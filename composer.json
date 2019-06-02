@@ -1,12 +1,16 @@
 {
-  "name": "adriansuter/slim4-skeleton",
+  "name": "vaizard/glued-skeleton",
   "description": "Web application skeleton that uses the Slim4 Framework, PHP-DI, Nyholm PSR7 and Twig.",
   "license": "MIT",
   "authors": [
     {
       "name": "Adrian Suter",
       "email": "adrian@suter-wirz.ch"
-    }
+    },
+    {
+      "name": "Pavel Stratil",
+      "email": "pavel@vaizard.org"
+    }   
   ],
   "autoload": {
     "psr-4": {
@@ -14,12 +18,24 @@
     }
   },
   "require": {
-    "php": "^7.1",
+    "php": "^7.2",
     "slim/slim": "^4.0.0-beta",
     "slim/twig-view": "3.0.0-alpha",
+    "slim/csrf": "^0.8.3",
+    "slim/flash": "^0.4.0",
     "nyholm/psr7": "^1.1",
     "nyholm/psr7-server": "^0.3",
-    "php-di/php-di": "^6"
+    "php-di/php-di": "^6",
+    "robmorgan/phinx": "^0.10.7",
+    "joshcam/mysqli-database-class": "^2.9.2",
+    "monolog/monolog": "^2.0.0-beta1",
+    "phpmailer/phpmailer": "^6.0",
+    "respect/validation": "^1.1",
+    "opis/json-schema": "^1.0",
+    "casbin/casbin": "^0.2",
+    "casbin/database-adapter": "^0.4",
+    "facebook/graph-sdk": "^5.7",
+    "phpoffice/phpspreadsheet": "^1.7"
   },
   "scripts": {
     "start": "php -S localhost:8080 -t public"
