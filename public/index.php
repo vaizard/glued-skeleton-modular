@@ -32,7 +32,7 @@ $app->add(
         new Twig(
             $rootPath . '/core/templates',
             [
-                'cache' => $rootPath . '/cache',
+                'cache' => $rootPath . '/private/cache',
                 'auto_reload' => true,
                 'debug' => false,
             ]

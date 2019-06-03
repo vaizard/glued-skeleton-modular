@@ -4,4 +4,5 @@
 composer.lock
 vendor
 coverage
-cache/**
+private/cache/**
+private/log/**
