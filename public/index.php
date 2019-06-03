@@ -30,7 +30,7 @@ $app = AppFactory::create();
 $app->add(
     new TwigMiddleware(
         new Twig(
-            $rootPath . '/application/templates',
+            $rootPath . '/core/templates',
             [
                 'cache' => $rootPath . '/cache',
                 'auto_reload' => true,
@@ -48,6 +48,8 @@ $app->group('/', function (RouteCollectorProxy $group) {
     $group->get('', HomeController::class)->setName('home');
     $group->get('hello/{name}', HelloController::class)->setName('hello');
 });
+
+$app->get('/_/phpinfo', function() { phpinfo(); })->setName('_phpinfo');
 
 // Run the app.
 $app->run();
