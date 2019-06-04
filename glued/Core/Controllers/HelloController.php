@@ -18,7 +18,7 @@ class HelloController extends AbstractController
      */
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-        return $this->render($response, 'hello.twig', [
+        return $this->render($response, 'Core/Views/hello.twig', [
             'pageTitle' => 'Hello ' . $args['name'],
             'name' => $args['name'],
         ]);
