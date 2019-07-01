@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tutorial\Controllers;
+namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use 
 
-class HelloController extends AbstractController
+class ApiUsers extends AbstractController
 {
     /**
      * @param Request  $request
@@ -18,10 +19,8 @@ class HelloController extends AbstractController
      */
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-        return $this->render($response, '/Tutorial/Views/hello.twig', [
-        //return $this->render($response, '/Core/Views/hello.twig', [
-            'pageTitle' => 'Hello ' . $args['name'],
-            'name' => $args['name'],
+        return $this->render($response, 'Core/Views/home.twig', [
+            'pageTitle' => 'Home',
         ]);
     }
 }

@@ -36,6 +36,7 @@
     "casbin/casbin": "^0.2",
     "casbin/database-adapter": "^0.4",
     "facebook/graph-sdk": "^5.7",
+    "tuupola/slim-jwt-auth": "^3.3.0",
     "phpoffice/phpspreadsheet": "^1.7"
   },
   "scripts": {

@@ -16,54 +16,14 @@ $app->get('/_/test', function($c) {
   // write your code here
 })->setName('_test');
 
-
-// monolog
-/*
-$container['logger'] = function ($c) {
-    $settings = $c->get('settings')['logger'];
-    $logger = new Monolog\Logger($settings['name']);
-    $logger->pushProcessor(new Monolog\Processor\UidProcessor());
-    $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
-    return $logger;
-};
-*/
-
-
-/*
-$app->add(
-    new TwigMiddleware(
-        new Twig(
-            __ROOT__ . '/glued/',
-            [
-                'cache' => __ROOT__ . '/private/cache',
-                'auto_reload' => true,
-                'debug' => false,
-            ]
-        ),
-        $container,
-        $app->getRouteCollector()->getRouteParser(),
-        $app->getBasePath()
-    )
-);
-*/
-
-/*
-$app->add(
-    new TwigMiddleware(
-        new Twig(
-            __ROOT__ . '/glued/',
-            [
-                'cache' => __ROOT__ . '/private/cache',
-                'auto_reload' => true,
-                'debug' => false,
-fa            ]
-        ),
-        $container,
-        $app->getRouteCollector()->getRouteParser(),
-        $app->getBasePath()
-    )
-);
-*/
+$app->get ('/_/mysqli', function () {
+    if ($this->has('mysqli')) {
+        $mysqli = $this->get('mysqli');
+        $sql = "SELECT * FROM test";
+        $result = $conn->query($sql);
+        echo "ok";
+    }
+})->setName('_mysql');
 
 
 

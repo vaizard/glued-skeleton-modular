@@ -10,7 +10,7 @@ $app->add(
     new TwigMiddleware(
         new Twig(
             __ROOT__ . '/glued/',
-             $getsettings['twig']
+             $settings['twig']
         ),
         $container,
         $app->getRouteCollector()->getRouteParser(),

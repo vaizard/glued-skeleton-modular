@@ -4,6 +4,8 @@ use Slim\Routing\RouteCollectorProxy;
 
 // Controllers (of this microservice)
 use Tutorial\Controllers\BasicController;
+use Tutorial\Controllers\HelloController;
+
 //use Skeleton\Controllers\ComplexController;
 
 
@@ -24,5 +26,5 @@ $app->group('/tutorial/', function(RouteCollectorProxy $group) {
           </ul>";
   })->setName('tutorial/home');
   $group->get('basic', BasicController::class)->setName('tutorial/basic');
-
+  $group->get('hello/{name}', HelloController::class)->setName('tutorial/hello');
 });

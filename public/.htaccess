@@ -1,7 +1,15 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Ensure PHP has access to Authorization: Bearer header
+    RewriteRule .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Rewrite paths
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.php [QSA,L]
 </IfModule>
+
+# Ensure $HTTP_RAW_POST_DATA is deprecated warning does not appear
+php_value   always_populate_raw_post_data   -1
+

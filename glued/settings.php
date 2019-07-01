@@ -14,7 +14,7 @@ return function (App $app) {
 
         // Monolog
         'logger' => [
-            'name' => 'slim-app',
+            'name' => 'glued',
             'path' =>  __DIR__ . '/../logs/app.log',
             'level' => Logger::DEBUG,
         ],
@@ -22,9 +22,9 @@ return function (App $app) {
         // Database
         'db' => [
             'host' => '127.0.0.1',
-            'database' => 'slim',
-            'username' => 'slim',
-            'password' => '*******',
+            'database' => 'glued',
+            'username' => 'glued',
+            'password' => 'glued-pw',
             'charset' => 'utf8',
             'collation' => 'utf8_general_ci'
         ],
