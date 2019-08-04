@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-
 use DI\Container;
 use Slim\Factory\AppFactory;
 
-
-// Set the absolute path to the root directory.
 define("__ROOT__", realpath(__DIR__ . '/..'));
-
-// Include the composer autoloader.
 include_once(__ROOT__ . '/vendor/autoload.php');
 
-// Instantiate PHP-DI Container
-$container = new Container();
+error_reporting(E_ALL);
+ini_set('display_errors', 'true');
+ini_set('display_startup_errors', 'true');
 
-// Instantiate the app
-AppFactory::setContainer($container);
-$app = AppFactory::create();
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+// Instantiate PHP-DI Container
+
+
 
 // Instantiate settings
 /*$settings = require_once __DIR__ . '/../glued/settings.php';
@@ -30,17 +30,22 @@ $getsettings = $container->get('settings');
 date_default_timezone_set($container->get('settings')['glued']['timezone']);
 */
 
-$settings = require_once __DIR__ . '/../glued/settings.php';
-$settings($app);
-$settings = $container->get('settings');
 
 
 // Configure PHP
+
+
+
+
+require_once __DIR__ . '/../glued/container.php';
+
+$app = AppFactory::create();
+
+//$settings = require_once(__DIR__ . '/../glued/settings.php');
+$settings = $container->get('settings');
 date_default_timezone_set($settings['glued']['timezone']);
 
 
-
-require_once __DIR__ . '/../glued/dependencies.php';
 require_once __DIR__ . '/../glued/middleware.php';
 require_once __DIR__ . '/../glued/routes.php';
 

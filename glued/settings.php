@@ -1,11 +1,16 @@
 <?php
 declare(strict_types=1);
+
+
+
+
+/*
 use DI\Container;
 use Monolog\Logger;
 use Slim\App;
 
 return function (App $app) {
-    /** @var Container $container */
+    
     $container = $app->getContainer();
     $container->set('settings', [
 
@@ -45,5 +50,5 @@ return function (App $app) {
     ]);
 };
 
-
+*/
 
