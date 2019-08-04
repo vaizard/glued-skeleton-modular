@@ -36,9 +36,12 @@ $app->get ('/_/mysqli', function (Request $request, Response $response, $c) {
         while($row = mysqli_fetch_assoc($result)) {
            echo "id: " . $row['id']. " - Name: " . $row['name']. "<br>";
         }
-        echo "done";
-        return $response;
+        echo "done";        
     }
+    $data = $this->get('db')->getOne('test');
+    echo "<br>testing db connector:";
+    print_r($data);
+    return $response;
 })->setName('_mysqli');
 
 

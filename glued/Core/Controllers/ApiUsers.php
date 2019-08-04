@@ -19,8 +19,12 @@ class ApiUsers extends AbstractController
      */
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-        return $this->render($response, 'Core/Views/home.twig', [
-            'pageTitle' => 'Home',
-        ]);
+        return $this->render(
+            $response, 
+            'Core/Views/home.twig', 
+            [
+                'pageTitle' => 'Home',
+            ]
+        );
     }
 }
