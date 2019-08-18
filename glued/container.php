@@ -9,12 +9,6 @@ use Slim\App;
 use Slim\Factory\AppFactory;
 use Slim\Flash\Messages;
 
-$container = new Container();
-AppFactory::setContainer($container);
-
-$container->set('settings', function() {
-    return require_once(__ROOT__ . '/glued/settings.php');
-});
 
 $container->set(LoggerInterface::class, function (Container $c) {
     $settings = $c->get('settings')['logger'];
@@ -26,6 +20,7 @@ $container->set(LoggerInterface::class, function (Container $c) {
     return $logger;
 });
 
+
 $container->set('mysqli', function (Container $c) {
     $db = $c->get('settings')['db'];
     $mysqli = new mysqli($db['host'], $db['username'], $db['password'], $db['database']);
@@ -34,11 +29,13 @@ $container->set('mysqli', function (Container $c) {
     return $mysqli;
 });
 
+
 $container->set('db', function (Container $c) {
     $mysqli = $c->get('mysqli');
     $db = new \MysqliDb($mysqli);
     return $db;
 });
+
 
 $container->set('flash', function () {
     return new \Slim\Flash\Messages();

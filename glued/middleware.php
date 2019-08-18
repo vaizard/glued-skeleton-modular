@@ -15,28 +15,24 @@ use Nyholm\Psr7\Response as Psr7Response;
 $errorMiddleware = new ErrorMiddleware(
     $app->getCallableResolver(),
     $app->getResponseFactory(),
-    true,
-    false,
-    false
+    $settings['displayErrorDetails'],
+    $settings['logErrors'],
+    $settings['logErrorDetails']
 );
 
-$errorMiddleware->setErrorHandler(HttpNotFoundException::class, function ($request, $exception) use ($container) {
+// Override 404
+// In classes, use: throw new HttpNotFoundException($request, 'optional message');
+$errorMiddleware->setErrorHandler(HttpNotFoundException::class, function ($request, $exception,$displayErrorDetails, $logErrors, $logErrorDetails) use ($container) {
     $response = new Psr7Response();
     return $container->get('view')->render(
         $response->withStatus(404), 
         'Core/Views/errors/404.twig'
     );
 });
-
 // TODO: add other exceptions (other then 404)
 // TODO: make nice twigs
-// TODO: Add $displayErrorDetails, $logErrors, $logErrorDetails)
 $app->add($errorMiddleware);
 
-
-/*$errorMiddleware->setErrorHandler(HttpNotFoundException::class, function($request, $exception, $displayErrorDetails, $logErrors, $logErrorDetails) {
-  die('Not found - overriding exception httpnotfoundexception');
-});*/
 
 // =================================================
 // TWIG MIDDLEWARE
@@ -53,24 +49,5 @@ $app->add(
         $app->getBasePath()
     )
 );
-
-
-/*
-$app->add(
-    new TwigMiddleware(
-        new Twig(
-            __ROOT__ . '/glued/',
-            [
-                'cache' => __ROOT__ . '/private/cache',
-                'auto_reload' => true,
-                'debug' => false,
-fa            ]
-        ),
-        $container,
-        $app->getRouteCollector()->getRouteParser(),
-        $app->getBasePath()
-    )
-);
-*/
 
 
