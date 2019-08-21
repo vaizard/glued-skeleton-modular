@@ -10,6 +10,7 @@
     "jquery": "latest",
     "moment": "latest",
     "popper.js": "latest",
+    "prop-types": "^15",
     "react": "latest",
     "react-bootstrap-table": "^4",
     "react-bootstrap-typeahead": "latest",
@@ -17,7 +18,8 @@
     "react-dom": "^16",
     "react-jsonschema-form": "latest",
     "react-jsonschema-form-extras": "latest",
-    "react-rte": "^0.16"
+    "react-rte": "^0.16",
+    "stisla": "latest"
   },
   "license": "MIT"
 }

@@ -6,9 +6,9 @@ namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use 
 
-class ApiUsers extends AbstractController
+
+class AbstractJsonController extends AbstractController
 {
     /**
      * @param Request  $request
@@ -17,14 +17,8 @@ class ApiUsers extends AbstractController
      *
      * @return Response
      */
-    public function __invoke(Request $request, Response $response, array $args = []): Response
+/*    public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-        return $this->render(
-            $response, 
-            'Core/Views/home.twig', 
-            [
-                'pageTitle' => 'Home',
-            ]
-        );
-    }
+        return $response->withJson(['works' => true]);
+    }*/
 }

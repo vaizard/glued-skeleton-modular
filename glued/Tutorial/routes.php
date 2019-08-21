@@ -5,45 +5,56 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Tutorial\Controllers\BasicController;
 use Tutorial\Controllers\HelloController;
 
-// Define the app routes.
-//$app->group('/example', function (RouteCollectorProxy $group) {
-//    $group->get('', HomeController::class)->setName('home');
-//    $group->get('hello/{name}', HelloController::class)->setName('hello');
-//});
-
-
-// Run the app.
-$app->get('/_/phpinfo', function(Request $request, Response $response) {
-    phpinfo(); 
-    return $response; 
-})->setName('_phpinfo');
-
-
-$app->get('/_/test', function(Request $request, Response $response) {
-    echo "<h1>Quick&Dirty TEST PAGE</h1>";
-    echo $this->get('settings')['glued']['timezone'];
+$app->group('/tutorial/', function(RouteCollectorProxy $group) {
+  $group->get('', function(Request $request, Response $response) { 
+        echo "
+        <!DOCTYPE html>
+        <html lang=\"en\">
+        <head>
+          <meta charset=\"UTF-8\">
+          <title>Glued / Tutorial</title>
+        </head>
+        <body>
+          <h1>Glued Tutorial</h1> 
+          <p>This tutorial aims to introduce you to the basic concepts used throughout glued. Please refer to <a href='https://github.com/vaizard/glued-skeleton/blob/master/glued/Tutorial/routes.php'>glued/Tutorial/routes.php</a> to the source of this page (and all other pages in the tutorial).</p>
+          <h2>Code structure and modules</h2>
+          ...
+          <h2>Basic tasks</h2>
+            Glued's setup is s" . $this->get('settings')['glued']['timezone'] . "
+          <h2>Index</h2>
+          <ul>
+            <li><a href='/tutorial/'>Code structure and modules</a></li>
+            <li><a href='/tutorial/phpinfo'>Phpinfo()</a></li>
+            <li><a href='/tutorial/01'>Controller basics</a></li>
+            <li><a href='/tutorial/02'>Twig</a></li>
+            <li><a href='/tutorial/03'>http decoration (file downloads, etc.)</a></li>
+          </ul>
+        </body>
+        </html>";
     return $response;
-    // write your code here
-})->setName('_test');
-
+  })->setName('tutorial/');
+  $group->get('phpinfo', function(Request $request, Response $response) {
+      phpinfo(); 
+      return $response; 
+  })->setName('tutorial/phpinfo');
+  $group->get('01', BasicController::class)->setName('tutorial/01');
+  $group->get('hello/{name}', HelloController::class)->setName('tutorial/hello');
+});
 
 $app->get ('/_/mysqli', function (Request $request, Response $response, $c) {
-    echo "1";
-    $db = $this->get('mysqli');
-    echo "2";
+    $db = $this->get('mysqli'); // fetching handler from container
+    echo "* mysqli handler from container fetched<br />";
     if ($this->has('mysqli')) {
-        echo "2";
         $conn = $this->get('mysqli');
         $sql = "SELECT * FROM test";
         $result = $conn->query($sql);
-        echo "ok";
+        echo "* query result:<br />";
         while($row = mysqli_fetch_assoc($result)) {
-           echo "id: " . $row['id']. " - Name: " . $row['name']. "<br>";
+           print_r($row); echo "<br />";
         }
-        echo "done";        
     }
+    echo "* testing joshcam/mysqli-database-class (fetch first row)<br />";
     $data = $this->get('db')->getOne('test');
-    echo "<br>testing db connector:";
     print_r($data);
     return $response;
 })->setName('_mysqli');
@@ -51,17 +62,3 @@ $app->get ('/_/mysqli', function (Request $request, Response $response, $c) {
 
 
 
-$app->group('/tutorial/', function(RouteCollectorProxy $group) {
-  $group->get('', function(Request $request, Response $response) { 
-    echo "<h1>The Skeleton Microservice</h1>
-          <div>Welcome! This microservice serves as a skeleton / example to help you quickly develop stuff.</div>
-          <div>Kindly review the source of glued/Skeleton/routes.php to see how this page is generated.</div>
-          <div>For more examples, follow the links below:</div>
-          <ul>
-            <li><a href='./basic'>Basic controller</a></li>
-          </ul>";
-    return $response;
-  })->setName('tutorial/home');
-  $group->get('basic', BasicController::class)->setName('tutorial/basic');
-  $group->get('hello/{name}', HelloController::class)->setName('tutorial/hello');
-});
