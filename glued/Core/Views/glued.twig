@@ -12,8 +12,15 @@
   <!-- CSS Libraries -->
 
   <!-- Template CSS -->
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/components.css">
+  <!--
+  <link rel="stylesheet" href="/assets/node_modules/stisla/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/node_modules/stisla/assets/css/components.css">
+  -->
+  {{ assets({files: [
+    '@public/assets/node_modules/stisla/assets/css/style.css',
+    '@public/assets/node_modules/stisla/assets/css/components.css'
+    ], name: 'stisla.css' }) }}
+
 </head>
 
 <body>
@@ -426,6 +433,10 @@
   <script src="/assets/node_modules/nicescroll/dist/jquery.nicescroll.min.js"></script>
   <script src="/assets/node_modules/moment/min/moment.min.js"></script>
   <script src="/assets/js/stisla.js"></script>
+
+{% block assets %}
+    {{ assets({files: ['Core/Views/time-index.js'], name: 'time-index.js'}) }}
+{% endblock %}
 
   <!-- JS Libraies -->
 

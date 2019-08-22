@@ -12,6 +12,7 @@ require_once(__ROOT__ . '/vendor/autoload.php');
 
 $container = new Container();
 AppFactory::setContainer($container);
+$app = AppFactory::create();
 
 $container->set('settings', function() {
     return require_once(__ROOT__ . '/glued/settings.php');
@@ -28,7 +29,6 @@ $nyholmFactory = new Psr17Factory();
 $decoratedResponseFactory = new DecoratedResponseFactory($nyholmFactory, $nyholmFactory);
 
 require_once (__ROOT__ . '/glued/bootstrap.php');
-$app = AppFactory::create();
 require_once (__ROOT__ . '/glued/container.php');
 require_once (__ROOT__ . '/glued/middleware.php');
 require_once (__ROOT__ . '/glued/routes.php');
