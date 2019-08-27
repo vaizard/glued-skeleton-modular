@@ -29,9 +29,8 @@
     "nyholm/psr7-server": "^0.3",
     "php-di/php-di": "^6",
     "robmorgan/phinx": "^0.10.8",
-    "joshcam/mysqli-database-class": "^2.9.2",
+    "ThingEngineer/mysqli-database-class": "^2.9",
     "monolog/monolog": "^2.0.0-beta2",
-    "phpmailer/phpmailer": "^6.0",
     "respect/validation": "^1.1",
     "opis/json-schema": "^1.0",
     "casbin/casbin": "^0.2",
@@ -43,7 +42,9 @@
     "odan/twig-assets": ">2",
     "odan/twig-translation": ">1",
     "odan/phinx-migrations-generator": ">4",
-    "nesbot/carbon": "^2.23"
+    "nesbot/carbon": "^2.23",
+    "swiftmailer/swiftmailer": "^6.2",
+    "middlewares/trailing-slash": "^1.1"
   },
   "scripts": {
     "start": "php -S localhost:8080 -t public",

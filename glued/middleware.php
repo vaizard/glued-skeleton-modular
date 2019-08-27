@@ -1,5 +1,7 @@
 <?php
 
+use DI\Container;
+use Middlewares\TrailingSlash;
 use Nyholm\Psr7\Response as Psr7Response;
 use Slim\App;
 use Slim\Exception\HttpNotFoundException;
@@ -7,7 +9,6 @@ use Slim\Middleware\ErrorMiddleware;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 use Slim\addRoutingMiddleware;
-use DI\Container;
 
 
 // =================================================
@@ -30,6 +31,7 @@ $app->add(
 */
 
 $app->add(
+    //TwigMiddleware::createFromContainer($app)
     new TwigMiddleware(
         $container->get('view'),
         $container,
@@ -43,6 +45,20 @@ $app->add(
 // =================================================
 
 $app->addRoutingMiddleware();
+
+
+// =================================================
+// TRAILING SLASH MIDDLEWARE
+// =================================================
+
+/**
+ * Add Trailing Slash middleware.
+ * TrailingSlash(false) means trailing slash is disabled (i.e. https://example.com/user)
+ * redirect(true) enforces a 301 redirect from https://example.com/user/ to https://example.com/user
+ */
+$trailingSlash = new TrailingSlash(false);
+$trailingSlash->redirect(true);
+$app->add($trailingSlash);
 
 // =================================================
 // ERROR MIDDLEWARE

@@ -19,8 +19,10 @@ class BasicController extends AbstractTwigController
      */
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
+        $name = isset($args['name']) ? $args['name'] : "";
         return $this->render($response, '/Core/Views/glued.twig', [
-            'pageTitle' => 'Home',
+            'pageTitle' => 'Glued Tutorial &mdash; Hello ' . $name,
+            'name' => $name,
         ]);
     }
 }

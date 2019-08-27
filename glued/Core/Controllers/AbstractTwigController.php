@@ -22,7 +22,7 @@ class AbstractTwigController extends AbstractController
     protected function render(Response $response, string $template, array $renderData = []): Response
     {
         /** @var Twig $view */
-        $view = $this->c->get('view');
-        return $view->render($response, $template, $renderData);
+        //$view = $this->c->get('view');
+        return $this->view->render($response, $template, $renderData);
     }
 }

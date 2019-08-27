@@ -43,30 +43,6 @@ abstract class AbstractController
     {
         /** @var Twig $view */
         $view = $this->container->get('view');
-
-        // ODAN TESTS START ----------------------------------<
-        $loader = $view->getLoader();
-        $settings['public'] = '';
-        $loader->addPath($settings['public'], 'public');
-
-        //$basePath = '';
-        //$basePath2 = rtrim(str_ireplace('index.php', '', $container->get('request')->getUri()->getBasePath()), '/');
-        //die($basePath2);
-    
-        //$view->addExtension(new \Slim\Views\TwigExtension(new \Slim\Interfaces\RouteParserInterface(), $basePath));
-        //$view->addExtension(new \Slim\Views\TwigExtension($this->app->getRouteCollector()->getRouteParser(), $this->app->getBasePath()));
-        
-        //TwigExtension requires:
-        //$this->routeParser = $routeParser;
-        //$this->uri = $uri;
-        //$this->basePath = $basePath;
-
-        $assets = [ 'assets' ];
-        // Add the Assets extension to Twig
-        //$view->addExtension(new \Odan\Twig\TwigAssetsExtension($view->getEnvironment(), $assets));
-       //$app->$twig->addExtension(new \Odan\Twig\TwigAssetsExtension($twig, $options));
-
-        // ODAN TESTS STOPS ----------------------------------<
         return $view->render($response, $template, $renderData);
         echo "haha";
     }

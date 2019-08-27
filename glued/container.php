@@ -4,8 +4,9 @@ use DI\Container;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Odan\Twig\TwigAssetsExtension;
+use Odan\Twig\TwigTranslationExtension;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Factory\AppFactory;
@@ -42,8 +43,6 @@ $container->set('db', function (Container $c) {
 });
 
 
-
-
 $container->set('flash', function () {
     return new \Slim\Flash\Messages();
 });
@@ -52,17 +51,12 @@ $container->set('flash', function () {
 //$container->set('routerParser', $app->getRouteCollector()->getRouteParser());
 
 
-//$container->set('reqUri', $request->getUri());
-/*$container->set('reqUri', function (Request $request) {
-    $this->request = $request;
-    return $request;
-});
-*/
 $container->set('view', function (Container $c) {
     $twig = new Twig(__ROOT__ . '/glued/', $c->get('settings')['twig']);
     $loader = $twig->getLoader();
     $loader->addPath(__ROOT__ . '/public', 'public');
     $twig->addExtension(new TwigAssetsExtension($twig->getEnvironment(), (array)$c->get('settings')['assets']));
+    //$twig->addExtension(new TwigTranslationExtension());
     return $twig;
 });
 
