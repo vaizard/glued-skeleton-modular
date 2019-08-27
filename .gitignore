@@ -2,7 +2,12 @@
 .idea
 .tmp
 composer.lock
-vendor
 coverage
+glued/settings.php
+public/assets/node_modules
+phinx.yml
 private/cache/**
+private/crypto/**
+private/data/**
 private/log/**
+vendor

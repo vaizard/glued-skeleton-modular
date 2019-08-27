@@ -17,10 +17,10 @@ return [
 
     // Database
     'db' => [
-        'host' => '127.0.0.1',
-        'database' => 'glued',
-        'username' => 'glued',
-        'password' => 'glued-pw',
+        'host' => 'db_host',
+        'database' => 'db_name',
+        'username' => 'db_user',
+        'password' => 'db_pass',
         'charset' => ' utf8mb4',
         'collation' => ' utf8mb4_unicode_ci'
     ],
