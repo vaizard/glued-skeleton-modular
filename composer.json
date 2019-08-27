@@ -52,13 +52,15 @@
       "mkdir -p public/assets/js",
       "mkdir -p public/assets/css",
       "mkdir -p public/assets/fonts",
-      "mkdir -p public/assets/img"
+      "mkdir -p public/assets/img",
+      "./install.sh"
     ],
     "post-install-cmd": [
       "mkdir -p public/assets/js",
       "mkdir -p public/assets/css",
       "mkdir -p public/assets/fonts",
-      "mkdir -p public/assets/img"
+      "mkdir -p public/assets/img",
+      "./install.sh"
     ]
   },
   "extra": {
