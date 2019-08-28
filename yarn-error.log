@@ -1,0 +1,50 @@
+Arguments: 
+  /usr/bin/node /usr/share/yarn/bin/yarn.js install --non-interactive --modules-folder=./public/assets/node_modules
+
+PATH: 
+  /srv/varwwwhtml/glued-skeleton/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+
+Yarn version: 
+  1.17.3
+
+Node version: 
+  8.10.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: ENOENT: no such file or directory, lstat '/srv/varwwwhtml/glued-skeleton/public/assets/node_modules/loose-envify'
+
+npm manifest: 
+  {
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/vaizard/glued-skeleton.git"
+    },
+    "dependencies": {
+      "bootstrap": "latest",
+      "draft-js": "^0.10",
+      "immutable": "^3",
+      "jquery": "latest",
+      "moment": "latest",
+      "popper.js": "latest",
+      "prop-types": "^15",
+      "react": "latest",
+      "react-bootstrap-table": "^4",
+      "react-bootstrap-typeahead": "latest",
+      "react-day-picker": "latest",
+      "react-dom": "^16",
+      "react-jsonschema-form": "latest",
+      "react-jsonschema-form-extras": "latest",
+      "react-rte": "^0.16",
+      "stisla": "latest"
+    },
+    "license": "MIT"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

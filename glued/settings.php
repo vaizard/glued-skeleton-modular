@@ -25,10 +25,19 @@ return [
         'collation' => ' utf8mb4_unicode_ci'
     ],
 
+    // Twig (set 'cache' to false to disable caching)
     'twig' => [
         'cache' => __ROOT__ . '/private/cache/twig',
         'auto_reload' => true,
         'debug' => false
+    ],
+
+    // Twig-translation
+    'locale' => [
+        'path' => __ROOT__ . '/private/locale',
+        'cache' => __ROOT__ . '/private/cache/locale',
+        'locale' => 'en_US',
+        'domain' => 'messages',
     ],
 
     // Glued globals

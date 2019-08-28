@@ -9,36 +9,24 @@ use Slim\Middleware\ErrorMiddleware;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 use Slim\addRoutingMiddleware;
+use App\Middleware\LocaleSessionMiddleware; // Twig-translation
+use App\Middleware\TranslatorMiddleware; // Twig-translation
 
 
 // =================================================
 // TWIG MIDDLEWARE
 // ================================================= 
 
+$app->add(TwigMiddleware::createFromContainer($app));
 
-/*
-$app->add(
-    new TwigMiddleware(
-        new Twig(
-            __ROOT__ . '/glued/',
-            $settings['twig']
-        ),
-        $container,
-        $app->getRouteCollector()->getRouteParser(),
-        $app->getBasePath()
-    );
-);
-*/
 
-$app->add(
-    //TwigMiddleware::createFromContainer($app)
-    new TwigMiddleware(
-        $container->get('view'),
-        $container,
-        $app->getRouteCollector()->getRouteParser(),
-        $app->getBasePath()
-    )
-);
+// =================================================
+// TWIG TRANSLATION MIDDLEWARE
+// ================================================= 
+
+$app->add(TranslatorMiddleware::class); // Twig-translation
+$app->add(LocaleSessionMiddleware::class); // Twig-translation
+
 
 // =================================================
 // ROUTING MIDDLEWARE

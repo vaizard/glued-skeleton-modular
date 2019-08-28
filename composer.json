@@ -16,19 +16,22 @@
     "psr-4": {
       "App\\": "glued/Core/",
       "Tutorial\\": "glued/Tutorial/"
-    }
+    },
+    "files": [
+      "glued/Core/Includes/translation.php"
+    ]
   },
   "require": {
     "php": "^7.2",
-    "slim/slim": "^4.1",
-    "slim/twig-view": "3.0.0-alpha",
+    "slim/slim": ">4.1",
+    "slim/twig-view": "3.0.0-beta",
     "slim/csrf": "^0.8.3",
     "slim/flash": "^0.4.0",
     "slim/http": ">0.6",
     "nyholm/psr7": "^1.1",
     "nyholm/psr7-server": "^0.3",
     "php-di/php-di": "^6",
-    "robmorgan/phinx": "^0.10.8",
+    "robmorgan/phinx": ">0.10.7",
     "ThingEngineer/mysqli-database-class": "^2.9",
     "monolog/monolog": "^2.0.0-beta2",
     "respect/validation": "^1.1",
@@ -41,7 +44,7 @@
     "foxy/foxy": "^1.0.0",
     "odan/twig-assets": ">2",
     "odan/twig-translation": ">1",
-    "odan/phinx-migrations-generator": ">4",
+    "odan/phinx-migrations-generator": ">4.1",
     "nesbot/carbon": "^2.23",
     "swiftmailer/swiftmailer": "^6.2",
     "middlewares/trailing-slash": "^1.1"
@@ -53,14 +56,16 @@
       "mkdir -p public/assets/css",
       "mkdir -p public/assets/fonts",
       "mkdir -p public/assets/img",
-      "./install.sh"
+      "./install.sh",
+      "php vendor/bin/phinx migrate -e production"
     ],
     "post-install-cmd": [
       "mkdir -p public/assets/js",
       "mkdir -p public/assets/css",
       "mkdir -p public/assets/fonts",
       "mkdir -p public/assets/img",
-      "./install.sh"
+      "./install.sh",
+      "php vendor/bin/phinx migrate -e production"
     ]
   },
   "extra": {
@@ -71,5 +76,7 @@
       "manager": "yarn",
       "manager-options": "--modules-folder=./public/assets/node_modules"
     }
-  }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }

@@ -65,9 +65,10 @@ if [ ! -f ./phinx.yml ]; then
    ewarn "phinx.yml not configured ..."
    cp ./phinx.dist.yml ./phinx.yml
    sed -i "s/db_host/${dbhost}/g" phinx.yml
-   sed -i "s/db_name/${dbname}/g" phinx.yml
+   sed -i "s/production_db/${dbname}/g" phinx.yml
    sed -i "s/db_user/${dbuser}/g" phinx.yml
    sed -i "s/db_pass/${dbpass}/g" phinx.yml
+   php vendor/bin/phinx test -e production
    etest "phinx.yml configuration"
 fi
 
@@ -80,5 +81,6 @@ if [ ! -f ./glued/settings.php ]; then
    sed -i "s/db_pass/${dbpass}/g" ./glued/settings.php
    etest "glued/settings.php configuration"
 fi
+
 
 eecho "Everything looks fine, nothing else to do. Bye!"

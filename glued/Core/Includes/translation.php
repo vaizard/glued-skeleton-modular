@@ -1,12 +1,11 @@
 <?php
-// Helper functions.
 use Symfony\Component\Translation\Translator;
 /**
- * Text translation (I18n).
+ * Text translation.
  *
- * @param mixed|Translator $message
+ * @param string|Translator $message The message or the translator instance
  *
- * @return string
+ * @return string The translated message
  *
  * <code>
  * echo __('Hello');
@@ -15,14 +14,11 @@ use Symfony\Component\Translation\Translator;
  */
 function __($message): string
 {
-    /* @var Translator $translator */
+    /** @var Translator $translator */
     static $translator = null;
     if ($message instanceof Translator) {
         $translator = $message;
         return '';
-    }
-    if ($translator === null) {
-        throw new RuntimeException('Translator not initialized');
     }
     $translated = $translator->trans($message);
     $context = array_slice(func_get_args(), 1);
