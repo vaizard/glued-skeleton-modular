@@ -11,7 +11,7 @@ return [
     // Monolog
     'logger' => [
         'name' => 'glued',
-        'path' =>  __DIR__ . '/../logs/app.log',
+        'path' =>  __ROOT__ . '/private/log/app.log',
         'level' => \Monolog\Logger::DEBUG,
     ],
 
@@ -39,7 +39,7 @@ return [
         'locale' => 'en_US',
         'domain' => 'messages',
     ],
-    
+
     // Glued globals
     'glued' => [
         'hostname' => 'glued.example.com',
@@ -53,8 +53,8 @@ return [
         'url_base_path' => '/cache/',
         // Cache settings
         'cache_enabled' => true,
-        'cache_path' => __ROOT__ . '/private/cache/assets',
-        'cache_name' => 'assets-cache',
+        'cache_path' => __ROOT__ . '/private/cache',
+        'cache_name' => 'assets',
         // Enable JavaScript and CSS compression
         'minify' => 1,
     ]
