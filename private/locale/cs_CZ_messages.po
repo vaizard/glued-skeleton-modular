@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-25 20:36+0200\n"
-"PO-Revision-Date: 2019-08-28 23:43+0200\n"
+"POT-Creation-Date: 2019-08-30 03:11+0200\n"
+"PO-Revision-Date: 2019-08-30 03:11+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: cs_CZ\n"
@@ -13,8 +13,38 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Poedit 2.2.1\n"
 "X-Poedit-KeywordsList: __\n"
-"X-Poedit-Basepath: ../..\n"
-"X-Poedit-SearchPath-0: src/.\n"
-"X-Poedit-SearchPath-1: private/cache/twig\n"
-"X-Poedit-SearchPath-2: private/cache/locale\n"
-"X-Poedit-SearchPath-3: private/cache/twig/8a/8ad8b5c202ef910f3c897a2976153fc3559da470f9fb54f5ec09195947eab7ae.php\n"
+"X-Poedit-Basepath: ../cache/twig\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: 2d/2d76ee939e2f92ed38d3248cb485679fd7798f22204153d546d61ff1810343ee.php:41
+#: 81/81046fcf74898f46f660ea4fd9f31f00cf651ec07e25fb92fef4f2eb432822d0.php:41
+msgid "Sign in"
+msgstr "Přihlásit se"
+
+#: 6a/6a9f38d9c4b037df43a1187be234529fd6cd71913b140165d78990783ca1e34b.php:41
+msgid "User"
+msgstr "Uživatel"
+
+#: 6a/6a9f38d9c4b037df43a1187be234529fd6cd71913b140165d78990783ca1e34b.php:51
+msgid "Profile"
+msgstr "Profil"
+
+#: 6a/6a9f38d9c4b037df43a1187be234529fd6cd71913b140165d78990783ca1e34b.php:57
+msgid "Settings"
+msgstr "Nastavení"
+
+#: 6a/6a9f38d9c4b037df43a1187be234529fd6cd71913b140165d78990783ca1e34b.php:64
+msgid "Sign out"
+msgstr "Odhlásit se"
+
+#: 8a/8ad8b5c202ef910f3c897a2976153fc3559da470f9fb54f5ec09195947eab7ae.php:54
+msgid "Hello, dear"
+msgstr "Ahoj,"
+
+#: 8a/8ad8b5c202ef910f3c897a2976153fc3559da470f9fb54f5ec09195947eab7ae.php:56
+msgid "Anonymous"
+msgstr "Anonyme"
+
+#: 8a/8ad8b5c202ef910f3c897a2976153fc3559da470f9fb54f5ec09195947eab7ae.php:63
+msgid "Let's stick together."
+msgstr "Držme se při sobě."

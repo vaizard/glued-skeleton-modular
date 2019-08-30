@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Controllers;
+namespace Tutorial\Controllers;
 
+use App\Controllers\AbstractTwigController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class HelloController extends AbstractTwigController
+class HomeController extends AbstractTwigController
 {
     /**
      * @param Request  $request
@@ -18,9 +19,10 @@ class HelloController extends AbstractTwigController
      */
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-        return $this->render($response, 'Core/Views/hello.twig', [
-            'pageTitle' => 'Hello ' . $args['name'],
-            'name' => $args['name'],
+        $name = isset($args['name']) ? $args['name'] : "";
+        return $this->render($response, '/Tutorial/Views/home.twig', [
+            'pageTitle' => 'Glued Tutorial &mdash; Hello ' . $name,
+            'name' => $name,
         ]);
     }
 }

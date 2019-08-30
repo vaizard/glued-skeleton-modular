@@ -2,8 +2,7 @@
 use Slim\Routing\RouteCollectorProxy;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Tutorial\Controllers\BasicController;
-use Tutorial\Controllers\HelloController;
+use Tutorial\Controllers\HomeController;
 
 $app->group('/tutorial', function(RouteCollectorProxy $group) {
   $group->get('', function(Request $request, Response $response) { 
@@ -25,7 +24,7 @@ $app->group('/tutorial', function(RouteCollectorProxy $group) {
         </html>";
     return $response; // this return is mandatory if you use echo & friends.
   })->setName('tutorial');
-  $group->get('/home[/{name}]', BasicController::class)->setName('tutorial/home');
+  $group->get('/home[/{name}]', HomeController::class)->setName('tutorial/home');
   $group->get('phpinfo', function(Request $request, Response $response) {
       phpinfo(); 
       return $response; 

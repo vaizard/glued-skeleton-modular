@@ -84,7 +84,9 @@ Translations code appears in:
 Usage:
 
 * Run `apt install poedit` or equivalent on your distro
-* Start Poedit and open the file ./private/locale/*.po (or equivalent to `$settings['locale']['path']`)
+* Start Poedit and 
+   * either open the file ./private/locale/*.po (or equivalent to `$settings['locale']['path']`)
+   * or click "New" to add a new po file to ./private/locale
 * Open menu: Catalog > Properties > Source Path
 * Add source path: ./private/cache/twig (or equivalent to `$settings['twig']['cache']`) - yep, translations are generated from cache files (possibly to get the php code equivalent)
 * Open tab: Sources keywords, Add keyword: \__, Click 'Ok' to store the settings
