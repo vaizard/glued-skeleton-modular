@@ -47,7 +47,9 @@
     "odan/phinx-migrations-generator": ">4.1",
     "nesbot/carbon": "^2.23",
     "swiftmailer/swiftmailer": "^6.2",
-    "middlewares/trailing-slash": "^1.1"
+    "middlewares/trailing-slash": "^1.1",
+    "granam/czech-vocative": "^2.0",
+    "dfridrich/ares": "^1.2"
   },
   "scripts": {
     "start": "php -S localhost:8080 -t public",
