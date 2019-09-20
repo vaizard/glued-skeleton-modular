@@ -53,11 +53,12 @@
   },
   "scripts": {
     "start": "php -S localhost:8080 -t public",
-    "post-update-cmd": [ 
+    "post-update-cmd": [
       "mkdir -p public/assets/js",
       "mkdir -p public/assets/css",
       "mkdir -p public/assets/fonts",
       "mkdir -p public/assets/img",
+      "App\\Install\\ComposerHooks::postInstall",
       "./install.sh",
       "php vendor/bin/phinx migrate -e production"
     ],
@@ -66,6 +67,7 @@
       "mkdir -p public/assets/css",
       "mkdir -p public/assets/fonts",
       "mkdir -p public/assets/img",
+      "App\\Install\\ComposerHooks::postInstall",
       "./install.sh",
       "php vendor/bin/phinx migrate -e production"
     ]
@@ -74,6 +76,7 @@
     "foxy": true
   },
   "config": {
+    "process-timeout": 0,
     "foxy": {
       "manager": "yarn",
       "manager-options": "--modules-folder=./public/assets/node_modules"
