@@ -58,8 +58,7 @@
       "mkdir -p public/assets/css",
       "mkdir -p public/assets/fonts",
       "mkdir -p public/assets/img",
-      "App\\Install\\ComposerHooks::postInstall",
-      "./install.sh",
+      "App\\Install\\ComposerHooks::configTool",
       "php vendor/bin/phinx migrate -e production"
     ],
     "post-install-cmd": [
