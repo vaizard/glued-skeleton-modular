@@ -1,0 +1,21 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+        <section class="section">
+          <div class="section-header">
+            <h1>{{ __('List accounts') }}</h1>
+          </div>
+
+          <div class="section-body">
+                
+            <br />uid: {{ users.c_uid }}
+            <br />attributes:{{ users.c_attr }}
+            <br />email: {{ users.c_email }}
+            <br />screenname: {{ users.c_screenname }}
+            <br />preferred language: {{ users.c_lang }}
+            <br />created: {{ users.c_ts_created }}
+            <br />modified: {{ users.c_ts_modified }}
+            
+          </div>
+        </section>
+{% endblock %}

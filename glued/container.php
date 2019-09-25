@@ -1,5 +1,7 @@
 <?php
 
+use App\Classes\Users;
+use App\Middleware\TranslatorMiddleware;
 use DI\Container;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -13,12 +15,11 @@ use Slim\Factory\AppFactory;
 use Slim\Flash\Messages;
 use Slim\Interfaces\RouteParserInterface;
 use Slim\Views\Twig;
-use Twig\Loader\FilesystemLoader;
-use Symfony\Component\Translation\Formatter\MessageFormatter; // Twig-translation
-use Symfony\Component\Translation\IdentityTranslator; // Twig-translation
-use Symfony\Component\Translation\Loader\MoFileLoader; // Twig-translation
-use Symfony\Component\Translation\Translator; // Twig-translation
-use App\Middleware\TranslatorMiddleware; // Twig-translation
+use Symfony\Component\Translation\Formatter\MessageFormatter;
+use Symfony\Component\Translation\IdentityTranslator;
+use Symfony\Component\Translation\Loader\MoFileLoader;
+use Symfony\Component\Translation\Translator;
+use Twig\Loader\FilesystemLoader; // Twig-translation
 
 $container->set(LoggerInterface::class, function (Container $c) {
     $settings = $c->get('settings')['logger'];
@@ -52,7 +53,7 @@ $container->set('flash', function () {
 });
 
 
-//$container->set('routerParser', $app->getRouteCollector()->getRouteParser());
+$container->set('routerParser', $app->getRouteCollector()->getRouteParser());
 
 
 $container->set('view', function (Container $c) {
@@ -85,3 +86,20 @@ $container->set(TranslatorMiddleware::class, static function (Container $contain
     $translator = $container->get(Translator::class);
     return new TranslatorMiddleware($translator, $localPath);
 }); // removed ->addArgument($container);
+
+
+
+// =================================================
+// ADD CLASSES
+// ================================================= 
+
+$container->set('auth', function () {
+    return new Auth();
+});
+// TODO 
+// - classes/users.php
+// - sjednotit namespace, ted mam app jako glued/core
+//   v users.php bylo glued/core/classes ...
+// - pouzit v accountscontrolleru na vypis 1 uzivatele
+// - je na to preduelany twig, asi nehotovy accounts.twig
+//   do ktereho v accountscontroleru passujeme obsah $users

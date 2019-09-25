@@ -14,11 +14,31 @@ use App\Middleware\TranslatorMiddleware; // Twig-translation
 
 
 // =================================================
+// EXAMPLE (BEFORE) MIDDLEWARE
+// ================================================= 
+
+// The example below implemented as a closure shows
+// a authentication middleware stub. For a production
+// equivalent see Core/Middleware/RedirectIfNotAuthenticated.php
+// implemented as a class.
+
+/*
+$beforeMiddleware = function ($request, $handler) {
+    $response = $handler->handle($request);
+    $signedIn = false;
+    if (!$signedIn) {
+        die('You are not signed in');
+    }
+    return $response;
+};
+$app->add($beforeMiddleware);
+*/
+
+// =================================================
 // TWIG MIDDLEWARE
 // ================================================= 
 
 $app->add(TwigMiddleware::createFromContainer($app));
-
 
 // =================================================
 // TWIG TRANSLATION MIDDLEWARE

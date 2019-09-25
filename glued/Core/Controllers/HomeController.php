@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Classes\Users;
 
 class HomeController extends AbstractTwigController
 {
@@ -18,6 +19,7 @@ class HomeController extends AbstractTwigController
      */
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
+        //$users = $this->users->get(1);
         return $this->render($response, 'Core/Views/home.twig', [
             'pageTitle' => 'Home',
         ]);
