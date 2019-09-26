@@ -1,0 +1,36 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+        <section class="section">
+          <div class="section-header">
+            <h1>{{ __('List accounts') }}</h1>
+          </div>
+
+          <div class="section-body">
+
+            <table class="table table-bordered table-md">
+            <tr>
+                <th>uid</th>
+                <th>attributes</th>
+                <th>email</th>
+                <th>screenname</th>
+                <th>preferred language</th>
+                <th>created</th>
+                <th>modified</th>
+            </tr>
+            {% for user in users %}
+            <tr>
+                <td><a href="{{ url_for('web.core.accounts') }}/{{ user.c_uid }}">{{ user.c_uid }}</a></td>
+                <td><a href="{{ url_for('web.core.accounts') }}/{{ user.c_uid }}">{{ user.c_attr }}</a></td>
+                <td><a href="{{ url_for('web.core.accounts') }}/{{ user.c_uid }}">{{ user.c_email }}</a></td>
+                <td><a href="{{ url_for('web.core.accounts') }}/{{ user.c_uid }}">{{ user.c_screenname }}</a></td>
+                <td><a href="{{ url_for('web.core.accounts') }}/{{ user.c_uid }}">{{ user.c_lang }}</a></td>
+                <td><a href="{{ url_for('web.core.accounts') }}/{{ user.c_uid }}">{{ user.c_ts_created }}</a></td>
+                <td><a href="{{ url_for('web.core.accounts') }}/{{ user.c_uid }}">{{ user.c_ts_modified }}</a></td>
+            </tr>
+            {% endfor %}
+            </table>
+
+          </div>
+        </section>
+{% endblock %}

@@ -17,30 +17,68 @@ class AccountsController extends AbstractTwigController
      *
      * @return Response
      */
+    /*
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-        $uid = isset($args['uid']);
-        
-        if ($uid == "") {
-          $auth = new Auth($this->db);
-          $users = $auth->get($uid);
-        }
-        elseif ($uid > 0) // TODO do propper validation here
-        {
-          //$uid = intval($uid);
-          $auth = new Auth($this->db);
-          $users = $auth->get($uid);
-        }            
-        else {
-            echo "nope";
-            return $response;
-        }
-        
+        if (isset($args['uid'])) {
+            // list
+        } else {
+            // object
+            $uid = isset($args['uid']);
+            if (v::inval()->positive()->validate($uid)) {
+                // show
+                $auth = new Auth($this->db);
+                $users = $auth->get($uid);
+            } else {
+                // forbidden value
+            }
+        }    
         return $this->render($response, 'Core/Views/accounts.twig', [
             'pageTitle' => 'Accounts',
             'users' => $users
         ]);
     }
+*/
+    public function get(Request $request, Response $response, array $args = []): Response
+    {
+        $auth = new Auth($this->db, $request);
+        $users = $auth->get($args['uid']);
+        return $this->render($response, 'Core/Views/accounts.obj.twig', [
+            'pageTitle' => 'Accounts',
+            'users' => $users
+        ]);
+
+  /*
+        // DO RBAC HERE
+        if (v::inval()->positive()->validate($uid)) {
+            // show
+            $auth = new Auth($this->db);
+            $users = $auth->get($uid);
+            return $this->render($response, 'Core/Views/accounts.get.twig', [
+                'pageTitle' => 'Accounts',
+                'users' => $users
+            ]);
+        } else {
+            // forbidden value
+            // 
+        }         
+        */
+    }
+
+    public function list(Request $request, Response $response, array $args = []): Response
+    {
+        // DO RBAC HERE
+        $auth = new Auth($this->db, $request);
+        $users = $auth->list();
+        return $this->render($response, 'Core/Views/accounts.col.twig', [
+            'pageTitle' => 'Accounts',
+            'users' => $users
+        ]);
+    }
+
+
+
+
 }
 
 

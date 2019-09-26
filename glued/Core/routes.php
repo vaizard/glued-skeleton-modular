@@ -17,7 +17,8 @@ $app->group('/', function (RouteCollectorProxy $group) {
 
     $group->get('core/signout', HomeController::class)->setName('web.core.signout');
     $group->get('core/profiles[/{uid}]', ProfilesController::class)->setName('web.core.profiles');
-    $group->get('core/accounts[/{uid}]', AccountsController::class)->setName('web.core.accounts');
+    $group->get('core/accounts', AccountsController::class . ':list')->setName('web.core.accounts');
+    $group->get('core/accounts/{uid}', AccountsController::class . ':get')->setName('web.core.accounts.obj');
     $group->get('json', JsonController::class)->setName('api.core.json');
 });
 

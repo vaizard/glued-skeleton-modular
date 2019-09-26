@@ -94,13 +94,14 @@ $errorMiddleware = new ErrorMiddleware(
 
 // Override 404
 // In classes, use: throw new HttpNotFoundException($request, 'optional message');
-$errorMiddleware->setErrorHandler(HttpNotFoundException::class, function ($request, $exception,$displayErrorDetails, $logErrors, $logErrorDetails) use ($container) {
+$errorMiddleware->setErrorHandler(HttpNotFoundException::class, function ($request, $exception, $displayErrorDetails, $logErrors, $logErrorDetails) use ($container) {
     $response = new Psr7Response();
     return $container->get('view')->render(
         $response->withStatus(404), 
         'Core/Views/errors/404.twig'
     );
 });
+
 // TODO: add other exceptions (other then 404)
 // TODO: make nice twigs
 $app->add($errorMiddleware);
