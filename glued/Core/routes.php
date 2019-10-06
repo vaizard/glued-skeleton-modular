@@ -2,13 +2,15 @@
 use App\Controllers\AccountsController;
 use App\Controllers\HomeController;
 use App\Controllers\JsonController;
+use App\Controllers\RjsfController;
 use App\Middleware\RedirectIfAuthenticated;
 use App\Middleware\RedirectIfNotAuthenticated;
 use Slim\Routing\RouteCollectorProxy;
 
 // Define the app routes.
 $app->group('/', function (RouteCollectorProxy $group) {
-    $group->get('', HomeController::class)->setName('web.home');
+//    $group->get('', HomeController::class)->setName('web.home');
+    $group->get('', RjsfController::class)->setName('web.home');
     $group->get('core/dashboard', HomeController::class)->setName('web.core.dashboard')->add( new RedirectIfNotAuthenticated());
 
     // TODO What's the problem here?

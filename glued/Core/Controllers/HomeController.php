@@ -19,7 +19,6 @@ class HomeController extends AbstractTwigController
      */
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-        //$users = $this->users->get(1);
         return $this->render($response, 'Core/Views/home.twig', [
             'pageTitle' => 'Home',
         ]);

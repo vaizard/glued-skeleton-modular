@@ -9,8 +9,11 @@
     '@public/assets/node_modules/bootstrap/dist/css/bootstrap.min.css',
     '@public/assets/node_modules/stisla/assets/css/style.css',
     '@public/assets/node_modules/stisla/assets/css/components.css',
+    '@public/assets/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css',
+    '@public/assets/node_modules/datatables.net-select-bs4/css/select.bootstrap4.min.css',
     '@public/assets/css/glued.css',
     ], name: 'styles'}) }}
+  {% include '/Core/Views/templates/partials/rjsf.twig' %}
   <link rel="stylesheet" href="/assets/node_modules/@fortawesome/fontawesome-free/css/all.min.css">
 </head>
 
@@ -91,7 +94,8 @@
 
       <!-- Main Content -->
       <div class="main-content">
-      {% block content %}{% endblock %}  
+      {% block content %}{% endblock %}
+      <div id="rjsf"></div>
       </div>
       <footer class="main-footer">
         <div class="footer-left">
@@ -112,6 +116,9 @@
     '@public/assets/node_modules/nicescroll/dist/jquery.nicescroll.min.js',
     '@public/assets/node_modules/moment/min/moment.min.js',
     '@public/assets/node_modules/stisla/assets/js/stisla.js',
+    '@public/assets/node_modules/datatables.net/js/jquery.dataTables.min.js',
+    '@public/assets/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.min.js',
+    '@public/assets/node_modules/datatables.net-select-bs4/js/select.bootstrap4.min.js',
     ], name: 'stisla-general.js'}) }}
 
 
@@ -120,5 +127,6 @@
     '@public/assets/node_modules/stisla/assets/js/custom.js'
     ], name: 'stisla-template.js'}) }}
 
+  {% block additionaljs %}{% endblock %}
 </body>
 </html>

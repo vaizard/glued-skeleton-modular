@@ -8,7 +8,8 @@
 
           <div class="section-body">
 
-            <table class="table table-bordered table-md">
+            <table class="table table-hover" id="core-accounts-col">
+            <thead>
             <tr>
                 <th>uid</th>
                 <th>attributes</th>
@@ -18,6 +19,7 @@
                 <th>created</th>
                 <th>modified</th>
             </tr>
+            </thead>
             {% for user in users %}
             <tr>
                 <td><a href="{{ url_for('web.core.accounts') }}/{{ user.c_uid }}">{{ user.c_uid }}</a></td>
@@ -33,4 +35,11 @@
 
           </div>
         </section>
+{% endblock %}
+{% block additionaljs %}
+  <script>
+  $(function(){
+    $("#core-accounts-col").dataTable();
+  });
+  </script>
 {% endblock %}
