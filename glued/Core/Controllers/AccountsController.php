@@ -39,11 +39,11 @@ class AccountsController extends AbstractTwigController
         ]);
     }
 */
-    public function get(Request $request, Response $response, array $args = []): Response
+    public function read(Request $request, Response $response, array $args = []): Response
     {
         $auth = new Auth($this->db, $request);
         $users = $auth->get($args['uid']);
-        return $this->render($response, 'Core/Views/accounts.obj.twig', [
+        return $this->render($response, 'Core/Views/accounts.read.twig', [
             'pageTitle' => 'Accounts',
             'users' => $users
         ]);
@@ -70,7 +70,7 @@ class AccountsController extends AbstractTwigController
         // DO RBAC HERE
         $auth = new Auth($this->db, $request);
         $users = $auth->list();
-        return $this->render($response, 'Core/Views/accounts.col.twig', [
+        return $this->render($response, 'Core/Views/accounts.list.twig', [
             'pageTitle' => 'Accounts',
             'users' => $users
         ]);

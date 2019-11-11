@@ -1,9 +1,11 @@
 {% if json_schema_output is defined %}
 
-<script src="https://unpkg.com/react@15/dist/react.min.js"></script>
-<script src="https://unpkg.com/react-dom@15/dist/react-dom.min.js"></script>
-<script src="https://unpkg.com/react-jsonschema-form@latest/dist/react-jsonschema-form.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+{{ assets({files: [
+  '@public/assets/node_modules/react/umd/react.production.min.js',
+  '@public/assets/node_modules/react-dom/umd/react-dom.production.min.js',
+  '@public/assets/node_modules/react-jsonschema-form/dist/react-jsonschema-form.js',
+  '@public/assets/node_modules/@babel/standalone/babel.min.js',
+], name: 'rjsf.js'}) }}
 
 <script type="text/babel">
     const Form = JSONSchemaForm.default;

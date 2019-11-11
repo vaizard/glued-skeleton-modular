@@ -11,6 +11,7 @@ use Slim\Views\TwigMiddleware;
 use Slim\addRoutingMiddleware;
 use App\Middleware\LocaleSessionMiddleware; // Twig-translation
 use App\Middleware\TranslatorMiddleware; // Twig-translation
+use App\Middleware\Timer;
 
 
 // =================================================
@@ -46,6 +47,12 @@ $app->add(TwigMiddleware::createFromContainer($app));
 
 $app->add(TranslatorMiddleware::class); // Twig-translation
 $app->add(LocaleSessionMiddleware::class); // Twig-translation
+
+// =================================================
+// TIMER MIDDLEWARE
+// ================================================= 
+
+$app->add(Timer::class); // Twig-translation
 
 
 // =================================================
