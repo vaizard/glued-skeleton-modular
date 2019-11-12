@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Controllers;
+namespace Glued\Core\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Classes\Users;
+use Glued\Core\Classes\Users;
 
-class WebProfiles extends AbstractTwigController
+class Profiles extends AbstractTwigController
 {
     /**
      * @param Request  $request
@@ -44,7 +44,7 @@ class WebProfiles extends AbstractTwigController
         });
       ';
 
-        return $this->render($response, 'Core/Views/home.twig', [
+        return $this->render($response, 'Core/Views/glued.twig', [
             'pageTitle' => 'Home',
             'json_schema_output' => $jsf_schema,
             'json_uischema_output' => $jsf_uischema,

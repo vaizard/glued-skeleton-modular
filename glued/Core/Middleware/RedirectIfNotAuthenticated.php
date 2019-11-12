@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Middleware;
+namespace Glued\Core\Middleware;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as Handler;

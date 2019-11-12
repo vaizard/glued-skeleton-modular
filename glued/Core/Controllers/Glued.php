@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Controllers;
+namespace Glued\Core\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Classes\Users;
+use Glued\Core\Classes\Users;
 
-class HomeController extends AbstractTwigController
+class Glued extends AbstractTwigController
 {
     /**
      * @param Request  $request
@@ -19,7 +19,7 @@ class HomeController extends AbstractTwigController
      */
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-        return $this->render($response, 'Core/Views/home.twig', [
+        return $this->render($response, 'Core/Views/glued.twig', [
             'pageTitle' => 'Home',
         ]);
     }

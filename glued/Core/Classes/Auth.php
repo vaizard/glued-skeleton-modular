@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Classes;
+namespace Glued\Core\Classes;
 use Respect\Validation\Validator as v;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpNotFoundException;

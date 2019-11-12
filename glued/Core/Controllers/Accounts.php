@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Controllers;
+namespace Glued\Core\Controllers;
 
-use App\Classes\Auth;
+use Glued\Core\Classes\Auth;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class AccountsController extends AbstractTwigController
+class Accounts extends AbstractTwigController
 {
     /**
      * @param Request  $request

@@ -9,9 +9,9 @@ use Slim\Middleware\ErrorMiddleware;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 use Slim\addRoutingMiddleware;
-use App\Middleware\LocaleSessionMiddleware; // Twig-translation
-use App\Middleware\TranslatorMiddleware; // Twig-translation
-use App\Middleware\Timer;
+use Glued\Core\Middleware\LocaleSessionMiddleware; // Twig-translation
+use Glued\Core\Middleware\TranslatorMiddleware; // Twig-translation
+use Glued\Core\Middleware\Timer;
 
 
 // =================================================

@@ -1,5 +1,5 @@
 <?php
-namespace App\Install;
+namespace Glued\Core\Install;
 use Composer\Script\Event;
 
 class ComposerHooks

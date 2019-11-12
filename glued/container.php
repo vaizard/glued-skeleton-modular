@@ -1,7 +1,7 @@
 <?php
 
-use App\Classes\Users;
-use App\Middleware\TranslatorMiddleware;
+use Glued\Core\Classes\Users;
+use Glued\Core\Middleware\TranslatorMiddleware;
 use DI\Container;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;

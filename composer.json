@@ -14,8 +14,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "App\\": "glued/Core/",
-      "Tutorial\\": "glued/Tutorial/"
+      "Glued\\": "glued/"
     },
     "files": [
       "glued/Core/Includes/translation.php"

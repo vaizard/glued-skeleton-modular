@@ -16,7 +16,7 @@
 // 
 // 
 // 
-namespace Glued\Interfaces;
+namespace Glued\Core\Interfaces;
 interface DatabaseInterface
 {
     public function set($key, $value);
