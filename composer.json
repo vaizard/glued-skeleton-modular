@@ -57,7 +57,13 @@
       "mkdir -p public/assets/css",
       "mkdir -p public/assets/fonts",
       "mkdir -p public/assets/img",
-      "App\\Install\\ComposerHooks::configTool",
+      "mkdir -p public/cache",
+      "chmod 777 public/cache",
+      "chmod 777 private/cache",
+      "chmod 777 private/data",
+      "chmod 777 private/locale",
+      "chmod 777 private/locale",
+      "Glued\\Core\\Install\\ComposerHooks::configTool",
       "php vendor/bin/phinx migrate -e production"
     ],
     "post-install-cmd": [
@@ -65,7 +71,13 @@
       "mkdir -p public/assets/css",
       "mkdir -p public/assets/fonts",
       "mkdir -p public/assets/img",
-      "App\\Install\\ComposerHooks::postInstall",
+      "mkdir -p public/cache",
+      "chmod 777 public/cache",
+      "chmod 777 private/cache",
+      "chmod 777 private/data",
+      "chmod 777 private/locale",
+      "chmod 777 private/locale",
+      "Glued\\Core\\Install\\ComposerHooks::postInstall",
       "./install.sh",
       "php vendor/bin/phinx migrate -e production"
     ]
