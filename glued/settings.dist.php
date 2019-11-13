@@ -49,8 +49,8 @@ return [
     ],
 
     'assets' => [
-        'path' => __ROOT__ . '/public/cache',
-        'url_base_path' => '/cache/',
+        'path' => __ROOT__ . '/public/assets/cache',
+        'url_base_path' => '/assets/cache/',
         // Cache settings
         'cache_enabled' => true,
         'cache_path' => __ROOT__ . '/private/cache',
