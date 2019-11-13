@@ -4,10 +4,13 @@
 composer.lock
 coverage
 glued/settings.php
-public/assets/node_modules
+public/assets/node_modules/**
+public/assets/cache/**
 phinx.yml
 private/cache/**
 private/crypto/**
 private/data/**
 private/log/**
 vendor
+yarn.lock
+yarn-error.log
