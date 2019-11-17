@@ -1,11 +1,16 @@
 <?php
 
-namespace App\Controllers\Auth;
 
-use App\Controllers\Controller;
+declare(strict_types=1);
+
+namespace Glued\Core\Controllers;
+use Glued\Core\Classes\Auth;
 use Respect\Validation\Validator as v;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
-class Auth extends Controller
+class AuthController extends AbstractTwigController
+
 {
     public function getSignOut($request, $response)
     {
@@ -35,7 +40,7 @@ class Auth extends Controller
 
     public function getSignUp($request, $response)
     {
-        return $this->view->render($response, 'auth/signup.twig');
+        return $this->view->render($response, 'Core/Views/signup.twig');
     }
 
     public function postSignUp($request, $response)
@@ -53,13 +58,11 @@ class Auth extends Controller
         $user = User::create([
             'email' => $request->getParam('email'),
             'name' => $request->getParam('name'),
-            'password' => password_hash($request->getParam('password'), PASSWORD_DEFAULT),
+            'password' => password_hash($request->getParam('password'), $this->get('settings')['glued']['password_hash_algo'], $this->get('settings')['glued']['password_hash_opts']),
         ]);
 
         $this->flash->addMessage('info', 'You have been signed up!');
-
         $this->auth->attempt($user->email, $request->getParam('password'));
-
         return $response->withRedirect($this->router->pathFor('home'));
     }
 }

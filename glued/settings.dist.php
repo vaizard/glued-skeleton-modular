@@ -45,7 +45,13 @@ return [
         'hostname' => 'glued.example.com',
         'session_def_timeout' => 7200,
         'session_min_timeout' => 300,
-        'timezone' => 'Europe/Prague'
+        'timezone' => 'Europe/Prague',
+        'password_hash_algo' => PASSWORD_ARGON2ID,
+        'password_hash_opts' => [ 
+            'memory_cost' => 2 * PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
+            'time_cost' => 2 * PASSWORD_ARGON2_DEFAULT_TIME_COST,
+            'threads' => PASSWORD_ARGON2_DEFAULT_THREADS 
+        ]
     ],
 
     'assets' => [

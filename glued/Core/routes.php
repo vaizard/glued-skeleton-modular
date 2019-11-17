@@ -5,6 +5,7 @@ use Glued\Core\Controllers\GluedApi;
 use Glued\Core\Middleware\RedirectIfAuthenticated;
 use Glued\Core\Middleware\RedirectIfNotAuthenticated;
 use Glued\Core\Controllers\Accounts;
+use Glued\Core\Controllers\AuthController;
 use Glued\Core\Controllers\Profiles;
 use Glued\Core\Controllers\ProfilesApi;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -20,6 +21,7 @@ $app->group('/', function (RouteCollectorProxy $group) {
     //$group->get('core/signup', HomeController::class)->setName('web.core.signup')->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() ));
 
 
+    $group->get ('core/signup', AuthController::class . ':getSignUp') ->        setName('core.signup.web');
     $group->get ('core/signout', Glued::class) ->                               setName('core.signout.web');
     $group->get ('core/profiles[/{uid}]', Profiles::class) ->                   setName('core.profiles.list.web');
     $group->get ('api', GluedApi::class) ->                                     setName('core.api');
