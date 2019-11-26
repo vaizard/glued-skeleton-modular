@@ -95,3 +95,13 @@ Usage:
 * Run `php glued/Core/Bin/parse-twig.php`
 
 Credit for the initial translation implementation goes to https://github.com/odan/slim4-skeleton/commit/ba57560e33e379fd3ce6ef7ec09b68b029fb64ad
+
+## Spider module
+
+The spider module requires to do
+
+```
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+sudo npm install --global --unsafe-perm puppeteer
+sudo chmod -R o+rx /usr/lib/node_modules/puppeteer/.local-chromium
+```
