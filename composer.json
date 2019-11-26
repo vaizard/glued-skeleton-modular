@@ -48,7 +48,8 @@
     "swiftmailer/swiftmailer": "^6.2",
     "middlewares/trailing-slash": "^1.1",
     "granam/czech-vocative": "^2.0",
-    "dfridrich/ares": "^1.2"
+    "dfridrich/ares": "^1.2",
+    "spatie/browsershot": "^3.33"
   },
   "scripts": {
     "start": "php -S localhost:8080 -t public",
