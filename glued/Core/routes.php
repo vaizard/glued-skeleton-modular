@@ -21,7 +21,8 @@ $app->group('/', function (RouteCollectorProxy $group) {
     //$group->get('core/signup', HomeController::class)->setName('web.core.signup')->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() ));
 
 
-    $group->get ('core/signup', AuthController::class . ':getSignUp') ->        setName('core.signup.web');
+    $group->get ('core/signup', AuthController::class . ':signup_get') ->        setName('core.signup.web');
+    $group->post('core/signup', AuthController::class . ':signup_post');
     $group->get ('core/signout', Glued::class) ->                               setName('core.signout.web');
     $group->get ('core/profiles[/{uid}]', Profiles::class) ->                   setName('core.profiles.list.web');
     $group->get ('api', GluedApi::class) ->                                     setName('core.api');

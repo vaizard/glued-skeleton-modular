@@ -52,6 +52,10 @@ $container->set('flash', function () {
     return new \Slim\Flash\Messages();
 });
 
+// glued validation class
+$container->set('validator', function (Container $c) {
+   return new Glued\Core\Classes\Validation\Validator;
+});
 
 $container->set('routerParser', $app->getRouteCollector()->getRouteParser());
 
@@ -86,8 +90,6 @@ $container->set(TranslatorMiddleware::class, static function (Container $contain
     $translator = $container->get(Translator::class);
     return new TranslatorMiddleware($translator, $localPath);
 }); // removed ->addArgument($container);
-
-
 
 // =================================================
 // ADD CLASSES

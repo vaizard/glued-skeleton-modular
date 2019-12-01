@@ -12,6 +12,7 @@ use Slim\addRoutingMiddleware;
 use Glued\Core\Middleware\LocaleSessionMiddleware; // Twig-translation
 use Glued\Core\Middleware\TranslatorMiddleware; // Twig-translation
 use Glued\Core\Middleware\Timer;
+use Glued\Core\Middleware\SessionMiddleware;
 
 
 // =================================================
@@ -38,6 +39,8 @@ $app->add($beforeMiddleware);
 // =================================================
 // TWIG MIDDLEWARE
 // ================================================= 
+
+
 
 $app->add(TwigMiddleware::createFromContainer($app));
 
@@ -74,6 +77,11 @@ $app->addRoutingMiddleware();
 $trailingSlash = new TrailingSlash(false);
 $trailingSlash->redirect(true);
 $app->add($trailingSlash);
+
+
+$app->add(\Glued\Core\Middleware\ValidationErrorsMiddleware::class);
+$app->add(SessionMiddleware::class);
+
 
 // =================================================
 // ERROR MIDDLEWARE

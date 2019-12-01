@@ -7,6 +7,7 @@ glued/settings.php
 public/assets/node_modules/**
 public/assets/cache/**
 phinx.yml
+private/api/**
 private/cache/**
 private/crypto/**
 private/data/**

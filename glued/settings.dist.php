@@ -63,6 +63,22 @@ return [
         'cache_name' => 'assets',
         // Enable JavaScript and CSS compression
         'minify' => 1,
+    ],
+
+    'session' => [
+        'name' => 'glued',
+        'cache_expire' => 0,
+        'cookie_httponly' => true,
+        'cookie_secure' => true,
+    ],
+
+    'apis' => [
+        'google' => '',
+        'facebook' => '',
+        'aliexpress' => '',
+        'matrix' => '',
+        'mailtrain' => '',
+        'twilio' => '',
     ]
 
 ];
