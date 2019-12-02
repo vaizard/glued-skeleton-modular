@@ -40,15 +40,15 @@ class AuthController extends AbstractTwigController
 
     public function signup_get($request, $response)
     {
-        return $this->view->render($response, 'Core/Views/signup.twig', ['x' => $_SESSION['test']]);
+        return $this->view->render($response, 'Core/Views/signup.twig');
     }
 
     public function signup_post($request, $response)
     {
 
         $validation = $this->validator->validate($request, [
-            'email' => v::noWhitespace()->notEmpty()->email(),//->emailAvailable(),
-            'name' => v::notEmpty()->alpha(),
+            'email' => v::noWhitespace()->notEmpty()->email()->emailAvailable($this->db),
+            'name' => v::notEmpty()->alnum(),
             'password' => v::noWhitespace()->notEmpty(),
         ]);
 

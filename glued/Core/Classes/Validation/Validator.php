@@ -17,6 +17,10 @@ use Respect\Validation\Exceptions\NestedValidationException;
  * Note that to define the $rules array, the class Respect\Validator
  * must be pulled in with `use Respect\Validation\Validator as v;`
  * in the AuthController.
+ *
+ * NOTE that new rules (and relevant exceptions) are located under
+ * Core\Classes\Validation\{Rules,Exceptions}\* - telling Respect 
+ * where to look for these is done in Core\bootstrap.php
  */
 class Validator
 {
@@ -41,8 +45,8 @@ class Validator
             } catch (NestedValidationException $e) {
                 $this->errors[$field] = $e->getMessages();
             }
+            $_SESSION['validation_errors'] = $this->errors;
         }
-        $_SESSION['validation_errors'] = $this->errors;
         return $this;
     }
 

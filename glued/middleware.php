@@ -79,7 +79,7 @@ $trailingSlash->redirect(true);
 $app->add($trailingSlash);
 
 
-$app->add(\Glued\Core\Middleware\ValidationErrorsMiddleware::class);
+$app->add(\Glued\Core\Middleware\ValidationFormsMiddleware::class);
 $app->add(SessionMiddleware::class);
 
 

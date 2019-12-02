@@ -50,7 +50,7 @@
     "granam/czech-vocative": "^2.0",
     "dfridrich/ares": "^1.2",
     "spatie/browsershot": "^3.33",
-    "google/apiclient": "^2.4",
+    "google/apiclient": "^2.4"
   },
   "scripts": {
     "start": "php -S localhost:8080 -t public",
