@@ -1,8 +1,8 @@
 <?php
 
+use DI\Container;
 use Glued\Core\Classes\Users;
 use Glued\Core\Middleware\TranslatorMiddleware;
-use DI\Container;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
@@ -11,6 +11,7 @@ use Odan\Twig\TwigTranslationExtension;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Slim\App;
+use Slim\Csrf\Guard;
 use Slim\Factory\AppFactory;
 use Slim\Flash\Messages;
 use Slim\Interfaces\RouteParserInterface;
@@ -56,6 +57,8 @@ $container->set('flash', function () {
 $container->set('validator', function (Container $c) {
    return new Glued\Core\Classes\Validation\Validator;
 });
+
+
 
 $container->set('routerParser', $app->getRouteCollector()->getRouteParser());
 

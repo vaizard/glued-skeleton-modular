@@ -1,0 +1,21 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+        <section class="section">
+          <div class="section-header">
+            <h1>{{ __('Hello, dear') }} {{ name | default(__('Anonymous')) }}</h1>
+          </div>
+
+          <div class="section-body">
+            {{ __('Let\'s stick together.') }}
+            <form id="spider_browse_fetch" onsubmit="changeUri()">
+                <input type="text" name="uri">
+                <input type="submit" value="Fetch">
+            </form>
+            <br />
+            uri: <a href="{{ uri }}">{{ uri }}</a> <br />
+            uri valid: {{ validate }} <br />
+            <img width="300" src="{{ screenshot }}">
+          </div>
+        </section>
+{% endblock %}

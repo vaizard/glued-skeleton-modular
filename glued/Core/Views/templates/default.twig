@@ -92,6 +92,13 @@
               </ul>
             </li>
             <li class="dropdown">
+              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-mail-bulk"></i> <span>Mail</span></a>
+              <ul class="dropdown-menu">
+                <li><a class="nav-link" href="{{ url_for('mail.accounts.web') }}">{{ __('Accounts') }}</a></li>
+                <li><a class="nav-link" href="{{ url_for('mail.opera.web') }}">{{ __('Opera') }}</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
               <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-spider"></i> <span>Spider</span></a>
               <ul class="dropdown-menu">
                 <li><a class="nav-link" href="{{ url_for('spider.browse.web') }}">Browse</a></li>

@@ -42,9 +42,13 @@ return [
 
     // Glued globals
     'glued' => [
-        'hostname' => 'glued.example.com',
-        'session_def_timeout' => 7200,
-        'session_min_timeout' => 300,
+        //'hostname' => 'glued.example.com',
+        //'session_def_timeout' => 7200,
+        //'session_min_timeout' => 300,
+        'session_cookie_lifetime' => 0,
+        'session_cookie_secure' => true,
+        'session_cookie_httponly' => true,
+        'session_cookie_samesite' => 'Lax',
         'timezone' => 'Europe/Prague',
         'password_hash_algo' => PASSWORD_ARGON2ID,
         'password_hash_opts' => [ 

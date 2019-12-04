@@ -1,18 +1,21 @@
 <?php
 
 use DI\Container;
+use Glued\Core\Middleware\LocaleSessionMiddleware;
+use Glued\Core\Middleware\SessionMiddleware;
+use Glued\Core\Middleware\Timer;
+use Glued\Core\Middleware\TranslatorMiddleware;
+use Middlewares\Csp;
 use Middlewares\TrailingSlash;
 use Nyholm\Psr7\Response as Psr7Response;
+use ParagonIE\CSPBuilder\CSPBuilder;
 use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 use Slim\addRoutingMiddleware;
-use Glued\Core\Middleware\LocaleSessionMiddleware; // Twig-translation
-use Glued\Core\Middleware\TranslatorMiddleware; // Twig-translation
-use Glued\Core\Middleware\Timer;
-use Glued\Core\Middleware\SessionMiddleware;
+use Tuupola\Middleware\CorsMiddleware;
 
 
 // =================================================
@@ -80,7 +83,22 @@ $app->add($trailingSlash);
 
 
 $app->add(\Glued\Core\Middleware\ValidationFormsMiddleware::class);
-$app->add(SessionMiddleware::class);
+//$app->add(SessionMiddleware::class);
+
+
+$csp = new CSPBuilder([
+            'script-src' => ['self' => true],
+            'object-src' => ['self' => true],
+            'frame-ancestors' => ['self' => true],
+        ]);
+
+$app->add(new Middlewares\Csp($csp));
+
+$app->add(new Tuupola\Middleware\CorsMiddleware);
+// TODO add sane defaults to CorsMiddleware
+
+$sessionMiddleware = new SessionMiddleware($settings);
+$app->add($sessionMiddleware);
 
 
 // =================================================

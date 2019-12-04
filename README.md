@@ -50,6 +50,11 @@ The glue that keeps stuff together in Glued. To all microservices, core provides
 - content-addressable file storage (CAS)
 - internationalization
 - assets management and caching
+- (some of the) security
+  - CSRF prevention (session cookie) via the SessionMiddleware;
+  - TODO / CSRF prevention (other cookies) - hack this https://github.com/selective-php/samesite-cookie/blob/master/src/SameSiteCookieMiddleware.php
+  - CSP prevention
+  - XSS prevention
 
 ### Spider
 
