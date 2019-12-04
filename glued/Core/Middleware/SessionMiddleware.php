@@ -32,12 +32,12 @@ final class SessionMiddleware implements MiddlewareInterface
                 $ini_defs = session_get_cookie_params();
             }
             session_set_cookie_params([
-                'lifetime' => $this->settings['glued']['session_cookie_lifetime'],
+                'lifetime' => $this->settings['php']['session_cookie_lifetime'],
                 'path' => $ini_defs['path'],
                 'domain' => $ini_defs['domain'],
-                'secure' => $this->settings['glued']['session_cookie_secure'],
-                'httponly' => $this->settings['glued']['session_cookie_httponly'],
-                'samesite' => $this->settings['glued']['session_cookie_samesite'],
+                'secure' => $this->settings['php']['session_cookie_secure'],
+                'httponly' => $this->settings['php']['session_cookie_httponly'],
+                'samesite' => $this->settings['php']['session_cookie_samesite'],
             ]);
             session_start();
         }

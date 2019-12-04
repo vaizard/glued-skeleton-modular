@@ -3,16 +3,18 @@ declare(strict_types=1);
 
 return [
 
+    /***********************************************************
+     * OPTIONS THAT WILL MOST LIKELY CHANGE
+     **********************************************************/
+
     // Slim
     'displayErrorDetails' => true, // Set to false in production
     'logErrors' => true,
     'logErrorDetails' => true,
 
-    // Monolog
-    'logger' => [
-        'name' => 'glued',
-        'path' =>  __ROOT__ . '/private/log/app.log',
-        'level' => \Monolog\Logger::DEBUG,
+    // Glued globals
+    'glued' => [
+        'timezone' => 'Europe/Prague'
     ],
 
     // Database
@@ -24,6 +26,94 @@ return [
         'charset' => ' utf8mb4',
         'collation' => ' utf8mb4_unicode_ci'
     ],
+
+    // Monolog
+    'logger' => [
+        'name' => 'glued',
+        'path' =>  __ROOT__ . '/private/log/app.log',
+        'level' => \Monolog\Logger::DEBUG,
+    ],
+
+    // Api keys
+    // TODO: get this out of the config
+    'apis' => [
+        'google' => 'AIzaSyDFGURBieERXfGQRaLHiCMlrxRtKZcrs4o',
+        'facebook' => '',
+        'aliexpress' => '',
+        'matrix' => '',
+        'mailtrain' => '',
+        'twilio' => '',
+    ],
+
+    /***********************************************************
+     * OPTIONS TO TWEAK ONLY IF YOU REALLY NEED TO / KNOW HOW TO
+     **********************************************************/
+
+    'php' => [
+        /** 
+         * password_hash() configuration.
+         */
+        'password_hash_algo' => PASSWORD_ARGON2ID,
+        'password_hash_opts' => [ 
+            'memory_cost' => 2 * PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
+            'time_cost' => 2 * PASSWORD_ARGON2_DEFAULT_TIME_COST,
+            'threads' => PASSWORD_ARGON2_DEFAULT_THREADS 
+        ],
+        /**
+         * Session cookies configuration (consumed by the @see
+         * SessionMiddleware). Changing these defaults may compromise
+         * security (i.e. break CSRF protection). See 
+         * @link https://scotthelme.co.uk/csrf-is-really-dead/.
+         */
+        'session_cookie_lifetime' => 0,
+        'session_cookie_secure' => true,
+        'session_cookie_httponly' => true,
+        'session_cookie_samesite' => 'Lax'
+    ],
+
+    'headers' => [
+        /**
+         * Feature-policy http header configuration (consumed by the 
+         * @see HeadersMiddleware). Changing these defaults may compromise
+         * security (i.e. enable unwanted browser apis/features). See 
+         * @link https://scotthelme.co.uk/a-new-security-header-feature-policy/
+         */ 
+        'feature-policy' => [
+            'geolocation' => "'self'",
+            'midi' => "'self'",
+            'notifications' => "'self'",
+            'push' => "'self'",
+            'sync-xhr' => "'self'",
+            'microphone' => "'self'",
+            'camera' => "'self'",
+            'magnetometer' => "'self'",
+            'gyroscope' => "'self'",
+            'speaker' => "'self'",
+            'vibrate' => "'self'",
+            'fullscreen' => "'self'",
+            'payment' => "'self'",
+        ],
+
+        /**
+         * Referrer-policy and content-type-options http header configuration
+         * (consumed by the @see HeadersMiddleware). Changing these defaults
+         * may compromise security. See 
+         * https://scotthelme.co.uk/a-new-security-header-referrer-policy/
+         * https://scotthelme.co.uk/hardening-your-http-response-headers/#x-content-type-options
+         */ 
+        'referrer-policy' => 'strict-origin-when-cross-origin',
+        'content-type-options' => 'nosniff',
+        'csp' => [
+            'script-src' => ['self' => true],
+            'object-src' => ['self' => true],
+            'frame-ancestors' => ['self' => true],
+        ]
+    ],
+
+    /***********************************************************
+     * OPTIONS THAT YOU SHOULDN'T HAVE A REASON TO TOUCH UNLESS
+     * YOU ARE A GLUED DEVELOPER
+     **********************************************************/
 
     // Twig (set 'cache' to false to disable caching)
     'twig' => [
@@ -40,24 +130,7 @@ return [
         'domain' => 'messages',
     ],
 
-    // Glued globals
-    'glued' => [
-        //'hostname' => 'glued.example.com',
-        //'session_def_timeout' => 7200,
-        //'session_min_timeout' => 300,
-        'session_cookie_lifetime' => 0,
-        'session_cookie_secure' => true,
-        'session_cookie_httponly' => true,
-        'session_cookie_samesite' => 'Lax',
-        'timezone' => 'Europe/Prague',
-        'password_hash_algo' => PASSWORD_ARGON2ID,
-        'password_hash_opts' => [ 
-            'memory_cost' => 2 * PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
-            'time_cost' => 2 * PASSWORD_ARGON2_DEFAULT_TIME_COST,
-            'threads' => PASSWORD_ARGON2_DEFAULT_THREADS 
-        ]
-    ],
-
+    // Odan-assets
     'assets' => [
         'path' => __ROOT__ . '/public/assets/cache',
         'url_base_path' => '/assets/cache/',
@@ -67,22 +140,6 @@ return [
         'cache_name' => 'assets',
         // Enable JavaScript and CSS compression
         'minify' => 1,
-    ],
-
-    'session' => [
-        'name' => 'glued',
-        'cache_expire' => 0,
-        'cookie_httponly' => true,
-        'cookie_secure' => true,
-    ],
-
-    'apis' => [
-        'google' => '',
-        'facebook' => '',
-        'aliexpress' => '',
-        'matrix' => '',
-        'mailtrain' => '',
-        'twilio' => '',
     ]
 
 ];

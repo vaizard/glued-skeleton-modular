@@ -1,6 +1,7 @@
 <?php
 
 use DI\Container;
+use Glued\Core\Middleware\HeadersMiddleware;
 use Glued\Core\Middleware\LocaleSessionMiddleware;
 use Glued\Core\Middleware\SessionMiddleware;
 use Glued\Core\Middleware\Timer;
@@ -81,21 +82,16 @@ $trailingSlash = new TrailingSlash(false);
 $trailingSlash->redirect(true);
 $app->add($trailingSlash);
 
-
 $app->add(\Glued\Core\Middleware\ValidationFormsMiddleware::class);
-//$app->add(SessionMiddleware::class);
 
-
-$csp = new CSPBuilder([
-            'script-src' => ['self' => true],
-            'object-src' => ['self' => true],
-            'frame-ancestors' => ['self' => true],
-        ]);
-
+$csp = new CSPBuilder($settings['headers']['csp']);
 $app->add(new Middlewares\Csp($csp));
 
 $app->add(new Tuupola\Middleware\CorsMiddleware);
 // TODO add sane defaults to CorsMiddleware
+
+$headersMiddleware = new HeadersMiddleware($settings);
+$app->add($headersMiddleware);
 
 $sessionMiddleware = new SessionMiddleware($settings);
 $app->add($sessionMiddleware);

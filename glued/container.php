@@ -22,6 +22,7 @@ use Symfony\Component\Translation\Loader\MoFileLoader;
 use Symfony\Component\Translation\Translator;
 use Twig\Loader\FilesystemLoader; // Twig-translation
 
+
 $container->set(LoggerInterface::class, function (Container $c) {
     $settings = $c->get('settings')['logger'];
     $logger = new Logger($settings['name']);
@@ -53,12 +54,6 @@ $container->set('flash', function () {
     return new \Slim\Flash\Messages();
 });
 
-// glued validation class
-$container->set('validator', function (Container $c) {
-   return new Glued\Core\Classes\Validation\Validator;
-});
-
-
 
 $container->set('routerParser', $app->getRouteCollector()->getRouteParser());
 
@@ -85,18 +80,25 @@ $container->set(Translator::class, static function (Container $container) {
     // Set translator instance
     __($translator);
     return $translator;
-}); // removed ->addArgument($container);
+});
+
 
 $container->set(TranslatorMiddleware::class, static function (Container $container) {
     $settings = $container->get('settings')['locale'];
     $localPath = $settings['path'];
     $translator = $container->get(Translator::class);
     return new TranslatorMiddleware($translator, $localPath);
-}); // removed ->addArgument($container);
+});
 
 // =================================================
 // ADD CLASSES
 // ================================================= 
+
+$container->set('validator', function (Container $c) {
+   // glued validation class
+   return new Glued\Core\Classes\Validation\Validator;
+});
+
 
 $container->set('auth', function () {
     return new Auth();

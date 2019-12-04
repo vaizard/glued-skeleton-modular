@@ -72,7 +72,7 @@ class AuthController extends AbstractTwigController
         $data = array (
             'c_type' => 0,
             'c_user_uid' => $subq,
-            'c_hash' => password_hash($request->getParam('password'), $this->settings['glued']['password_hash_algo'], $this->settings['glued']['password_hash_opts']),
+            'c_hash' => password_hash($request->getParam('password'), $this->settings['php']['password_hash_algo'], $this->settings['php']['password_hash_opts']),
         );
         if (!$this->db->insert ('t_core_authn', $data)) { $trx_error = true; }
         // TODO add error message - db error ...? send it over via $validation
