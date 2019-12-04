@@ -37,7 +37,7 @@ return [
     // Api keys
     // TODO: get this out of the config
     'apis' => [
-        'google' => 'AIzaSyDFGURBieERXfGQRaLHiCMlrxRtKZcrs4o',
+        'google' => '',
         'facebook' => '',
         'aliexpress' => '',
         'matrix' => '',
