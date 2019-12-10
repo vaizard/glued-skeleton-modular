@@ -45,7 +45,7 @@ class Accounts extends AbstractTwigController
         $users = $auth->get($args['uid']);
 
         return $this->render($response, 'Core/Views/accounts.read.twig', [
-            'pageTitle' => $final,//'Accounts',
+            'pageTitle' => 'Accounts',
             'users' => $users
         ]);
 
