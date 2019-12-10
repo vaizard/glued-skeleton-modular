@@ -18,7 +18,7 @@
             <img width="300" src="{{ screenshot }}">
           </div>
 
-<script>
+<script nonce="{{ csp_nonce.script_src }}">
 function changeUri(){
     var action_src = 'http://10.146.149.29/spider/browse/' . document.getElementsByName("uri")[0].value;
     var spider_browse_fetch = document.getElementById('spider_browse_fetch');

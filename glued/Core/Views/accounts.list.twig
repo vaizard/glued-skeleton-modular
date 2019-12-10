@@ -37,7 +37,7 @@
         </section>
 {% endblock %}
 {% block additionaljs %}
-  <script>
+  <script nonce="{{ csp_nonce.script_src }}">
   $(function(){
     $("#core-accounts-col").dataTable();
   });

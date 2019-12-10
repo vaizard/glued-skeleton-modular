@@ -37,11 +37,6 @@ INSERT INTO `t_core_authn` (`c_type`, `c_user_uid`, `c_hash`, `c_attr`, `c_ts_cr
 VALUES ('1', (SELECT c_uid FROM t_core_users WHERE c_email = 'p@e.org'), md5('w'), NULL, now(), now());
 
 
-    public function get($uid) {
-        
-        if (!(v::intVal()->positive()->between(0, 4294967295)->validate($uid))) {
-            throw new HttpBadRequestException($this->request, 'Expected value: positive integer');
-        }
 
 // select * from t_core_users left join t_core_authn on t_core_users.c_uid = t_core_authn.c_users_uid;
 
@@ -73,7 +68,11 @@ PLAUSIBLE DENIABILITY
 */
 
 
-
+    public function get($uid) {
+        
+        if (!(v::intVal()->positive()->between(0, 4294967295)->validate($uid))) {
+            throw new HttpBadRequestException($this->request, 'Expected value: positive integer');
+        }
 
         $this->db->where("c_uid", $uid);
         $result = $this->db->getOne("t_core_users");

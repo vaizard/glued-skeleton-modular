@@ -19,7 +19,7 @@ class HeadersMiddleware implements MiddlewareInterface
     {
         $final = '';
         foreach ($this->settings['feature-policy'] as $key => $val) { $final .= $key.' '.$val.'; '; }
-        rtrim($final, ';');
+        $final = rtrim($final, '; ');
 
         $response = $handler->handle($request);
         return $response->withHeader('Feature-Policy', $final)

@@ -7,20 +7,17 @@
   '@public/assets/node_modules/@babel/standalone/babel.min.js',
 ], name: 'rjsf.js'}) }}
 
-<script type="text/babel">
+<script type="text/babel" nonce="{{ csp_nonce.script_src }}">
     const Form = JSONSchemaForm.default;
     const uiSchema = {{ json_uischema_output | raw }};
     const schema = {{ json_schema_output | raw }};
     const formData = {{ json_formdata_output | raw }};
 
-
     function onSubmit(formData) {
         {{ json_onsubmit_output | raw }}
     }
 
-
     function onChange(formData) { }
-
 
     {% if json_formdata_render_custom_array is not defined %}
     ReactDOM.render((<Form onChange={onChange} onSubmit={onSubmit} uiSchema={uiSchema} schema={schema} formData={formData}></Form>), document.getElementById("rjsf"));

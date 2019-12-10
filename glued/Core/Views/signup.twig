@@ -47,6 +47,6 @@
         </section>
 {% endblock %}
 {% block additionaljs %}
-  <script>
+  <script nonce="{{ csp_nonce.script_src }}">
   </script>
 {% endblock %}

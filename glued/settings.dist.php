@@ -103,10 +103,24 @@ return [
          */ 
         'referrer-policy' => 'strict-origin-when-cross-origin',
         'content-type-options' => 'nosniff',
+        // TODO remove unsafe-inline and unsafe-eval once odan/twig-assets works with csp
         'csp' => [
-            'script-src' => ['self' => true],
-            'object-src' => ['self' => true],
-            'frame-ancestors' => ['self' => true],
+            'script-src' => [ 'allow' => [ $_SERVER['SERVER_NAME'] ], 'unsafe-inline' => true,'unsafe-eval' => true,  ],
+            'object-src' => [ 'allow' => [ $_SERVER['SERVER_NAME'] ] ],
+            'frame-ancestors' => [ 'allow' => [ 'https://' . $_SERVER['SERVER_NAME'] ] ],
+        ],
+        /** Optimal production hsts values (see https://hstspreload.org/
+         * before setting things up this)
+         *   'enable' => false,
+         *   'max-age' => 31536000,
+         *   'include-sub-domains' => true,
+         *   'preload' => true,
+         */
+        'hsts' => [
+            'enable' => true,
+            'max-age' => 15552,//552000,
+            'include-sub-domains' => false,
+            'preload' => false,
         ]
     ],
 
