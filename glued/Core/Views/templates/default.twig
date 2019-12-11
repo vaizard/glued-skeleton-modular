@@ -13,7 +13,6 @@
     '@public/assets/node_modules/datatables.net-select-bs4/css/select.bootstrap4.min.css',
     '@public/assets/css/glued.css',
     ], name: 'styles'}) }}
-  {% include '/Core/Views/templates/partials/rjsf.twig' %}
   <link rel="stylesheet" href="/assets/node_modules/@fortawesome/fontawesome-free/css/all.min.css">
 </head>
 
@@ -132,6 +131,8 @@
     </div>
   </div>
 
+  {% include '/Core/Views/templates/partials/rjsf.twig' %}
+  
   {{ assets({files: [
     '@public/assets/node_modules/jquery/dist/jquery.min.js',
     '@public/assets/node_modules/popper.js/dist/umd/popper.min.js',
