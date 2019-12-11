@@ -1,0 +1,48 @@
+{
+  "name": "draft-js-import-html",
+  "version": "1.4.1",
+  "description": "DraftJS: Import HTML to ContentState",
+  "main": "lib/main.js",
+  "module": "esm/main.js",
+  "typings": "typings/index.d.ts",
+  "files": [
+    "lib",
+    "esm",
+    "typings"
+  ],
+  "scripts": {
+    "release": "npm run build && npm publish",
+    "build:cjs": "babel src --root-mode upward --out-dir lib --ignore \"_*\"",
+    "build:esm": "NODE_ENV=esm babel src --root-mode upward --out-dir esm --ignore \"_*\"",
+    "build": "yarn build:cjs && yarn build:esm"
+  },
+  "dependencies": {
+    "draft-js-import-element": "^1.4.0"
+  },
+  "peerDependencies": {
+    "draft-js": ">=0.10.0",
+    "immutable": "3.x.x"
+  },
+  "keywords": [
+    "draft-js",
+    "import-html"
+  ],
+  "author": "sstur@me.com",
+  "contributors": [
+    {
+      "name": "Laura Knight",
+      "url": "https://github.com/ljknight"
+    },
+    {
+      "name": "Simon Sturmer",
+      "url": "https://github.com/sstur"
+    }
+  ],
+  "license": "ISC",
+  "repository": "https://github.com/sstur/draft-js-utils/tree/master/packages/draft-js-import-html",
+  "bugs": {
+    "url": "https://github.com/sstur/draft-js-utils/issues"
+  },
+  "homepage": "https://github.com/sstur/draft-js-utils/blob/master/packages/draft-js-import-html/README.md",
+  "gitHead": "4007f3ef39db2f4b264d28381b03c5795b7176cb"
+}

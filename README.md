@@ -57,6 +57,11 @@ The glue that keeps stuff together in Glued. To all microservices, core provides
   - XSS prevention
   - TODO unify header generation with someting like a middleware using https://github.com/BePsvPT/secure-headers
 
+**Caching**
+
+Glued's default cache headers (see `/public/.htaccess`) allow short term assets caching. Please understand that performance gains based on caching always comes at the cost of security. Sensitive data, i.e. pdf files, or private photos will get cached (depending on configuration locally by the user's browser or on public proxies). While html caching is disabled out of the box, if you want full security, completely disable caching (no-cache on everything). 
+For the above mentioned security considerations, when sessions are on, php sets `Pragma: no-cache` by default on the generated output. Don't change this unless you know what you are doing.
+
 ### Spider
 
 A microservice to crawl websites, track changes and archive and search content.

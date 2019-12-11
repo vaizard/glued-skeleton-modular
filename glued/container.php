@@ -8,7 +8,6 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Odan\Twig\TwigAssetsExtension;
 use Odan\Twig\TwigTranslationExtension;
-use ParagonIE\CSPBuilder\CSPBuilder;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Slim\App;

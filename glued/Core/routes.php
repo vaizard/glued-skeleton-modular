@@ -17,9 +17,8 @@ $app->group('/', function (RouteCollectorProxy $group) {
     $group->get ('core/dashboard', Glued::class)->setName('core.dashboard.web')->add(new RedirectIfNotAuthenticated());
 
     // TODO What's the problem here?
-    //$group->get('core/signin', HomeController::class)->setName('web.core.signin')->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() ));
-    //$group->get('core/signup', HomeController::class)->setName('web.core.signup')->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() ));
-
+    $group->get ('core/signin', AuthController::class . ':signin_get')->setName('core.signin.web');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() ));
+    $group->post('core/signin', AuthController::class . ':signin_post');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() )); TODO / ano?
 
     $group->get ('core/signup', AuthController::class . ':signup_get') ->        setName('core.signup.web');
     $group->post('core/signup', AuthController::class . ':signup_post');
@@ -54,5 +53,5 @@ $app->group('/', function (RouteCollectorProxy $group) {
 // going to `/core/signin` should redirect via Middleware/RedirectIfAuthenticated.php
 // to web.core.dashboard.  this should be `/core/dashboard`, but instead the readir leads
 // to `/signin`
-$app->get('/core/signin', Glued::class)->setName('core.signin.web')->add(new RedirectIfAuthenticated($container->get('routerParser')));
+//$app->get('/core/signin', Glued::class)->setName('core.signin.web')->add(new RedirectIfAuthenticated($container->get('routerParser')));
 

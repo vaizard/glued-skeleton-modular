@@ -20,7 +20,7 @@ class AuthController extends AbstractTwigController
 
     public function signin_get($request, $response)
     {
-        return $this->view->render($response, 'auth/signin.twig');
+        return $this->view->render($response, 'Core/Views/signin.twig');
     }
 
     public function signin_post($request, $response)

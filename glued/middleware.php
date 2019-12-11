@@ -86,7 +86,7 @@ $app->add($trailingSlash);
 $app->add(\Glued\Core\Middleware\ValidationFormsMiddleware::class);
 
 $csp = new CSPBuilder($settings['headers']['csp']);
-// $nonce['script_src'] = $csp->nonce('script-src');
+//$nonce['script_src'] = $csp->nonce('script-src');
 $app->add(new Middlewares\Csp($csp));
 
 $nonce['script_src'] = "dummy_nonce"; // TODO: delete this in favor for `$nonce['script_src'] = $csp->nonce('script-src');` (once csp works with odan/twig-assets)
