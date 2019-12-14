@@ -86,10 +86,14 @@ $app->add($trailingSlash);
 $app->add(\Glued\Core\Middleware\ValidationFormsMiddleware::class);
 
 $csp = new CSPBuilder($settings['headers']['csp']);
-//$nonce['script_src'] = $csp->nonce('script-src');
+// TODO: look at how to make this work with RJSF and its inlined evals and scripts
+// then kill the dummy nonce and keep on going with $csp->nonce() only
+// $nonce['script_src'] = $csp->nonce('script-src');
+// $nonce['style_src'] = $csp->nonce('style-src');
+$nonce['script_src'] = "dummy_nonce"; 
 $app->add(new Middlewares\Csp($csp));
 
-$nonce['script_src'] = "dummy_nonce"; // TODO: delete this in favor for `$nonce['script_src'] = $csp->nonce('script-src');` (once csp works with odan/twig-assets)
+
 $app->add(new \Glued\Core\Middleware\TwigCspMiddleware($nonce, $container));
 
 $app->add(new Tuupola\Middleware\CorsMiddleware);

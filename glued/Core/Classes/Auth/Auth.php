@@ -85,7 +85,7 @@ class Auth
         // TODO: drop an auth method
     }
 
-    public function get(Request $request, $uid) { // otazka: netahat to pres $this->request, ale mit get($request, $uid)???? <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    public function get(Request $request, $uid) { 
         
         if (!(v::intVal()->positive()->between(0, 4294967295)->validate($uid))) {
             throw new HttpBadRequestException($request, 'Expected value: positive integer');

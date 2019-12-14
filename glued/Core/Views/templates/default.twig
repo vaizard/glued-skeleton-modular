@@ -137,7 +137,7 @@
     '@public/assets/node_modules/bootstrap/dist/js/bootstrap.min.js',
     '@public/assets/node_modules/stisla/assets/js/scripts.js',
     '@public/assets/node_modules/stisla/assets/js/custom.js'
-    ], name: 'stisla-template.js'}) }}
+    ], name: 'stisla-template.js', nonce: csp_nonce.script_src }) }}
 
   {% include '/Core/Views/templates/partials/rjsf.twig' %}
 
@@ -149,7 +149,7 @@
     '@public/assets/node_modules/datatables.net/js/jquery.dataTables.min.js',
     '@public/assets/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.min.js',
     '@public/assets/node_modules/datatables.net-select-bs4/js/select.bootstrap4.min.js',
-    ], name: 'stisla-general.js'}) }}
+    ], name: 'stisla-general.js', nonce: csp_nonce.script_src, inline: true}) }}
 
    
 

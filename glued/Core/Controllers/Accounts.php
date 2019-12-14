@@ -69,8 +69,8 @@ class Accounts extends AbstractTwigController
     public function list(Request $request, Response $response, array $args = []): Response
     {
         // DO RBAC HERE
-        $auth = new Auth($this->db, $request);
-        $users = $auth->list();
+        $auth = new Auth($this->db);
+        $users = $auth->list($request);
         return $this->render($response, 'Core/Views/accounts.list.twig', [
             'pageTitle' => 'Accounts',
             'users' => $users
