@@ -4,7 +4,7 @@
 declare(strict_types=1);
 
 namespace Glued\Core\Controllers;
-use Glued\Core\Classes\Auth;
+use Glued\Core\Classes\Auth\Auth;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
@@ -26,16 +26,17 @@ class AuthController extends AbstractTwigController
     public function signin_post($request, $response)
     {
         $auth = $this->auth->attempt(
+            $request,
             $request->getParam('email'),
             $request->getParam('password')
         );
 
         if (!$auth) {
             $this->flash->addMessage('error', 'Could not sign you in with those details.');
-            return $response->withRedirect($this->router->pathFor('auth.signin'));
+            return $response->withRedirect($this->routerParser->urlFor('core.signin.web'));
         }
 
-        return $response->withRedirect($this->router->pathFor('home'));
+        return $response->withRedirect($this->routerParser->urlFor('home'));
     }
 
     public function signup_get($request, $response)
@@ -66,7 +67,6 @@ class AuthController extends AbstractTwigController
             'c_name'  => $request->getParam('name'),
         );
         if (!$this->db->insert ('t_core_users', $data)) { $trx_error = true; }
-        // TODO add error message - email exists, screen name ...? send it over via $validation
 
         $subq = $this->db->subQuery()->where('c_email', $request->getParam('email'))->getOne('t_core_users', 'c_uid');
         $data = array (

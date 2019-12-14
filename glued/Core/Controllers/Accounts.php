@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Glued\Core\Controllers;
 
-use Glued\Core\Classes\Auth;
+use Glued\Core\Classes\Auth\Auth;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -41,8 +41,8 @@ class Accounts extends AbstractTwigController
 */
     public function read(Request $request, Response $response, array $args = []): Response
     {
-        $auth = new Auth($this->db, $request);
-        $users = $auth->get($args['uid']);
+        $auth = new Auth($this->db);
+        $users = $auth->get($request, $args['uid']);
 
         return $this->render($response, 'Core/Views/accounts.read.twig', [
             'pageTitle' => 'Accounts',

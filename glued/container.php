@@ -1,7 +1,7 @@
 <?php
 
 use DI\Container;
-use Glued\Core\Classes\Users;
+use Glued\Core\Classes\Auth\Auth;
 use Glued\Core\Middleware\TranslatorMiddleware;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -11,7 +11,6 @@ use Odan\Twig\TwigTranslationExtension;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Slim\App;
-use Slim\Csrf\Guard;
 use Slim\Factory\AppFactory;
 use Slim\Flash\Messages;
 use Slim\Interfaces\RouteParserInterface;
@@ -22,7 +21,6 @@ use Symfony\Component\Translation\Loader\MoFileLoader;
 use Symfony\Component\Translation\Translator;
 use Twig\Loader\FilesystemLoader; // Twig-translation
 
-
 $container->set(LoggerInterface::class, function (Container $c) {
     $settings = $c->get('settings')['logger'];
     $logger = new Logger($settings['name']);
@@ -32,6 +30,7 @@ $container->set(LoggerInterface::class, function (Container $c) {
     $logger->pushHandler($handler);
     return $logger;
 });
+
 
 
 $container->set('mysqli', function (Container $c) {
@@ -99,9 +98,8 @@ $container->set('validator', function (Container $c) {
    return new Glued\Core\Classes\Validation\Validator;
 });
 
-
-$container->set('auth', function () {
-    return new Auth();
+$container->set('auth', function (Container $c) {
+    return new Auth($c->get('db'));
 });
 // TODO 
 // - classes/users.php

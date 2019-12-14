@@ -11,6 +11,7 @@ use Glued\Core\Controllers\ProfilesApi;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+
 // Define the app routes.
 $app->group('/', function (RouteCollectorProxy $group) {
     $group->get('', Glued::class)->setName('core.web');
