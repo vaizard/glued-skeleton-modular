@@ -2,11 +2,6 @@
 namespace Glued\Core\Classes\Auth;
 use Respect\Validation\Validator as v;
 use UnexpectedValueException;
-use ErrorException;
-use RuntimeException;
-
-//use Psr\Http\Message\ResponseInterface as Response;
-//use Psr\Http\Message\ServerRequestInterface as Request;
 
 class Auth
 {
@@ -44,12 +39,13 @@ class Auth
 
     public function user_read($uid) { 
         if (!(v::intVal()->positive()->between(0, 4294967295)->validate($uid))) {
-            throw new ErrorException('Bad request (wrong user id).', 550);
+            throw new UnexpectedValueException('Bad request (wrong user id).', 550);
         }
+
         $this->db->where("c_uid", $uid);
         $result = $this->db->getOne("t_core_users");
         if(!$result) {
-            throw new Exception('Not found (no such user).', 450);
+            throw new UnexpectedValueException('Not found (no such user).', 450);
         }
         return $result;
     }

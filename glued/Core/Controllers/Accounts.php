@@ -18,7 +18,7 @@ class Accounts extends AbstractTwigController
     {
         $auth = new Auth($this->db, $this->settings);
         try {
-            $users = $auth->user_read($request, $args['uid']);
+            $users = $auth->user_read($args['uid']);
         } catch (Throwable $e) {
             if ($e->getCode() == 450) { throw new NotFound($request, 'User not found.'); }
             if ($e->getCode() == 550) { throw new BadRequest($request, 'Wrong user id.'); }
@@ -38,7 +38,7 @@ class Accounts extends AbstractTwigController
     {
         // DO RBAC HERE
         $auth = new Auth($this->db, $this->settings);
-        $users = $auth->user_list($request);
+        $users = $auth->user_list();
         return $this->render($response, 'Core/Views/accounts.list.twig', [
             'pageTitle' => 'Accounts',
             'users' => $users

@@ -1,4 +1,4 @@
-# GLued-Skeleton
+# Glued-Skeleton
 
 A full blown modular webapp skeleton built around
 
@@ -138,36 +138,28 @@ Credit for the initial translation implementation goes to https://github.com/oda
 
 ### Validation & exceptions and error handling
 
-Glued 
+Used technology
 
-- relies on respect/validation, extends it through the core\classes\validation class to make work with forms easier. 
-- uses custom exceptions to display error messages on URIs
-  throw new HttpNotFoundException($this->request, 'User not found');
-- uses flash messages
-- json data validation
+- `Respect\Validation` class, extended via `Core\Classes\Validation` class and `ValidationFormsMiddleware` which simplify handling validation failures of posted form data
+- `Slim\Flash` to render feedback on actions
+- Json data validation on API routes
+- Choice between the `Whoops` and `Error` middlewares to display errors (hint: use whoops for development, error for production)
 
-Exception and error handling is done via 
+Practical usage
 
-- flash messages
-- exception handlers, i.e. `throw new HttpNotFoundException($request, 'optional message');`
-- api responses, i.e. via json exception renderer (see end of `core/middleware.php`)
+- Distinguish between infrastructure specific exceptions (e.g. HttpNotFoundException, HttpBadRequestException) and domain specific exceptions (e.g. DomainException, UnexpectedValueException, ValidationException, etc…).
+- Use domain specific exception in classes (where glued handles the data internally only), rethrow the domain specific exceptions as infrastructure specific exceptions in controllers (set the return code depending on context, emit a friendlier/more readable error message). See how `Glued\Core\Controllers\AccountsController::read()` rethrows exceptions comming from `Glued\Core\Classes\Auth\Auth::user_read()`.
+- Using infrastructure specific exceptions in classes is unwanted, since throwing them requires the Request passed as a parameter (i.e. `throw new HttpNotFoundException($this->request, 'User not found');`).
+- Perform validation in classes. Optionally you can also validate in controllers, if it's usefull (i.e. see `Glued\Core\Controllers\AccountsController::signup_post()` where the `$this->validator` uses the container-residing `Core\Classes\Validation` helper that re-fills the signup form and explains which data is invalid)
+- Don't forget to do i18n via. the `__()` function available both in glued's php sources and in its twig templates on error messages.
 
-**Notes on praticalities**
+Notes
 
-- Validation is in most cases done in controllers (a json controller will validate data differently from the twig controller). Class functions used by some controllers will expect validated data.
-- To prevent unwanted validation rules differences, validation rules are kept in the vrules container item (single source of thruth), rather then in the controller code.
-- Within classes used by controllers, throwing exceptions is limited to cases which require a total execution stop. I.e. in the `core/classes/auth/auth.php` class, exceptions are thrown only on invalid data in the `response()` function. Since the data fed to this function should be always valid (passed from the session data which the user cannot tamper with), getting invalid data here would indicate a serious problem. Other functions in this class don't throw exceptions and just return i.e. an empty result set.
-
-
-### Error handling
-
-- throw exceptions: 
-
-**NOTE:** Don't forget to do i18n!
+- In classes throwing exceptions is limited to cases which require a total execution stop (i.e. security concerns). I.e. in the `core/classes/auth/auth.php` class, exceptions are thrown only on invalid data in the `response()` function. Since the data fed to this function should be always valid (passed from the session data which the user cannot tamper with), getting invalid data here would indicate a serious problem. Other functions in this class don't throw exceptions and just return i.e. an empty result set.
 
 ### Debuging
 
-Remember that `var_dump($some_variable); die();` is your best friend.
+Remember that `var_dump($some_variable); die();` is your best friend. Also use the `Whoops` error middleware (see settings.php)
 
 
 ### Developer tutorials
