@@ -1,23 +1,26 @@
 <?php
-
 declare(strict_types=1);
 
 use DI\Container;
 use Slim\Factory\AppFactory;
-use Nyholm\Psr7\Factory\Psr17Factory; //
-use Slim\Http\Factory\DecoratedResponseFactory; //
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Slim\Http\Factory\DecoratedResponseFactory;
+
 
 define("__ROOT__", realpath(__DIR__ . '/..'));
 require_once(__ROOT__ . '/vendor/autoload.php');
+
 
 $container = new Container();
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
+
 $container->set('settings', function() {
     return require_once(__ROOT__ . '/glued/settings.php');
 });
 $settings = $container->get('settings');
+
 
 $nyholmFactory = new Psr17Factory();
 /**
@@ -28,13 +31,22 @@ $nyholmFactory = new Psr17Factory();
  */
 $decoratedResponseFactory = new DecoratedResponseFactory($nyholmFactory, $nyholmFactory);
 
-require_once (__ROOT__ . '/glued/bootstrap.php');
-//require_once (__ROOT__ . '/glued/Core/Classes/Translate.php');
-require_once (__ROOT__ . '/glued/container.php');
 
+require_once (__ROOT__ . '/glued/bootstrap.php');
+require_once (__ROOT__ . '/glued/container.php');
 require_once (__ROOT__ . '/glued/middleware.php');
 require_once (__ROOT__ . '/glued/routes.php');
 
+
 $app->run();
+
+/*
+try {
+    $app->run();
+} catch (Throwable $exception) {
+    http_response_code($exception->getCode());
+    echo sprintf('Bad Request: %s %s', $exception->getMessage(), $exception->getCode());
+}
+*/
 
 ?>

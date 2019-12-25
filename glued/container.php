@@ -8,7 +8,6 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Odan\Twig\TwigAssetsExtension;
 use Odan\Twig\TwigTranslationExtension;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Factory\AppFactory;
@@ -19,7 +18,8 @@ use Symfony\Component\Translation\Formatter\MessageFormatter;
 use Symfony\Component\Translation\IdentityTranslator;
 use Symfony\Component\Translation\Loader\MoFileLoader;
 use Symfony\Component\Translation\Translator;
-use Twig\Loader\FilesystemLoader; // Twig-translation
+use Twig\Loader\FilesystemLoader;
+
 
 $container->set(LoggerInterface::class, function (Container $c) {
     $settings = $c->get('settings')['logger'];
@@ -30,7 +30,6 @@ $container->set(LoggerInterface::class, function (Container $c) {
     $logger->pushHandler($handler);
     return $logger;
 });
-
 
 
 $container->set('mysqli', function (Container $c) {
@@ -62,12 +61,11 @@ $container->set('view', function (Container $c) {
     $loader = $twig->getLoader();
     $loader->addPath(__ROOT__ . '/public', 'public');
     $twig->addExtension(new TwigAssetsExtension($twig->getEnvironment(), (array)$c->get('settings')['assets']));
-    $twig->addExtension(new TwigTranslationExtension()); // GETTEXT
+    $twig->addExtension(new TwigTranslationExtension());
     return $twig;
 });
 
 
-// GETTEXT
 $container->set(Translator::class, static function (Container $container) {
     $settings = $container->get('settings')['locale'];
     $translator = new Translator(
@@ -76,8 +74,7 @@ $container->set(Translator::class, static function (Container $container) {
         $settings['cache']
     );
     $translator->addLoader('mo', new MoFileLoader());
-    // Set translator instance
-    __($translator);
+    __($translator); // Set translator instance
     return $translator;
 });
 
@@ -89,17 +86,20 @@ $container->set(TranslatorMiddleware::class, static function (Container $contain
     return new TranslatorMiddleware($translator, $localPath);
 });
 
-// =================================================
-// ADD CLASSES
-// ================================================= 
 
+// *************************************************
+// GLUED CLASSES ***********************************
+// ************************************************* 
+
+// Form-data validation helper (send validation results
+// via session to the original form upon failure)
 $container->set('validator', function (Container $c) {
-   // glued validation class
    return new Glued\Core\Classes\Validation\Validator;
 });
 
+
 $container->set('auth', function (Container $c) {
-    return new Auth($c->get('db'));
+    return new Auth($c->get('db'), $c->get('settings'));
 });
 // TODO 
 // - classes/users.php

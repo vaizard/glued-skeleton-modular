@@ -1,13 +1,11 @@
 {% extends '/Core/Views/templates/default.twig' %}
 
 {% block content %}
-        <section class="section">
           <div class="section-header">
             <h1>{{ __('Sign up') }}</h1>
           </div>
-
           <div class="section-body">
-
+            {% include '/Core/Views/templates/partials/flash.twig' %}
             <div class="card card-primary col-4">
               <form action="{{ url_for('core.signup.web') }}" method="post" autocomplete="off">
                 <div class="card-header">{{ __('Please provide your details below')}}</div>
@@ -40,9 +38,6 @@
                 </form>
               </div>
             </div>
-
-
-
           </div>
         </section>
 {% endblock %}

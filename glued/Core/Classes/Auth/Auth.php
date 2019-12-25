@@ -1,31 +1,61 @@
 <?php
-
 namespace Glued\Core\Classes\Auth;
 use Respect\Validation\Validator as v;
-use Slim\Exception\HttpBadRequestException;
-use Slim\Exception\HttpNotFoundException;
+use UnexpectedValueException;
+use ErrorException;
+use RuntimeException;
 
-
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+//use Psr\Http\Message\ResponseInterface as Response;
+//use Psr\Http\Message\ServerRequestInterface as Request;
 
 class Auth
-
 {
+
+
     protected $db;
+    protected $settings;
 
-    public function __construct($db) {
+
+    public function __construct($db, $settings) {
         $this->db = $db;
+        $this->settings = $settings;
     }
 
-    public function check() {
-        return true ;
-    }
 
-    public function create($email, $name, $pass, $lang) {
+    public function user_create($email, $name, $password) {
+        $trx_error = false;
+        $this->db->startTransaction();
+        $data = array (
+            'c_email' => $email,
+            'c_name'  => $name,
+        );
+        if (!$this->db->insert ('t_core_users', $data)) { $trx_error = true; }
+        $subq = $this->db->subQuery()->where('c_email', $email)->getOne('t_core_users', 'c_uid');
+        $data = array (
+            'c_type' => 0,
+            'c_user_uid' => $subq,
+            'c_hash' => password_hash($password, $this->settings['php']['password_hash_algo'], $this->settings['php']['password_hash_opts']),
+        );
+        if (!$this->db->insert ('t_core_authn', $data)) { $trx_error = true; }
+        if ($trx_error === true) { $this->db->rollback(); } 
+        else { $this->db->commit(); }
     } 
 
-    public function drop($uid) {
+
+    public function user_read($uid) { 
+        if (!(v::intVal()->positive()->between(0, 4294967295)->validate($uid))) {
+            throw new ErrorException('Bad request (wrong user id).', 550);
+        }
+        $this->db->where("c_uid", $uid);
+        $result = $this->db->getOne("t_core_users");
+        if(!$result) {
+            throw new Exception('Not found (no such user).', 450);
+        }
+        return $result;
+    }
+
+
+    public function user_delete($uid) {
         /*
         DELETING ACCOUNTS & GDPR:
 
@@ -47,12 +77,17 @@ class Auth
     }
 
 
+    public function user_list() {
+        // replace with attribute filtering
+        // $this->db->where("c_uid", $user_id); 
+        return $this->db->get("t_core_users");
+    }
+
+
     /**
      *  attempt to sign in user, return true|false on success or failure   
      */ 
-    public function attempt(Request $request, $email, $password)
-    {
-
+    public function attempt($email, $password) {
         $authenticated = false;
         $this->db->join("t_core_authn a", "a.c_user_uid=u.c_uid", "LEFT");
         $this->db->where("u.c_email", $email);
@@ -61,6 +96,10 @@ class Auth
         
         if ($this->db->count > 0) {
             foreach ($result as $user) {
+                // TODO: test here if an disabled/old auth password/token are used
+                // If yes, then:
+                // - log the issue and notify user
+                // - ratelimit IP
                 if (password_verify($password, $user['c_hash'])) {
                     $_SESSION['core_user_id'] = $user['c_user_uid'];
                     $_SESSION['core_auth_id'] = $user['c_uid'];
@@ -72,8 +111,69 @@ class Auth
         return $authenticated;
     }
 
+    public function signout() {
+        unset($_SESSION['core_user_id']);
+        unset($_SESSION['core_auth_id']);
+        unset($_SESSION['auth']);
+    }
 
-    public function auth_add(Request $request, $uid, $password) {
+
+    /**
+     * Checks if user is logged in by testing if $_SESSION has core_user_id
+     * and core_auth_id set (data set and stored only on the server).
+     * @return bool Returns true if user is logged in, false when not
+     */
+    public function check()
+    {
+        $user_id = $_SESSION['core_user_id'] ?? false;
+        $auth_id = $_SESSION['core_auth_id'] ?? false;
+        if ($user_id === false or $auth_id === false) { return false; }
+        else { return true; }
+    }
+
+
+    /**
+     * Get response-modifying data.
+     * (Auth context, personalization)
+     * 
+     * @param  [type]  $user_id [description]
+     * @param  [type]  $auth_id [description]
+     * @return [type]           [description]
+     */
+    public function response() { 
+        $user_id = $_SESSION['core_user_id'] ?? false;
+        $auth_id = $_SESSION['core_auth_id'] ?? false;
+        // <--------------------------------------------------------------------------------------------
+        // pridel authid check
+        /*
+        if ((!(v::intVal()->positive()->between(0, 4294967295)->validate($user_id))) or (!(v::intVal()->positive()->between(0, 4294967295)->validate($user_id)))) {
+            throw new ErrorException('Internal Server Error (mangled session).', 500);
+        }*/
+
+        $this->db->join("t_core_authn a", "a.c_user_uid=u.c_uid", "LEFT");
+        $this->db->where("u.c_uid", $user_id);
+        $this->db->where("a.c_uid", $auth_id);
+        //$result = $this->db->getOne("t_core_users u", null);
+        $result = $this->db->getOne("t_core_users u", null);
+
+
+        // tady udelej join a nacti i limitace na auth
+        //$this->db->where("c_uid", $user_id);
+        //$result = $this->db->getOne("t_core_users");
+
+        if(!$result) {
+            //throw new HttpNotFoundException($request, 'User not found');
+            //throw new ErrorException('Custom exception', 9);
+            //throw new UnexpectedValueException('User not found');
+            // session destroy
+        }
+
+        return $result;
+    }
+
+
+
+    public function create($uid, $password) {
         // TODO
         // add interface and function to supplement once user 
         // account with secondary login credentials, such as
@@ -81,31 +181,13 @@ class Auth
         // key, etc.
     }
 
-    public function auth_drop($uid, $auth_id) {
-        // TODO: drop an auth method
+
+    public function delete($uid, $auth_id) {
+        // TODO: disable an auth token/password
+        // NOTE: do NOT delete disabled aith tokens/passwords.
+        // the attempt() function should probe even old passwords
+        // to identify IPs that should get rate-limited
     }
 
-    public function get(Request $request, $uid) { 
-        
-        if (!(v::intVal()->positive()->between(0, 4294967295)->validate($uid))) {
-            throw new HttpBadRequestException($request, 'Expected value: positive integer');
-        }
-
-        $this->db->where("c_uid", $uid);
-        $result = $this->db->getOne("t_core_users");
-
-        if(!$result) {
-            throw new HttpNotFoundException($request, 'User not found');
-        }
-
-        return $result;
-    }
-
-
-    public function list(Request $request) {
-        // replace with attribute filtering
-        // $this->db->where("c_uid", $user_id); 
-        return $this->db->get("t_core_users");
-    }
 
 }

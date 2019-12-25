@@ -7,70 +7,38 @@ namespace Glued\Core\Controllers;
 use Glued\Core\Classes\Auth\Auth;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Exception\HttpBadRequestException as BadRequest;
+use Slim\Exception\HttpNotFoundException as NotFound;
+use Throwable;
 
 class Accounts extends AbstractTwigController
 {
-    /**
-     * @param Request  $request
-     * @param Response $response
-     * @param array    $args
-     *
-     * @return Response
-     */
-    /*
-    public function __invoke(Request $request, Response $response, array $args = []): Response
-    {
-        if (isset($args['uid'])) {
-            // list
-        } else {
-            // object
-            $uid = isset($args['uid']);
-            if (v::inval()->positive()->validate($uid)) {
-                // show
-                $auth = new Auth($this->db);
-                $users = $auth->get($uid);
-            } else {
-                // forbidden value
-            }
-        }    
-        return $this->render($response, 'Core/Views/accounts.twig', [
-            'pageTitle' => 'Accounts',
-            'users' => $users
-        ]);
-    }
-*/
+  
     public function read(Request $request, Response $response, array $args = []): Response
     {
-        $auth = new Auth($this->db);
-        $users = $auth->get($request, $args['uid']);
+        $auth = new Auth($this->db, $this->settings);
+        try {
+            $users = $auth->user_read($request, $args['uid']);
+        } catch (Throwable $e) {
+            if ($e->getCode() == 450) { throw new NotFound($request, 'User not found.'); }
+            if ($e->getCode() == 550) { throw new BadRequest($request, 'Wrong user id.'); }
+            else { throw new BadRequest($request, 'Something went wrong, sorry.'); }
+        }
+        
+        // TODO DO RBAC HERE
 
         return $this->render($response, 'Core/Views/accounts.read.twig', [
             'pageTitle' => 'Accounts',
             'users' => $users
         ]);
-
-  /*
-        // DO RBAC HERE
-        if (v::inval()->positive()->validate($uid)) {
-            // show
-            $auth = new Auth($this->db);
-            $users = $auth->get($uid);
-            return $this->render($response, 'Core/Views/accounts.get.twig', [
-                'pageTitle' => 'Accounts',
-                'users' => $users
-            ]);
-        } else {
-            // forbidden value
-            // 
-        }         
-        */
     }
+
 
     public function list(Request $request, Response $response, array $args = []): Response
     {
         // DO RBAC HERE
-        $auth = new Auth($this->db);
-        $users = $auth->list($request);
+        $auth = new Auth($this->db, $this->settings);
+        $users = $auth->user_list($request);
         return $this->render($response, 'Core/Views/accounts.list.twig', [
             'pageTitle' => 'Accounts',
             'users' => $users

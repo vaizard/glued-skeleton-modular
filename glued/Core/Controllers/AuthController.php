@@ -14,8 +14,8 @@ class AuthController extends AbstractTwigController
 {
     public function signout_get($request, $response)
     {
-        $this->auth->logout();
-        return $response->withRedirect($this->router->pathFor('home'));
+        $this->auth->signout();
+        return $response->withRedirect($this->routerParser->urlFor('core.web'));
     }
 
     public function signin_get($request, $response)
@@ -26,7 +26,6 @@ class AuthController extends AbstractTwigController
     public function signin_post($request, $response)
     {
         $auth = $this->auth->attempt(
-            $request,
             $request->getParam('email'),
             $request->getParam('password')
         );
@@ -36,54 +35,44 @@ class AuthController extends AbstractTwigController
             return $response->withRedirect($this->routerParser->urlFor('core.signin.web'));
         }
 
-        return $response->withRedirect($this->routerParser->urlFor('home'));
+        $this->flash->addMessage('info', 'Welcome back, you are signed in!');
+        return $response->withRedirect($this->routerParser->urlFor('core.dashboard.web'));
     }
 
     public function signup_get($request, $response)
     {
         return $this->view->render($response, 'Core/Views/signup.twig');
     }
+/*
+   public function test($request, $response) {
 
+        $this->db->join("t_core_authn a", "a.c_user_uid=u.c_uid", "LEFT");
+        $this->db->where("u.c_uid", 16);
+        $this->db->where("a.c_uid", 9);
+        $result = $this->db->getOne("t_core_users u", null);
+
+        echo  $this->db->getLastQuery().'<br>';
+        print_r($result);
+        return $response;
+
+   }
+*/
     public function signup_post($request, $response)
     {
 
         $validation = $this->validator->validate($request, [
-            'email' => v::noWhitespace()->notEmpty()->email()->emailAvailable($this->db),
+            'email' =>v::noWhitespace()->notEmpty()->email()->emailAvailable($this->db),
             'name' => v::notEmpty()->alnum(),
             'password' => v::noWhitespace()->notEmpty(),
         ]);
-
         if ($validation->failed()) {
-            //print_r($validation->errors); die();
             return $response->withRedirect($this->routerParser->urlFor('core.signup.web'));
         }
+        $this->auth->user_create($request->getParam('email'), $request->getParam('name'), $request->getParam('password'));
+        // signin user after account creation
+        $this->auth->attempt($request->getParam('email'), $request->getParam('password'));
 
-        // transaction start
-        $this->db->startTransaction();
-        $trx_error = false;
-  
-        $data = array (
-            'c_email' => $request->getParam('email'),
-            'c_name'  => $request->getParam('name'),
-        );
-        if (!$this->db->insert ('t_core_users', $data)) { $trx_error = true; }
-
-        $subq = $this->db->subQuery()->where('c_email', $request->getParam('email'))->getOne('t_core_users', 'c_uid');
-        $data = array (
-            'c_type' => 0,
-            'c_user_uid' => $subq,
-            'c_hash' => password_hash($request->getParam('password'), $this->settings['php']['password_hash_algo'], $this->settings['php']['password_hash_opts']),
-        );
-        if (!$this->db->insert ('t_core_authn', $data)) { $trx_error = true; }
-        // TODO add error message - db error ...? send it over via $validation
-        
-        if ($trx_error === true) { $this->db->rollback(); } 
-        else { $this->db->commit(); }
-
-       // TODO pass valid data back to form in case something is inalid (glued has old.email etc.)
-       // TODO add custom email validator
        // TODO configure session middleware according to $settings
-       // 
 /*
         $this->flash->addMessage('info', 'You have been signed up!');
  =       $this->auth->attempt($user->email, $request->getParam('password')); */

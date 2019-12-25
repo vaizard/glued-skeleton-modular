@@ -15,7 +15,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 // Define the app routes.
 $app->group('/', function (RouteCollectorProxy $group) {
     $group->get('', Glued::class)->setName('core.web');
-    $group->get ('core/dashboard', Glued::class)->setName('core.dashboard.web')->add(new RedirectIfNotAuthenticated());
+    $group->get ('core/dashboard', Glued::class)->setName('core.dashboard.web');//->add(new RedirectIfNotAuthenticated());
 
     // TODO What's the problem here?
     $group->get ('core/signin', AuthController::class . ':signin_get')->setName('core.signin.web');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() ));
@@ -23,7 +23,7 @@ $app->group('/', function (RouteCollectorProxy $group) {
 
     $group->get ('core/signup', AuthController::class . ':signup_get') ->        setName('core.signup.web');
     $group->post('core/signup', AuthController::class . ':signup_post');
-    $group->get ('core/signout', Glued::class) ->                               setName('core.signout.web');
+    $group->get ('core/signout', AuthController::class . ':signout_get') ->     setName('core.signout.web');
     $group->get ('core/profiles[/{uid}]', Profiles::class) ->                   setName('core.profiles.list.web');
     $group->get ('api', GluedApi::class) ->                                     setName('core.api');
     $group->post('api/core/v1/profiles', ProfilesApi::class . ':create') ->     setName('core.profiles.create.api01');

@@ -11,6 +11,7 @@ return [
     'displayErrorDetails' => true, // Set to false in production
     'logErrors' => true,
     'logErrorDetails' => true,
+    'debugEngine' => 'Whoops', // Error | Whoops
 
     // Glued globals
     'glued' => [

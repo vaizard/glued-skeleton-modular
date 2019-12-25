@@ -96,8 +96,6 @@ Glued comes with phinx-migrations, which generates automatically database migrat
 ./vendor/bin/phinx-migrations generate -e production --name initial
 ```
 
-
-
 ### Assets
 
 Assets are managed (kept in an up-to-date state) by the composer foxy/foxy package. This package uses yarn (and a package.json) file to grab all that css and javascript for you and build it. Furthermore, odan/twig-assets will cache minified and joined versions of assets to give you a hassle free assets experience.
@@ -138,21 +136,32 @@ Integrating odan/twig-translation was not trivial. This section intends to docum
 
 Credit for the initial translation implementation goes to https://github.com/odan/slim4-skeleton/commit/ba57560e33e379fd3ce6ef7ec09b68b029fb64ad
 
-### Validation and exceptions handling
+### Validation & exceptions and error handling
 
 Glued 
 
-- relies on respect/validation, extends it through the validation class. 
+- relies on respect/validation, extends it through the core\classes\validation class to make work with forms easier. 
 - uses custom exceptions to display error messages on URIs
   throw new HttpNotFoundException($this->request, 'User not found');
 - uses flash messages
 - json data validation
 
-Exception handling is done via 
+Exception and error handling is done via 
 
 - flash messages
-- exception handlers
-- api responses
+- exception handlers, i.e. `throw new HttpNotFoundException($request, 'optional message');`
+- api responses, i.e. via json exception renderer (see end of `core/middleware.php`)
+
+**Notes on praticalities**
+
+- Validation is in most cases done in controllers (a json controller will validate data differently from the twig controller). Class functions used by some controllers will expect validated data.
+- To prevent unwanted validation rules differences, validation rules are kept in the vrules container item (single source of thruth), rather then in the controller code.
+- Within classes used by controllers, throwing exceptions is limited to cases which require a total execution stop. I.e. in the `core/classes/auth/auth.php` class, exceptions are thrown only on invalid data in the `response()` function. Since the data fed to this function should be always valid (passed from the session data which the user cannot tamper with), getting invalid data here would indicate a serious problem. Other functions in this class don't throw exceptions and just return i.e. an empty result set.
+
+
+### Error handling
+
+- throw exceptions: 
 
 **NOTE:** Don't forget to do i18n!
 

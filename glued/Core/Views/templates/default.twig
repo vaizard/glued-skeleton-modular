@@ -40,8 +40,11 @@
             </div>
           </div>
         </form>
-         {% include '/Core/Views/templates/partials/menu-anonymous.twig' %}
-         {% include '/Core/Views/templates/partials/menu-authenticated.twig' %}
+        {% if auth.check %}
+        {% include '/Core/Views/templates/partials/menu-authenticated.twig' %}
+        {% else %}
+        {% include '/Core/Views/templates/partials/menu-anonymous.twig' %}
+        {% endif %}
       </nav>
       <div class="main-sidebar sidebar-style-2">
         <aside id="sidebar-wrapper">
@@ -116,8 +119,10 @@
 
       <!-- Main Content -->
       <div class="main-content">
-      {% block content %}{% endblock %}
-      <div id="rjsf"></div>
+      <section class="section">
+        {% block content %}{% endblock %}
+        <div id="rjsf"></div>
+      </section>
       </div>
       <footer class="main-footer">
         <div class="footer-left">

@@ -40,7 +40,7 @@
     "tuupola/slim-jwt-auth": "^3.4.0",
     "phpoffice/phpspreadsheet": "^1.10",
     "foxy/foxy": "^1.0.8",
-    "odan/twig-assets": "dev-csp-nonce",
+    "odan/twig-assets": "^2.3",
     "odan/twig-translation": "^1.3.1",
     "odan/phinx-migrations-generator": ">4.1",
     "nesbot/carbon": "^2.27",
@@ -52,7 +52,8 @@
     "google/apiclient": "^2.4",
     "php-imap/php-imap": "^3.0",
     "tuupola/cors-middleware": "^1.1",
-    "middlewares/csp": "^3.0"
+    "middlewares/csp": "^3.0",
+    "zeuxisoo/slim-whoops": "^0.7.2"
   },
   "scripts": {
     "start": "php -S localhost:8080 -t public",

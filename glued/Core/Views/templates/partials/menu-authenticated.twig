@@ -1,8 +1,8 @@
         <ul class="navbar-nav navbar-right">
           <li class="dropdown"><a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
-            <div class="d-sm-none d-lg-inline-block">{{ __('Hi,') }} {{ user | default (__('User')) }}</div></a>
+            <div class="d-sm-none d-lg-inline-block">{{ __('Hi,') }} {{ auth.c_name | default (__('User')) }}</div></a>
             <div class="dropdown-menu dropdown-menu-right">
-              <div class="dropdown-title">{{ user }}</div>
+              <div class="dropdown-title">{{ auth.c_name }}</div>
               <a href="features-profile.html" class="dropdown-item has-icon">
                 <i class="far fa-user"></i> {{ __('Profile') }}
               </a>
@@ -10,7 +10,7 @@
                 <i class="fas fa-cog"></i> {{ __('Settings') }}
               </a>
               <div class="dropdown-divider"></div>
-              <a href="#" class="dropdown-item has-icon text-danger">
+              <a href="{{ url_for('core.signout.web') }}" class="dropdown-item has-icon text-danger">
                 <i class="fas fa-sign-out-alt"></i> {{ __('Sign out') }}
               </a>
             </div>
