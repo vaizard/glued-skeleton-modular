@@ -64,4 +64,56 @@ class AuthController extends AbstractTwigController
         $this->auth->attempt($request->getParam('email'), $request->getParam('password')); // auto sign-in after account creation
         return $response->withRedirect($this->routerParser->urlFor('core.web'));
     }
+
+
+
+    // responds to the change password post request (tries to change user's
+    // password, redirects him to different locations based on success|failure.
+    public function change_password_post($request, $response)
+    {
+        $user_id = $_SESSION['core_user_id'] ?? false;
+        $auth_id = $_SESSION['core_auth_id'] ?? false;
+        
+        if ($user_id and $auth_id) {
+            
+            // matchesPassword() is a custom validation rule, see Classes/Validation
+            // using $this->container->auth->user() as its parameter is a
+            // preparation for cases when user's password can be reset by an admin
+            // as well (not only the user himselft)
+            
+            // zatim udelame jen nejjednodussi pripad, ze menime heslo prihlaseneho uzivatele. pozdeji zde bude nejake vetveni
+            $change_user_id = $user_id;
+            $change_auth_id = $auth_id;
+            
+            $validation = $this->container->validator->validate($request, [
+                'password_old' => v::noWhitespace()->notEmpty()->matchesPassword($this->container, $change_user_id, $change_auth_id),
+                'password' => v::noWhitespace()->notEmpty(),
+            ]);
+            
+            // on validation failure redirect back to the form. the rest of this
+            // function won't get exectuted
+            if ($validation->failed()) {
+                $this->container->logger->warn("Password change failed. Validation error.");
+                return $response->withRedirect($this->container->router->pathFor('auth.settings'));
+            }
+            
+            // change the password, emit flash message and redirect
+            $password = $request->getParam('password');
+            $this->container->db->where('c_type', 1);
+            $this->container->db->where('c_uid', $change_authentication_id);
+            $this->container->db->where('c_user_id', $change_user_id);
+            $update = $this->container->db->update('t_authentication', Array ( 'c_pasword' => password_hash($password, PASSWORD_DEFAULT)  ));
+            
+            if (!$update) {
+                $this->container->logger->warn("Password change failed. DB error.");
+                return $response->withRedirect($this->container->router->pathFor('auth.settings'));
+            }
+            else {
+                $this->container->flash->addMessage('info', 'Your password was changed');
+                return $response->withRedirect($this->container->router->pathFor('home'));
+            }
+        }
+        
+    }
+
 }

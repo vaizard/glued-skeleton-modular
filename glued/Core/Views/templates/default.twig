@@ -63,7 +63,7 @@
               <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-user"></i> <span>Account</span></a>
               <ul class="dropdown-menu">
                 <li><a class="nav-link" href="{{ url_for('core.profiles.list.web') }}/self">My profile</a></li>
-                <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}/self">My account</a></li>
+                {%if auth.check %}<li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}/{{ auth.u_uid }}">My account</a></li>{%endif%}
                 <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}">Manage accounts</a></li>
               </ul>
             </li>
@@ -121,6 +121,7 @@
       <div class="main-content">
       <section class="section">
         {% block content %}{% endblock %}
+        {% include '/Core/Views/templates/partials/debug.twig' %}
         <div id="rjsf"></div>
       </section>
       </div>

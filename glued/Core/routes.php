@@ -24,14 +24,18 @@ $app->group('/', function (RouteCollectorProxy $group) {
     $group->get ('core/signup', AuthController::class . ':signup_get') ->        setName('core.signup.web');
     $group->post('core/signup', AuthController::class . ':signup_post');
     $group->get ('core/signout', AuthController::class . ':signout_get') ->     setName('core.signout.web');
+
     $group->get ('core/profiles[/{uid}]', Profiles::class) ->                   setName('core.profiles.list.web');
     $group->get ('api', GluedApi::class) ->                                     setName('core.api');
     $group->post('api/core/v1/profiles', ProfilesApi::class . ':create') ->     setName('core.profiles.create.api01');
     $group->get ('api/core/v1/profiles', ProfilesApi::class . ':list') ->       setName('core.profiles.list.api01');
     $group->get ('api/core/v1/profiles/{uid:[0-9]+}', 'ApiProfiles:read') ->    setName('core.profiles.read.api01');
     $group->put ('api/core/v1/profiles/{uid:[0-9]+}', 'ApiProfiles:update') ->  setName('core.profiles.update.api01');
+
     $group->get ('core/accounts', Accounts::class . ':list') ->                 setName('core.accounts.list.web');
-    $group->get ('core/accounts/{uid}', Accounts::class . ':read') ->           setName('core.accounts.read.web');
+    $group->get ('core/accounts/{uid:[0-9]+}', Accounts::class . ':read') ->           setName('core.accounts.read.web');
+    $group->post('core/accounts/{uid:[0-9]+}/password', AuthController::class . ':change_password_post')-> setName('core.settings.password.web');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() )); TODO / ano?
+
     $group->get ('core/admin/phpinfo', function(Request $request, Response $response) { phpinfo(); }) -> setName('core.admin.phpinfo.web');
     $group->get ('core/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); }) -> setName('core.admin.phpconst.web');    
 

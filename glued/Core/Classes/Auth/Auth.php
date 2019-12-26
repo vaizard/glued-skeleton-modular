@@ -2,6 +2,7 @@
 namespace Glued\Core\Classes\Auth;
 use Respect\Validation\Validator as v;
 use UnexpectedValueException;
+use ErrorException;
 
 class Auth
 {
@@ -139,29 +140,28 @@ class Auth
     public function response() { 
         $user_id = $_SESSION['core_user_id'] ?? false;
         $auth_id = $_SESSION['core_auth_id'] ?? false;
-        // <--------------------------------------------------------------------------------------------
-        // pridel authid check
-        /*
-        if ((!(v::intVal()->positive()->between(0, 4294967295)->validate($user_id))) or (!(v::intVal()->positive()->between(0, 4294967295)->validate($user_id)))) {
-            throw new ErrorException('Internal Server Error (mangled session).', 500);
-        }*/
+        if (($user_id === false) or ($auth_id === false)) { return false; }
 
+        if ((!(v::intVal()->positive()->between(0, 4294967295)->validate($user_id))) or (!(v::intVal()->positive()->between(0, 4294967295)->validate($auth_id)))) {
+            throw new ErrorException('Internal Server Error (mangled session).', 500);
+        }
+
+        $columns = [ "u.c_uid AS u_uid",
+                     "u.c_attr AS u_attr",
+                     "u.c_email AS u_email",
+                     "u.c_name AS u_name",
+                     "u.c_lang AS u_lang",
+                     "a.c_uid AS a_uid",
+                     "a.c_type AS a_type",
+                     "a.c_attr AS a_attr" ];
         $this->db->join("t_core_authn a", "a.c_user_uid=u.c_uid", "LEFT");
         $this->db->where("u.c_uid", $user_id);
         $this->db->where("a.c_uid", $auth_id);
-        //$result = $this->db->getOne("t_core_users u", null);
-        $result = $this->db->getOne("t_core_users u", null);
-
-
-        // tady udelej join a nacti i limitace na auth
-        //$this->db->where("c_uid", $user_id);
-        //$result = $this->db->getOne("t_core_users");
+        $result = $this->db->getOne("t_core_users u", $columns );
 
         if(!$result) {
-            //throw new HttpNotFoundException($request, 'User not found');
-            //throw new ErrorException('Custom exception', 9);
-            //throw new UnexpectedValueException('User not found');
-            // session destroy
+            signout();
+            throw new ErrorException(__('Forbidden and signed out.'), 403);
         }
 
         return $result;

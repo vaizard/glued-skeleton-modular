@@ -1,21 +1,90 @@
 {% extends '/Core/Views/templates/default.twig' %}
 
 {% block content %}
-        <section class="section">
+
           <div class="section-header">
-            <h1>{{ __('User account for') }} {{ users.c_screenname }}</h1>
+            <h1>{{ __('Account settings / ') }} {{ users.c_name }}</h1>
           </div>
 
           <div class="section-body">
+          {% include '/Core/Views/templates/partials/flash.twig' %}
 
+
+          <div class="row"> 
+            <br />TODO: list auths, plausible deniability, edit all (relevant) atrributes, limit scope of sub-auths in accounts.read.twig
             <br />uid: {{ users.c_uid }}
             <br />attributes:{{ users.c_attr }}
             <br />email: {{ users.c_email }}
-            <br />screenname: {{ users.c_screenname }}
+            <br />screenname: {{ users.c_name }}
             <br />preferred language: {{ users.c_lang }}
             <br />created: {{ users.c_ts_created }}
             <br />modified: {{ users.c_ts_modified }}
+            <br /><br />
+            <br /><br />
+          </div>
+          <div class="row"><br></div>
+
+  <div class="row">
+
+  <div class="col-12 col-md-6 col-lg-3">
+  <div class="card card-primary">
+    <form action="{{ url_for( 'core.settings.password.web',  { 'uid': auth.u_uid } ) }}" method="post" autocomplete="off">
+      <div class="card-header"><h4>{{ __('Change password')}}</h4></div>
+        <div class="card-body pb-0">
+              <div class="form-group {{ validation_errors.password_old ? ' has-error' : ''}}">
+                  <label for="password_old">{{ __('Current password') }}</label>
+                  <input type="password" name="password_old" id="password_old" class="form-control{{ validation_errors.password_old ? ' is-invalid' : validation_reseed.password_old ? ' is-valid' : '' }}">
+                  {% if validation_errors.password_old %}
+                      <span class="invalid-feedback">{{ validation_errors.password_old | first }}</span>
+                  {% endif %}
+              </div>
+              <div class="form-group">
+                  <label for="password">{{ __('Password') }}</label>
+                  <input type="password" name="password" id="password" class="form-control{{ validation_errors.password ? ' is-invalid' : '' }}">
+                  {% if validation_errors.password %}
+                      <span class="invalid-feedback">{{ validation_errors.password | first }}</span>
+                  {% endif %}
+              </div>
+          </div>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
+          </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6 col-lg-3">
+  <div class="card card-primary">
+    <form action="{{ url_for( 'core.settings.password.web',  { 'uid': auth.u_uid } ) }}" method="post" autocomplete="off">
+      <div class="card-header"><h4>{{ __('Modify details')}}</h4></div>
+        <div class="card-body pb-0">
+              <div class="form-group {{ validation_errors.name ? ' has-error' : ''}}">
+                  <label for="name">{{ __('Screen name') }}</label>
+                  <input type="text" name="name" id="name" class="form-control{{ validation_errors.name ? ' is-invalid' : validation_reseed.name ? ' is-valid' : '' }}" value="{{ auth.u_name }}">
+                  {% if validation_errors.name %}
+                      <span class="invalid-feedback">{{ validation_errors.name | first }}</span>
+                  {% endif %}
+              </div>
+              <div class="form-group">
+                  <label for="email">{{ __('E-mail') }}</label>
+                  <input type="text" name="email" id="email" class="form-control{{ validation_errors.email ? ' is-invalid' : '' }}" value="{{ auth.u_email }}">
+                  {% if validation_errors.email %}
+                      <span class="invalid-feedback">{{ validation_errors.email | first }}</span>
+                  {% endif %}
+              </div>
+          </div>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+
+
 
           </div>
-        </section>
 {% endblock %}
