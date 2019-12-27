@@ -72,6 +72,13 @@
                       <span class="invalid-feedback">{{ validation_errors.email | first }}</span>
                   {% endif %}
               </div>
+              <div class="form-group">
+                  <label for="lang">{{ __('Preffered language') }}</label>
+                  <input type="select" name="lang" id="lang" class="form-control{{ validation_errors.lang ? ' is-invalid' : '' }}" value="{{ auth.u_lang }}">
+                  {% if validation_errors.lang %}
+                      <span class="invalid-feedback">{{ validation_errors.lang | first }}</span>
+                  {% endif %}
+              </div>
           </div>
           <div class="card-footer">
             <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>

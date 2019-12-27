@@ -19,7 +19,7 @@ $app->group('/', function (RouteCollectorProxy $group) {
 
     // TODO What's the problem here?
     $group->get ('core/signin', AuthController::class . ':signin_get')->setName('core.signin.web');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() ));
-    $group->post('core/signin', AuthController::class . ':signin_post');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() )); TODO / ano?
+    $group->post('core/signin', AuthController::class . ':signin_post');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() ));
 
     $group->get ('core/signup', AuthController::class . ':signup_get') ->        setName('core.signup.web');
     $group->post('core/signup', AuthController::class . ':signup_post');
