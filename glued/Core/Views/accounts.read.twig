@@ -10,24 +10,10 @@
           {% include '/Core/Views/templates/partials/flash.twig' %}
 
 
-          <div class="row"> 
-            <br />TODO: list auths, plausible deniability, edit all (relevant) atrributes, limit scope of sub-auths in accounts.read.twig
-            <br />uid: {{ users.c_uid }}
-            <br />attributes:{{ users.c_attr }}
-            <br />email: {{ users.c_email }}
-            <br />screenname: {{ users.c_name }}
-            <br />preferred language: {{ users.c_lang }}
-            <br />created: {{ users.c_ts_created }}
-            <br />modified: {{ users.c_ts_modified }}
-            <br /><br />
-            <br /><br />
-          </div>
-          <div class="row"><br></div>
-
   <div class="row">
 
   <div class="col-12 col-md-6 col-lg-3">
-  <div class="card card-primary">
+  <div class="card card-warning">
     <form action="{{ url_for( 'core.settings.password.web',  { 'uid': auth.u_uid } ) }}" method="post" autocomplete="off">
       <div class="card-header"><h4>{{ __('Change password')}}</h4></div>
         <div class="card-body pb-0">
@@ -54,7 +40,7 @@
   </div>
 
   <div class="col-12 col-md-6 col-lg-3">
-  <div class="card card-primary">
+  <div class="card card-secondary">
     <form action="{{ url_for( 'core.settings.password.web',  { 'uid': auth.u_uid } ) }}" method="post" autocomplete="off">
       <div class="card-header"><h4>{{ __('Modify details')}}</h4></div>
         <div class="card-body pb-0">
@@ -86,6 +72,56 @@
       </form>
     </div>
   </div>
+
+<div class="col-12 col-md-6 col-lg-3">
+  <div class="card card-danger">
+    <form action="{{ url_for( 'core.settings.password.web',  { 'uid': auth.u_uid } ) }}" method="post" autocomplete="off">
+      <div class="card-header"><h4>{{ __('Danger zone')}}</h4></div>
+
+        <div class="card-body pb-0">
+              <div class="form-group">
+                  <label for="password_danger">{{ __('Password') }}</label>
+                  <input type="password" name="password_danger" id="password_danger" class="form-control{{ validation_errors.password_danger ? ' is-invalid' : '' }}">
+                  {% if validation_errors.password_danger %}
+                      <span class="invalid-feedback">{{ validation_errors.password_danger | first }}</span>
+                  {% endif %}
+              </div>
+          </div>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-danger">{{ __('Delete account') }}</button>
+            <button type="submit" class="btn btn-warning">{{ __('GDPR download') }}</button>
+          </div>
+      </form>
+    </div>
+  </div>
+
+
+<div class="col-12 col-md-6 col-lg-3">
+  <div class="card card-primary">
+    
+      <div class="card-header"><h4>{{ __('Account stats')}}</h4></div>
+
+        <div class="card-body pb-0">
+              <div class="form-group">
+
+                  <label>{{ __('User ID') }}</label> {{ users.c_uid }}<br>
+                  <label>{{ __('Created') }}</label> {{ users.c_ts_created }}<br>
+                  <label>{{ __('Modified') }}</label> {{ users.c_ts_modified }}<br>
+
+              </div>
+          </div>
+
+
+    </div>
+  </div>
+
+
+          <div class="row"> 
+            <br />TODO: list auths, plausible deniability, edit all (relevant) atrributes, limit scope of sub-auths in accounts.read.twig
+          </div>
+
+</div>
+
 </div>
 
 
