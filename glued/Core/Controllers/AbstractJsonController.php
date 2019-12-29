@@ -8,7 +8,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 
-class AbstractJsonController extends AbstractController
+abstract class AbstractJsonController extends AbstractController
 {
     /**
      * @param Request  $request
@@ -18,27 +18,38 @@ class AbstractJsonController extends AbstractController
      * @return Response
      */
 
-    public $API_NAME = '';
-    public $API_VERSION = '';
+    public function json_stub_response(int $code, $message = null, $data = null, $links = null, $pagination = null, $embeds = null) {
 
-    public function api_meta($res_code) {
-        $res_name[200] = 'success';
-        $res_name[500] = 'internal server error';
-        if (!array_key_exists($res_code, $res_name)) { $res_name[$res_code] = "unknown"; }
+        $status[200] = 'success';
+        $status[201] = 'created';
+        $status[400] = 'bad request';
+        $status[401] = 'unauthorized';
+        $status[403] = 'forbidden';
+        $status[404] = 'not found';
+        $status[500] = 'internal server error';
+        if (!array_key_exists($code, $status)) { $status[$code] = "unknown"; }
+
+        if ($this->API_NAME == '') { throw new \Exception('Api name not defined'); }
+        if ($this->API_VERSION == '') { throw new \Exception('Api version not defined'); }
 
         $payload = array(
-             'api' => $this->API_NAME, //self::API_NAME,
-             'version' => $this->API_VERSION, //self::API_VERSION,
-             'response' => array (
-                 'timestamp' => time(),
-                 'status' => $res_code,
-                 'message' => $res_name[$res_code],
-                 'id' => uniqid(),),
-             'pagination' => [],
-             'embeds' => [],
+            'api' => $this->API_NAME,        //self::API_NAME,
+            'version' => $this->API_VERSION, //self::API_VERSION,
+            'code' => $code,
+            'status' => $status[$code],
+            'response_ts' => time(),
+            'response_id' => uniqid()
         );
+        
+        if (!empty($message)) { $payload['message'] = $message; }
+        if (!empty($pagination)) { $payload['pagination'] = $pagination; }
+        if (!empty($embeds)) { $payload['embeds'] = $embeds; }
+        if (!empty($links)) { $payload['links'] = $links; }
+        if ( ($code === 200) or ($code === 201) ) { $payload['data'] = $data; }
+
         return $payload;
     }
+
 
 
 

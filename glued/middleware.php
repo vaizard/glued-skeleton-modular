@@ -16,19 +16,35 @@ use ParagonIE\CSPBuilder\CSPBuilder;
 use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Middleware\ErrorMiddleware;
+use Slim\Middleware\MethodOverrideMiddleware;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 use Slim\addRoutingMiddleware;
 use Tuupola\Middleware\CorsMiddleware;
 use Zeuxisoo\Whoops\Slim\WhoopsMiddleware;
 
-
+/**
+ * WARNING
+ * 
+ * Middleware in Slim 4 are executed in the reverse order as they appear in middleware.php.
+ * Do not change the order of the middleware below without a good thought. The first middleware
+ * to kick must always be the error middleware, so it has to be at the end of this file.
+ * 
+ */
 
 $app->add(TwigMiddleware::createFromContainer($app));
 $app->add(TranslatorMiddleware::class);
 $app->add(LocaleSessionMiddleware::class);
 $app->add(Timer::class); // adds time needed to generate a response to headers
+$app->addBodyParsingMiddleware();
+
+
+
+ // BodyParsingMiddleware detects content-type set to a JSON or XML media type
+ // and automatically decodes getBody() into a php array and places the decoded body
+ // into the Request’s parsed body property.
 $app->addRoutingMiddleware();
+
 
 
 /**
@@ -42,7 +58,6 @@ $app->addRoutingMiddleware();
 $trailingSlash = new TrailingSlash(false);
 $trailingSlash->redirect(true);
 $app->add($trailingSlash);
-
 
 $app->add(\Glued\Core\Middleware\ValidationFormsMiddleware::class);
 
@@ -59,20 +74,28 @@ $nonce['script_src'] = "dummy_nonce";
 $app->add(new Middlewares\Csp($csp));
 $app->add(new \Glued\Core\Middleware\TwigCspMiddleware($nonce, $container));
 
-$app->add(new Tuupola\Middleware\CorsMiddleware);
-// TODO add sane defaults to CorsMiddleware
-
-$headersMiddleware = new HeadersMiddleware($settings);
-$app->add($headersMiddleware);
 
 
+$app->add(new Tuupola\Middleware\CorsMiddleware); // TODO add sane defaults to CorsMiddleware
+$app->add(new HeadersMiddleware($settings));
 $app->add(new \Glued\Core\Middleware\AuthMiddleware($container));
+$app->add(new SessionMiddleware($settings));
 
-$sessionMiddleware = new SessionMiddleware($settings);
-$app->add($sessionMiddleware);
+/**
+ * *******************************
+ * METHOD OVERRIDE MIDDLEWARE
+ * *******************************
+ *
+ * Per the HTML standard, desktop browsers will only submit GET and POST requests, PUT
+ * and DELETE requests will be handled as GET. This is middleware allows desktop browsers
+ * to submit pseudo PUT and DELETE requests by relying on pre-determined request 
+ * parameters (either a `X-Http-Method-Override` header, or a `_METHOD` form value) 
+ * allowing routing unification. 
+ * 
+ * This middleware must be added last must be added before `$app->addRoutingMiddleware();`
+ */
 
-
-
+$app->add(new MethodOverrideMiddleware); // Add this before `$app->addRoutingMiddleware();`
 
 /**
  * *******************************
@@ -112,7 +135,6 @@ if ($settings['debugEngine'] == "Whoops") {
         $errorHandler->registerErrorRenderer('text/html', HtmlErrorRenderer::class);
         // TODO beautify html renderer
         // TODO review json renderer & modify if needed
-        // TODO 
         // HELP https://akrabat.com/custom-error-rendering-in-slim-4/
     }
 

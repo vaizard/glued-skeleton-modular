@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Glued\Core\Controllers;
 
+use Glued\Core\Classes\JsonResponse\JsonResponseBuilder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -23,7 +24,8 @@ class GluedApi extends AbstractJsonController
 
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-        $payload = $this->api_meta(200);
+        $builder = new JsonResponseBuilder($this->API_NAME, $this->API_VERSION);
+        $payload = $builder->withCode(200)->build();
         $payload['data']['endpoints']['core/profiles'] = $request->getUri()->getScheme() . '://' . $request->getUri()->getHost() . $this->routerParser->urlFor('core.profiles.list.api01');
         return $response->withJson($payload);
     }

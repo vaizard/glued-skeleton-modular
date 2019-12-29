@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace Glued\Core\Controllers;
 use Glued\Core\Classes\Auth\Auth;
+use Glued\Core\Classes\JsonResponse\JsonResponseBuilder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
@@ -56,9 +57,19 @@ class AuthController extends AbstractTwigController
             'name' => v::notEmpty()->alnum(),
             'password' => v::noWhitespace()->notEmpty(),
         ]);
+
         if ($validation->failed()) {
-            return $response->withRedirect($this->routerParser->urlFor('core.signup.web'));
+            if ($request->isXhr() === true) {
+                $builder = new JsonResponseBuilder('authentication', 1);
+                $payload = $builder->withValidationError($validation->messages())->build();
+                return $response->withJson($payload, 400);
+                // TODO With the ajax form submit via the twig view (see signup_get()) the browser's console log
+                // sees a 302 redirect, but the page doesn't reload (even if it should per the jquery success callback)
+            } else {
+                return $response->withRedirect($this->routerParser->urlFor('core.signup.web'));
+            }
         }
+
         $this->auth->user_create($request->getParam('email'), $request->getParam('name'), $request->getParam('password'));
         $this->flash->addMessage('info', 'You have been signed up!');
         $this->auth->attempt($request->getParam('email'), $request->getParam('password')); // auto sign-in after account creation

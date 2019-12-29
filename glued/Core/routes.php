@@ -37,7 +37,92 @@ $app->group('/', function (RouteCollectorProxy $group) {
     $group->post('core/accounts/{uid:[0-9]+}/password', AuthController::class . ':change_password_post')-> setName('core.settings.password.web');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() )); TODO / ano?
 
     $group->get ('core/admin/phpinfo', function(Request $request, Response $response) { phpinfo(); }) -> setName('core.admin.phpinfo.web');
-    $group->get ('core/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); }) -> setName('core.admin.phpconst.web');    
+    $group->get ('core/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); }) -> setName('core.admin.phpconst.web');
+    $group->get ('core/admin/playground', function(Request $request, Response $response) { 
+
+        $key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES); // 256 bit
+        echo base64_encode($key).' '.time();
+
+        echo '
+            <div id="validation_errors"></div>
+
+            <div class="card card-primary col-4">
+              <form action="/core/admin/playground" method="post" autocomplete="off" id="formpost">
+                <input type="email" name="email" id="email" placeholder="you@domain.com" class="form-control" value="a@a.a">
+                <input type="password" name="password" id="password" class="form-control" value="pwpw">
+                <button type="submit" class="btn btn-primary">Form submit</button>
+            </form>
+            <form action="/core/admin/playground" method="post" autocomplete="off" id="formajax">
+                <input type="email" name="email" id="email" placeholder="you@domain.com" class="form-control" value="a@a.a">
+                <input type="password" name="password" id="password" class="form-control" value="pwpw">
+                <button type="submit" class="btn btn-primary">Ajax submit</button>
+            </form>
+            <form action="/core/admin/playground" method="post" autocomplete="off" id="formajaxput">
+                <input type="email" name="email" id="email" placeholder="you@domain.com" class="form-control" value="a@a.a">
+                <input type="password" name="password" id="password" class="form-control" value="pwpw">
+                <button type="submit" class="btn btn-primary">Ajax submit PUT</button>
+            </form>            
+            <script src="/assets/node_modules/jquery/dist/jquery.min.js" nonce="dummy_nonce"></script>
+            <script src="/assets/node_modules/@claviska/jquery-ajax-submit/jquery.ajaxSubmit.min.js" nonce="dummy_nonce"></script>
+            <script nonce="dummy_nonce">
+                $("#formajax").ajaxSubmit({
+                  success: function(res) {
+                    console.log(res);
+                    location.reload();
+                  }
+                });
+            </script>            
+            <script nonce="dummy_nonce">
+                $("#formajaxput").ajaxSubmit({
+                    headers: {
+                        "X-Http-Method-Override": "PUT"
+                    },                    
+                    success: function(res) {
+                        console.log(res);
+                    },
+                    error: function(res) {
+                        $("#validation-errors").html("");
+                        $("#validation_errors").empty();
+                        $.each(res.message.validation_errors, function(key,value) {
+                            $("#validation_errors").append("<div class=\'alert alert-danger\'>"+key+\' \'+value[0]+"</div");
+                        }); 
+                    }
+                });
+            </script>
+            ';
+
+        return $response;
+
+    }) -> setName('core.admin.playground.web');
+    $group->post ('core/admin/playground', function(Request $request, Response $response) { 
+        $e = $request->getParam('email');
+        $p = $request->getParam('password');
+        $isXHR = $request->isXhr();
+        $gpb = $request->getParsedBody();
+        $upb = $request->getBody();
+        $x = array( 'e' => $e, 'p' => $p, 'xhr' => $isXHR, 'gpb' => $gpb, 'upb' => htmlentities($upb) );
+        if ($isXHR === true) {
+            return $response->withJson($x);
+        } else {
+            //echo $upb;
+            return $response->withJson($x);
+            //return $response->withRedirect('http://10.146.149.29/core/admin/playground');
+        }    
+    });
+    $group->put ('core/admin/playground', function(Request $request, Response $response) { 
+        //validation_errors
+        //$x = array( 'put' => 'success' );
+        $x = [
+                'success' => 'false', 
+                'message' => [ 
+                    'validation_errors' => [ 
+                        'password' => [ 'must be longer', 'must be stronger' ],
+                        'email' => [ 'must be nicer' ],
+                    ]
+                ]
+            ];
+        return $response->withJson($x)->withStatus(400);
+    });
 
     /* OLD
     $group->get ('core/signout', HomeController::class)->setName('web.core.signout');

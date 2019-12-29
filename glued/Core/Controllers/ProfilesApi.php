@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Glued\Core\Controllers;
 
+use Glued\Core\Classes\JsonResponse\JsonResponseBuilder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Glued\Core\Classes\Users;
 
 class ProfilesApi extends AbstractJsonController
 {
@@ -25,21 +25,23 @@ class ProfilesApi extends AbstractJsonController
     {
         // DO RBAC HERE
 
-        $collection = $this->db->get('t_core_profiles');
 
-        if ($this->db->getLastErrno() === 0) { $res_code = 200; } else {  $res_code = 500; }
-        $arr = $this->api_meta($res_code);
+        $collection = $this->db->get('t_core_profiles');
 
         if (($this->db->getLastErrno() === 0) and ($this->db->count > 0)) {
             foreach ($collection as $object) { 
-                $arr['data'][] = json_decode($object['c_json'], true);
+                $item = json_decode($object['c_json'], true);
+                $item['id'] = $object['c_uid'];
+                $data[] = $item;
             }
+        } else { $data = []; }
+    
+        $builder = new JsonResponseBuilder($this->API_NAME, $this->API_VERSION);
+        if ($this->db->getLastErrno() === 0) { 
+            $arr = $builder->withData($data)->build();
+        } else {  
+            $arr = $builder->withCode(500)->build(); 
         }
-
-        // DEBUG CODE
-        // $payload = json_encode($arr);
-        // $response->getBody()->write($payload);
-        // return $response->withHeader('Content-type', 'application/json;charset=utf-8');
 
         return $response->withJson($arr);
     }

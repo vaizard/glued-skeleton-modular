@@ -57,4 +57,12 @@ class Validator
     {
         return !empty($this->errors);
     }
+
+    /** 
+     * returns the validation error messages array
+     */    
+    public function messages()
+    {
+        return $this->errors;
+    }
 }

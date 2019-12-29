@@ -4,7 +4,7 @@
 <table>
 <tr><td>SESSION</td><td></td></tr>
 {% for key,value in session %}
-<tr><td>{{ key }}</td><td>{{ value }}</td></tr>
+<tr><td>{{ key }}</td><td>{% if value is iterable %} [array]{% else %} {{ value }}{% endif %}</td></tr>
 {% endfor %}
 <tr><td>AUTH</td><td></td></tr>
 {% for key,value in auth %}

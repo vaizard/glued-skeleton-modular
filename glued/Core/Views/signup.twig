@@ -42,6 +42,22 @@
         </section>
 {% endblock %}
 {% block additionaljs %}
+  <script src="/assets/node_modules/@claviska/jquery-ajax-submit/jquery.ajaxSubmit.min.js" nonce="dummy_nonce"></script>
+
   <script nonce="{{ csp_nonce.script_src }}">
+      $("form").ajaxSubmit({
+          success: function(res) {
+              console.log(res);
+              alert('You have been signed up');
+              location.reload(true);
+          },
+          error: function(res) {
+              $("#validation_errors").html("");
+              $("#validation_errors").empty();
+              $.each(res.message.validation_errors, function(key,value) {
+                  $("#validation_errors").append("<div class='alert alert-danger'>"+key+' '+value[0]+"</div>");
+              }); 
+          }
+      });
   </script>
 {% endblock %}
