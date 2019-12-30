@@ -12,6 +12,7 @@
     "immutable": "^3",
     "jquery": "latest",
     "jquery-jeditable": "latest",
+    "jquery-mask-plugin": "latest",
     "loose-envify": "^1.4.0",
     "moment": "latest",
     "popper.js": "latest",

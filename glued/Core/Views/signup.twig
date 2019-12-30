@@ -47,12 +47,14 @@
           success: function(res) {
               console.log(res);
               alert('You have been signed up');
-              
+              location.reload(true);
           },
           error: function(res) {
               $.each(res.message.validation_error, function(key,value) {
-                  $("#"+key+"group").append("<span class='invalid-feedback'>"+value[0]+"</div>");
-                  $("#"+key+"input").removeClass().addClass("form-control is-invalid");
+                  //$("div#signup_form input.form-control").removeClass().addClass("form-control is-valid");
+                  $(".invalid-feedback").remove();
+                  $("#"+key+"_group").append("<span class='invalid-feedback'>"+value[0]+"</div>");
+                  $("#"+key+"_input").removeClass().addClass("form-control is-invalid");
                   console.log(key + ' ' + value[0]);
               }); 
           }

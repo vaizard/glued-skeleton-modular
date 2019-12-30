@@ -1,0 +1,106 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+          <div class="section-header">
+            <h1>{{ __('Hello, dear') }} {{ name | default(__('Anonymous')) }}</h1>
+          </div>
+
+          <div class="section-body">
+
+
+
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h4>Events</h4>
+                  </div>
+                  <div class="card-body p-0">
+                    <div class="table-responsive">
+                      <table class="table table-striped">
+                        <tr>
+                          <th>Date</th>
+                          <th>Added</th>
+                          <th>Summary</th>
+                          <th>Starts</th>
+                          <th>Ends</th>
+                          <th>Description</th>
+                          <th>Last modified</th>
+                        </tr>
+                        <tr>
+                          <div class="form-group">
+                          <td>
+                            <div class="form-group">
+                              <label>Date</label>
+                              <input type="text" class="form-control" id="worklog_date" required="" placeholder="____/__/__">
+                            </div>
+                          </td>
+                          <td>
+                            <div class="form-group">
+                              <label>Time</label>
+                              <input type="text" class="form-control" id="worklog_time" required="" placeholder="____/__/__">
+                            </div>
+                          </td>
+                          <td>
+                            <div class="form-group">
+                              <label>Summary</label>
+                              <input type="text" class="form-control" id="worklog_summary" required="">
+                            </div>
+                          </td>                          
+                          <td>
+                            <div class="form-group">
+                              <label>Team</label>
+
+                              <select class="form-control" multiple=""  id="worklog_team">
+                                <option value="1">A Option</option>
+                                <option value="2">B Option</option>
+                                <option value="3">C Option</option>
+                              </select>
+
+                            </div>
+                          </td>
+                          <td>{{ event.dtend }}</td>
+                          <td>{{ event.description }}</td>
+                          <td>{{ event.last_modifed }}</td>
+                        </div>
+                        </tr>
+                        {% for date, events in out %}
+                        {% for event in events %}
+                        
+                        <tr>
+                          <td>{{ date }}</td>
+                          <td><span title="{{ event.created }}">{{ event.hrcreated }}</span></td>
+                          <td>{{ event.summary }}</td>
+                          <td>{{ event.dtstart }}</td>
+                          <td>{{ event.dtend }}</td>
+                          <td>{{ event.description }}</td>
+                          <td>{{ event.last_modifed }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+          </div>
+{% endblock %}
+
+{% block additionaljs %}
+  <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
+  <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/select2/dist/js/select2.full.min.js"></script>
+
+  <script  nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+  $(function() {
+    $('#worklog_date').mask('0000/00/00');
+    $('#worklog_time').mask('00:00');
+    $('#worklog_team').select2();
+  });
+   
+  </script>
+{% endblock %}
