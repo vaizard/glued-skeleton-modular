@@ -1,0 +1,68 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+          <div class="section-header">
+            <h1>{{ __('Hello, dear') }} {{ name | default(__('Anonymous')) }}</h1>
+          </div>
+
+          <div class="section-body">
+
+
+
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h4>Events</h4>
+                  </div>
+                  <div class="card-body p-0">
+                    <div class="table-responsive">
+                      <table class="table table-striped">
+                        <tr>
+                          <th>Date</th>
+                          <th>Added</th>
+                          <th>Summary</th>
+                          <th>Starts</th>
+                          <th>Ends</th>
+                          <th>Description</th>
+                          <th>Last modified</th>
+                        </tr>
+                        {% for date, events in out %}
+                        {% for event in events %}
+                        
+                        <tr>
+                          <td>{{ date }}</td>
+                          <td><span title="{{ event.created }}">{{ event.hrcreated }}</span></td>
+                          <td>{{ event.summary }}</td>
+                          <td>{{ event.dtstart }}</td>
+                          <td>{{ event.dtend }}</td>
+                          <td>{{ event.description }}</td>
+                          <td>{{ event.last_modifed }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          </div>
+{% endblock %}

@@ -53,7 +53,8 @@
     "php-imap/php-imap": "^3.0",
     "tuupola/cors-middleware": "^1.1",
     "middlewares/csp": "^3.0",
-    "zeuxisoo/slim-whoops": "^0.7.2"
+    "zeuxisoo/slim-whoops": "^0.7.2",
+    "sabre/vobject": "^4.0"
   },
   "scripts": {
     "start": "php -S localhost:8080 -t public",

@@ -11,6 +11,7 @@
     "draft-js": "^0.10",
     "immutable": "^3",
     "jquery": "latest",
+    "jquery-jeditable": "latest",
     "loose-envify": "^1.4.0",
     "moment": "latest",
     "popper.js": "latest",
