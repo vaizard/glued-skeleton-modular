@@ -34,7 +34,7 @@ $app->group('/', function (RouteCollectorProxy $group) {
 
     $group->get ('core/accounts', Accounts::class . ':list') ->                 setName('core.accounts.list.web');
     $group->get ('core/accounts/{uid:[0-9]+}', Accounts::class . ':read') ->           setName('core.accounts.read.web');
-    $group->post('core/accounts/{uid:[0-9]+}/password', AuthController::class . ':change_password_post')-> setName('core.settings.password.web');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() )); TODO / ano?
+    $group->patch('core/accounts/{uid:[0-9]+}/password', AuthController::class . ':change_password')-> setName('core.settings.password.web');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() )); TODO / ano?
 
     $group->get ('core/admin/phpinfo', function(Request $request, Response $response) { phpinfo(); }) -> setName('core.admin.phpinfo.web');
     $group->get ('core/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); }) -> setName('core.admin.phpconst.web');
@@ -44,6 +44,7 @@ $app->group('/', function (RouteCollectorProxy $group) {
         echo base64_encode($key).' '.time();
 
         echo '
+            <link rel="stylesheet" type="text/css" href="/assets/cache/styles.db34ce26cb19c04c315933041af50e77c292abb9.css" media="all" />
             <div id="validation_errors"></div>
 
             <div class="card card-primary col-4">
@@ -57,13 +58,35 @@ $app->group('/', function (RouteCollectorProxy $group) {
                 <input type="password" name="password" id="password" class="form-control" value="pwpw">
                 <button type="submit" class="btn btn-primary">Ajax submit</button>
             </form>
-            <form action="/core/admin/playground" method="post" autocomplete="off" id="formajaxput">
-                <input type="email" name="email" id="email" placeholder="you@domain.com" class="form-control" value="a@a.a">
-                <input type="password" name="password" id="password" class="form-control" value="pwpw">
-                <button type="submit" class="btn btn-primary">Ajax submit PUT</button>
-            </form>            
+            <div id="twigAplaceholder"></div>
+            {% raw %}
+            <script type="text/twig" id="twigA">
+                <form action="/core/admin/playground" method="post" autocomplete="off" id="formajaxput">
+                    <input type="email" name="email" id="email_input" placeholder="you@domain.com" class="form-control{{ validation_errors.email ? \' is-invalid\' : validation_reseed.email ? \' is-valid\' : \'\' }}" value="{{ validation_reseed.email }}">
+                    {% if validation_errors.email %}
+                        <span class="invalid-feedback">{{ validation_errors.email | first }}</span>
+                    {% endif %}
+                    <input type="password" name="password" id="password" class="form-control" value="pwpw">
+                    <button type="submit" class="btn btn-primary">Ajax submit PUT</button>                    
+                </form>            
+            </script>
+            {% endraw %}
+            <br>twig.js tests<br><br>
+            <script type="text/twig" id="twigB">
+              {% set animal = "fox" %}
+              a quick brown {{ animal }}
+              {{ validation_errors.email }}
+              {{ validation_errors.name }}
+              {{ validation_errors.password }}
+              {{ list.1 }}
+
+              <hr>
+            </script>
+            <div class="display-templates"></div>
             <script src="/assets/node_modules/jquery/dist/jquery.min.js" nonce="dummy_nonce"></script>
+            <script src="/assets/node_modules/twig/twig.min.js" nonce="dummy_nonce"></script>
             <script src="/assets/node_modules/@claviska/jquery-ajax-submit/jquery.ajaxSubmit.min.js" nonce="dummy_nonce"></script>
+
             <script nonce="dummy_nonce">
                 $("#formajax").ajaxSubmit({
                   success: function(res) {
@@ -71,7 +94,29 @@ $app->group('/', function (RouteCollectorProxy $group) {
                     location.reload();
                   }
                 });
+
+                $("script[type=\'text/twig\']").each(function() {
+                  var id = $(this).attr("id"),
+                    data = $(this).text();
+
+                  Twig.twig({
+                    id: id,
+                    data: data,
+                    allowInlineIncludes: true
+                  });
+                });
+
+                var listjs = ["one", "two", "three"];
+
+                $(".display-templates").append(
+                  Twig.twig({ ref: \'twigB\' }).render({ list: listjs })
+                );
+
+                $("#twigAplaceholder").append(
+                  Twig.twig({ ref: \'twigA\' }).render({ list: listjs })
+                );
             </script>            
+
             <script nonce="dummy_nonce">
                 $("#formajaxput").ajaxSubmit({
                     headers: {
@@ -86,6 +131,12 @@ $app->group('/', function (RouteCollectorProxy $group) {
                         $.each(res.message.validation_errors, function(key,value) {
                             $("#validation_errors").append("<div class=\'alert alert-danger\'>"+key+\' \'+value[0]+"</div");
                         }); 
+                        $(".display-templates").append(
+                            Twig.twig({ ref: \'twigB\' }).render({ validation_errors: res.message.validation_errors })
+                        );
+                        $(".display-templates").replaceWith(
+                            Twig.twig({ ref: \'twigA\' }).render({ validation_errors: res.message.validation_errors })
+                        );
                     }
                 });
             </script>

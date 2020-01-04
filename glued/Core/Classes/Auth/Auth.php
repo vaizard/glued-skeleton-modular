@@ -185,5 +185,15 @@ class Auth
         // to identify IPs that should get rate-limited
     }
 
+    public function update_password($user_id, $auth_id, $password) {
+        // TODO add password disabling part (we want to keep the old hash to honeypot bots)
+        $this->db->where('c_type', 0);
+        $this->db->where('c_uid', (int)$auth_id);
+        $this->db->where('c_user_id', (int)$user_id);
+        $update = $this->db->update( 't_core_authn', [
+            'c_hash' => password_hash($password, $this->settings['php']['password_hash_algo'], $this->settings['php']['password_hash_opts']) 
+        ]);
+        if(!$update) { return false; } else { return true; }
+    }
 
 }

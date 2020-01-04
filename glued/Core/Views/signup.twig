@@ -6,57 +6,100 @@
           </div>
           <div class="section-body">
             {% include '/Core/Views/templates/partials/flash.twig' %}
-            <div class="card card-primary col-4" id="signup_form">
-              <form action="{{ url_for('core.signup.web') }}" method="post" autocomplete="off">
+            <div class="card card-primary col-4">
+              <form action="{{ url_for('core.signup.web') }}" method="post" autocomplete="off" id="signup_form">
                 <div class="card-header">{{ __('Please provide your details below')}}</div>
                   <div class="card-body pb-0">
-                        <div class="form-group" id="email_group">
-                            <label for="email">{{ __('Email') }}</label>
+                    <div class="form-group">
+                      <label for="email">{{ __('Email') }}</label>
+                      <div id="email_placeholder"></div>
+
+                      {% verbatim %}
+                      <script type="text/twig" id="email_twig">
                             <input type="email" name="email" id="email_input" placeholder="you@domain.com" class="form-control{{ validation_errors.email ? ' is-invalid' : validation_reseed.email ? ' is-valid' : '' }}" value="{{ validation_reseed.email }}">
                             {% if validation_errors.email %}
                                 <span class="invalid-feedback">{{ validation_errors.email | first }}</span>
                             {% endif %}
-                        </div>
-                        <div class="form-group" id="name_group">
-                            <label for="name">{{ __('Name') }}</label>
+                      </script>
+                      {% endverbatim %}
+
+                    </div>
+                    <div class="form-group" id="name_group">
+                      <label for="name">{{ __('Name') }}</label>
+                      <div id="name_placeholder"></div>
+
+                      {% verbatim %}
+                      <script type="text/twig" id="name_twig">
                             <input type="text" name="name" id="name_input" class="form-control{{ validation_errors.name ? ' is-invalid'  : validation_reseed.name ? ' is-valid' : '' }}" value="{{ validation_reseed.name }}">
                             {% if validation_errors.name %}
                                 <span class="invalid-feedback">{{ validation_errors.name | first }}</span>
                             {% endif %}
-                        </div>
-                        <div class="form-group" id="password_group">
-                            <label for="password">{{ __('Password') }}</label>
+                      </script>
+                      {% endverbatim %}
+      
+                    </div>
+                    <div class="form-group" id="password_group">
+                      <label for="password">{{ __('Password') }}</label>
+                      <div id="password_placeholder"></div>
+
+                      {% verbatim %}
+                      <script type="text/twig" id="password_twig">
                             <input type="password" name="password" id="password_input" class="form-control{{ validation_errors.password ? ' is-invalid' : '' }}">
                             {% if validation_errors.password %}
                                 <span class="invalid-feedback">{{ validation_errors.password | first }}</span>
                             {% endif %}
-                        </div>
+                      </script>
+                      {% endverbatim %}
+
                     </div>
-                    <div class="card-footer">
-                      <button type="submit" class="btn btn-primary">{{ __('Sign up') }}</button>
-                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">{{ __('Sign up') }}</button>
+                  </div>
                 </form>
               </div>
             </div>
 {% endblock %}
 {% block additionaljs %}
+  <script src="/assets/node_modules/twig/twig.min.js" nonce="{{ csp_nonce.script_src }}"></script>
   <script src="/assets/node_modules/@claviska/jquery-ajax-submit/jquery.ajaxSubmit.min.js" nonce="{{ csp_nonce.script_src }}"></script>
-
+  
   <script nonce="{{ csp_nonce.script_src }}">
-      $("form").ajaxSubmit({
+
+      $("script[type='text/twig']").each(function() {
+          var id = $(this).attr("id"),
+          data = $(this).text();
+          Twig.twig({ id: id, data: data, allowInlineIncludes: true });
+      });
+
+      $("#email_placeholder").append(
+          Twig.twig({ ref: "email_twig" }).render({ })
+      );
+
+      $("#name_placeholder").append(
+          Twig.twig({ ref: "name_twig" }).render({ })
+      );
+
+      $("#password_placeholder").append(
+          Twig.twig({ ref: "password_twig" }).render({ })
+      );
+
+      $("#signup_form").ajaxSubmit({
           success: function(res) {
               console.log(res);
-              alert('You have been signed up');
+              //alert('You have been signed up');
               location.reload(true);
           },
           error: function(res) {
-              $.each(res.message.validation_error, function(key,value) {
-                  //$("div#signup_form input.form-control").removeClass().addClass("form-control is-valid");
-                  $(".invalid-feedback").remove();
-                  $("#"+key+"_group").append("<span class='invalid-feedback'>"+value[0]+"</div>");
-                  $("#"+key+"_input").removeClass().addClass("form-control is-invalid");
-                  console.log(key + ' ' + value[0]);
-              }); 
+              $("#email_placeholder").replaceWith(
+                  Twig.twig({ ref: "email_twig" }).render({ validation_errors: res.messages.validation_error, validation_reseed: res.messages.validation_reseed })
+              );
+              $("#name_placeholder").replaceWith(
+                  Twig.twig({ ref: "name_twig" }).render({ validation_errors: res.messages.validation_error, validation_reseed: res.messages.validation_reseed })
+              );
+              $("#password_placeholder").replaceWith(
+                  Twig.twig({ ref: "password_twig" }).render({ validation_errors: res.messages.validation_error, validation_reseed: res.messages.validation_reseed })
+              );
           }
       });
   </script>

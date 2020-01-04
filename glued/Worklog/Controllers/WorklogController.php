@@ -24,7 +24,7 @@ class WorklogController extends AbstractTwigController
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
         $collection = $this->db->getOne('t_calendar_uris');
-        $ical = json_decode($collection['c_json'], true)['ical'];
+        $ical = json_decode((string)$collection['c_json'], true)['ical'];
    
         return $this->render($response, 'Worklog/Views/i.twig', [
             'pageTitle' => 'Worklog'

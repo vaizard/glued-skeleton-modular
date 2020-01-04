@@ -20,8 +20,8 @@
                     <div class="table-responsive">
                       <table class="table table-striped">
                         <tr>
-                          <th>Date</th>
-                          <th>Added</th>
+                          <th class="col-sm-2">Date</th>
+                          <th class="col-sm-1">Added</th>
                           <th>Summary</th>
                           <th>Starts</th>
                           <th>Ends</th>
@@ -31,15 +31,15 @@
                         <tr>
                           <div class="form-group">
                           <td>
-                            <div class="form-group">
+                            <div class="form-group col-xs-1">
                               <label>Date</label>
-                              <input type="text" class="form-control" id="worklog_date" required="" placeholder="____/__/__">
+                              <input type="text" class="form-control" id="worklog_date" required="" placeholder="____/__/__" value="2020/01/01">
                             </div>
                           </td>
                           <td>
                             <div class="form-group">
                               <label>Time</label>
-                              <input type="text" class="form-control" id="worklog_time" required="" placeholder="____/__/__">
+                              <input type="text" class="form-control" id="worklog_time" required="" placeholder="__:__">
                             </div>
                           </td>
                           <td>
@@ -50,14 +50,12 @@
                           </td>                          
                           <td>
                             <div class="form-group">
-                              <label>Team</label>
-
-                              <select class="form-control" multiple=""  id="worklog_team">
+                              <label>Team</label><br />
+                              <select class="form-control" multiple="" id="worklog_team" required="">
                                 <option value="1">A Option</option>
                                 <option value="2">B Option</option>
                                 <option value="3">C Option</option>
                               </select>
-
                             </div>
                           </td>
                           <td>{{ event.dtend }}</td>
@@ -94,7 +92,6 @@
 {% block additionaljs %}
   <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
   <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/select2/dist/js/select2.full.min.js"></script>
-
   <script  nonce="{{ csp_nonce.script_src }}" type="text/javascript">
   $(function() {
     $('#worklog_date').mask('0000/00/00');

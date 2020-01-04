@@ -31,11 +31,11 @@ class JsonResponseBuilder {
      * 
      * In case that $value is an array, the content of $value is appended
      * (merged with) the preexisting $property key. This is usefull esp. when 
-     * constructing the $payload['message'], since it can contain several 
+     * constructing the $payload['messages'], since it can contain several 
      * subelements at the same time i.e.:
      * 
-     * - $payload['message']['validation_errors']
-     * - $payload['message']['flash']
+     * - $payload['messages']['validation_errors']
+     * - $payload['messages']['flash']
      * etc.
      * 
      * @param string $property [description]
@@ -76,13 +76,27 @@ class JsonResponseBuilder {
 
     public function withValidationError(array $arr) {
         $this->withCode(400);
-        return $this->setProperty('message', [
+        return $this->setProperty('messages', [
             'validation_error' => $arr
         ]);
     }
 
+    public function withValidationReseed(array $arr) {
+        return $this->setProperty('messages', [
+            'validation_reseed' => $arr
+        ]);
+    }
+
+    /**
+     * Sends a flash message. 
+     * @param  array  $arr 
+     * 'success' => , 
+     * 'dagner' =>
+     * 'warning' =>
+     * 'info' =>
+     */
     public function withFlashMessage(array $arr) {
-        return $this->setProperty('message', [
+        return $this->setProperty('messages', [
             'flash' => $arr
         ]);
     }
@@ -163,7 +177,7 @@ class JsonResponseBuilder {
         $e = [ 'none' ];
 
         $builder = new JsonResponseBuilder($this->API_NAME, $this->API_VERSION);
-        $arr = $builder->withFlashMessage(['notice' => $msg ])->withValidationError($ve)->build();
+        $arr = $builder->withFlashMessage(['info' => $msg ])->withValidationError($ve)->build();
         $arr = $builder->withFlashMessage($msg)->withData($data)->withLinks($l)->withEmbeds($e)->withPagination($p)->build();
         return $response->withJson($arr);
 

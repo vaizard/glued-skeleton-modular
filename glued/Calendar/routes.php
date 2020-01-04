@@ -30,6 +30,13 @@ t_mail_attachments
 t_spider_subscriptions
 t_spider_data
 t_spider_events
+
+out[$date][$eventid] = $event[data]
+
+https://podio.github.io/jquery-mentions-input/
+https://github.com/zurb/tribute
 */
+
+
 
 

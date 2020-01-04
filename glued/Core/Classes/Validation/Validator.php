@@ -26,6 +26,7 @@ class Validator
 {
 
     protected $errors;
+    protected $reseed;
 
     /**
      * validate() looks at get/post parameters passed via $request
@@ -48,6 +49,14 @@ class Validator
             $_SESSION['validation_errors'] = $this->errors;
         }
         return $this;
+    }
+
+    public function reseed($request, array $reseed)
+    {
+        foreach ($reseed as $item) {
+            $this->reseed[$item] = $request->getParam($item);
+        }
+        return $this->reseed;
     }
 
     /** 

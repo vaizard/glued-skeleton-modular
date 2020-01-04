@@ -47,6 +47,7 @@
               <div class="form-group {{ validation_errors.name ? ' has-error' : ''}}">
                   <label for="name">{{ __('Screen name') }}</label>
                   <input type="text" name="name" id="name" class="form-control{{ validation_errors.name ? ' is-invalid' : validation_reseed.name ? ' is-valid' : '' }}" value="{{ auth.u_name }}">
+                  <input type="hidden" name="_METHOD" value="PATCH">
                   {% if validation_errors.name %}
                       <span class="invalid-feedback">{{ validation_errors.name | first }}</span>
                   {% endif %}

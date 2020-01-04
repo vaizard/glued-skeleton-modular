@@ -52,12 +52,48 @@ class AuthController extends AbstractTwigController
 
     public function signup_post($request, $response)
     {
+        $builder = new JsonResponseBuilder('authentication', 1);
+
+        // TODO verify that a posted json will yield same results as XHR posting a form
+        $validation = $this->validator->validate($request, [
+            'email' => v::noWhitespace()->notEmpty()->email()->emailAvailable($this->db),
+            'name' => v::notEmpty()->alnum(),
+            'password' => v::noWhitespace()->notEmpty(),
+        ]);
+
+        if ($validation->failed()) {
+
+            $reseed = $this->validator->reseed($request, [ 'email', 'name' ]);
+            $payload = $builder->withValidationError($validation->messages())
+                               ->withValidationReseed($reseed)
+                               ->build();
+            return $response->withJson($payload, 400);
+            // TODO With the ajax form submit via the twig view (see signup_get()) the browser's console log
+            // sees a 302 redirect, but the page doesn't reload (even if it should per the jquery success callback)
+
+        } else {
+
+            $this->auth->user_create($request->getParam('email'), $request->getParam('name'), $request->getParam('password'));
+            $this->auth->attempt($request->getParam('email'), $request->getParam('password')); // auto sign-in after account creation
+
+            $flash = [
+                "info" => 'You have been signed up',
+                "info" => 'You have been signed in too'
+            ];
+            $payload = $builder->withFlashMessage($flash)->build();
+            return $response->withJson($payload, 200);
+
+        }
+    }
+
+/*
+    public function signup_post($request, $response)
+    {
         $validation = $this->validator->validate($request, [
             'email' =>v::noWhitespace()->notEmpty()->email()->emailAvailable($this->db),
             'name' => v::notEmpty()->alnum(),
             'password' => v::noWhitespace()->notEmpty(),
         ]);
-
         if ($validation->failed()) {
             if ($request->isXhr() === true) {
                 $builder = new JsonResponseBuilder('authentication', 1);
@@ -69,18 +105,17 @@ class AuthController extends AbstractTwigController
                 return $response->withRedirect($this->routerParser->urlFor('core.signup.web'));
             }
         }
-
         $this->auth->user_create($request->getParam('email'), $request->getParam('name'), $request->getParam('password'));
         $this->flash->addMessage('info', 'You have been signed up!');
         $this->auth->attempt($request->getParam('email'), $request->getParam('password')); // auto sign-in after account creation
         return $response->withRedirect($this->routerParser->urlFor('core.web'));
     }
-
+ */
 
 
     // responds to the change password post request (tries to change user's
     // password, redirects him to different locations based on success|failure.
-    public function change_password_post($request, $response)
+    public function change_password($request, $response)
     {
         $user_id = $_SESSION['core_user_id'] ?? false;
         $auth_id = $_SESSION['core_auth_id'] ?? false;
@@ -88,40 +123,33 @@ class AuthController extends AbstractTwigController
         if ($user_id and $auth_id) {
             
             // matchesPassword() is a custom validation rule, see Classes/Validation
-            // using $this->container->auth->user() as its parameter is a
+            // using $this->auth->user() as its parameter is a
             // preparation for cases when user's password can be reset by an admin
-            // as well (not only the user himselft)
+            // as well (not only the user himself)
             
-            // zatim udelame jen nejjednodussi pripad, ze menime heslo prihlaseneho uzivatele. pozdeji zde bude nejake vetveni
-            $change_user_id = $user_id;
-            $change_auth_id = $auth_id;
-            
-            $validation = $this->container->validator->validate($request, [
-                'password_old' => v::noWhitespace()->notEmpty()->matchesPassword($this->container, $change_user_id, $change_auth_id),
+         
+            $validation = $this->validator->validate($request, [
+                'password_old' => v::noWhitespace()->notEmpty()->matchesPassword($this->container, $user_id, $auth_id),
                 'password' => v::noWhitespace()->notEmpty(),
             ]);
             
             // on validation failure redirect back to the form. the rest of this
             // function won't get exectuted
             if ($validation->failed()) {
-                $this->container->logger->warn("Password change failed. Validation error.");
-                return $response->withRedirect($this->container->router->pathFor('auth.settings'));
+                $this->logger->warn("Password change failed. Validation error.");
+                return $response->withRedirect($this->router->urlFor('auth.settings'));
             }
             
             // change the password, emit flash message and redirect
-            $password = $request->getParam('password');
-            $this->container->db->where('c_type', 1);
-            $this->container->db->where('c_uid', $change_authentication_id);
-            $this->container->db->where('c_user_id', $change_user_id);
-            $update = $this->container->db->update('t_authentication', Array ( 'c_pasword' => password_hash($password, PASSWORD_DEFAULT)  ));
+            $this->auth->update_password($uid, $auth_id, $request->getParam('password'));
             
             if (!$update) {
-                $this->container->logger->warn("Password change failed. DB error.");
-                return $response->withRedirect($this->container->router->pathFor('auth.settings'));
+                $this->logger->warn("Password change failed. DB error.");
+                return $response->withRedirect($this->router->urlFor('auth.settings'));
             }
             else {
-                $this->container->flash->addMessage('info', 'Your password was changed');
-                return $response->withRedirect($this->container->router->pathFor('home'));
+                $this->flash->addMessage('info', 'Your password was changed');
+                return $response->withRedirect($this->router->urlhFor('home'));
             }
         }
         

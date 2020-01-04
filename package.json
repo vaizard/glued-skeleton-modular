@@ -26,7 +26,8 @@
     "react-jsonschema-form-extensions": "latest",
     "react-jsonschema-form-extras": "^0.9.48",
     "react-rte": "^0.16",
-    "stisla": "latest"
+    "stisla": "latest",
+    "twig": "latest"
   },
   "license": "MIT"
 }
