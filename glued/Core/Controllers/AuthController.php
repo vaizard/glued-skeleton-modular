@@ -80,7 +80,8 @@ class AuthController extends AbstractTwigController
                 "info" => 'You have been signed up',
                 "info" => 'You have been signed in too'
             ];
-            $payload = $builder->withFlashMessage($flash)->build();
+            $payload = $builder->withFlashMessage($flash)->withCode(200)->build();
+            $this->flash->addMessage('info', __('You were signed up successfully. We signed you in too!'));
             return $response->withJson($payload, 200);
 
         }

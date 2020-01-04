@@ -2,10 +2,11 @@
 
 use Phinx\Db\Adapter\MysqlAdapter;
 
-class V20191231 extends Phinx\Migration\AbstractMigration
+class Initial extends Phinx\Migration\AbstractMigration
 {
     public function change()
     {
+        $this->execute('SET unique_checks=0; SET foreign_key_checks=0;');
         $this->table('t_calendar_uris', [
                 'id' => false,
                 'primary_key' => ['c_uid'],
@@ -56,6 +57,11 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'name' => 'c_user_id',
                 'unique' => false,
             ])
+            ->addForeignKey('c_user_id', 't_core_users', 'c_uid', [
+                'constraint' => 't_calendar_uris_ibfk_1',
+                'update' => 'NO_ACTION',
+                'delete' => 'CASCADE',
+            ])
             ->create();
         $this->table('t_core_authn', [
                 'id' => false,
@@ -66,7 +72,7 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'comment' => 'Access credentials to users defined in t_core_users. Each user is allowed a secondary name/pass combination (plausible deniability)',
                 'row_format' => 'DYNAMIC',
             ])
-            ->changeColumn('c_attr', 'json', [
+            ->addColumn('c_attr', 'json', [
                 'null' => true,
                 'comment' => 'Object attributes (status: enabled/disabled, allowed IPs, scope - i.e. allwed/forbidden actions, rate limits, etc.)',
             ])
@@ -95,6 +101,14 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'comment' => '0 password, 1 api key',
                 'after' => 'c_ts_modified',
             ])
+            ->addColumn('c_uid', 'integer', [
+                'null' => false,
+                'limit' => '10',
+                'signed' => false,
+                'identity' => 'enable',
+                'comment' => 'Unique row/object id',
+                'after' => 'c_type',
+            ])
             ->addColumn('c_user_uid', 'integer', [
                 'null' => true,
                 'limit' => '10',
@@ -102,13 +116,20 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'comment' => 'Corresponds to t_core_users.c_uid',
                 'after' => 'c_uid',
             ])
-            ->removeColumn('c_password')
-            ->removeColumn('c_user_id')
+            ->addIndex(['c_uid'], [
+                'name' => 'c_uid',
+                'unique' => true,
+            ])
             ->addIndex(['c_user_uid'], [
                 'name' => 'c_user_id',
                 'unique' => false,
             ])
-            ->save();
+            ->addForeignKey('c_user_uid', 't_core_users', 'c_uid', [
+                'constraint' => 't_core_authn_ibfk_1',
+                'update' => 'NO_ACTION',
+                'delete' => 'CASCADE',
+            ])
+            ->create();
         $this->table('t_core_domains', [
                 'id' => false,
                 'primary_key' => ['c_uid'],
@@ -157,6 +178,40 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'name' => 'c_user_id',
                 'unique' => false,
             ])
+            ->addForeignKey('c_user_id', 't_core_users', 'c_uid', [
+                'constraint' => 't_core_domains_ibfk_1',
+                'update' => 'NO_ACTION',
+                'delete' => 'CASCADE',
+            ])
+            ->create();
+        $this->table('t_core_profiles', [
+                'id' => false,
+                'primary_key' => ['c_uid'],
+                'engine' => 'InnoDB',
+                'encoding' => 'utf8mb4',
+                'collation' => 'utf8mb4_0900_ai_ci',
+                'comment' => 'Users\' system profiles (personal, invoicing, etc.)',
+                'row_format' => 'DYNAMIC',
+            ])
+            ->addColumn('c_json', 'json', [
+                'null' => false,
+                'comment' => 'Profile data',
+            ])
+            ->addColumn('c_uid', 'integer', [
+                'null' => false,
+                'limit' => '10',
+                'signed' => false,
+                'identity' => 'enable',
+                'comment' => 'Unique row id',
+                'after' => 'c_json',
+            ])
+            ->addColumn('c_users_uid', 'integer', [
+                'null' => false,
+                'limit' => '10',
+                'signed' => false,
+                'comment' => 'Profile owner',
+                'after' => 'c_uid',
+            ])
             ->create();
         $this->table('t_core_users', [
                 'id' => false,
@@ -167,11 +222,19 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'comment' => 'Users\' table, their profile and their attributes',
                 'row_format' => 'DYNAMIC',
             ])
-            ->changeColumn('c_attr', 'json', [
+            ->addColumn('c_attr', 'json', [
                 'null' => true,
                 'comment' => 'User\'s account attributes (enabled/disabled, GDPR anonymised, etc.)',
             ])
-            ->changeColumn('c_lang', 'char', [
+            ->addColumn('c_email', 'string', [
+                'null' => false,
+                'limit' => 255,
+                'collation' => 'utf8mb4_0900_ai_ci',
+                'encoding' => 'utf8mb4',
+                'comment' => 'Primary email',
+                'after' => 'c_attr',
+            ])
+            ->addColumn('c_lang', 'char', [
                 'null' => true,
                 'default' => 'en_US',
                 'limit' => 5,
@@ -188,20 +251,27 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'comment' => 'User\'s visible screen name (nickname)',
                 'after' => 'c_lang',
             ])
-            ->changeColumn('c_ts_created', 'timestamp', [
+            ->addColumn('c_ts_created', 'timestamp', [
                 'null' => true,
                 'default' => 'CURRENT_TIMESTAMP',
                 'comment' => 'Timestamp: account created',
                 'after' => 'c_name',
             ])
-            ->changeColumn('c_ts_modified', 'timestamp', [
+            ->addColumn('c_ts_modified', 'timestamp', [
                 'null' => true,
                 'default' => 'CURRENT_TIMESTAMP',
                 'update' => 'CURRENT_TIMESTAMP',
                 'comment' => 'Timestamp: account modified',
                 'after' => 'c_ts_created',
             ])
-            ->removeColumn('c_screenname')
+            ->addColumn('c_uid', 'integer', [
+                'null' => false,
+                'limit' => '10',
+                'signed' => false,
+                'identity' => 'enable',
+                'comment' => 'Unique row/object id',
+                'after' => 'c_ts_modified',
+            ])
             ->addIndex(['c_email'], [
                 'name' => 'c_email',
                 'unique' => true,
@@ -210,7 +280,11 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'name' => 'c_screenname',
                 'unique' => false,
             ])
-            ->save();
+            ->addIndex(['c_uid'], [
+                'name' => 'c_uid',
+                'unique' => true,
+            ])
+            ->create();
         $this->table('t_store_items', [
                 'id' => false,
                 'primary_key' => ['c_uid'],
@@ -260,6 +334,11 @@ class V20191231 extends Phinx\Migration\AbstractMigration
             ->addIndex(['c_seller_id'], [
                 'name' => 'c_seller_id',
                 'unique' => false,
+            ])
+            ->addForeignKey('c_seller_id', 't_store_sellers', 'c_uid', [
+                'constraint' => 't_store_items_ibfk_1',
+                'update' => 'NO_ACTION',
+                'delete' => 'CASCADE',
             ])
             ->create();
         $this->table('t_store_sellers', [
@@ -363,6 +442,11 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'name' => 'c_seller_id',
                 'unique' => false,
             ])
+            ->addForeignKey('c_seller_id', 't_store_sellers', 'c_uid', [
+                'constraint' => 't_store_subscriptions_ibfk_1',
+                'update' => 'NO_ACTION',
+                'delete' => 'CASCADE',
+            ])
             ->create();
         $this->table('t_store_tickets', [
                 'id' => false,
@@ -413,6 +497,11 @@ class V20191231 extends Phinx\Migration\AbstractMigration
             ->addIndex(['c_seller_id'], [
                 'name' => 'c_seller_id',
                 'unique' => false,
+            ])
+            ->addForeignKey('c_seller_id', 't_store_sellers', 'c_uid', [
+                'constraint' => 't_store_tickets_ibfk_1',
+                'update' => 'NO_ACTION',
+                'delete' => 'CASCADE',
             ])
             ->create();
         $this->table('t_worklog_items', [
@@ -470,6 +559,17 @@ class V20191231 extends Phinx\Migration\AbstractMigration
                 'name' => 'c_user_id',
                 'unique' => false,
             ])
+            ->addForeignKey('c_user_id', 't_core_users', 'c_uid', [
+                'constraint' => 't_worklog_items_ibfk_1',
+                'update' => 'NO_ACTION',
+                'delete' => 'CASCADE',
+            ])
+            ->addForeignKey('c_domain_id', 't_core_domains', 'c_uid', [
+                'constraint' => 't_worklog_items_ibfk_2',
+                'update' => 'NO_ACTION',
+                'delete' => 'CASCADE',
+            ])
             ->create();
+        $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
     }
 }
