@@ -3,11 +3,84 @@
 {% block content %}
 
           <div class="section-header">
-            <h1>{{ __('Hello, dear') }} {{ name | default(__('Anonymous')) }}</h1>
+            <h1>{{ __('What I did today') }}</h1>
           </div>
 
           <div class="section-body">
 
+<div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+
+                    <ul class="nav nav-pills" id="worklog-pills" role="tablist">
+                      <li class="nav-item">
+                        <a class="nav-link active" id="worklog-work" data-toggle="tab" href="#work" role="tab" aria-controls="work" aria-selected="true"><i class="fas fa-plus-square"></i> Work</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="worklog-shift" data-toggle="tab" href="#shift" role="tab" aria-controls="shift" aria-selected="false"><i class="fas fa-plus-square"></i> Shift</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="worklog-negotiation" data-toggle="tab" href="negotiation" role="tab" aria-controls="negotiation" aria-selected="false"><i class="fas fa-plus-square"></i> Negotiation</a>
+                      </li>
+                      <li class="">
+                        <a class="nav-link btn-success icon-left btn-icon" id="worklog-clockin" href="#"><i class="fas fa-door-open"></i> Clock in</a>
+                      </li>
+                      <li class="">
+                        <a class="nav-link btn-danger icon-left btn-icon" id="worklog-clockin" href="#"><i class="fas fa-door-closed"></i> Clock out</a>
+                      </li>
+                    </ul>
+
+
+                  </div>
+                  <div class="card-body">
+                    
+                    <div class="tab-content" id="worklog-forms">
+                      <div class="tab-pane fade show active" id="worklog-work-form" role="tabpanel" aria-labelledby="worklog-work">
+
+
+                          <div class="form-row">
+                              <div class="form-group col-md-2">
+                                <label>Date and duration</label>
+                                <div class="input-group">
+                                  <input type="text" class="form-control" id="worklog_date" required="" placeholder="____/__/__" value="2020/01/01">
+                                  <input type="text" class="form-control" id="worklog_time" required="" placeholder="__:__">
+        
+                              </div>
+                            </div>
+                              <div class="form-group col-md-3">
+                                <label>Summary</label>
+                                <input type="text" class="form-control" id="worklog_summary" required="">
+                              </div>
+                              <div class="form-group col-md-2">
+                                <label>Team</label><br />
+                                <select class="form-control" multiple="" id="worklog_team" required="">
+                                  <option value="1">A Option</option>
+                                  <option value="2">B Option</option>
+                                  <option value="3">C Option</option>
+                                </select>
+                              </div>
+                              <div class="form-group col-md-1">
+                                <label>Price</label>
+                                <input type="text" class="form-control" id="worklog_price" required="">
+                              </div>
+                              <div class="form-group col-md-1">
+                                <label>Attachments</label>
+                                <a href="" class="btn btn-primary icon-left btn-icon"><i class="fas fa-paperclip"></i> Add files</a>
+                              </div>
+                          </div>  
+
+                      </div>
+                      <div class="tab-pane fade" id="worklog-shift-form" role="tabpanel" aria-labelledby="worklog-shift">
+                        Sed sed metus vel lacus hendrerit tempus. Sed efficitur velit tortor, ac efficitur est lobortis quis. Nullam lacinia metus erat, sed fermentum justo rutrum ultrices. Proin quis iaculis tellus. Etiam ac vehicula eros, pharetra consectetur dui.
+                      </div>
+                      <div class="tab-pane fade" id="worklog-negotiation-form" role="tabpanel" aria-labelledby="worklog-negotiation">
+                        Vestibulum imperdiet odio sed neque ultricies, ut dapibus mi maximus. Proin ligula massa, gravida in lacinia efficitur, hendrerit eget mauris. Pellentesque fermentum, sem interdum molestie finibus, nulla diam varius leo, nec varius lectus elit id dolor.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
 
             <div class="row">
@@ -21,51 +94,35 @@
                       <table class="table table-striped">
                         <tr>
                           <th class="col-sm-2">Date</th>
-                          <th class="col-sm-1">Added</th>
                           <th>Summary</th>
+                          <th class="col-sm-1">Hrs.</th>
                           <th>Starts</th>
-                          <th>Ends</th>
+                          <th class="col-sm-1">Ends</th>
                           <th>Description</th>
                           <th>Last modified</th>
                         </tr>
                         <tr>
-                          <div class="form-group">
-                          <td>
-                            <div class="form-group col-xs-1">
-                              <label>Date</label>
-                              <input type="text" class="form-control" id="worklog_date" required="" placeholder="____/__/__" value="2020/01/01">
-                            </div>
-                          </td>
-                          <td>
-                            <div class="form-group">
-                              <label>Time</label>
-                              <input type="text" class="form-control" id="worklog_time" required="" placeholder="__:__">
-                            </div>
-                          </td>
-                          <td>
-                            <div class="form-group">
-                              <label>Summary</label>
-                              <input type="text" class="form-control" id="worklog_summary" required="">
-                            </div>
-                          </td>                          
-                          <td>
-                            <div class="form-group">
-                              <label>Team</label><br />
-                              <select class="form-control" multiple="" id="worklog_team" required="">
-                                <option value="1">A Option</option>
-                                <option value="2">B Option</option>
-                                <option value="3">C Option</option>
-                              </select>
-                            </div>
-                          </td>
+                        <tr class="table-info">
+                          <td>⁠—</td>
+                          <td>January 2020</td>
+                          <td>155:27</td>
+                          <td>Industra</td>
                           <td>{{ event.dtend }}</td>
                           <td>{{ event.description }}</td>
                           <td>{{ event.last_modifed }}</td>
-                        </div>
+                        </tr>
+                        <tr>
+                          <td>01</td>
+                          <td>Installing the water faucet <a href="">#331</a></td>
+                          <td>03:30</td>
+                          <td>Industra</td>
+                          <td>{{ event.dtend }}</td>
+                          <td>{{ event.description }}</td>
+                          <td>{{ event.last_modifed }}</td>
                         </tr>
                         {% for date, events in out %}
                         {% for event in events %}
-                        
+
                         <tr>
                           <td>{{ date }}</td>
                           <td><span title="{{ event.created }}">{{ event.hrcreated }}</span></td>

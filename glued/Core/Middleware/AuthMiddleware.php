@@ -20,7 +20,7 @@ class AuthMiddleware extends AbstractMiddleware
         // consider try/catch here
 
         $this->view->getEnvironment()->addGlobal('session', $_SESSION);
-        $this->view->getEnvironment()->addGlobal('auth', $response);
+        $this->view->getEnvironment()->addGlobal('auth', $response); // old input data
         return $handler->handle($request);
     }
 }

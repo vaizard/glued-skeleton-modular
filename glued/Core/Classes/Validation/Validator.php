@@ -56,6 +56,10 @@ class Validator
         foreach ($reseed as $item) {
             $this->reseed[$item] = $request->getParam($item);
         }
+        // Don't do this here:
+        // $this->reseed = $request->getParams(); 
+        // We don't really want to send, i.e., the password back
+        // While it shouldn't matter over secure connections, why add surface?
         return $this->reseed;
     }
 

@@ -77,6 +77,41 @@ sudo chmod -R o+rx /usr/lib/node_modules/puppeteer/.local-chromium
 
 ## Developers
 
+### Frontend vs. Backend
+
+The backend is purely API based. Developing the backend requires to use the Core\Classes\JsonResponse\JsonResponseBuilder class. The class features methods such as
+
+- build() - to be called last, returns the json response
+- withCode($code) - adds a response code item to the json response
+- withValidationError($array) - adds data validation errors
+- withValidationReseed($array) - adds the submitted data
+- withData($array, $code = 200) - adds response data
+- HATEOAS functions such as withPagination(), withEmbeds(), or withLinks()
+- and others.
+
+The frontend is built around 
+
+- php-based twig templating that 
+  - act as page scaffolding
+  - perform some auth related changes to rendered pages
+  - ensure i18n/l10n
+- js-based twig templating (via twig.js), which
+  - renders forms to perform post/put/patch/delete requests
+  - re-renders the forms on errors (adds validation errors and data reseed)
+  - renders data (received as json from the API)
+- simple js renderer/ajax xhr requestor
+
+NOTE: Browsers support only GET/POST methods, but the backend api uses the the whole package (GET/POST/DELETE/PATCH/PUT). To circumvent this limitation, forms are submitted either with the `X-Http-Method-Override` header or the `_method` hidden input field. The MethodOverrideMiddleware then takes care of modifying the request before Slim's router decides what to do with the request. To set the headers, use something like
+
+```js
+ $("#my-form").ajaxSubmit({
+    headers: {
+        "X-Http-Method-Override": "PUT"
+    },         
+```
+
+(see docs for @claviska/jquery-ajax-submit for details).
+
 ### Database
 
 **Concepts**

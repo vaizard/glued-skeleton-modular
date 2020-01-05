@@ -12,7 +12,7 @@
                   <div class="card-body pb-0">
                     <div class="form-group">
                       <label for="email">{{ __('Email') }}</label>
-                      <div id="email_placeholder"></div>
+                      <div class="twigjs" id="email_placeholder"></div>
 
                       {% verbatim %}
                       <script type="text/twig" id="email_twig">
@@ -26,7 +26,7 @@
                     </div>
                     <div class="form-group" id="name_group">
                       <label for="name">{{ __('Name') }}</label>
-                      <div id="name_placeholder"></div>
+                      <div class="twigjs" id="name_placeholder"></div>
 
                       {% verbatim %}
                       <script type="text/twig" id="name_twig">
@@ -40,7 +40,7 @@
                     </div>
                     <div class="form-group" id="password_group">
                       <label for="password">{{ __('Password') }}</label>
-                      <div id="password_placeholder"></div>
+                      <div class="twigjs" id="password_placeholder"></div>
 
                       {% verbatim %}
                       <script type="text/twig" id="password_twig">
@@ -66,40 +66,37 @@
   
   <script nonce="{{ csp_nonce.script_src }}">
 
+      // Compile the data
       $("script[type='text/twig']").each(function() {
           var id = $(this).attr("id"),
           data = $(this).text();
           Twig.twig({ id: id, data: data, allowInlineIncludes: true });
       });
 
-      $("#email_placeholder").append(
-          Twig.twig({ ref: "email_twig" }).render({ })
-      );
-
-      $("#name_placeholder").append(
-          Twig.twig({ ref: "name_twig" }).render({ })
-      );
-
-      $("#password_placeholder").append(
-          Twig.twig({ ref: "password_twig" }).render({ })
-      );
+      // Render the data. This requires to have a div with
+      // <div class="twigjs" id="some_placeholder"> for the loop below to work
+      $("div.twigjs").each(function() {
+          var idhold = $(this).attr("id");
+          var idtwig = $(this).attr("id").slice(0, -12) + '_twig';
+          $("#" + idhold).append(
+              Twig.twig({ ref: idtwig }).render({ })
+          );
+      });
 
       $("#signup_form").ajaxSubmit({
           success: function(res) {
-              console.log(res);
-              //alert('You have been signed up');
+              //console.log(res);
               location.reload();
           },
           error: function(res) {
-              $("#email_placeholder").replaceWith(
-                  Twig.twig({ ref: "email_twig" }).render({ validation_errors: res.messages.validation_error, validation_reseed: res.messages.validation_reseed })
-              );
-              $("#name_placeholder").replaceWith(
-                  Twig.twig({ ref: "name_twig" }).render({ validation_errors: res.messages.validation_error, validation_reseed: res.messages.validation_reseed })
-              );
-              $("#password_placeholder").replaceWith(
-                  Twig.twig({ ref: "password_twig" }).render({ validation_errors: res.messages.validation_error, validation_reseed: res.messages.validation_reseed })
-              );
+              $("div.twigjs").each(function() {
+                //console.log(res);
+                var idhold = $(this).attr("id");
+                var idtwig = $(this).attr("id").slice(0, -12) + '_twig';
+                $("#" + idhold).html(
+                  Twig.twig({ ref: idtwig }).render({ validation_errors: res.messages.validation_error, validation_reseed: res.messages.validation_reseed })
+                );
+              });
           }
       });
   </script>
