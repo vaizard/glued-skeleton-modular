@@ -15,13 +15,16 @@
 
                     <ul class="nav nav-pills" id="worklog-pills" role="tablist">
                       <li class="nav-item">
-                        <a class="nav-link active" id="worklog-work" data-toggle="tab" href="#work" role="tab" aria-controls="work" aria-selected="true"><i class="fas fa-plus-square"></i> Work</a>
+                        <a class="nav-link active" id="worklog-work" data-toggle="tab" href="#work" role="tab" aria-controls="work" aria-selected="true"><i class="fas fa-wrench"></i> Work</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" id="worklog-shift" data-toggle="tab" href="#shift" role="tab" aria-controls="shift" aria-selected="false"><i class="fas fa-plus-square"></i> Shift</a>
+                        <a class="nav-link" id="worklog-shift" data-toggle="tab" href="#shift" role="tab" aria-controls="shift" aria-selected="false"><i class="fas fa-user-clock"></i> Shift</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" id="worklog-negotiation" data-toggle="tab" href="negotiation" role="tab" aria-controls="negotiation" aria-selected="false"><i class="fas fa-plus-square"></i> Negotiation</a>
+                        <a class="nav-link" id="worklog-negotiation" data-toggle="tab" href="negotiation" role="tab" aria-controls="negotiation" aria-selected="false"><i class="fas fa-handshake"></i> Negotiation</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="worklog-away" data-toggle="tab" href="negotiation" role="tab" aria-controls="away" aria-selected="false"><i class="fas fa-battery-quarter"></i> Away/sick</a>
                       </li>
                       <li class="">
                         <a class="nav-link btn-success icon-left btn-icon" id="worklog-clockin" href="#"><i class="fas fa-door-open"></i> Clock in</a>
@@ -93,17 +96,19 @@
                     <div class="table-responsive">
                       <table class="table table-striped">
                         <tr>
-                          <th class="col-sm-2">Date</th>
+                          <th class="col-sm-1">Date</th>
+                          <th class="col-sm-1">Type</th>
                           <th>Summary</th>
                           <th class="col-sm-1">Hrs.</th>
-                          <th>Starts</th>
-                          <th class="col-sm-1">Ends</th>
-                          <th>Description</th>
-                          <th>Last modified</th>
+                          <th>Team</th>
+                          <th class="col-sm-1">Project</th>
+                          <th>Stoptime</th>
+                          <th>Status</th>
                         </tr>
                         <tr>
                         <tr class="table-info">
                           <td>⁠—</td>
+                          <td></td>
                           <td>January 2020</td>
                           <td>155:27</td>
                           <td>Industra</td>
@@ -113,12 +118,43 @@
                         </tr>
                         <tr>
                           <td>01</td>
+                          <td><i class="fas fa-wrench"></i></td>
                           <td>Installing the water faucet <a href="">#331</a></td>
                           <td>03:30</td>
                           <td>Industra</td>
-                          <td>{{ event.dtend }}</td>
-                          <td>{{ event.description }}</td>
-                          <td>{{ event.last_modifed }}</td>
+                          <td>#331</td>
+                          <td>14:25</td>
+                          <td><div class="badge badge-primary">done</div><div class="badge badge-danger">wip</div><div class="badge badge-warning">waits</div><div class="badge badge-dark">private</div></td>
+                        </tr>
+                        <tr>
+                          <td>02</td>
+                          <td><i class="fas fa-handshake"></i></td>
+                          <td>Meet <a href="">@Gerhard Boben</a> from <a href="">@BBC</a>. Add location, details, files</td>
+                          <td>02:30</td>
+                          <td>Industra</td>
+                          <td>#331</td>
+                          <td>14:25</td>
+                          <td><div class="badge badge-primary">done</div><div class="badge badge-danger">wip</div><div class="badge badge-warning">waits</div><div class="badge badge-dark">private</div><div class="badge badge-light">edited</div></td>
+                        </tr>
+                        <tr>
+                          <td>01</td>
+                          <td><i class="fas fa-battery-quarter"></i></td>
+                          <td>Ill. Guru meditation</td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td><div class="badge badge-primary">ill</div></td>
+                        </tr>
+                        <tr>
+                          <td>01</td>
+                          <td><i class="fas fa-user-clock"></i></td>
+                          <td>Assumed #role <a href="">#331</a></td>
+                          <td>03:30</td>
+                          <td>Industra</td>
+                          <td>#331</td>
+                          <td>14:25</td>
+                          <td><div class="badge badge-primary">done</div><div class="badge badge-danger">wip</div><div class="badge badge-warning">waits</div><div class="badge badge-dark">private</div></td>
                         </tr>
                         {% for date, events in out %}
                         {% for event in events %}
