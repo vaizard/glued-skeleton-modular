@@ -15,22 +15,16 @@
 
                     <ul class="nav nav-pills" id="worklog-pills" role="tablist">
                       <li class="nav-item">
-                        <a class="nav-link active" id="worklog-work" data-toggle="tab" href="#work" role="tab" aria-controls="work" aria-selected="true"><i class="fas fa-wrench"></i> Work</a>
+                        <a class="nav-link active" id="worklog-work" data-toggle="tab" href="#worklog-work-div" role="tab" aria-controls="work" aria-selected="true"><i class="fas fa-wrench"></i> {{ __('Work') }}</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" id="worklog-shift" data-toggle="tab" href="#shift" role="tab" aria-controls="shift" aria-selected="false"><i class="fas fa-user-clock"></i> Shift</a>
+                        <a class="nav-link" id="worklog-shift" data-toggle="tab" href="#worklog-shift-div" role="tab" aria-controls="shift" aria-selected="false"><i class="fas fa-user-clock"></i> {{ __('Shift') }}</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" id="worklog-negotiation" data-toggle="tab" href="negotiation" role="tab" aria-controls="negotiation" aria-selected="false"><i class="fas fa-handshake"></i> Negotiation</a>
+                        <a class="nav-link" id="worklog-negotiation" data-toggle="tab" href="#worklog-negotiation-div" role="tab" aria-controls="negotiation" aria-selected="false"><i class="fas fa-handshake"></i> {{ __('Negotiation') }}</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" id="worklog-away" data-toggle="tab" href="negotiation" role="tab" aria-controls="away" aria-selected="false"><i class="fas fa-battery-quarter"></i> Away/sick</a>
-                      </li>
-                      <li class="">
-                        <a class="nav-link btn-success icon-left btn-icon" id="worklog-clockin" href="#"><i class="fas fa-door-open"></i> Clock in</a>
-                      </li>
-                      <li class="">
-                        <a class="nav-link btn-danger icon-left btn-icon" id="worklog-clockin" href="#"><i class="fas fa-door-closed"></i> Clock out</a>
+                        <a class="nav-link" id="worklog-away" data-toggle="tab" href="#worklog-away-div" role="tab" aria-controls="away" aria-selected="false"><i class="fas fa-battery-quarter"></i> {{ __('Away / sick') }}</a>
                       </li>
                     </ul>
 
@@ -39,46 +33,21 @@
                   <div class="card-body">
                     
                     <div class="tab-content" id="worklog-forms">
-                      <div class="tab-pane fade show active" id="worklog-work-form" role="tabpanel" aria-labelledby="worklog-work">
-
-
-                          <div class="form-row">
-                              <div class="form-group col-md-2">
-                                <label>Date and duration</label>
-                                <div class="input-group">
-                                  <input type="text" class="form-control" id="worklog_date" required="" placeholder="____/__/__" value="2020/01/01">
-                                  <input type="text" class="form-control" id="worklog_time" required="" placeholder="__:__">
-        
-                              </div>
-                            </div>
-                              <div class="form-group col-md-3">
-                                <label>Summary</label>
-                                <input type="text" class="form-control" id="worklog_summary" required="">
-                              </div>
-                              <div class="form-group col-md-2">
-                                <label>Team</label><br />
-                                <select class="form-control" multiple="" id="worklog_team" required="">
-                                  <option value="1">A Option</option>
-                                  <option value="2">B Option</option>
-                                  <option value="3">C Option</option>
-                                </select>
-                              </div>
-                              <div class="form-group col-md-1">
-                                <label>Price</label>
-                                <input type="text" class="form-control" id="worklog_price" required="">
-                              </div>
-                              <div class="form-group col-md-1">
-                                <label>Attachments</label>
-                                <a href="" class="btn btn-primary icon-left btn-icon"><i class="fas fa-paperclip"></i> Add files</a>
-                              </div>
-                          </div>  
-
+                      <div class="tab-pane fade show active" id="worklog-work-div" role="tabpanel" aria-labelledby="worklog-work">
+                        <form action="{{ url_for('worklog.me') }}" method="post" autocomplete="off" id="worklog_work_form">
+                          {% include '/Worklog/Views/i-work.twig' %}
+                        </form>
+                     </div>
+                      <div class="tab-pane fade" id="worklog-shift-div" role="tabpanel" aria-labelledby="worklog-shift">
+                      {# {% include '/Worklog/Views/i-shift.twig' %} #}
+                      {{ __('Disabled') }}
                       </div>
-                      <div class="tab-pane fade" id="worklog-shift-form" role="tabpanel" aria-labelledby="worklog-shift">
-                        Sed sed metus vel lacus hendrerit tempus. Sed efficitur velit tortor, ac efficitur est lobortis quis. Nullam lacinia metus erat, sed fermentum justo rutrum ultrices. Proin quis iaculis tellus. Etiam ac vehicula eros, pharetra consectetur dui.
+                      <div class="tab-pane fade" id="worklog-negotiation-div" role="tabpanel" aria-labelledby="worklog-negotiation">
+                      {# {% include '/Worklog/Views/i-negotiate.twig' %} #}
+                      {{ __('Disabled') }}
                       </div>
-                      <div class="tab-pane fade" id="worklog-negotiation-form" role="tabpanel" aria-labelledby="worklog-negotiation">
-                        Vestibulum imperdiet odio sed neque ultricies, ut dapibus mi maximus. Proin ligula massa, gravida in lacinia efficitur, hendrerit eget mauris. Pellentesque fermentum, sem interdum molestie finibus, nulla diam varius leo, nec varius lectus elit id dolor.
+                      <div class="tab-pane fade" id="worklog-away-div" role="tabpanel" aria-labelledby="worklog-away">
+                      {% include '/Worklog/Views/i-away.twig' %}
                       </div>
                     </div>
                   </div>
@@ -89,21 +58,20 @@
             <div class="row">
               <div class="col-12">
                 <div class="card">
-                  <div class="card-header">
-                    <h4>Events</h4>
-                  </div>
+
                   <div class="card-body p-0">
                     <div class="table-responsive">
-                      <table class="table table-striped">
+                      <table class="table table-striped" id="log">
                         <tr>
-                          <th class="col-sm-1">Date</th>
-                          <th class="col-sm-1">Type</th>
-                          <th>Summary</th>
-                          <th class="col-sm-1">Hrs.</th>
-                          <th>Team</th>
-                          <th class="col-sm-1">Project</th>
-                          <th>Stoptime</th>
-                          <th>Status</th>
+                          <th class="col-sm-1">{{ __('Day / Fin.') }}</th>
+                          <th class="col-sm-1">{{ __('Type') }}</th>
+                          <th>{{ __('Summary') }}</th>
+                          <th class="col-sm-1">{{ __('Hrs.') }}</th>
+                          <th>{{ __('Team') }}</th>
+                          <th>{{ __('Project') }}</th>
+                          <th>{{ __('Status') }}</th>
+                          <th>{{ __('Location') }}</th>
+                          <th>{{ __('Details') }}</th>
                         </tr>
                         <tr>
                         <tr class="table-info">
@@ -115,16 +83,20 @@
                           <td>{{ event.dtend }}</td>
                           <td>{{ event.description }}</td>
                           <td>{{ event.last_modifed }}</td>
+                          <td></td>
+                          <td></td>
                         </tr>
                         <tr>
-                          <td>01</td>
+                          <td>01 / 14:25</td>
                           <td><i class="fas fa-wrench"></i></td>
                           <td>Installing the water faucet <a href="">#331</a></td>
                           <td>03:30</td>
                           <td>Industra</td>
                           <td>#331</td>
-                          <td>14:25</td>
+
                           <td><div class="badge badge-primary">done</div><div class="badge badge-danger">wip</div><div class="badge badge-warning">waits</div><div class="badge badge-dark">private</div></td>
+                          <td>Location</td>
+                          <td><i class="fas fa-paperclip"></i> <i class="fas fa-info-circle"></i></td>
                         </tr>
                         <tr>
                           <td>02</td>
@@ -133,8 +105,14 @@
                           <td>02:30</td>
                           <td>Industra</td>
                           <td>#331</td>
-                          <td>14:25</td>
-                          <td><div class="badge badge-primary">done</div><div class="badge badge-danger">wip</div><div class="badge badge-warning">waits</div><div class="badge badge-dark">private</div><div class="badge badge-light">edited</div></td>
+
+                          <td>
+                            <div class="badge badge-primary"><i class="fas fa-spinner"></i><span style="display: none">wip</span></div>
+                            <div class="badge badge-danger"><i class="fas fa-pause-circle"></i><span style="display: none">waits</span></div>
+                            <div class="badge badge-success"><i class="fas fa-check-circle"></i><span style="display: none">done</span></div>
+                            <div class="badge badge-dark"><i class="fas fa-lock"></i><span style="display: none">private</span></div>
+                            <div class="badge badge-dark"><i class="fas fa-pen"></i><span style="display: none">edited</span></div>
+                          </td>
                         </tr>
                         <tr>
                           <td>01</td>
@@ -144,16 +122,16 @@
                           <td></td>
                           <td></td>
                           <td></td>
-                          <td><div class="badge badge-primary">ill</div></td>
+                          <td><div class="badge badge-primary"><i class="fas fa-umbrella-beach"></i></div></td>
                         </tr>
                         <tr>
                           <td>01</td>
                           <td><i class="fas fa-user-clock"></i></td>
-                          <td>Assumed #role <a href="">#331</a></td>
+                          <td>Barista</td>
                           <td>03:30</td>
                           <td>Industra</td>
                           <td>#331</td>
-                          <td>14:25</td>
+
                           <td><div class="badge badge-primary">done</div><div class="badge badge-danger">wip</div><div class="badge badge-warning">waits</div><div class="badge badge-dark">private</div></td>
                         </tr>
                         {% for date, events in out %}
@@ -185,12 +163,18 @@
 {% block additionaljs %}
   <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
   <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/select2/dist/js/select2.full.min.js"></script>
-  <script  nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+  <script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
   $(function() {
-    $('#worklog_date').mask('0000/00/00');
-    $('#worklog_time').mask('00:00');
-    $('#worklog_team').select2();
+    $('.mask_date').mask('0000/00/00');
+    $('.mask_time').mask('00:00');
+    $('.select2').select2();
   });
-   
-  </script>
+
+  $(document).ready(function(){
+    $("button").click(function(){
+      $("p").hide(1000);
+    });
+  });
+  </script>   
+
 {% endblock %}

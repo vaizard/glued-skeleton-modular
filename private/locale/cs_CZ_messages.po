@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-30 03:11+0200\n"
-"PO-Revision-Date: 2019-08-30 03:11+0200\n"
+"POT-Creation-Date: 2020-01-07 01:22+0100\n"
+"PO-Revision-Date: 2020-01-07 01:30+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: cs_CZ\n"
@@ -11,40 +11,250 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.4\n"
 "X-Poedit-KeywordsList: __\n"
 "X-Poedit-Basepath: ../cache/twig\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: 2d/2d76ee939e2f92ed38d3248cb485679fd7798f22204153d546d61ff1810343ee.php:41
-#: 81/81046fcf74898f46f660ea4fd9f31f00cf651ec07e25fb92fef4f2eb432822d0.php:41
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:55
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:203
+msgid "What I did today"
+msgstr "Dnes jsem udělal(a)"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:70
+msgid "Work"
+msgstr "Práce"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:76
+msgid "Shift"
+msgstr "Směna"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:82
+msgid "Negotiation"
+msgstr "Jednání"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:88
+msgid "Away / sick"
+msgstr "Volno / nemoc"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:113
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:120
+msgid "Disabled"
+msgstr "Nedostupný"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:145
+msgid "Day / Fin."
+msgstr "Den / Konec"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:149
+msgid "Type"
+msgstr "Typ"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:153
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:54
+#: dd/dddb4cbeeba446773e90abceed3ac1310c18083e37a6f167db217c52c22181a8.php:53
+msgid "Summary"
+msgstr "Souhrn"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:157
+msgid "Hrs."
+msgstr "Hod."
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:161
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:61
+msgid "Team"
+msgstr "Team"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:165
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:72
+msgid "Project"
+msgstr "Projekt"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:169
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:185
+msgid "Status"
+msgstr "Status"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:173
+msgid "Location"
+msgstr "Místo"
+
+#: 0d/0db88e14c3d3827c3d1a1383fd480e97553b9badf28b18e7ddc02ab46d6836b1.php:177
+msgid "Details"
+msgstr "Detaily"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:113
+msgid "Dashboard"
+msgstr "Hlavní panel"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:119
+msgid "Account"
+msgstr "Účet"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:126
+msgid "My profile"
+msgstr "Můj profil"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:136
+msgid "My account"
+msgstr "Můj účet"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:143
+msgid "Manage accounts"
+msgstr "Správa účtů"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:150
+msgid "Admin"
+msgstr "Admin"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:175
+msgid "Apps"
+msgstr "Apky"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:180
+msgid "Membership"
+msgstr "Členství"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:189
+msgid "Ballance"
+msgstr "Stav"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:196
+msgid "Worklog"
+msgstr "Pracovní deník"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:209
+msgid "Team log"
+msgstr "Teamový deník"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:216
+msgid "Mail"
+msgstr "Mail"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:223
+msgid "Accounts"
+msgstr "Účty"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:229
+msgid "Opera"
+msgstr "Opera"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:236
+msgid "Spider"
+msgstr "Spider"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:248
+msgid "Calendar"
+msgstr "Kalendář"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:255
+msgid "Browse"
+msgstr "Prohlížet"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:261
+msgid "Manage"
+msgstr "Spravovat"
+
+#: 42/4233955388fb74fd524ad1059abaeea72d6bc085792414f737a5eb35d4bc3fef.php:294
+msgid "Source code"
+msgstr "Zdrojový kód"
+
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:41
+#: dd/dddb4cbeeba446773e90abceed3ac1310c18083e37a6f167db217c52c22181a8.php:41
+msgid "Date and duration"
+msgstr "Datum a trvání"
+
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:79
+msgid "Done / Wip / Waits"
+msgstr "Hotov / Část / Čeká"
+
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:100
+msgid "Finished at"
+msgstr "Doděláno v"
+
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:109
+msgid "Cost"
+msgstr "Náklady"
+
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:117
+msgid "Attachments"
+msgstr "Přílohy"
+
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:121
+msgid "Add"
+msgstr "Přidat"
+
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:128
+msgid "Private"
+msgstr "Soukromé"
+
+#: 54/54e097af7def80d0abf67ac7055567d43bd1bc34687b0bb075eb577eed8f7bee.php:142
+#: dd/dddb4cbeeba446773e90abceed3ac1310c18083e37a6f167db217c52c22181a8.php:62
+msgid "Save"
+msgstr "Vlož"
+
+#: 71/717bfe49c3bec390d15f7d921187ca29a9dadc3971785f6574135e5227f65bfb.php:54
+#: 71/717bfe49c3bec390d15f7d921187ca29a9dadc3971785f6574135e5227f65bfb.php:118
+#: df/df9381b3ace170f86adc011cd746c3d87cd134d85354a193240f47a45e329204.php:51
 msgid "Sign in"
 msgstr "Přihlásit se"
 
-#: 6a/6a9f38d9c4b037df43a1187be234529fd6cd71913b140165d78990783ca1e34b.php:41
-msgid "User"
-msgstr "Uživatel"
+#: 71/717bfe49c3bec390d15f7d921187ca29a9dadc3971785f6574135e5227f65bfb.php:69
+#: 71/71ef49c1ed50b7d4c4506abf536da5ccd7ddaa58106746398dc96cc7d1c1b6c5.php:69
+msgid "Please provide your details below"
+msgstr "Zadejte prosím níže vaše údaje"
 
-#: 6a/6a9f38d9c4b037df43a1187be234529fd6cd71913b140165d78990783ca1e34b.php:51
+#: 71/717bfe49c3bec390d15f7d921187ca29a9dadc3971785f6574135e5227f65bfb.php:75
+#: 71/71ef49c1ed50b7d4c4506abf536da5ccd7ddaa58106746398dc96cc7d1c1b6c5.php:75
+msgid "Email"
+msgstr "Email"
+
+#: 71/717bfe49c3bec390d15f7d921187ca29a9dadc3971785f6574135e5227f65bfb.php:97
+#: 71/71ef49c1ed50b7d4c4506abf536da5ccd7ddaa58106746398dc96cc7d1c1b6c5.php:115
+msgid "Password"
+msgstr "Heslo"
+
+#: 71/71ef49c1ed50b7d4c4506abf536da5ccd7ddaa58106746398dc96cc7d1c1b6c5.php:54
+#: 71/71ef49c1ed50b7d4c4506abf536da5ccd7ddaa58106746398dc96cc7d1c1b6c5.php:136
+#: df/df9381b3ace170f86adc011cd746c3d87cd134d85354a193240f47a45e329204.php:43
+msgid "Sign up"
+msgstr "Registrovat se"
+
+#: 71/71ef49c1ed50b7d4c4506abf536da5ccd7ddaa58106746398dc96cc7d1c1b6c5.php:95
+msgid "Name"
+msgstr "Jméno"
+
+#: 75/75aa747a3a37c265792d5f143981d67e5466aa1439fda05b1264b236aa089c3d.php:41
+msgid "Hi,"
+msgstr "Ahoj,"
+
+#: 75/75aa747a3a37c265792d5f143981d67e5466aa1439fda05b1264b236aa089c3d.php:43
+msgid "friend"
+msgstr "příteli"
+
+#: 75/75aa747a3a37c265792d5f143981d67e5466aa1439fda05b1264b236aa089c3d.php:53
 msgid "Profile"
 msgstr "Profil"
 
-#: 6a/6a9f38d9c4b037df43a1187be234529fd6cd71913b140165d78990783ca1e34b.php:57
+#: 75/75aa747a3a37c265792d5f143981d67e5466aa1439fda05b1264b236aa089c3d.php:64
 msgid "Settings"
 msgstr "Nastavení"
 
-#: 6a/6a9f38d9c4b037df43a1187be234529fd6cd71913b140165d78990783ca1e34b.php:64
+#: 75/75aa747a3a37c265792d5f143981d67e5466aa1439fda05b1264b236aa089c3d.php:74
 msgid "Sign out"
 msgstr "Odhlásit se"
 
-#: 8a/8ad8b5c202ef910f3c897a2976153fc3559da470f9fb54f5ec09195947eab7ae.php:54
+#: 9d/9d0e2967bc8721dd0ccdef26d516300ddea21e7a184d1a5e1184bda23335d492.php:53
 msgid "Hello, dear"
-msgstr "Ahoj,"
+msgstr "Ahoj, milý"
 
-#: 8a/8ad8b5c202ef910f3c897a2976153fc3559da470f9fb54f5ec09195947eab7ae.php:56
+#: 9d/9d0e2967bc8721dd0ccdef26d516300ddea21e7a184d1a5e1184bda23335d492.php:55
 msgid "Anonymous"
 msgstr "Anonyme"
 
-#: 8a/8ad8b5c202ef910f3c897a2976153fc3559da470f9fb54f5ec09195947eab7ae.php:63
+#: 9d/9d0e2967bc8721dd0ccdef26d516300ddea21e7a184d1a5e1184bda23335d492.php:65
 msgid "Let's stick together."
 msgstr "Držme se při sobě."
+
+#~ msgid "User"
+#~ msgstr "Uživatel"

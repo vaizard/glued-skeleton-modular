@@ -58,18 +58,18 @@
           <ul class="sidebar-menu">
             <li class="menu-header">System</li>
             <li class="active">
-              <a href="{{ url_for('core.dashboard.web') }}" class="nav-link"><i class="fas fa-fire"></i><span>Dashboard</span></a>
+              <a href="{{ url_for('core.dashboard.web') }}" class="nav-link"><i class="fas fa-fire"></i><span>{{ __('Dashboard') }}</span></a>
             </li>
             <li class="dropdown">
-              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-user"></i> <span>Account</span></a>
+              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-user"></i> <span>{{ __('Account') }}</span></a>
               <ul class="dropdown-menu">
-                <li><a class="nav-link" href="{{ url_for('core.profiles.list.web') }}/self">My profile</a></li>
-                {%if auth.check %}<li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}/{{ auth.u_uid }}">My account</a></li>{%endif%}
-                <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}">Manage accounts</a></li>
+                <li><a class="nav-link" href="{{ url_for('core.profiles.list.web') }}/self">{{ __('My profile') }}</a></li>
+                {%if auth.check %}<li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}/{{ auth.u_uid }}">{{ __('My account') }}</a></li>{%endif%}
+                <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}">{{ __('Manage accounts') }}</a></li>
               </ul>
             </li>
             <li class="dropdown">
-              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-terminal"></i> <span>Admin</span></a>
+              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-terminal"></i> <span>{{ __('Admin') }}</span></a>
               <ul class="dropdown-menu">
                 <li><a class="nav-link" href="{{ url_for('core.admin.phpinfo.web') }}">phpinfo()</a></li>
                 <li><a class="nav-link" href="{{ url_for('core.admin.phpconst.web') }}">get_defined_constants()</a></li>
@@ -81,37 +81,37 @@
             </li>
             <li class="menu-header">{{ __('Apps') }}</li>
             <li class="dropdown">
-              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-clipboard-check"></i> <span>Membership</span></a>
+              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-clipboard-check"></i> <span>{{ __('Membership') }}</span></a>
               <ul class="dropdown-menu">
                 <li><a class="nav-link" href="#">{{ __('Status') }}</a></li>
                 <li><a class="nav-link" href="#">{{ __('Ballance') }}</a></li>
               </ul>
             </li>
             <li class="dropdown">
-              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-briefcase"></i> <span>Worklog</span></a>
+              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-briefcase"></i> <span>{{ __('Worklog') }}</span></a>
               <ul class="dropdown-menu">
-                <li><a class="nav-link" href="{{ url_for('worklog.i.web') }}">{{ __('What I did today') }}</a></li>
-                <li><a class="nav-link" href="{{ url_for('worklog.we.web') }}">{{ __('Team log') }}</a></li>
+                <li><a class="nav-link" href="{{ url_for('worklog.me') }}">{{ __('What I did today') }}</a></li>
+                <li><a class="nav-link" href="{{ url_for('worklog.we') }}">{{ __('Team log') }}</a></li>
               </ul>
             </li>
             <li class="dropdown">
-              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-mail-bulk"></i> <span>Mail</span></a>
+              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-mail-bulk"></i> <span>{{ __('Mail') }}</span></a>
               <ul class="dropdown-menu">
                 <li><a class="nav-link" href="{{ url_for('mail.accounts.web') }}">{{ __('Accounts') }}</a></li>
                 <li><a class="nav-link" href="{{ url_for('mail.opera.web') }}">{{ __('Opera') }}</a></li>
               </ul>
             </li>
             <li class="dropdown">
-              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-spider"></i> <span>Spider</span></a>
+              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-spider"></i> <span>{{ __('Spider') }}</span></a>
               <ul class="dropdown-menu">
                 <li><a class="nav-link" href="{{ url_for('spider.browse.web') }}">Browse</a></li>
               </ul>
             </li>
             <li class="dropdown">
-              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-calendar"></i> <span>Calendar</span></a>
+              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-calendar"></i> <span>{{ __('Calendar') }}</span></a>
               <ul class="dropdown-menu">
-                <li><a class="nav-link" href="{{ url_for('calendar.browse.web') }}">Browse</a></li>
-                <li><a class="nav-link" href="{{ url_for('calendar.manage.web') }}">Manage</a></li>
+                <li><a class="nav-link" href="{{ url_for('calendar.browse.web') }}">{{ __('Browse') }}</a></li>
+                <li><a class="nav-link" href="{{ url_for('calendar.manage.web') }}">{{ __('Manage') }}</a></li>
               </ul>
             </li>
 
@@ -136,7 +136,7 @@
       </div>
       <footer class="main-footer">
         <div class="footer-left">
-          Copyright &copy; 2019 <div class="bullet"></div> Made by <a href="https://industra.space/">INDUSTRA</a> <div class="bullet"></div> <a href="https://github.com/vaizard/glued-skeleton">Source</a>
+          Copyright &copy; 2019 <div class="bullet"></div> Made by <a href="https://industra.space/">INDUSTRA</a> <div class="bullet"></div> <a href="https://github.com/vaizard/glued-skeleton">{{ __('Source code') }}</a>
         </div>
         <div class="footer-right">
           
