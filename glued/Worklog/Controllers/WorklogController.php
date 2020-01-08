@@ -39,19 +39,16 @@ class WorklogController extends AbstractTwigController
 
     public function me_post(Request $request, Response $response, array $args = []): Response
     {
-        // start off with the request body
+        // start off with the request body & add data
         $data = $request->getParsedBody();
-        // add metadata
-        $data['id'] = 0;
-        $data['_v'] = 1;
-        $data['_s'] = 'worklog/work';
-        //echo $_SESSION['core_user_id'];
+        $data['user'] = (int)$_SESSION['core_user_id'];
+        // TODO document that the validator will set default data if defaults in the schema
         // coerce types
         if ( isset($data['team']) and is_array($data['team'])) { foreach ($data['team'] as $key => $val) { $data['team'][$key] = (int)$val; } }
-        if (isset($data['private'])) { $data['private'] = (bool) $data['private']; }
-        print_r($data);
+        if ( isset($data['private']) ) { $data['private'] = (bool) $data['private']; }
         // convert bodyay to object
         $data = json_decode(json_encode((object)$data));
+        print("<pre>".print_r($data,true)."</pre>");
         // TODO replace manual coercion above with a function to recursively cast types of object values according to the json schema object (see below)       
     
         // load the json schema and validate data against it
@@ -62,10 +59,17 @@ class WorklogController extends AbstractTwigController
         $validator = new \Opis\JsonSchema\Validator;
         $result = $validator->schemaValidation($data, $schema);
 
+        if ($result->isValid()) {
+            print('JSON is valid');
+        } else {
+            $error = $result->getFirstError();
+            print_r($error);
+        }
 
-        print("<pre>".print_r($result,true)."</pre>");
+
+
         
-        print_r($data);
+        print_r(json_encode($data));
         //return $response->withJson($arr);
         return $response;
     }

@@ -20,9 +20,9 @@
       "$id": "#/properties/_s",
       "type": "string",
       "title": "Schema name",
-      "default": "",
+      "default": "worklog/work",
       "examples": [
-        "worklog.work"
+        "worklog/work"
       ],
       "pattern": "^(.*)$"
     },
@@ -30,7 +30,7 @@
       "$id": "#/properties/_v",
       "type": "number",
       "title": "Schema version",
-      "default": "",
+      "default": "1",
       "examples": [
         "1"
       ]
@@ -38,8 +38,8 @@
     "id": {
       "$id": "#/properties/id",
       "type": "integer",
-      "title": "ID of work",
-      "default": "",
+      "title": "ID of work (to be updated from the default 0 value after database insert)",
+      "default": "0",
       "examples": [
         "1"
       ]
@@ -48,7 +48,6 @@
       "$id": "#/properties/user",
       "type": "integer",
       "title": "User ID who performed the work",
-      "default": "",
       "examples": [
         "1"
       ]
@@ -57,9 +56,8 @@
       "$id": "#/properties/date",
       "type": "string",
       "title": "Date at which work was completed",
-      "default": "",
       "examples": [
-        "20200108"
+        "2020-01-08"
       ],
       "pattern": "^(.*)$",
       "format": "date"
@@ -68,7 +66,6 @@
       "$id": "#/properties/time",
       "type": "string",
       "title": "Time spent on work (hh:mm)",
-      "default": "",
       "examples": [
         "22:22"
       ],
@@ -78,7 +75,6 @@
       "$id": "#/properties/summary",
       "type": "string",
       "title": "Summary of the work done",
-      "default": "",
       "examples": [
         "fdfd"
       ],
@@ -88,12 +84,10 @@
       "$id": "#/properties/team",
       "type": "array",
       "title": "Array of domain ids which are recipients of the work (i.e. profit centers)",
-      "default": null,
       "items": {
         "$team_id": "#/properties/team/items",
         "type": "integer",
         "title": "The Items Schema",
-        "default": "",
         "examples": [
           "2"
         ]
@@ -118,7 +112,6 @@
         "waits"
       ],
       "title": "Work status (done = completed, in-progress = partial completion, waits = waits for someone's input)",
-      "default": "",
       "examples": [
         "done"
       ],
@@ -128,7 +121,6 @@
       "$id": "#/properties/finished",
       "type": "string",
       "title": "Time when work was finished / interrupted (hh:mm)",
-      "default": "",
       "examples": [
         "11:11"
       ],
@@ -138,7 +130,6 @@
       "$id": "#/properties/cost",
       "type": "string",
       "title": "Cost of work.",
-      "default": "",
       "examples": [
         "222"
       ],
@@ -148,7 +139,7 @@
       "$id": "#/properties/private",
       "type": "boolean",
       "title": "Set to true when logging work that should be hidden/blacked out from others.",
-      "default": "",
+      "default": false,
       "examples": [
         "true"
       ]
