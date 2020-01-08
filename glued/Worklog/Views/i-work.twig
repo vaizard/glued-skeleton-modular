@@ -2,17 +2,17 @@
                               <div class="form-group col-md-2">
                                 <label>{{ __('Date and duration') }}*</label>
                                 <div class="input-group">
-                                  <input type="text" class="form-control mask_date" name="worklog_date" required placeholder="____/__/__" value="{{ "now" | date("Y/m/d") }}">
-                                  <input type="text" class="form-control mask_time" name="worklog_time" required placeholder="__:__">
+                                  <input type="text" class="form-control mask_date" name="date" required placeholder="____-__-__" value="{{ "now" | date("Y/m/d") }}">
+                                  <input type="text" class="form-control mask_time" name="time" required placeholder="__:__">
                               </div>
                             </div>
                               <div class="form-group col-md-2">
                                 <label>{{ __('Summary') }}*</label>
-                                <input type="text" class="form-control" name="worklog_summary" required>
+                                <input type="text" class="form-control" name="summary" required>
                               </div>
                               <div class="form-group col-md-1">
                                 <label>{{ __('Team') }}*</label><br />
-                                <select class="form-control select2" multiple="" name="worklog_team[]" required>
+                                <select class="form-control select2" multiple="" name="team[]" required>
                                   <option value="1">A Option</option>
                                   <option value="2">B Option</option>
                                   <option value="3">C Option</option>
@@ -20,21 +20,21 @@
                               </div>
                               <div class="form-group col-md-1">
                                 <label>{{ __('Project') }}</label>
-                                <input type="text" class="form-control" name="worklog_project">
+                                <input type="text" class="form-control" name="project">
                               </div>                              
                               <div class="form-group">
                                 <label class="form-label">{{ __('Done / Wip / Waits') }}*</label>
                                 <div class="selectgroup selectgroup-pills">
                                   <label class="selectgroup-item">
-                                    <input type="radio" name="worklog_status" value="done" class="selectgroup-input" checked="">
+                                    <input type="radio" name="status" value="done" class="selectgroup-input" checked="">
                                     <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-check-circle"></i></span>
                                   </label>
                                   <label class="selectgroup-item">
-                                    <input type="radio" name="worklog_status" value="in-progress" class="selectgroup-input">
+                                    <input type="radio" name="status" value="in-progress" class="selectgroup-input">
                                     <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-spinner"></i></span>
                                   </label>
                                   <label class="selectgroup-item">
-                                    <input type="radio" name="worklog_status" value="waits" class="selectgroup-input">
+                                    <input type="radio" name="status" value="waits" class="selectgroup-input">
                                     <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-pause-circle"></i></span>
                                   </label>
 
@@ -43,12 +43,12 @@
                               <div class="form-group col-md-1">
                                 <label>{{ __('Finished at') }}</label>
                                 <div class="input-group">
-                                  <input type="text" class="form-control mask_time" name="worklog_finished" placeholder="__:__">
+                                  <input type="text" class="form-control mask_time" name="finished" placeholder="__:__">
                                 </div>
                               </div>    
                               <div class="form-group col-md-1">
                                 <label>{{ __('Cost') }}</label>
-                                <input type="text" class="form-control" name="worklog_cost">
+                                <input type="text" class="form-control" name="cost">
                               </div>
 
                               <div class="form-group col-md-1">
@@ -60,7 +60,7 @@
                                 <label class="form-label">{{ __('Private') }}</label>
                                 <div class="selectgroup selectgroup-pills">
                                   <label class="selectgroup-item">
-                                    <input type="checkbox" name="worklog_private" value="private" class="selectgroup-input">
+                                    <input type="checkbox" name="private" value="true" class="selectgroup-input">
                                     <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-lock"></i></span>
                                   </label>
                                 </div>

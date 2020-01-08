@@ -2,17 +2,17 @@
                               <div class="form-group col-md-2">
                                 <label>{{ __('Date and duration') }}*</label>
                                 <div class="input-group">
-                                  <input type="text" class="form-control" name="worklog_date" required placeholder="____/__/__" value="{{ "now"|date("Y/m/d") }}">
+                                  <input type="text" class="form-control" name="date" required placeholder="____-__-__" value="{{ "now"|date("Y/m/d") }}">
                               </div>
                             </div>
                               <div class="form-group col-md-2">
                                 <label>{{ __('Summary') }}</label>
-                                <input type="text" class="form-control" name="worklog_summary">
+                                <input type="text" class="form-control" name="summary">
                               </div>
 
                               <div class="form-group col-md-1">
                                 <label>&nbsp;</label><br>
                                 <button type="submit" class="btn btn-primary btn-lg">{{ __('Save') }}</button>
-                                <input type="hidden" name="worklog_type" value="away">
+                                <input type="hidden" name="type" value="away">
                               </div>
                           </div>  

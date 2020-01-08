@@ -2,19 +2,19 @@
                               <div class="form-group col-md-2">
                                 <label>Date and duration*</label>
                                 <div class="input-group">
-                                  <input type="text" class="form-control mask_date" name="worklog_date" required placeholder="____/__/__" value="{{ "now" | date("Y/m/d") }}">
-                                  <input type="text" class="form-control mask_time" name="worklog_time" required placeholder="__:__">
+                                  <input type="text" class="form-control mask_date" name="date" required placeholder="____-__-__" value="{{ "now" | date("Y/m/d") }}">
+                                  <input type="text" class="form-control mask_time" name="time" required placeholder="__:__">
                                 </div>
                               </div>
                               <div class="form-group col-md-1">
                                 <label>Started at*</label>
                                 <div class="input-group">
-                                  <input type="text" class="form-control" name="worklog_started" required placeholder="__:__">
+                                  <input type="text" class="form-control" name="started" required placeholder="__:__">
                                 </div>
                               </div>                                  
                               <div class="form-group col-md-2">
                                 <label>Role*</label><br />
-                                <select class="form-control select2" multiple="" id="worklog_shift_role" name="worklog_role[]" required>
+                                <select class="form-control select2" multiple="" id="worklog_shift_role" name="role[]" required>
                                   <option value="1">A Option</option>
                                   <option value="2">B Option</option>
                                   <option value="3">C Option</option>
@@ -22,7 +22,7 @@
                               </div>
                               <div class="form-group col-md-2">
                                 <label>Team*</label><br />
-                                <select class="form-control select2" multiple="" name="worklog_team[]" required>
+                                <select class="form-control select2" multiple="" name="team[]" required>
                                   <option value="1">A Option</option>
                                   <option value="2">B Option</option>
                                   <option value="3">C Option</option>
@@ -30,7 +30,7 @@
                               </div>
                               <div class="form-group col-md-1">
                                 <label>Location</label>
-                                <input type="text" class="form-control" name="worklog_location">
+                                <input type="text" class="form-control" name="location">
                               </div>                         
 
                               <div class="form-group col-md-1">

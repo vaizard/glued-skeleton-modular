@@ -2,7 +2,7 @@
                               <div class="form-group col-md-2">
                                 <label>Date and duration*</label>
                                 <div class="input-group">
-                                  <input type="text" class="form-control" id="worklog_date" required placeholder="____/__/__" value="{{ "now" | date("Y/m/d") }}">
+                                  <input type="text" class="form-control" id="worklog_date" required placeholder="____-__-__" value="{{ "now" | date("Y/m/d") }}">
                                   <input type="text" class="form-control" id="worklog_time" required placeholder="__:__">
                               </div>
                             </div>
@@ -30,7 +30,7 @@
                               </div>    
                               <div class="form-group col-md-2">
                                 <label>Description*</label>
-                                <textarea class="form-control" name="worklog_description" rows="1" required></textarea>
+                                <textarea class="form-control" name="description" rows="1" required></textarea>
                               </div>
 
                               <div class="form-group col-md-1">
@@ -42,7 +42,7 @@
                                 <label class="form-label">Private</label>
                                 <div class="selectgroup selectgroup-pills">
                                   <label class="selectgroup-item">
-                                    <input type="checkbox" name="worklog_private" value="private" class="selectgroup-input"  disabled="true">
+                                    <input type="checkbox" name="private" value="private" class="selectgroup-input"  disabled="true">
                                     <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-lock"></i></span>
                                   </label>
                                 </div>
