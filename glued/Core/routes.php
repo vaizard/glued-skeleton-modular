@@ -7,6 +7,7 @@ use Glued\Core\Middleware\RedirectIfNotAuthenticated;
 use Glued\Core\Controllers\Accounts;
 use Glued\Core\Controllers\AuthController;
 use Glued\Core\Controllers\Profiles;
+use Glued\Core\Controllers\DomainsController as Domains;
 use Glued\Core\Controllers\ProfilesApi;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -35,6 +36,10 @@ $app->group('/', function (RouteCollectorProxy $group) {
     $group->get ('core/accounts', Accounts::class . ':list') ->                 setName('core.accounts.list.web');
     $group->get ('core/accounts/{uid:[0-9]+}', Accounts::class . ':read') ->           setName('core.accounts.read.web');
     $group->patch('core/accounts/{uid:[0-9]+}/password', AuthController::class . ':change_password')-> setName('core.settings.password.web');//->add(new RedirectIfAuthenticated( $app->getRouteCollector->getRouteParser() )); TODO / ano?
+
+    $group->get ('core/domains', Domains::class . ':ui_manage') ->              setName('core.domains');
+    $group->get ('api/core/v1/domains', Domains::class . ':list') ->            setName('core.domains.api01');
+    $group->post('api/core/v1/domains', Domains::class . ':create');
 
     $group->get ('core/admin/phpinfo', function(Request $request, Response $response) { phpinfo(); }) -> setName('core.admin.phpinfo.web');
     $group->get ('core/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); }) -> setName('core.admin.phpconst.web');

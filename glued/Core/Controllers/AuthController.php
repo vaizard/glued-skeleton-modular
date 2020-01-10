@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace Glued\Core\Controllers;
 use Glued\Core\Classes\Auth\Auth;
-use Glued\Core\Classes\JsonResponse\JsonResponseBuilder;
+use Glued\Core\Classes\Json\JsonResponseBuilder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
@@ -68,8 +68,6 @@ class AuthController extends AbstractTwigController
                                ->withValidationReseed($reseed)
                                ->build();
             return $response->withJson($payload, 400);
-            // TODO With the ajax form submit via the twig view (see signup_get()) the browser's console log
-            // sees a 302 redirect, but the page doesn't reload (even if it should per the jquery success callback)
 
         } else {
 

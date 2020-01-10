@@ -66,6 +66,7 @@
                 <li><a class="nav-link" href="{{ url_for('core.profiles.list.web') }}/self">{{ __('My profile') }}</a></li>
                 {%if auth.check %}<li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}/{{ auth.u_uid }}">{{ __('My account') }}</a></li>{%endif%}
                 <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}">{{ __('Manage accounts') }}</a></li>
+                <li><a class="nav-link" href="{{ url_for('core.domains') }}">{{ __('Manage domains') }}</a></li>
               </ul>
             </li>
             <li class="dropdown">

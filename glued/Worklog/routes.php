@@ -7,8 +7,14 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 // Define the app routes.
-$app->group('/worklog', function (RouteCollectorProxy $group) {
-    $group->get ('/me', WorklogController::class . ':me_get')->setName('worklog.me'); 
+
+$app->group('/api/worklog/v1', function (RouteCollectorProxy $group) {
+    $group->get ('/me', WorklogController::class . ':me_get')->setName('worklog.me.api01'); 
     $group->post('/me', WorklogController::class . ':me_post');
-    $group->get ('/we', WorklogController::class . ':we_get')->setName('worklog.we'); 
+    $group->get ('/we', WorklogController::class . ':we_get')->setName('worklog.we.api01'); 
+});
+
+$app->group('/worklog', function (RouteCollectorProxy $group) {
+    $group->get ('/me', WorklogController::class . ':me_ui')->setName('worklog.me'); 
+    $group->get ('/we', WorklogController::class . ':we_ui')->setName('worklog.we'); 
 });

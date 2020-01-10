@@ -34,7 +34,7 @@
                     
                     <div class="tab-content" id="worklog-forms">
                       <div class="tab-pane fade show active" id="worklog-work-div" role="tabpanel" aria-labelledby="worklog-work">
-                        <form action="{{ url_for('worklog.me') }}" method="post" autocomplete="off" id="worklog_work_form">
+                        <form action="{{ url_for('worklog.me.api01') }}" method="post" autocomplete="off" id="worklog_work_form">
                           {% include '/Worklog/Views/i-work.twig' %}
                         </form>
                      </div>
@@ -65,89 +65,42 @@
                         <tr>
                           <th class="col-sm-1">{{ __('Day / Fin.') }}</th>
                           <th class="col-sm-1">{{ __('Type') }}</th>
-                          <th>{{ __('Summary') }}</th>
+                          <th class="col-sm-3">{{ __('Summary') }}</th>
                           <th class="col-sm-1">{{ __('Hrs.') }}</th>
-                          <th>{{ __('Team') }}</th>
-                          <th>{{ __('Project') }}</th>
-                          <th>{{ __('Status') }}</th>
-                          <th>{{ __('Location') }}</th>
-                          <th>{{ __('Details') }}</th>
+                          <th class="col-sm-1">{{ __('Team') }}</th>
+                          <th class="col-sm-1">{{ __('Project') }}</th>
+                          <th class="col-sm-2">{{ __('Status') }}</th>
+                          <th class="col-sm-1">{{ __('Location') }}</th>
+                          <th class="col-sm-1">{{ __('Details') }}</th>
                         </tr>
+                        <tr id="worklog_rows_placeholder"></tr>
+                      {% verbatim %}
+                      <script type="text/twig" id="worklog_rows_twig">
+                        {% for row in work %}
                         <tr>
-                        <tr class="table-info">
-                          <td>⁠—</td>
-                          <td></td>
-                          <td>January 2020</td>
-                          <td>155:27</td>
-                          <td>Industra</td>
-                          <td>{{ event.dtend }}</td>
-                          <td>{{ event.description }}</td>
-                          <td>{{ event.last_modifed }}</td>
-                          <td></td>
-                          <td></td>
-                        </tr>
-                        <tr>
-                          <td>01 / 14:25</td>
-                          <td><i class="fas fa-wrench"></i></td>
-                          <td>Installing the water faucet <a href="">#331</a></td>
-                          <td>03:30</td>
-                          <td>Industra</td>
-                          <td>#331</td>
-
-                          <td><div class="badge badge-primary">done</div><div class="badge badge-danger">wip</div><div class="badge badge-warning">waits</div><div class="badge badge-dark">private</div></td>
-                          <td>Location</td>
-                          <td><i class="fas fa-paperclip"></i> <i class="fas fa-info-circle"></i></td>
-                        </tr>
-                        <tr>
-                          <td>02</td>
-                          <td><i class="fas fa-handshake"></i></td>
-                          <td>Meet <a href="">@Gerhard Boben</a> from <a href="">@BBC</a>. Add location, details, files</td>
-                          <td>02:30</td>
-                          <td>Industra</td>
-                          <td>#331</td>
-
-                          <td>
-                            <div class="badge badge-primary"><i class="fas fa-spinner"></i><span style="display: none">wip</span></div>
-                            <div class="badge badge-danger"><i class="fas fa-pause-circle"></i><span style="display: none">waits</span></div>
-                            <div class="badge badge-success"><i class="fas fa-check-circle"></i><span style="display: none">done</span></div>
-                            <div class="badge badge-dark"><i class="fas fa-lock"></i><span style="display: none">private</span></div>
-                            <div class="badge badge-dark"><i class="fas fa-pen"></i><span style="display: none">edited</span></div>
+                          <td class="col-sm-1"><b>{{ row.date | slice(2) }}</b>{{ "@" ~ row.finished }}</td>
+                          <td class="col-sm-1">
+                          {% if row._s == 'worklog/work' %}<i class="fas fa-wrench"></i>{% endif %}
+                          {% if row._s == 'worklog/away' %}<i class="fas fa-battery-quarter"></i>{% endif %}
+                          {% if row._s == 'worklog/shift' %}<i class="fas fa-user-clock"></i>{% endif %}
+                          {% if row._s == 'worklog/negotiation' %}<i class="fas fa-handshake"></i>{% endif %}
                           </td>
-                        </tr>
-                        <tr>
-                          <td>01</td>
-                          <td><i class="fas fa-battery-quarter"></i></td>
-                          <td>Ill. Guru meditation</td>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td><div class="badge badge-primary"><i class="fas fa-umbrella-beach"></i></div></td>
-                        </tr>
-                        <tr>
-                          <td>01</td>
-                          <td><i class="fas fa-user-clock"></i></td>
-                          <td>Barista</td>
-                          <td>03:30</td>
-                          <td>Industra</td>
-                          <td>#331</td>
-
-                          <td><div class="badge badge-primary">done</div><div class="badge badge-danger">wip</div><div class="badge badge-warning">waits</div><div class="badge badge-dark">private</div></td>
-                        </tr>
-                        {% for date, events in out %}
-                        {% for event in events %}
-
-                        <tr>
-                          <td>{{ date }}</td>
-                          <td><span title="{{ event.created }}">{{ event.hrcreated }}</span></td>
-                          <td>{{ event.summary }}</td>
-                          <td>{{ event.dtstart }}</td>
-                          <td>{{ event.dtend }}</td>
-                          <td>{{ event.description }}</td>
-                          <td>{{ event.last_modifed }}</td>
+                          <td>{{ row.summary }}</td>
+                          <th class="col-sm-1">{{ row.time }}</td>
+                          <td>{{ row.domain }}</td>
+                          <td>{{ row.project | default('') }}</td>
+                          <td>
+                          {% if row.status == 'done' %}<div class="badge badge-success"><i class="fas fa-check-circle"></i><span style="display: none">done</span></div>{% endif %}
+                          {% if row.status == 'in-progress' %}<div class="badge badge-primary"><i class="fas fa-spinner"></i><span style="display: none">wip</span></div>{% endif %}
+                          {% if row.status == 'waits' %}<div class="badge badge-danger"><i class="fas fa-pause-circle"></i><span style="display: none">waits</span></div>{% endif %}
+                          {% if row.private == true %}<div class="badge badge-dark"><i class="fas fa-lock"></i><span style="display: none">private</span></div>{% endif %}
+                          </td>
+                          <td>{{ row.location | default('') }}</td>
+                          <td>{{ row.details | default('') }}</td>
                         </tr>
                         {% endfor %}
-                        {% endfor %}
+                      </script>
+                      {% endverbatim %}
                       </table>
                     </div>
                   </div>
@@ -163,6 +116,8 @@
 {% block additionaljs %}
   <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
   <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/select2/dist/js/select2.full.min.js"></script>
+  <script src="/assets/node_modules/@claviska/jquery-ajax-submit/jquery.ajaxSubmit.min.js" nonce="{{ csp_nonce.script_src }}"></script>
+  <script src="/assets/node_modules/twig/twig.min.js" nonce="{{ csp_nonce.script_src }}"></script>
   <script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
   $(function() {
     $('.mask_date').mask('0000-00-00');
@@ -170,11 +125,29 @@
     $('.select2').select2();
   });
 
-  $(document).ready(function(){
-    $("button").click(function(){
-      $("p").hide(1000);
-    });
+  // Compile the data
+  $("script[type='text/twig']").each(function() {
+      var id = $(this).attr("id"),
+      data = $(this).text();
+      Twig.twig({ id: id, data: data, allowInlineIncludes: true });
   });
+
+$( document ).ready(function() {
+  var api_url = '{{ url_for('worklog.me.api01') }}'
+  $.ajax({
+    url: api_url,
+    contentType: "application/json",
+    dataType: 'json',
+    success: function(res){
+      console.log(res);
+      var idhold = 'worklog_rows_placeholder';
+      var idtwig = 'worklog_rows_twig';
+      $("#" + idhold).replaceWith(
+        Twig.twig({ ref: idtwig }).render({ work: res.data })
+      )
+    }
+  })
+});
 
 
   $("#worklog_work_form").ajaxSubmit({
@@ -182,8 +155,7 @@
       return $(this).serialize();
     },
     success: function(res) {
-        //console.log(res);
-        location.reload();
+        console.log(res);
     },
     error: function(res) {
         console.log(res);

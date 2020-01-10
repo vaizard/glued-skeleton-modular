@@ -57,7 +57,7 @@ $container->set('routerParser', $app->getRouteCollector()->getRouteParser());
 
 
 $container->set('view', function (Container $c) {
-    $twig = new Twig(__ROOT__ . '/glued/', $c->get('settings')['twig']);
+    $twig = Twig::create(__ROOT__ . '/glued/', $c->get('settings')['twig']);
     $loader = $twig->getLoader();
     $loader->addPath(__ROOT__ . '/public', 'public');
     $twig->addExtension(new TwigAssetsExtension($twig->getEnvironment(), (array)$c->get('settings')['assets']));

@@ -1,5 +1,5 @@
 <?php
-namespace Glued\Core\Classes\JsonResponse;
+namespace Glued\Core\Classes\Json;
 
 /**
  * See example usage in the Core\Controllers\ProfilesApi.

@@ -12,7 +12,7 @@
     "date",
     "time",
     "summary",
-    "team",
+    "domain",
     "status"
   ],
   "properties": {
@@ -80,18 +80,13 @@
       ],
       "pattern": "^(.*)$"
     },
-    "team": {
-      "$id": "#/properties/team",
-      "type": "array",
-      "title": "Array of domain ids which are recipients of the work (i.e. profit centers)",
-      "items": {
-        "$team_id": "#/properties/team/items",
-        "type": "integer",
-        "title": "The Items Schema",
-        "examples": [
-          "2"
-        ]
-      }
+    "domain": {
+      "$id": "#/properties/domain",
+      "type": "integer",
+      "title": "Domain id (think 'team', or 'profit center') which is the recipients of the work",
+      "examples": [
+        "2"
+      ]
     },
     "project": {
       "$id": "#/properties/project",
@@ -124,7 +119,8 @@
       "examples": [
         "11:11"
       ],
-      "pattern": "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+      "default": "",
+      "pattern": "^$|(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
     },
     "cost": {
       "$id": "#/properties/cost",
