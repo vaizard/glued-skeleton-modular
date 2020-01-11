@@ -1,174 +1,162 @@
 {% extends '/Core/Views/templates/default.twig' %}
 
 {% block content %}
+<div class="section-header">
+  <h1>{{ __('What I did today') }}</h1>
+</div>
 
-          <div class="section-header">
-            <h1>{{ __('What I did today') }}</h1>
-          </div>
-
-          <div class="section-body">
-
-<div class="row">
-              <div class="col-12">
-                <div class="card">
-                  <div class="card-header">
-
-                    <ul class="nav nav-pills" id="worklog-pills" role="tablist">
-                      <li class="nav-item">
-                        <a class="nav-link active" id="worklog-work" data-toggle="tab" href="#worklog-work-div" role="tab" aria-controls="work" aria-selected="true"><i class="fas fa-wrench"></i> {{ __('Work') }}</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link" id="worklog-shift" data-toggle="tab" href="#worklog-shift-div" role="tab" aria-controls="shift" aria-selected="false"><i class="fas fa-user-clock"></i> {{ __('Shift') }}</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link" id="worklog-negotiation" data-toggle="tab" href="#worklog-negotiation-div" role="tab" aria-controls="negotiation" aria-selected="false"><i class="fas fa-handshake"></i> {{ __('Negotiation') }}</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link" id="worklog-away" data-toggle="tab" href="#worklog-away-div" role="tab" aria-controls="away" aria-selected="false"><i class="fas fa-battery-quarter"></i> {{ __('Away / sick') }}</a>
-                      </li>
-                    </ul>
-
-
-                  </div>
-                  <div class="card-body">
-                    
-                    <div class="tab-content" id="worklog-forms">
-                      <div class="tab-pane fade show active" id="worklog-work-div" role="tabpanel" aria-labelledby="worklog-work">
-                        <form action="{{ url_for('worklog.me.api01') }}" method="post" autocomplete="off" id="worklog_work_form">
-                          {% include '/Worklog/Views/i-work.twig' %}
-                        </form>
-                     </div>
-                      <div class="tab-pane fade" id="worklog-shift-div" role="tabpanel" aria-labelledby="worklog-shift">
-                      {# {% include '/Worklog/Views/i-shift.twig' %} #}
-                      {{ __('Disabled') }}
-                      </div>
-                      <div class="tab-pane fade" id="worklog-negotiation-div" role="tabpanel" aria-labelledby="worklog-negotiation">
-                      {# {% include '/Worklog/Views/i-negotiate.twig' %} #}
-                      {{ __('Disabled') }}
-                      </div>
-                      <div class="tab-pane fade" id="worklog-away-div" role="tabpanel" aria-labelledby="worklog-away">
-                      {% include '/Worklog/Views/i-away.twig' %}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-
-            <div class="row">
-              <div class="col-12">
-                <div class="card">
-
-                  <div class="card-body p-0">
-                    <div class="table-responsive">
-                      <table class="table table-striped" id="log">
-                        <tr>
-                          <th class="col-sm-1">{{ __('Day / Fin.') }}</th>
-                          <th class="col-sm-1">{{ __('Type') }}</th>
-                          <th class="col-sm-3">{{ __('Summary') }}</th>
-                          <th class="col-sm-1">{{ __('Hrs.') }}</th>
-                          <th class="col-sm-1">{{ __('Team') }}</th>
-                          <th class="col-sm-1">{{ __('Project') }}</th>
-                          <th class="col-sm-2">{{ __('Status') }}</th>
-                          <th class="col-sm-1">{{ __('Location') }}</th>
-                          <th class="col-sm-1">{{ __('Details') }}</th>
-                        </tr>
-                        <tr id="worklog_rows_placeholder"></tr>
-                      {% verbatim %}
-                      <script type="text/twig" id="worklog_rows_twig">
-                        {% for row in work %}
-                        <tr>
-                          <td class="col-sm-1"><b>{{ row.date | slice(2) }}</b>{{ "@" ~ row.finished }}</td>
-                          <td class="col-sm-1">
-                          {% if row._s == 'worklog/work' %}<i class="fas fa-wrench"></i>{% endif %}
-                          {% if row._s == 'worklog/away' %}<i class="fas fa-battery-quarter"></i>{% endif %}
-                          {% if row._s == 'worklog/shift' %}<i class="fas fa-user-clock"></i>{% endif %}
-                          {% if row._s == 'worklog/negotiation' %}<i class="fas fa-handshake"></i>{% endif %}
-                          </td>
-                          <td>{{ row.summary }}</td>
-                          <th class="col-sm-1">{{ row.time }}</td>
-                          <td>{{ row.domain }}</td>
-                          <td>{{ row.project | default('') }}</td>
-                          <td>
-                          {% if row.status == 'done' %}<div class="badge badge-success"><i class="fas fa-check-circle"></i><span style="display: none">done</span></div>{% endif %}
-                          {% if row.status == 'in-progress' %}<div class="badge badge-primary"><i class="fas fa-spinner"></i><span style="display: none">wip</span></div>{% endif %}
-                          {% if row.status == 'waits' %}<div class="badge badge-danger"><i class="fas fa-pause-circle"></i><span style="display: none">waits</span></div>{% endif %}
-                          {% if row.private == true %}<div class="badge badge-dark"><i class="fas fa-lock"></i><span style="display: none">private</span></div>{% endif %}
-                          </td>
-                          <td>{{ row.location | default('') }}</td>
-                          <td>{{ row.details | default('') }}</td>
-                        </tr>
-                        {% endfor %}
-                      </script>
-                      {% endverbatim %}
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
+<div class="section-body">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-pills" id="worklog-pills" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="worklog-work" data-toggle="tab" href="#worklog-work-div" role="tab" aria-controls="work" aria-selected="true"><i class="fas fa-wrench"></i> {{ __('Work') }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="worklog-shift" data-toggle="tab" href="#worklog-shift-div" role="tab" aria-controls="shift" aria-selected="false"><i class="fas fa-user-clock"></i> {{ __('Shift') }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="worklog-negotiation" data-toggle="tab" href="#worklog-negotiation-div" role="tab" aria-controls="negotiation" aria-selected="false"><i class="fas fa-handshake"></i> {{ __('Negotiation') }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="worklog-away" data-toggle="tab" href="#worklog-away-div" role="tab" aria-controls="away" aria-selected="false"><i class="fas fa-battery-quarter"></i> {{ __('Away / sick') }}</a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content" id="worklog-forms">
+            <div class="tab-pane fade show active" id="worklog-work-div" role="tabpanel" aria-labelledby="worklog-work">
+              <form action="{{ url_for('worklog.me.api01') }}" method="post" autocomplete="off" id="worklog_work_form">
+                {% include '/Worklog/Views/i-work.twig' %}
+              </form>
             </div>
-
-
-
+            <div class="tab-pane fade" id="worklog-shift-div" role="tabpanel" aria-labelledby="worklog-shift">
+              {# {% include '/Worklog/Views/i-shift.twig' %} #}
+              {{ __('Disabled') }}
+            </div>
+            <div class="tab-pane fade" id="worklog-negotiation-div" role="tabpanel" aria-labelledby="worklog-negotiation">
+              {# {% include '/Worklog/Views/i-negotiate.twig' %} #}
+              {{ __('Disabled') }}
+            </div>
+            <div class="tab-pane fade" id="worklog-away-div" role="tabpanel" aria-labelledby="worklog-away">
+              {% include '/Worklog/Views/i-away.twig' %}
+            </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped" id="log">
+              <thead>
+                <tr>
+                  <th class="col-sm-1">{{ __('Finished at') }}</th>
+                  <th class="col-sm-1">{{ __('Type') }}</th>
+                  <th class="col-sm-3">{{ __('Summary') }}</th>
+                  <th class="col-sm-1">{{ __('Duration') }}</th>
+                  <th class="col-sm-1">{{ __('Team') }}</th>
+                  <th class="col-sm-1">{{ __('Project') }}</th>
+                  <th class="col-sm-2">{{ __('Status') }}</th>
+                  <th class="col-sm-1">{{ __('Location') }}</th>
+                  <th class="col-sm-1">{{ __('Details') }}</th>
+                </tr>
+              </thead>
+              <tbody id="worklog_rows_placeholder">
+                {% verbatim %}
+                <script type="text/twig" id="worklog_row_add">
+                <tr>
+                <td class="col-sm-1"><b>{{ row.date | slice(2) | replace({'-': ''}) }}{{ "@" ~ row.finished }}</b></td>
+                <td class="col-sm-1">
+                {% if row._s == 'worklog/work' %}<i class="fas fa-wrench"></i>{% endif %}
+                {% if row._s == 'worklog/away' %}<i class="fas fa-battery-quarter"></i>{% endif %}
+                {% if row._s == 'worklog/shift' %}<i class="fas fa-user-clock"></i>{% endif %}
+                {% if row._s == 'worklog/negotiation' %}<i class="fas fa-handshake"></i>{% endif %}
+                </td>
+                <td>{{ row.summary }}</td>
+                <td class="col-sm-1">{{ row.time }}</td>
+                <td>{{ row.domain }}</td>
+                <td>{{ row.project | default('') }}</td>
+                <td>
+                {% if row.status == 'done' %}<div class="badge badge-success"><i class="fas fa-check-circle"></i><span style="display: none">done</span></div>{% endif %}
+                {% if row.status == 'in-progress' %}<div class="badge badge-primary"><i class="fas fa-spinner"></i><span style="display: none">wip</span></div>{% endif %}
+                {% if row.status == 'waits' %}<div class="badge badge-danger"><i class="fas fa-pause-circle"></i><span style="display: none">waits</span></div>{% endif %}
+                {% if row.private == true %}<div class="badge badge-dark"><i class="fas fa-lock"></i><span style="display: none">private</span></div>{% endif %}
+                </td>
+                <td>{{ row.location | default('') }}</td>
+                <td>{{ row.details | default('') }}</td>
+                </tr>
+                </script>
+                <script type="text/twig" id="worklog_rows_twig">
+                {% for row in work %}
+                {% include "worklog_row_add" %}
+                {% endfor %}
+                </script>
+                {% endverbatim %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block additionaljs %}
-  <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
-  <script nonce="{{ csp_nonce.script_src }}" src="/assets/node_modules/select2/dist/js/select2.full.min.js"></script>
-  <script src="/assets/node_modules/@claviska/jquery-ajax-submit/jquery.ajaxSubmit.min.js" nonce="{{ csp_nonce.script_src }}"></script>
-  <script src="/assets/node_modules/twig/twig.min.js" nonce="{{ csp_nonce.script_src }}"></script>
-  <script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+<script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+  // Set up form elements
   $(function() {
     $('.mask_date').mask('0000-00-00');
     $('.mask_time').mask('00:00');
     $('.select2').select2();
   });
 
-  // Compile the data
+  // Compile twig.js templates
   $("script[type='text/twig']").each(function() {
-      var id = $(this).attr("id"),
-      data = $(this).text();
-      Twig.twig({ id: id, data: data, allowInlineIncludes: true });
+    var id = $(this).attr("id"),
+    data = $(this).text();
+    Twig.twig({ id: id, data: data, allowInlineIncludes: true });
   });
 
-$( document ).ready(function() {
-  var api_url = '{{ url_for('worklog.me.api01') }}'
-  $.ajax({
-    url: api_url,
-    contentType: "application/json",
-    dataType: 'json',
-    success: function(res){
-      console.log(res);
-      var idhold = 'worklog_rows_placeholder';
-      var idtwig = 'worklog_rows_twig';
-      $("#" + idhold).replaceWith(
-        Twig.twig({ ref: idtwig }).render({ work: res.data })
-      )
-    }
-  })
-});
+  // Onload ajax to fetch worklog data
+  $( document ).ready(function() {
+    var api_url = '{{ url_for('worklog.me.api01') }}'
+    $.ajax({
+      url: api_url,
+      contentType: "application/json",
+      dataType: 'json',
+      success: function(res){
+        console.log(res);
+        var idhold = 'worklog_rows_placeholder';
+        var idtwig = 'worklog_rows_twig';
+        $("#" + idhold).append(
+          Twig.twig({ ref: idtwig }).render({ work: res.data })
+          )
+      }
+    })
+  });
 
-
+  // Post (new) data, modify current page
   $("#worklog_work_form").ajaxSubmit({
     data: function() {
       return $(this).serialize();
     },
     success: function(res) {
-        console.log(res);
+      var idtwig = 'worklog_row_add';
+      $('#log > tbody > tr:first').before(
+        Twig.twig({ ref: 'worklog_row_add' }).render({ row: res.data })
+        );
     },
     error: function(res) {
-        console.log(res);
-        //$("div.twigjs").each(function() {
-        //  console.log(res);
-          //var idhold = $(this).attr("id");
-          //var idtwig = $(this).attr("id").slice(0, -12) + '_twig';
-          //$("#" + idhold).html(
-          //  Twig.twig({ ref: idtwig }).render({ validation_errors: res.messages.validation_error, validation_reseed: res.messages.validation_reseed })
-          //);
-        //});
+      console.log(res);
     }
   });
-  </script>   
-
+</script>
 {% endblock %}
