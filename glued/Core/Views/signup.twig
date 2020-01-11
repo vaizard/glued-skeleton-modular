@@ -86,7 +86,7 @@
       $("#signup_form").ajaxSubmit({
           success: function(res) {
               //console.log(res);
-              location.reload();
+              window.location.replace('/');
           },
           error: function(res) {
               $("div.twigjs").each(function() {

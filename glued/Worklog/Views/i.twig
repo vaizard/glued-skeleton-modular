@@ -150,9 +150,7 @@
     },
     success: function(res) {
       var idtwig = 'worklog_row_add';
-      $('#log > tbody > tr:first').before(
-        Twig.twig({ ref: 'worklog_row_add' }).render({ row: res.data })
-        );
+      $(Twig.twig({ ref: 'worklog_row_add' }).render({ row: res.data })).prependTo("#log > tbody");
     },
     error: function(res) {
       console.log(res);
