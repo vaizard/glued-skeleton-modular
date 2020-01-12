@@ -25,6 +25,7 @@ $app = AppFactory::create();
 $nyholmFactory = new Psr17Factory();
 $decoratedResponseFactory = new DecoratedResponseFactory($nyholmFactory, $nyholmFactory);
 
+
 require_once (__ROOT__ . '/glued/container.php');
 require_once (__ROOT__ . '/glued/environment.php');
 require_once (__ROOT__ . '/glued/middleware.php');
@@ -32,5 +33,4 @@ require_once (__ROOT__ . '/glued/routes.php');
 
 
 $app->run();
-
 ?>
