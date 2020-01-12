@@ -20,6 +20,9 @@ use Symfony\Component\Translation\Loader\MoFileLoader;
 use Symfony\Component\Translation\Translator;
 use Twig\Loader\FilesystemLoader;
 
+$container->set('settings', function() {
+    return require_once(__ROOT__ . '/glued/settings.php');
+});
 
 $container->set(LoggerInterface::class, function (Container $c) {
     $settings = $c->get('settings')['logger'];
