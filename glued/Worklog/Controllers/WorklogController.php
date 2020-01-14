@@ -64,6 +64,7 @@ class WorklogController extends AbstractTwigController
             FROM `t_worklog_items` 
             LEFT JOIN t_core_users ON t_worklog_items.c_user_id = t_core_users.c_uid
             LEFT JOIN t_core_domains ON t_worklog_items.c_domain_id = t_core_domains.c_uid
+            ORDER BY `date` DESC, `finished` DESC
         ");
         return $log;
     }
@@ -90,7 +91,7 @@ class WorklogController extends AbstractTwigController
         $id = (int)$_SESSION['core_user_id'] ?? 0;
         if ($id === 0) { throw new HttpForbiddenException( $request, 'Please log in.' );  }
         $workobj = $this->db->rawQuery("SELECT *, JSON_EXTRACT(c_json, '$.date') AS j_date, JSON_EXTRACT(c_json, '$.finished') AS j_finished 
-                                        FROM `t_worklog_items` WHERE `c_user_id` = ? ORDER BY `j_date`, `j_finished` ASC", [ $id ]);
+                                        FROM `t_worklog_items` WHERE `c_user_id` = ? ORDER BY `j_date` DESC, `j_finished` DESC", [ $id ]);
         $work = [];
         foreach ($workobj as $row) { $work[] = json_decode($row['c_json']); }
         $payload = $builder->withData((array)$work)->withCode(200)->build();
