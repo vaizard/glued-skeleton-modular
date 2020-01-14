@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Glued\Worklog\Controllers;
+namespace Glued\Contacts\Controllers;
 
 use Carbon\Carbon;
 use Glued\Core\Classes\Json\JsonResponseBuilder;
@@ -15,7 +15,7 @@ use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpForbiddenException;
 use Spatie\Browsershot\Browsershot;
 
-class WorklogController extends AbstractTwigController
+class ContactsController extends AbstractTwigController
 {
     /**
      * @param Request  $request
@@ -25,49 +25,56 @@ class WorklogController extends AbstractTwigController
      * @return Response
      */
 
-    public function me_ui(Request $request, Response $response, array $args = []): Response
+    public function collection_ui(Request $request, Response $response, array $args = []): Response
     {
         // TODO add constrains on what domains a user can actually list
-        $domains = $this->db->get('t_core_domains');
+        //$domains = $this->db->get('t_core_domains');
         
         // TODO add default domain for each user - maybe base this on some stats?
-        return $this->render($response, 'Worklog/Views/i.twig', [
-            'domains' => $domains
+        return $this->render($response, 'Contacts/Views/collection.twig', [
+            //'domains' => $domains
         ]);
     }
 
-    public function we_get(Request $request, Response $response, array $args = []): Response
+
+    // show form for add new contact
+    public function addContactForm($request, $response)
     {
-        $log = $this->db->rawQuery("
-            SELECT
-                c_domain_id as 'domain',
-                t_worklog_items.c_user_id as 'user',
-                t_core_users.c_name as 'user_name',
-                t_core_domains.c_name as 'domain_name',
-                c_json->>'$._s' as '_s',
-                c_json->>'$._v' as '_v',
-                c_json->>'$.summary' as 'summary',
-                c_json->>'$.date' as 'date',
-                c_json->>'$.time' as 'time',
-                c_json->>'$.location' as 'location',
-                c_json->>'$.status' as 'status',
-                c_json->>'$.private' as 'private',
-                c_json->>'$.finished' as 'finished',
-                c_json->>'$.project' as 'project'
-            FROM `t_worklog_items` 
-            LEFT JOIN t_core_users ON t_worklog_items.c_user_id = t_core_users.c_uid
-            LEFT JOIN t_core_domains ON t_worklog_items.c_domain_id = t_core_domains.c_uid
-        ");
+        $form_output = '';
 
-        return $response->withJson($log);
-        // TODO handle errors
+        $jsf_schema   = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.v1.schema');
+        $jsf_uischema = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.v1.formui');
+        $jsf_formdata = '{"data":{}}';
+        $jsf_onsubmit = '
+            $.ajax({
+                url: "https://'.$this->settings['glued']['hostname'].$this->routerParser->pathFor('contacts.api.new').'",
+                dataType: "text",
+                type: "POST",
+                data: "billdata=" + JSON.stringify(formData.formData),
+                success: function(data) {
+                    ReactDOM.render((<div><h1>Thank you</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre><h2>Final data</h2><pre>{data}</pre></div>), 
+                         document.getElementById("main"));
+                },
+                error: function(xhr, status, err) {
+                    alert(status + err + data);
+                    ReactDOM.render((<div><h1>Something goes wrong ! not saving.</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre></div>), 
+                         document.getElementById("main"));
+                }
+            });
+        ';
+
+        return $this->render($response, 'Core/Views/glued.twig', [
+            'json_schema_output' => $jsf_schema,
+            'json_uischema_output' => $jsf_uischema,
+            'json_formdata_output' => $jsf_formdata,
+            'json_onsubmit_output' => $jsf_onsubmit,
+            'json_formdata_render_custom_array' => '1'
+
+        ]);
+
+        return $this->view->render($response, 'contacts/addcontact.twig', array(
+        ));
     }
-
-    public function we_ui(Request $request, Response $response, array $args = []): Response
-    {
-        return $this->render($response, 'Worklog/Views/we.twig', []);
-    }
-
 
     public function me_get(Request $request, Response $response, array $args = []): Response
     {

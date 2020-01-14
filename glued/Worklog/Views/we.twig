@@ -1,0 +1,96 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+<div class="section-header">
+  <h1>{{ __('Team stats') }}</h1>
+</div>
+
+<div class="section-body">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped" id="log">
+              <thead>
+                <tr>
+                  <th class="col-sm-1">{{ __('Member') }}</th>
+                  <th class="col-sm-1">{{ __('Finished at') }}</th>
+                  <th class="col-sm-1">{{ __('Type') }}</th>
+                  <th class="col-sm-3">{{ __('Summary') }}</th>
+                  <th class="col-sm-1">{{ __('Duration') }}</th>
+                  <th class="col-sm-1">{{ __('Team') }}</th>
+                  <th class="col-sm-1">{{ __('Project') }}</th>
+                  <th class="col-sm-2">{{ __('Status') }}</th>
+                  <th class="col-sm-1">{{ __('Location') }}</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block additionaljs %}
+
+                {% verbatim %}
+                <script type="text/twig" id="worklog_rows_twig">
+                {% for row in log %}
+                <tr>
+                <td class="col-sm-1"><a title="{{ row.user }}">{{ row.user_name }}</a></td>
+                <td class="col-sm-1">{{ row.date | slice(2) | replace({'-': ''}) }}{{ "@" ~ row.finished }}</td>
+                <td class="col-sm-1">
+                {% if row._s == 'worklog/work' %}<i class="fas fa-wrench"></i>{% endif %}
+                {% if row._s == 'worklog/away' %}<i class="fas fa-battery-quarter"></i>{% endif %}
+                {% if row._s == 'worklog/shift' %}<i class="fas fa-user-clock"></i>{% endif %}
+                {% if row._s == 'worklog/negotiation' %}<i class="fas fa-handshake"></i>{% endif %}
+                </td>
+                <td>{{ row.summary }}</td>
+                <td class="col-sm-1">{{ row.time }}</td>
+                <td><a title="{{ row.domain }}">{{ row.domain_name }}</a></td>
+                <td>{{ row.project | default('') }}</td>
+                <td>
+                {% if row.status == 'done' %}<div class="badge badge-success"><i class="fas fa-check-circle"></i><span style="display: none">done</span></div>{% endif %}
+                {% if row.status == 'in-progress' %}<div class="badge badge-primary"><i class="fas fa-spinner"></i><span style="display: none">wip</span></div>{% endif %}
+                {% if row.status == 'waits' %}<div class="badge badge-danger"><i class="fas fa-pause-circle"></i><span style="display: none">waits</span></div>{% endif %}
+                {% if row.private == true %}<div class="badge badge-dark"><i class="fas fa-lock"></i><span style="display: none">private</span></div>{% endif %}
+                </td>
+                <td>{{ row.location | default('') }}</td>
+                <td>{{ row.details | default('') }}</td>
+                </tr>
+                {% endfor %}
+                </script>
+                {% endverbatim %}
+
+
+<script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+
+  // Compile twig.js templates
+  $("script[type='text/twig']").each(function() {
+    var id = $(this).attr("id"),
+    data = $(this).text();
+    Twig.twig({ id: id, data: data, allowInlineIncludes: true });
+  });
+
+  // Onload ajax to fetch worklog data
+  $( document ).ready(function() {
+    var api_url = '{{ url_for('worklog.we.api01') }}'
+    $.ajax({
+      url: api_url,
+      contentType: "application/json",
+      dataType: 'json',
+      success: function(res){
+        console.log(res);
+        var idtwig = 'worklog_rows_twig';
+        $('table#log').append(
+          Twig.twig({ ref: idtwig }).render({ log: res })
+          );
+      }
+    })
+  });
+
+</script>
+{% endblock %}

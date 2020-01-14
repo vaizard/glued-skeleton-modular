@@ -1,1 +1,5 @@
 /* glued's css override */
+
+label {
+    margin-bottom: 0.2rem;
+}

@@ -19,8 +19,8 @@ class Profiles extends AbstractTwigController
      */
     public function __invoke(Request $request, Response $response, array $args = []): Response
     {
-      $jsf_schema   = file_get_contents(__ROOT__.'/glued/Core/Controllers/schemas/assets.v1.schema');
-      $jsf_uischema = file_get_contents(__ROOT__.'/glued/Core/Controllers/schemas/assets.v1.formui');
+      $jsf_schema   = file_get_contents(__ROOT__.'/glued/Core/Controllers/Schemas/assets.v1.schema');
+      $jsf_uischema = file_get_contents(__ROOT__.'/glued/Core/Controllers/Schemas/assets.v1.formui');
       $jsf_formdata = '{"data":{"ts_created":"'.time().'","ts_updated":"'.time().'"}}';
       $jsf_onsubmit = '
         $.ajax({
