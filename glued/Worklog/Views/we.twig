@@ -25,19 +25,10 @@
                   <th class="col-sm-1">{{ __('Location') }}</th>
                 </tr>
               </thead>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}
-
-{% block additionaljs %}
-
+                {#                
                 {% verbatim %}
                 <script type="text/twig" id="worklog_rows_twig">
+                #}
                 {% for row in log %}
                 <tr>
                 <td class="col-sm-1"><a title="{{ row.user }}">{{ row.user_name }}</a></td>
@@ -59,15 +50,27 @@
                 {% if row.private == true %}<div class="badge badge-dark"><i class="fas fa-lock"></i><span style="display: none">private</span></div>{% endif %}
                 </td>
                 <td>{{ row.location | default('') }}</td>
-                <td>{{ row.details | default('') }}</td>
                 </tr>
                 {% endfor %}
+                {#
                 </script>
                 {% endverbatim %}
+                #}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block additionaljs %}
 
 
 <script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
 
+{#
   // Compile twig.js templates
   $("script[type='text/twig']").each(function() {
     var id = $(this).attr("id"),
@@ -87,9 +90,14 @@
         var idtwig = 'worklog_rows_twig';
         $('table#log').append(
           Twig.twig({ ref: idtwig }).render({ log: res })
-          );
+          ).delay(1000).dataTable();
       }
     })
+  });
+#}
+
+  $(function(){
+    $("#log").dataTable( { "paging": false } );
   });
 
 </script>

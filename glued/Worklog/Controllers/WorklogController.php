@@ -36,8 +36,15 @@ class WorklogController extends AbstractTwigController
         ]);
     }
 
-    public function we_get(Request $request, Response $response, array $args = []): Response
-    {
+    /**
+     * Transitional helper function to circument ajax loaded twig.js->datatables chaining.
+     * Until we resolve this, we won't have we_ui() ask data from we_get() on client side.
+     * we_ui() now temporarily generates the whole dataset via server side twig templating
+     * and getting data from this helper function.
+     * 
+     * @return object team worklog
+     */
+    private function we_helper() {
         $log = $this->db->rawQuery("
             SELECT
                 c_domain_id as 'domain',
@@ -58,14 +65,22 @@ class WorklogController extends AbstractTwigController
             LEFT JOIN t_core_users ON t_worklog_items.c_user_id = t_core_users.c_uid
             LEFT JOIN t_core_domains ON t_worklog_items.c_domain_id = t_core_domains.c_uid
         ");
+        return $log;
+    }
 
+    public function we_get(Request $request, Response $response, array $args = []): Response
+    {
+
+        $log = $this->we_helper();
         return $response->withJson($log);
         // TODO handle errors
     }
 
     public function we_ui(Request $request, Response $response, array $args = []): Response
     {
-        return $this->render($response, 'Worklog/Views/we.twig', []);
+        // TODO remove datatables hack and fetch data via api 
+        // (see $this->we_helper() description) for info about the workaround.
+        return $this->render($response, 'Worklog/Views/we.twig', [ 'log' =>  $this->we_helper()]);
     }
 
 
