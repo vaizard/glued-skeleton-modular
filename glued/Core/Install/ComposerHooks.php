@@ -1,6 +1,7 @@
 <?php
 namespace Glued\Core\Install;
 use Composer\Script\Event;
+use Glued\Core\Classes\Crypto\Crypto;
 
 class ComposerHooks
 {
@@ -74,7 +75,9 @@ class ComposerHooks
         }
         if ( !file_exists($fn['settings']) ) {
           echo "*** Generating /glued/settings.php." . PHP_EOL;
+          $crypto = new Crypto;
           $str=file_get_contents(getcwd().'/glued/settings.dist.php');
+          $str=str_replace("mail-encryption-key", $crypto->genkey_base64(), $str);
           $str=str_replace("db_host", $ioresp['dbhost'], $str);
           $str=str_replace("db_name", $ioresp['dbname'], $str);
           $str=str_replace("db_user", $ioresp['dbuser'], $str);

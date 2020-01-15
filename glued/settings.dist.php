@@ -35,8 +35,14 @@ return [
         'level' => \Monolog\Logger::DEBUG,
     ],
 
+    // Cryptography keys
+    'crypto' => [
+        'mail' => 'mail-encryption-key'
+    ],
+
     // Api keys
     // TODO: get this out of the config
+    // see https://www.codementor.io/@ccornutt/keeping-credentials-secure-in-php-kvcbrk55z
     'apis' => [
         'google' => '',
         'facebook' => '',
