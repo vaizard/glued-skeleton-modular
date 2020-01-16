@@ -18,23 +18,19 @@ This skeleton application was built for [Composer](https://getcomposer.org/).
 
 ## Installation
 
-Run this command from the directory in which you want to install your new Slim4 Framework application.
 
-```bash
-composer create-project vaizard/glued-skeleton  [my-app-name]
-```
+### From github (on apache or nginx)
 
-Replace `[my-app-name]` with the desired directory name for your new application. You'll want to:
+* Run `git clone https://github.com/vaizard/glued-skeleton` in `/var/www/html`
+* Point your virtual host document root to `/var/www/html/glued-skeleton/public`
+* Run `composer update`
 
+### With composer
+
+* Run `composer create-project vaizard/glued-skeleton [my-app-name]`
 * Point your virtual host document root to your new application's `public/` directory.
 * Ensure `public/cache/` and `private/cache/*` is web writable.
 
-To run the application in development, you can run these commands 
-
-```bash
-cd [my-app-name]
-composer start
-```
 
 **That's it! Now go build something cool.**
 
