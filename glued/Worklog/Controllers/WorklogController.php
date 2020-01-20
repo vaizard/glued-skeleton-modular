@@ -71,9 +71,9 @@ class WorklogController extends AbstractTwigController
 
     public function we_get(Request $request, Response $response, array $args = []): Response
     {
-
-        $log = $this->we_helper();
-        return $response->withJson($log);
+        $builder = new JsonResponseBuilder('worklog', 1);
+        $payload = $builder->withData((array)$this->we_helper())->withCode(200)->build();
+        return $response->withJson($payload);
         // TODO handle errors
     }
 
