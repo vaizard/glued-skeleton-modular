@@ -91,7 +91,7 @@
                 </td>
                 <td>{{ row.location | default('') }}</td>
                 <td>{{ row.details | default('') }} 
-                {% if row._s == 'worklog/work' %}<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editLog" data-id="{{ row.id }}" data-date="{{ row.date }}" data-finished="{{ row.finished }}" data-summary="{{ row.summary }}" data-time="{{ row.time }}"><i class="fas fa-edit"></i></button>{% endif %}
+                {% if row._s == 'worklog/work' %}<button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#editLog" data-id="{{ row.id }}" data-date="{{ row.date }}" data-finished="{{ row.finished }}" data-summary="{{ row.summary }}" data-time="{{ row.time }}"><i class="fas fa-edit"></i></button>{% endif %}
                 </tr>
                 </script>
                 <script type="text/twig" id="worklog_rows_twig">
@@ -119,7 +119,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form>
+        <form action="" method="post" autocomplete="off" id="worklog_edit_form">
          <div class="form-row"> 
            <div class="form-group col-md-6">
             <label>{{ __('Date and duration') }}*</label>
@@ -144,8 +144,8 @@
       </form>
     </div>
     <div class="modal-footer bg-whitesmoke br">
-      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      <button type="button" class="btn btn-primary">Save changes</button>
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close' ) }}</button>
+      <button type="submit" class="btn btn-primary">{{ __('Save changes') }}</button>
     </div>
   </div>
 </div>
@@ -211,13 +211,31 @@
     var summary = button.data('summary')
     var date = button.data('date')
     var time = button.data('time')
+    var time = button.data('id')
     var modal = $(this)
-    modal.find('.modal-title').text('Edit log entry ' + id)
+    modal.find('.modal-title').text('{{ __("Edit log entry") }} ' + id)
     modal.find('.modal-body input[name="finished"]').val(finished)
     modal.find('.modal-body input[name="date"]').val(date)
     modal.find('.modal-body input[name="time"]').val(time)
     modal.find('.modal-body input[name="summary"]').val(summary)
+    modal.find('.modal-body form').attr('action', '{{ url_for("worklog.api01") }}' + id)
   });
+
+
+  // Post (new) data, modify current page
+  $("#worklog_edit_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    success: function(res) {
+      var idtwig = 'worklog_row_add';
+      $(Twig.twig({ ref: 'worklog_row_add' }).render({ row: res.data })).prependTo("#log > tbody");
+    },
+    error: function(res) {
+      console.log(res);
+    }
+  });
+
   </script>
   {% endblock %}
 

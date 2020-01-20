@@ -12,6 +12,8 @@ $app->group('/api/worklog/v1', function (RouteCollectorProxy $group) {
     $group->get ('/me', WorklogController::class . ':me_get')->setName('worklog.me.api01'); 
     $group->post('/me', WorklogController::class . ':me_post');
     $group->get ('/we', WorklogController::class . ':we_get')->setName('worklog.we.api01'); 
+    $group->post('/', WorklogController::class . ':me_post')->setName('worklog.api01'); 
+    $group->post('/{id}', WorklogController::class . ':patch');
 });
 
 $app->group('/worklog', function (RouteCollectorProxy $group) {

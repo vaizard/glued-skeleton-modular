@@ -98,6 +98,17 @@ class WorklogController extends AbstractTwigController
         return $response->withJson($payload, 200);
     }
 
+    public function patch(Request $request, Response $response, array $args = []): Response
+    {
+        $builder = new JsonResponseBuilder('worklog/work', 1);
+        // start off with the request body & add data
+        $req = $request->getParsedBody();
+        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req = json_decode(json_encode((object)$req));
+        // print("<pre>".print_r($req,true)."</pre>"); // DEBUG
+        $payload = $builder->withData((array)$req)->withCode(200)->build();
+        return $response->withJson($payload, 200);
+    }
 
 
     public function me_post(Request $request, Response $response, array $args = []): Response
