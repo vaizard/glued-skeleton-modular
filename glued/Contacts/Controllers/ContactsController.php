@@ -27,12 +27,43 @@ class ContactsController extends AbstractTwigController
 
     public function collection_ui(Request $request, Response $response, array $args = []): Response
     {
+      $uribase = strtolower(parse_url((string)$request->getUri(), PHP_URL_SCHEME)).'://'.strtolower(parse_url((string)$request->getUri(), PHP_URL_HOST));
+
+      $jsf_schema   = file_get_contents(__ROOT__.'/glued/Core/Controllers/Schemas/assets.v1.schema');
+      $jsf_uischema = file_get_contents(__ROOT__.'/glued/Core/Controllers/Schemas/assets.v1.formui');
+      $jsf_formdata = '{"data":{"ts_created":"'.time().'","ts_updated":"'.time().'"}}';
+      $jsf_onsubmit = '
+        $.ajax({
+          url: "'.$uribase.$this->routerParser->urlFor('contacts.collection.api01').'",
+          dataType: "text",
+          type: "POST",
+          data: "stockdata=" + JSON.stringify(formData.formData),
+          success: function(data) {
+            // diky replacu nezustava puvodni adresa v historii, takze se to vice blizi redirectu
+            // presmerovani na editacni stranku se vraci z toho ajaxu
+            window.location.replace(data);
+            /*
+            ReactDOM.render((<div><h1>Thank you</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre></div>), 
+                     document.getElementById("main"));
+            */
+          },
+          error: function(xhr, status, err) {
+            ReactDOM.render((<div><h1>Something goes wrong ! not saving.</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre></div>), 
+                     document.getElementById("main"));
+          }
+        });
+      ';
+
         // TODO add constrains on what domains a user can actually list
         //$domains = $this->db->get('t_core_domains');
         
         // TODO add default domain for each user - maybe base this on some stats?
         return $this->render($response, 'Contacts/Views/collection.twig', [
             //'domains' => $domains
+            'json_schema_output' => $jsf_schema,
+            'json_uischema_output' => $jsf_uischema,
+            'json_formdata_output' => $jsf_formdata,
+            'json_onsubmit_output' => $jsf_onsubmit
         ]);
     }
 
@@ -41,7 +72,6 @@ class ContactsController extends AbstractTwigController
     public function addContactForm($request, $response)
     {
         $form_output = '';
-
         $jsf_schema   = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.v1.schema');
         $jsf_uischema = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.v1.formui');
         $jsf_formdata = '{"data":{}}';

@@ -2,55 +2,15 @@
 
 {% block content %}
 <div class="section-header">
-  <h1>{{ __('Contacts') }}</h1>
+  <h1>{{ __('Contacts') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-target="#addContact">Add contact</button>
 </div>
 
-<div class="section-body">
   <div class="row">
     <div class="col-12">
       <div class="card">
         <div class="card-header">
-          <ul class="nav nav-pills" id="contacts-pills" role="tablist">
-            <li class="nav-item">
-              <a class="nav-link active" id="contacts-work" data-toggle="tab" href="#contacts-work-div" role="tab" aria-controls="work" aria-selected="true"><i class="fas fa-wrench"></i> {{ __('Work') }}</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="contacts-shift" data-toggle="tab" href="#contacts-shift-div" role="tab" aria-controls="shift" aria-selected="false"><i class="fas fa-user-clock"></i> {{ __('Shift') }}</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="contacts-negotiation" data-toggle="tab" href="#contacts-negotiation-div" role="tab" aria-controls="negotiation" aria-selected="false"><i class="fas fa-handshake"></i> {{ __('Negotiation') }}</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="contacts-away" data-toggle="tab" href="#contacts-away-div" role="tab" aria-controls="away" aria-selected="false"><i class="fas fa-battery-quarter"></i> {{ __('Away / sick') }}</a>
-            </li>
-          </ul>
-        </div>
-        <div class="card-body">
-          <div class="tab-content" id="contacts-forms">
-            <div class="tab-pane fade show active" id="contacts-work-div" role="tabpanel" aria-labelledby="contacts-work">
-              <form action="{{ url_for('contacts.collection.api01') }}" method="post" autocomplete="off" id="contacts_work_form">
-                {# include '/contacts/Views/i-work.twig' #}
-              </form>
-            </div>
-            <div class="tab-pane fade" id="contacts-shift-div" role="tabpanel" aria-labelledby="contacts-shift">
-              {# {% include '/contacts/Views/i-shift.twig' %} #}
-              {{ __('Disabled') }}
-            </div>
-            <div class="tab-pane fade" id="contacts-negotiation-div" role="tabpanel" aria-labelledby="contacts-negotiation">
-              {# {% include '/contacts/Views/i-negotiate.twig' %} #}
-              {{ __('Disabled') }}
-            </div>
-            <div class="tab-pane fade" id="contacts-away-div" role="tabpanel" aria-labelledby="contacts-away">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
+        </div>
         <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-striped" id="log">
@@ -106,6 +66,27 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="addContact">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="rjsf"></div>
+      </div>
+      <div class="modal-footer bg-whitesmoke br">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block additionaljs %}
