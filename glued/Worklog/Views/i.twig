@@ -91,7 +91,7 @@
                 </td>
                 <td>{{ row.location | default('') }}</td>
                 <td>{{ row.details | default('') }} 
-                  {% if row._s == 'worklog/work' %}<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editLog" data-id="{{ row.id }}" data-date="{{ row.date }}" data-finished="{{ row.finished }}" data-summary="{{ row.summary }}" data-time="{{ row.time }}"><i class="fas fa-edit"></i></button>{% endif %}
+                {% if row._s == 'worklog/work' %}<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editLog" data-id="{{ row.id }}" data-date="{{ row.date }}" data-finished="{{ row.finished }}" data-summary="{{ row.summary }}" data-time="{{ row.time }}"><i class="fas fa-edit"></i></button>{% endif %}
                 </tr>
                 </script>
                 <script type="text/twig" id="worklog_rows_twig">
@@ -109,7 +109,7 @@
   </div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="editLog">
+<div class="modal fade" tabindex="-1" role="dialog" id="editLog" data-backdrop="false">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -121,32 +121,34 @@
       <div class="modal-body">
         <form>
          <div class="form-row"> 
-         <div class="form-group col-md-4">
+           <div class="form-group col-md-6">
             <label>{{ __('Date and duration') }}*</label>
             <div class="input-group">
               <input type="text" class="form-control mask_date" name="date" required placeholder="____-__-__" value="{{ "now" | date("Y/m/d") }}">
               <input type="text" class="form-control mask_time" name="time" required placeholder="__:__">
             </div>
           </div>
-          <div class="form-group col-md-4">
-            <label>{{ __('Summary') }}*</label>
-            <input type="text" class="form-control" name="summary" required>
-          </div>
-          <div class="form-group col-md-4">
+          <div class="form-group col-md-6">
             <label>{{ __('Finished at') }}</label>
             <div class="input-group">
               <input type="text" class="form-control mask_time" name="finished" placeholder="__:__">
             </div>
           </div>   
         </div>
-        </form>
-      </div>
-      <div class="modal-footer bg-whitesmoke br">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
+        <div class="form-row">
+          <div class="form-group col-md-12">
+            <label>{{ __('Summary') }}*</label>
+            <input type="text" class="form-control" name="summary" required>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer bg-whitesmoke br">
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      <button type="button" class="btn btn-primary">Save changes</button>
     </div>
   </div>
+</div>
 </div>
 {% endblock %}
 
@@ -206,10 +208,16 @@
     // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
     // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
     var finished = button.data('finished')
+    var summary = button.data('summary')
+    var date = button.data('date')
+    var time = button.data('time')
     var modal = $(this)
     modal.find('.modal-title').text('Edit log entry ' + id)
     modal.find('.modal-body input[name="finished"]').val(finished)
+    modal.find('.modal-body input[name="date"]').val(date)
+    modal.find('.modal-body input[name="time"]').val(time)
+    modal.find('.modal-body input[name="summary"]').val(summary)
   });
-</script>
-{% endblock %}
+  </script>
+  {% endblock %}
 
