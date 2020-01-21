@@ -9,11 +9,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 // Define the app routes.
 
 $app->group('/api/worklog/v1', function (RouteCollectorProxy $group) {
-    $group->get ('/me', WorklogController::class . ':me_get')->setName('worklog.me.api01'); 
-    $group->post('/me', WorklogController::class . ':me_post');
-    $group->get ('/we', WorklogController::class . ':we_get')->setName('worklog.we.api01'); 
-    $group->post('/', WorklogController::class . ':me_post')->setName('worklog.api01'); 
-    $group->post('/{id}', WorklogController::class . ':patch');
+    $group->get ('/users', WorklogController::class . ':me_get')->setName('worklog.users.api01'); 
+    $group->get ('/domains', WorklogController::class . ':we_get')->setName('worklog.domains.api01'); 
+    $group->post('/items[/{uid}]', WorklogController::class . ':me_post')->setName('worklog.items.api01'); 
+    $group->patch('/items[/{uid}]', WorklogController::class . ':patch');
 });
 
 $app->group('/worklog', function (RouteCollectorProxy $group) {

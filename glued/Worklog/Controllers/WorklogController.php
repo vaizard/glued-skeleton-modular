@@ -11,8 +11,9 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Sabre\VObject;
-use Slim\Exception\HttpInternalServerErrorException;
+use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpForbiddenException;
+use Slim\Exception\HttpInternalServerErrorException;
 use Spatie\Browsershot\Browsershot;
 
 class WorklogController extends AbstractTwigController
@@ -101,13 +102,44 @@ class WorklogController extends AbstractTwigController
     public function patch(Request $request, Response $response, array $args = []): Response
     {
         $builder = new JsonResponseBuilder('worklog/work', 1);
-        // start off with the request body & add data
+
+        // Get patch data
         $req = $request->getParsedBody();
         $req['user'] = (int)$_SESSION['core_user_id'];
-        $req = json_decode(json_encode((object)$req));
-        // print("<pre>".print_r($req,true)."</pre>"); // DEBUG
+        $req['id'] = (int)$args['uid'];
+
+        // Get old data
+        $this->db->where('c_uid', $req['id']);
+        $doc = $this->db->getOne('t_worklog_items', ['c_json'])['c_json'];
+        if(!$doc) { throw new HttpBadRequestException( $request, 'Bad worklog ID.'); }
+        $doc = json_decode($doc);
+
+        // Patch old data
+        //$req['user'] = 33;
+        if($doc->user != $req['user']) { throw new HttpForbiddenException( $request, 'Only own worklog items can be edited.'); }
+        $doc->date = $req['date'];
+        $doc->time = $req['time'];
+        $doc->finished = $req['finished'];
+        $doc->summary = $req['summary'];
+        // TODO if $doc->domain is patched here, you have to first test, if user has access to the domain
+
+        // Load the json schema and validate data against it
+        $loader = new \Opis\JsonSchema\Loaders\File("schema://worklog/", [
+            __ROOT__ . "/glued/Worklog/Controllers/Schemas/",
+        ]);
+        $schema = $loader->loadSchema("schema://worklog/work.v1.schema");
+        $validator = new \Opis\JsonSchema\Validator;
+        $result = $validator->schemaValidation($doc, $schema);
+        if ($result->isValid()) {
+            $row = [ 'c_json' => json_encode($doc) ];
+            $this->db->where('c_uid', $req['id']);
+            $id = $this->db->update('t_worklog_items', $row);
+            if (!$id) { throw new HttpInternalServerErrorException( $request, 'Writing to the worklog failed (update).'); }
+        } else { throw new HttpBadRequestException( $request, 'Invalid worklog data.'); }
+
+        // Success
         $payload = $builder->withData((array)$req)->withCode(200)->build();
-        return $response->withJson($payload, 200);
+        return $response->withJson($payload, 200);  
     }
 
 
@@ -139,17 +171,16 @@ class WorklogController extends AbstractTwigController
 
         if ($result->isValid()) {
             $row = array (
-                'c_domain_id' => $req->domain, 
-                'c_user_id' => $req->user,
+                'c_domain_id' => (int)$req->domain, 
+                'c_user_id' => (int)$req->user,
                 'c_json' => json_encode($req)
             );
             $this->db->startTransaction(); 
             $id = $this->db->insert('t_worklog_items', $row);
             $err = $this->db->getLastErrno();
             if ($id) {
-              $req->id = $id; 
-              $row = [ "c_json" => "JSON_SET( c_json, '$.id', ".$id.")" ];
-              $updt = $this->db->rawQuery("UPDATE `t_worklog_items` SET `c_json` = JSON_SET(c_json, '$.id', ?) WHERE c_uid = ?", Array (strval($id), (int)$id));
+              $req->id = (int)$id; 
+              $updt = $this->db->rawQuery("UPDATE `t_worklog_items` SET `c_json` = JSON_SET(c_json, '$.id', ?) WHERE c_uid = ?", Array ((int)$id, (int)$id));
               $err += $this->db->getLastErrno();
             }
             if ($err >= 0) { $this->db->commit(); } else { $this->db->rollback(); throw new HttpInternalServerErrorException($request, __('Database error')); }

@@ -30,7 +30,7 @@
       "$id": "#/properties/_v",
       "type": "number",
       "title": "Schema version",
-      "default": "1",
+      "default": 1,
       "examples": [
         "1"
       ]
@@ -39,7 +39,7 @@
       "$id": "#/properties/id",
       "type": "integer",
       "title": "ID of work (to be updated from the default 0 value after database insert)",
-      "default": "0",
+      "default": 0,
       "examples": [
         "1"
       ]

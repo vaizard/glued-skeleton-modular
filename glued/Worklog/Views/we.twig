@@ -80,7 +80,7 @@
 
   // Onload ajax to fetch worklog data
   $( document ).ready(function() {
-    var api_url = '{{ url_for('worklog.we.api01') }}'
+    var api_url = '{{ url_for('worklog.domains.api01') }}'
     $.ajax({
       url: api_url,
       contentType: "application/json",
