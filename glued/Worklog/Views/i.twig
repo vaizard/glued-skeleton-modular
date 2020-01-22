@@ -211,9 +211,15 @@
     },
     success: function(res) {
       var idtwig = 'worklog_row_add';
+      $('#toast-placeholder').empty();
       $(Twig.twig({ ref: 'worklog_row_add' }).render({ row: res.data })).prependTo("#log > tbody");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Worklog") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
     },
     error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Worklog") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
       console.log(res);
     }
   });
