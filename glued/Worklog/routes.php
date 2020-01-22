@@ -18,4 +18,5 @@ $app->group('/api/worklog/v1', function (RouteCollectorProxy $group) {
 $app->group('/worklog', function (RouteCollectorProxy $group) {
     $group->get ('/me', WorklogController::class . ':me_ui')->setName('worklog.me'); 
     $group->get ('/we', WorklogController::class . ':we_ui')->setName('worklog.we'); 
+    $group->get ('/schema-migration/0-1', WorklogController::class . ':migrate_jsonschema_0_1');
 });

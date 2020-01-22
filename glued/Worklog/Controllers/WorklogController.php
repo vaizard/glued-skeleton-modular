@@ -99,6 +99,42 @@ class WorklogController extends AbstractTwigController
         return $response->withJson($payload, 200);
     }
 
+    public function migrate_jsonschema_0_1(Request $request, Response $response, array $args = []): Response {
+
+        $loader = new \Opis\JsonSchema\Loaders\File("schema://worklog/", [
+            __ROOT__ . "/glued/Worklog/Controllers/Schemas/",
+        ]);
+        $schema = $loader->loadSchema("schema://worklog/work.v1.schema");
+        $validator = new \Opis\JsonSchema\Validator;
+        $docs = $this->db->get('t_worklog_items', null, ['c_uid', 'c_json']);
+        echo "<h1>Worklog/work schema migration: 0 -> 1</h1><table>";
+
+        if ($this->db->count > 0)
+            foreach ($docs as $doc) {
+                // Init
+                $style = "";
+                $uid = (int)$doc['c_uid'];
+                $doc = json_decode($doc['c_json']);
+                // Data according to current schema
+                echo "<tr><td width='50%'><pre>".json_encode($doc,JSON_PRETTY_PRINT);
+                // Schema update
+                $doc->_v = (int)$doc->_v;
+                $doc->id = (int)$doc->id;
+                $result = $validator->schemaValidation($doc, $schema);
+                // Db write
+                if ($result->isValid()) {
+                    $style="background: lime;";
+                    $this->db->where('c_uid', $uid);
+                    $id = $this->db->update('t_worklog_items',  [ 'c_json' => json_encode($doc) ]);
+                    if (!$id) { throw new HttpInternalServerErrorException( $request, 'Writing to the worklog failed on uid '.$uid); }
+                } 
+                // Data according to new schema
+                echo "</pre></td><td width='50%' style='".$style."'><pre>".json_encode($doc,JSON_PRETTY_PRINT)."</pre></td></tr>";
+        }
+        echo "</table><h2>All done.</h2>";
+        return $response;
+    }
+
     public function patch(Request $request, Response $response, array $args = []): Response
     {
         $builder = new JsonResponseBuilder('worklog/work', 1);
