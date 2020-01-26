@@ -8,7 +8,10 @@ use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Slim\Views\Twig;
 use Psr\Container\ContainerInterface as Container;
 
-class AuthMiddleware extends AbstractMiddleware
+/**
+ * Deals with RBAC/ABAC
+ */
+class AuthorizationMiddleware extends AbstractMiddleware
 {
 
     public function __invoke(Request $request, Handler $handler)

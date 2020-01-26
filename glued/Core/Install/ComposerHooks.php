@@ -78,6 +78,7 @@ class ComposerHooks
           $crypto = new Crypto;
           $str=file_get_contents(getcwd().'/glued/settings.dist.php');
           $str=str_replace("mail-encryption-key", $crypto->genkey_base64(), $str);
+          $str=str_replace("reqparams-encryption-key", $crypto->genkey_base64(), $str);
           $str=str_replace("db_host", $ioresp['dbhost'], $str);
           $str=str_replace("db_name", $ioresp['dbname'], $str);
           $str=str_replace("db_user", $ioresp['dbuser'], $str);

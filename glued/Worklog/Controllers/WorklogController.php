@@ -89,7 +89,7 @@ class WorklogController extends AbstractTwigController
     public function me_get(Request $request, Response $response, array $args = []): Response
     {
         $builder = new JsonResponseBuilder('worklog/work', 1);
-        $id = (int)$_SESSION['core_user_id'] ?? 0;
+        $id = (int)($_SESSION['core_user_id'] ?? 0);
         if ($id === 0) { throw new HttpForbiddenException( $request, 'Please log in.' );  }
         $workobj = $this->db->rawQuery("SELECT *, JSON_EXTRACT(c_json, '$.date') AS j_date, JSON_EXTRACT(c_json, '$.finished') AS j_finished 
                                         FROM `t_worklog_items` WHERE `c_user_id` = ? ORDER BY `j_date` DESC, `j_finished` DESC", [ $id ]);

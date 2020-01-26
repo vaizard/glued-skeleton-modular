@@ -5,10 +5,12 @@ declare(strict_types=1);
 
 namespace Glued\Core\Controllers;
 use Glued\Core\Classes\Auth\Auth;
+use Glued\Core\Classes\Crypto\Crypto;
 use Glued\Core\Classes\Json\JsonResponseBuilder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
+use \Exception;
 
 class AuthController extends AbstractTwigController
 
@@ -23,7 +25,9 @@ class AuthController extends AbstractTwigController
 
     public function signin_get($request, $response)
     {
-        return $this->view->render($response, 'Core/Views/signin.twig');
+        return $this->view->render($response, 'Core/Views/signin.twig', [
+            'redirect' => $request->getParams()['redirect'] ?? null 
+        ]);
     }
 
 
@@ -39,8 +43,27 @@ class AuthController extends AbstractTwigController
             return $response->withRedirect($this->routerParser->urlFor('core.signin.web'));
         }
 
+        // If an unauthenticated user visits an URI requiring authentication, he'll
+        // be redirected by the RedirectGuest middleware to the signin page. The
+        // middleware will encrypt the URI the user wanted to visit and will pass
+        // it to an <input type=hidden> on the signin page. We fetch the data below
+        // into $enc and try to decrypt it. The try/catch will deal with decryption
+        // errors caused by a truncated get paramter (i.e. user copying an incomplete
+        // link and using it later/elsewhere). The if (!redirect) deals with garbled
+        // get param (i.e. string length is correct, but user changed a letter or two).
+        $redirect = $this->routerParser->urlFor('core.dashboard.web'); 
+        if ($enc = $request->getParam('redirect')) {
+            $crypto = new Crypto;
+            try {
+                $redirect = $crypto->decrypt($enc, $this->settings['crypto']['reqparams']);
+                if (!$redirect) { $redirect = $this->routerParser->urlFor('core.dashboard.web'); }
+            } catch (Exception $e) {
+                $redirect = $this->routerParser->urlFor('core.dashboard.web');
+            }
+        }
+
         $this->flash->addMessage('info', 'Welcome back, you are signed in!');
-        return $response->withRedirect($this->routerParser->urlFor('core.dashboard.web'));
+        return $response->withRedirect($redirect);
     }
 
 

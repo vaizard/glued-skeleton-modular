@@ -1,16 +1,15 @@
 <?php
-use Slim\Routing\RouteCollectorProxy;
 use Glued\Calendar\Controllers\CalendarController;
-use Glued\Core\Middleware\RedirectIfAuthenticated;
-use Glued\Core\Middleware\RedirectIfNotAuthenticated;
+use Glued\Core\Middleware\RedirectGuests;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Routing\RouteCollectorProxy;
 
 // Define the app routes.
 $app->group('/calendar', function (RouteCollectorProxy $group) {
     $group->get ('/browse', CalendarController::class)->setName('calendar.browse.web'); 
     $group->get ('/manage', CalendarController::class)->setName('calendar.manage.web'); 
-});
+})->add(RedirectGuests::class);
 
 /*
 t_store_opportunities

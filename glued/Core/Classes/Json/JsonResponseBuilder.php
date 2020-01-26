@@ -101,6 +101,13 @@ class JsonResponseBuilder {
         ]);
     }
 
+    // TODO drop flash messages, styling should be done on client side
+    // TODO rename messages to details to discern from withMessage
+
+    public function withMessage(string $msg) {
+        return $this->setProperty('message', $msg);
+    }
+
     public function withData(array $arr, $code = 200) {
         if ( (isset($this->payload['code']) and (($this->payload['code'] !== 200) or ($this->payload['code'] !== 201)) ) )  { throw new \ErrorException('Application tried to send data in an error state.', 500); }
         if (!(($code === 200) or ($code === 201))) { throw new \ErrorException('Responding with data doesn\'t match required response code', 500); }

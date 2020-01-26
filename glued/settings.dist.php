@@ -37,7 +37,8 @@ return [
 
     // Cryptography keys
     'crypto' => [
-        'mail' => 'mail-encryption-key'
+        'mail' => 'mail-encryption-key',
+        'reqparams' => 'reqparams-encryption-key'
     ],
 
     // Api keys

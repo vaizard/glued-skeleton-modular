@@ -78,7 +78,7 @@ $app->add(new \Glued\Core\Middleware\TwigCspMiddleware($nonce, $container));
 
 $app->add(new Tuupola\Middleware\CorsMiddleware); // TODO add sane defaults to CorsMiddleware
 $app->add(new HeadersMiddleware($settings));
-$app->add(new \Glued\Core\Middleware\AuthMiddleware($container));
+$app->add(new \Glued\Core\Middleware\AuthorizationMiddleware($container));
 $app->add(new SessionMiddleware($settings));
 
 /**
