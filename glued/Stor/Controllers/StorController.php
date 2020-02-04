@@ -191,6 +191,10 @@ class StorController extends AbstractTwigController
             throw new Exception('Expected uploaded file, got none.');
         }
         
+        // nacteme si to z containeru ktery to ma ze tridy
+        $app_dirs = $this->stor->app_dirs;
+        $app_tables = $this->stor->app_tables;
+        
         $newfile = $files['file'];
         
         $raw_path = $request->getParam('actual_dir');
@@ -213,16 +217,16 @@ class StorController extends AbstractTwigController
         }
         
         // pokud dir existuje v seznamu povolenych diru, uploadujem (ovsem je zadany timpadem i objekt)
-        if (isset($this->container->stor->app_dirs[$actual_dir])) {
+        if (isset($app_dirs[$actual_dir])) {
             
             if ($newfile->getError() === UPLOAD_ERR_OK) {
                 $filename = $newfile->getClientFilename();
                 $sha512 = hash_file('sha512', $_FILES['file']['tmp_name']);
                 
                 // zjistime jestli soubor se stejnym hashem uz mame
-                $this->container->db->where("sha512", $sha512);
-                $this->container->db->getOne('t_stor_objects');
-                if ($this->container->db->count == 0) {
+                $this->db->where("c_sha512", $sha512);
+                $this->db->getOne('t_stor_objects');
+                if ($this->db->count == 0) {
                     
                     // vytvorime tomu adresar
                     $dir1 = substr($sha512, 0, 1);
@@ -230,7 +234,7 @@ class StorController extends AbstractTwigController
                     $dir3 = substr($sha512, 2, 1);
                     $dir4 = substr($sha512, 3, 1);
                     
-                    $cilovy_dir = '../private/stor/'.$dir1.'/'.$dir2.'/'.$dir3.'/'.$dir4;
+                    $cilovy_dir = __ROOT__.'/private/data/stor/'.$dir1.'/'.$dir2.'/'.$dir3.'/'.$dir4;
                     
                     if (!is_dir($cilovy_dir)) { mkdir($cilovy_dir, 0777, true); }
                     
@@ -256,56 +260,52 @@ class StorController extends AbstractTwigController
                     // pozor, spojit dve vkladani pres commit, TODO
                     
                     // vlozime do objects
-                    $data = Array ("doc" => $json_string);
-                    $this->container->db->insert ('t_stor_objects', $data);
+                    $data = Array ("c_json" => $json_string);
+                    $this->db->insert ('t_stor_objects', $data);
                     
                     // vlozime do links
                     $data = Array (
                     "c_sha512" => $sha512,
-                    "c_owner" => $_SESSION['user_id'],
+                    "c_user_id" => $_SESSION['core_user_id'],
                     "c_filename" => $filename,
-                    "c_inherit_table" => $this->container->stor->app_tables[$actual_dir],
+                    "c_inherit_table" => $app_tables[$actual_dir],
                     "c_inherit_object" => $actual_object
                     );
-                    $this->container->db->insert ('t_stor_links', $data);
+                    $this->db->insert ('t_stor_links', $data);
                     
-                    $this->container->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully.');
+                    $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully.');
                 }
                 else {
                     // soubor uz existuje v objects ale vlozime ho aspon do links
                     $data = Array (
                     "c_sha512" => $sha512,
-                    "c_owner" => $_SESSION['user_id'],
+                    "c_user_id" => $_SESSION['core_user_id'],
                     "c_filename" => $filename,
-                    "c_inherit_table" => $this->container->stor->app_tables[$actual_dir],
+                    "c_inherit_table" => $app_tables[$actual_dir],
                     "c_inherit_object" => $actual_object
                     );
-                    $this->container->db->insert ('t_stor_links', $data);
+                    $this->db->insert ('t_stor_links', $data);
                     
-                    $this->container->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully as link. Its hash already exists in objects table.');
+                    $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully as link. Its hash already exists in objects table.');
                 }
             }
             else {
-                $this->container->flash->addMessage('error', 'your file failed to upload.');
+                $this->flash->addMessage('error', 'your file failed to upload.');
             }
         }
         else {
-            $this->container->flash->addMessage('error', 'your cannot upload into this dir.');
+            $this->flash->addMessage('error', 'your cannot upload into this dir.');
         }
         
         if ($upload_type == 'browser') {
-            $redirect_url = $this->container->router->pathFor('stor.browser').'?filter=/'.$actual_dir.'/'.$actual_object;
+            $redirect_url = $this->routerParser->urlFor('stor.browser').'?filter=/'.$actual_dir.'/'.$actual_object;
         }
         else if ($upload_type == 'general') {   // obecny form nekde jinde mimo stor, posle si vlastni zpatecni adresu
             $redirect_url = $request->getParam('return_url');
         }
         else {
-            if (!empty($actual_dir)) {
-                $redirect_url = $this->container->router->pathFor('stor.uploader').'/~/'.$raw_path;
-            }
-            else {
-                $redirect_url = $this->container->router->pathFor('stor.uploader');
-            }
+            // jinak tu byl uploader, ale ten uz nemame, takze to posleme na root browseru
+            $redirect_url = $this->routerParser->urlFor('stor.browser');
         }
         
         return $response->withRedirect($redirect_url);
@@ -519,6 +519,10 @@ class StorController extends AbstractTwigController
         
         $preset_filter = $request->getParam('filter');
         
+        // nacteme si to z containeru ktery to ma ze tridy
+        $app_dirs = $this->stor->app_dirs;
+        $app_tables = $this->stor->app_tables;
+        
         // pokud je v getu nejaky filter
         if (!empty($preset_filter)) {
             $casti_filtru = explode(' ', $preset_filter);
@@ -530,10 +534,10 @@ class StorController extends AbstractTwigController
             }
         }
         
-        
+        // obal script je v sablone
         $additional_javascript = '';
         
-        /*
+        
         $additional_javascript .= '
     // tuto funkci pouzijeme jen v pripade ze chceme ukladat historii a menit adresu. tj treba ne, kdyz jdeme back a forward a ne kdyz treba uploadujeme
     function push_filter_state() {
@@ -679,7 +683,7 @@ class StorController extends AbstractTwigController
           }
         });
     }
-        */
+    ';
         
         $additional_javascript .= '
     // inicializujeme select 2 a tlacitko filtr
@@ -706,18 +710,15 @@ class StorController extends AbstractTwigController
               text: params.term
             }
           },
-          width: "100%"
-
-        });
-        
-        /*
+          width: "100%",
           ajax: {
             url: "'.$this->routerParser->urlFor('stor.api.filter.options').'",
             dataType: "json"
           }
-        */
+        });
         
-        /*
+        
+        
         $("#stor-files-filter-button").on("click", function(){
             filter_stor_files();
             push_filter_state();
@@ -732,13 +733,13 @@ class StorController extends AbstractTwigController
         // zavolame to defaultne na prazdny filtr
         filter_stor_files();
         // iniciujeme prvotni objekty v copy move modalu
-        read_modal_objects();
-        */
+        //read_modal_objects();
+        
         
     });
         ';
         
-        /*
+        $additional_javascript .= '
     // zachytime back button v browseru, pro pushnute adresy v historii
     $(window).on("popstate", function(e) {
         if (e.originalEvent.state !== null) {
@@ -751,21 +752,8 @@ class StorController extends AbstractTwigController
             $("#stor-files-select2-filter").val(null).trigger("change", "nepush");
         }
     });
-        */
+        ';
         
-        
-        
-        // zatim nevim jak to dat do containeru
-        $app_dirs = array(
-           "my_files"    => 'My private files',
-           "my_owned"    => 'My owned files',
-           "users"    => 'Users',
-           "assets"    => 'Assets',
-           "consumables"    => 'Consumables',
-           "parts"    => 'Parts',
-           "accounting-costs"    => 'Accounting costs',
-           "helper"    => 'Helper'
-        );
         
         // priprava vyberu diru do copy move popupu
         $stor_dirs_options = '';
