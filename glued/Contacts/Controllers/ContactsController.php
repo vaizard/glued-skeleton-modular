@@ -29,8 +29,9 @@ class ContactsController extends AbstractTwigController
     {
       $uribase = strtolower(parse_url((string)$request->getUri(), PHP_URL_SCHEME)).'://'.strtolower(parse_url((string)$request->getUri(), PHP_URL_HOST));
 
-      $jsf_schema   = file_get_contents(__ROOT__.'/glued/Core/Controllers/Schemas/assets.v1.schema');
-      $jsf_uischema = file_get_contents(__ROOT__.'/glued/Core/Controllers/Schemas/assets.v1.formui');
+      $jsf_schema   = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.v1.schema');
+      $jsf_uischema = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.v1.formui');
+      $jsf_uischema = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/test.v1.formui');
       $jsf_formdata = '{"data":{"ts_created":"'.time().'","ts_updated":"'.time().'"}}';
       $jsf_onsubmit = '
         $.ajax({
@@ -98,8 +99,7 @@ class ContactsController extends AbstractTwigController
             'json_uischema_output' => $jsf_uischema,
             'json_formdata_output' => $jsf_formdata,
             'json_onsubmit_output' => $jsf_onsubmit,
-            'json_formdata_render_custom_array' => '1'
-
+            'json_custom_widgets' => 1,
         ]);
 
         return $this->view->render($response, 'contacts/addcontact.twig', array(

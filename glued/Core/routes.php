@@ -53,8 +53,9 @@ $app->group('/api/core/v1', function (RouteCollectorProxy $route) {
 $app->get ('/core/admin/playground', function(Request $request, Response $response) { 
 
     $key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES); // 256 bit
-    echo base64_encode($key).' '.time();
-
+    
+    echo sodium_bin2base64(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES), SODIUM_BASE64_VARIANT_URLSAFE);
+    echo ' '.time();
     echo '
         <link rel="stylesheet" type="text/css" href="/assets/cache/styles.db34ce26cb19c04c315933041af50e77c292abb9.css" media="all" />
         <div id="validation_errors"></div>

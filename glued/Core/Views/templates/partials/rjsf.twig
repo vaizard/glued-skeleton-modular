@@ -22,8 +22,9 @@
 
     function onChange(formData) { }
 
-
-    {% if json_formdata_render_custom_array is defined %}
+ 
+    {% if json_custom_widgets is defined %}
+    
     const MyCustomWidget = (props) => {
       return (
         <input type="text"
@@ -82,7 +83,7 @@
       );
     }
     ReactDOM.render((<Form onChange={onChange} onSubmit={onSubmit} uiSchema={uiSchema} schema={schema} formData={formData} ArrayFieldTemplate={ArrayFieldTemplate} widgets={widgets} ></Form>),
-        document.getElementById("main"), function() {
+        document.getElementById("rjsf"), function() {
             $(".form-label-group input").focus(function() {
                 $(this).addClass("activated").siblings("label").addClass("labelisima");
             });
