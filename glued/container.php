@@ -19,6 +19,7 @@ use Symfony\Component\Translation\IdentityTranslator;
 use Symfony\Component\Translation\Loader\MoFileLoader;
 use Symfony\Component\Translation\Translator;
 use Twig\Loader\FilesystemLoader;
+use Glued\Stor\Classes\Stor as StorMainClass;
 
 $container->set('settings', function() {
     return require_once(__ROOT__ . '/glued/settings.php');
@@ -104,6 +105,13 @@ $container->set('validator', function (Container $c) {
 $container->set('auth', function (Container $c) {
     return new Auth($c->get('db'), $c->get('settings'));
 });
+
+// stor trida
+$container->set('stor', function (Container $c) {
+    return new StorMainClass($c);
+});
+
+
 // TODO 
 // - classes/users.php
 // - sjednotit namespace, ted mam app jako glued/core
