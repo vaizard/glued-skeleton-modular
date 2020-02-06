@@ -347,13 +347,13 @@ class StorController extends AbstractTwigController
         $link_id = $args['id'];
         
         // nacteme sha512
-        $this->container->db->where ("c_uid", $link_id);
-        $file_link = $this->container->db->getOne("t_stor_links");
+        $this->db->where ("c_uid", $link_id);
+        $file_link = $this->db->getOne("t_stor_links");
         
         // nacteme mime
-        $sloupce = array("doc->>'$.data.mime' as mime", "doc->>'$.data.storage[0].path' as path");
-        $this->container->db->where("sha512", $file_link['c_sha512']);
-        $file_data = $this->container->db->getOne("t_stor_objects", $sloupce);
+        $sloupce = array("c_json->>'$.data.mime' as mime", "c_json->>'$.data.storage[0].path' as path");
+        $this->db->where("c_sha512", $file_link['c_sha512']);
+        $file_data = $this->db->getOne("t_stor_objects", $sloupce);
         
         // path mame v takovem nejakem tvaru
         // ../private/stor/0/2/8/0
