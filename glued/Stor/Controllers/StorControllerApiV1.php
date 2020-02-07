@@ -737,16 +737,16 @@ class StorControllerApiV1 extends AbstractTwigController
         }
         else if ($prvni_znak == '@') {  // uzivatele
             // nacteme idecka
-            $cols = Array("c_uid", "stor_name");
-            $this->container->db->orderBy("c_uid","asc");
-            $idecka = $this->container->db->get('t_users', null, $cols);
+            $cols = Array("c_uid", "c_name");
+            $this->db->orderBy("c_uid","asc");
+            $idecka = $this->db->get('t_core_users', null, $cols);
             $objekty_useru = array();
-            if ($this->container->db->count > 0) {
+            if ($this->db->count > 0) {
                 foreach ($idecka as $idecko) {
                     $objekty_useru[] = '
     {
       "id": "@'.$idecko['c_uid'].'",
-      "text": "@'.$idecko['c_uid'].' - '.$idecko['stor_name'].'"
+      "text": "@'.$idecko['c_uid'].' - '.$idecko['c_name'].'"
     }
                     ';
                 }
@@ -1047,7 +1047,7 @@ class StorControllerApiV1 extends AbstractTwigController
                     $vystup .= $this->firstRowUplinkBrowser('/'.$casti[1].'/', '/'.$casti[1].'/');
                 }
                 if (count($pole_useru) > 0) {
-                    $this->db->where("c_owner", $pole_useru[0]);
+                    $this->db->where("c_user_id", $pole_useru[0]);
                 }
                 if (count($pole_tagu) > 0) {
                     // tagy zatim nemame
@@ -1200,7 +1200,7 @@ class StorControllerApiV1 extends AbstractTwigController
         }
         else {  // jsme v zakladnim vyberu my files a app
             //$your_user_id = $this->container->auth_user->user_id;
-            $your_user_id = 1;
+            $your_user_id = $_SESSION['core_user_id'];
             //$your_screenname = $this->container->auth->user_screenname($your_user_id);
             $your_screenname = 'noob';
             
@@ -1209,7 +1209,7 @@ class StorControllerApiV1 extends AbstractTwigController
                     <td class="col-sm-2"><i class="fa fa-folder-o fa-2x"></i></td>
                     <td class="col-sm-2">
                         <a href="" class="stor-shortcuts" data-id="@'.$your_user_id.'" data-text="@'.$your_user_id.' - '.$your_screenname.'">
-                            <h4 class="item-title">My files</h4>
+                            <h4 class="item-title">Files I created</h4>
                         </a>
                     </td>
                     <td class="col-sm-2"></td>
