@@ -21,6 +21,7 @@
     <div class="main-wrapper main-wrapper-1">
       <div class="navbar-bg"></div>
       {% include '/Core/Views/templates/partials/toasts.twig' %}
+      
       <nav class="navbar navbar-expand-lg main-navbar">
         <form class="form-inline mr-auto">
           <ul class="navbar-nav mr-3">
@@ -42,6 +43,7 @@
             </div>
           </div>
         </form>
+        
         {% if auth.check %}
         {% include '/Core/Views/templates/partials/menu-authenticated.twig' %}
         {% else %}
@@ -84,7 +86,7 @@
             </li>
             <li class="menu-header">{{ __('Apps') }}</li>
             <li>
-              <a href="#" class="nav-link"><i class="fas fa-file"></i><span>{{ __('Stor browser') }}</span></a>
+              <a href="{{ url_for('stor.browser') }}" class="nav-link"><i class="fas fa-file"></i><span>{{ __('Stor browser') }}</span></a>
             </li>
             <li class="dropdown">
               <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-clipboard-check"></i> <span>{{ __('Membership') }}</span></a>
@@ -152,7 +154,7 @@
           Copyright &copy; 2020 <div class="bullet"></div> Made by <a href="https://industra.space/">INDUSTRA</a> <div class="bullet"></div> <a href="https://github.com/vaizard/glued-skeleton">{{ __('Source code') }}</a>
         </div>
         <div class="footer-right">
-          
+        
         </div>
       </footer>
     </div>
