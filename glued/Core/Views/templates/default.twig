@@ -164,22 +164,21 @@
 
   {{ assets({files: [
     '@public/assets/node_modules/jquery/dist/jquery.min.js',
+    '@public/assets/node_modules/popper.js/dist/umd/popper.min.js',
     '@public/assets/node_modules/bootstrap/dist/js/bootstrap.min.js',
     '@public/assets/node_modules/stisla/assets/js/scripts.js',
-    '@public/assets/node_modules/stisla/assets/js/custom.js',
-    '@public/assets/node_modules/popper.js/dist/popper.min.js'
+    '@public/assets/node_modules/stisla/assets/js/custom.js'
     ], name: 'stisla-template.js', nonce: csp_nonce.script_src }) }}
 
   {% include '/Core/Views/templates/partials/rjsf.twig' %}
 
   {{ assets({files: [
-    '@public/assets/node_modules/popper.js/dist/umd/popper.min.js',
     '@public/assets/node_modules/tooltip.js/dist/umd/tooltip.min.js',
     '@public/assets/node_modules/nicescroll/dist/jquery.nicescroll.min.js',
     '@public/assets/node_modules/moment/min/moment.min.js',
     '@public/assets/node_modules/datatables.net/js/jquery.dataTables.min.js',
     '@public/assets/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.min.js',
-    '@public/assets/node_modules/datatables.net-select-bs4/js/select.bootstrap4.min.js',
+    '@public/assets/node_modules/datatables.net-select-bs4/js/select.bootstrap4.min.js'
     ], name: 'stisla-general.js', nonce: csp_nonce.script_src, inline: false}) }}
 
   {{ assets({files: [
