@@ -7,8 +7,15 @@ use Slim\Routing\RouteCollectorProxy;
 
 // Define the app routes.
 $app->group('/calendar', function (RouteCollectorProxy $group) {
-    $group->get ('/browse', CalendarController::class)->setName('calendar.browse.web'); 
-    $group->get ('/manage', CalendarController::class)->setName('calendar.manage.web'); 
+    $group->get ('/events', CalendarController::class . ':events_list_ui')->setName('calendar.events'); 
+    $group->get ('/sources', CalendarController::class . ':calendars_list_ui')->setName('calendar.sources'); 
+})->add(RedirectGuests::class);
+
+$app->group('/api/calendar', function (RouteCollectorProxy $group) {
+    $group->get ('/events[/{uid}]', CalendarController::class . ':events_list')->setName('calendar.events.api01'); 
+    $group->get ('/sources[/{uid}]', CalendarController::class . ':calendars_list')->setName('calendar.sources.api01'); 
+    $group->post('/sources[/{uid}]', CalendarController::class . ':calendars_post');
+    $group->put('/sources[/{uid}]', CalendarController::class . ':calendars_put');
 })->add(RedirectGuests::class);
 
 /*

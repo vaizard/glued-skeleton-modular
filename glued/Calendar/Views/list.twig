@@ -1,0 +1,239 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Calendars') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-target="#modalCalendar">{{ __('New calendar') }}</button>
+</div>
+
+<div class="section-body">
+
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped" id="log">
+              <thead>
+                <tr>
+                  <th class="col-sm-1">{{ __('Calendar') }}</th>
+                  <th class="col-sm-1">{{ __('Team') }}</th>
+                  <th class="col-sm-1">{{ __('Driver') }}</th>
+                  <th class="col-sm-4">{{ __('Name') }}</th>
+                  <th class="col-sm-4">{{ __('Uri') }}</th>
+                </tr>
+              </thead>
+              <tbody id="calendar_rows_placeholder">
+                {% verbatim %}
+                <script type="text/twig" id="calendar_row_add">
+                <tr>
+                  <td class="col-sm-1">row.c_uid</td>
+                  <td class="col-sm-1">row.c_team</td>
+                  <td class="col-sm-1">row.c_json.driver</td>
+                  <td class="col-sm-4">row.c_json.name</td>
+                  <td class="col-sm-4">row.c_json.uri</td>
+                </tr>
+                </script>
+                <script type="text/twig" id="calendar_rows_twig">
+                {% for row in data %}
+                {% include "calendar_row_add" %}
+                {% endfor %}
+                </script>
+                {% endverbatim %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="newCalendar">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ __('New remote calendar') }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="rjsf"></div>
+      </div>
+      <div class="modal-footer bg-whitesmoke br">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modalCalendar" data-backdrop="false">
+  <div class="modal-dialog modal-lg" role="document">
+    <form action="" method="post" autocomplete="off" id="calendar_form">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Remote calendar</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row"> 
+           <div class="form-group col-md-6">
+            <label>{{ __('Remote URI') }}*</label>
+            <div class="input-group">
+              <input type="url" class="form-control" name="uri" required placeholder="https://...">
+            </div>
+          </div>
+          <div class="form-group col-md-6">
+            <label>{{ __('Name') }}</label>
+            <div class="input-group">
+              <input type="text" class="form-control mask_time" name="name">
+            </div>
+          </div>   
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>{{ __('Domain') }}*</label><br>
+            <select class="form-control select2" name="domain" required style="width: 100%">
+               {% for domain in domains %}
+               <option value="{{ domain.c_uid }}">{{ domain.c_name }}</option>
+               {% endfor %}
+             </select>
+          </div>
+          <div class="form-group col-md-6">
+            <label>{{ __('Driver') }}*</label><br>
+            <select class="form-control select2" name="driver" required style="width: 100%">
+              <option value="google">Google</option>
+              <option value="facebook">Facebook</option>
+              <option value="ics">ICS</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer bg-whitesmoke br">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close' ) }}</button>
+        <button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
+      </div>
+    </div>
+  </form>
+</div>
+</div>
+
+{% endblock %}
+
+
+
+{% block additionaljs %}
+<script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+
+  // Compile twig.js templates
+  $("script[type='text/twig']").each(function() {
+    var id = $(this).attr("id"),
+    data = $(this).text();
+    Twig.twig({ id: id, data: data, allowInlineIncludes: true });
+  });
+
+  // Onload ajax to fetch calendar data
+  $( document ).ready(function() {
+    var api_url = '{{ url_for('calendar.sources.api01') }}'
+    $.ajax({
+      url: api_url,
+      contentType: "application/json",
+      dataType: 'json',
+      success: function(res){
+        console.log(res);
+        var idhold = 'calendar_rows_placeholder';
+        var idtwig = 'calendar_rows_twig';
+        $("#" + idhold).append(
+          Twig.twig({ ref: idtwig }).render({ data: res.data })
+          )
+      }
+    })
+  });
+
+  // Post (new) data, modify current page
+  $("#calendar_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    success: function(res) {
+      var idtwig = 'worklog_row_add';
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'worklog_row_add' }).render({ row: res.data })).prependTo("#log > tbody");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Worklog") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Worklog") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+      console.log(res);
+    }
+  });
+
+
+  // Show modal
+  $('#editLog').on('show.bs.modal', function (event) {
+    // Button that triggered the modal
+    var button = $(event.relatedTarget)
+    // Extract info from data-* attributes
+    var id = button.data('id') 
+    var finished = button.data('finished')
+    var summary = button.data('summary')
+    var date = button.data('date')
+    var time = button.data('time')
+    var modal = $(this)
+    // Update the modal's content.
+    modal.find('.modal-title').text('{{ __("Edit log entry") }} ' + id)
+    modal.find('.modal-body input[name="finished"]').val(finished)
+    modal.find('.modal-body input[name="date"]').val(date)
+    modal.find('.modal-body input[name="time"]').val(time)
+    modal.find('.modal-body input[name="summary"]').val(summary)
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("worklog.items.api01") }}/' + id)
+  });
+
+
+  // Post (new) data, modify current page
+  $("#worklog_edit_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    headers: {
+      "X-Http-Method-Override": "PATCH"
+    },
+    success: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Worklog") }}' , msg: '{{ __("Entry updated.") }}' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+      $('#editLog').modal('toggle');
+      $('#worklog_rows_placeholder').empty();
+      var api_url = '{{ url_for('worklog.users.api01') }}'
+      $.ajax({ 
+        url: api_url, 
+        contentType: "application/json", 
+        dataType: 'json',
+        success: function(res){
+          var idhold = 'worklog_rows_placeholder';
+          var idtwig = 'worklog_rows_twig';
+          $("#" + idhold).append(Twig.twig({ ref: idtwig }).render({ work: res.data }))
+        }
+    })
+
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Worklog") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+
+  </script>
+  {% endblock %}
+
+

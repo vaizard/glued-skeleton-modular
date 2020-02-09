@@ -3,13 +3,28 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "http://example.com/root.json",
   "type": "object",
-  "title": "Remote calendars schema",
+  "title": "The Root Schema",
   "required": [
+    "_s",
     "_v",
+    "id",
+    "user",
+    "uri",
     "name",
-    "ical"
+    "driver"
   ],
   "properties": {
+    "_s": {
+      "$id": "#/properties/_s",
+      "type": "string",
+      "title": "Schema name",
+      "default": "calendar/sources",
+      "examples": [
+        "calendar/sources"
+      ],
+      "pattern": "^(.*)$"
+    },
+
     "_v": {
       "$id": "#/properties/_v",
       "type": "integer",
@@ -19,26 +34,58 @@
         1
       ]
     },
-    "name": {
-      "$id": "#/properties/name",
-      "type": "string",
-      "title": "Calendar name",
-      "default": "",
+    "id": {
+      "$id": "#/properties/id",
+      "type": "integer",
+      "title": "ID of the calendar source",
+      "default": 0,
       "examples": [
-        "My remote calendar"
-      ],
-      "pattern": "^(.*)$"
+        1
+      ]
     },
-    "ical": {
-      "$id": "#/properties/ical",
+    "user": {
+      "$id": "#/properties/user",
+      "type": "integer",
+      "title": "User ID who added the source",
+      "examples": [
+        "1"
+      ]
+    },
+    "uri": {
+      "$id": "#/properties/uri",
       "type": "string",
-      "title": "The Ical Schema",
+      "title": "Remote calendar URI",
       "default": "",
       "examples": [
         "https://calendar.google.com/calendar/ical/some-calendar/basic.ics"
       ],
       "pattern": "^(.*)$",
       "format": "uri"
+    },
+    "name": {
+      "$id": "#/properties/name",
+      "type": "string",
+      "title": "Remote calendar name",
+      "default": "",
+      "examples": [
+        "My Calendar"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "driver": {
+      "$id": "#/properties/driver",
+      "enum": [
+        "google",
+        "ics",
+        "facebook"
+      ],
+      "type": "string",
+      "title": "Remote calendar driver",
+      "default": "",
+      "examples": [
+        "google"
+      ],
+      "pattern": "^(.*)$"
     }
   }
 }

@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="section-header">
-  <h1>{{ __('Contacts') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-target="#addContact">Add contact</button>
+  <h1>{{ __('Contacts') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-target="#newContact">{{ __('New contact') }}</button>
 </div>
 
   <div class="row">
@@ -67,7 +67,7 @@
   </div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="addContact">
+<div class="modal fade" tabindex="-1" role="dialog" id="newContact">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
