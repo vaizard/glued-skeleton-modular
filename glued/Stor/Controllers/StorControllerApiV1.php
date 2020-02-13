@@ -1090,58 +1090,16 @@ class StorControllerApiV1 extends AbstractTwigController
                             // jestli bude ozubene kolo
                             if (in_array('write', $allowed_global_actions)) {
                                 $action_dropdown = '
-                                
-<div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Dropdown button
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="#">Action</a>
-    <a class="dropdown-item" href="#">Another action</a>
-    <a class="dropdown-item" href="#">Something else here</a>
-  </div>
-</div>
-                                
-                                <div class="dropdown">
-                                    <div class="btn-group dropleft">
-                                      <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Dropleft
-                                      </button>
-                                      <div class="dropdown-menu">
-                                            <button class="dropdown-item" type="button">Action</button>
-                                            <button class="dropdown-item" type="button">Another action</button>
-                                            <button class="dropdown-item" type="button">Something else here</button>
-                                      </div>
-                                    </div>
-                                </div>
-                                    
-                                    <div class="item-actions-dropdown">
-                                        <a class="item-actions-toggle-btn">
-                                            <span class="inactive">
-                                                <i class="fa fa-cog"></i>
-                                            </span>
-                                            <span class="active">
-                                                <i class="fa fa-chevron-circle-right"></i>
-                                            </span>
-                                        </a>
-                                        <div class="item-actions-block">
-                                            <ul class="item-actions-list">
-                                                <li>
-                                                    <a class="remove" href="#" data-toggle="modal" data-target="#confirm-modal" onclick="$(\'#delete_file_uid\').val('.$data['c_uid'].');">
-                                                        <i class="fa fa-trash-o "></i>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="edit" href="#" data-toggle="modal" data-target="#modal-edit-stor" onclick="$(\'#edit_file_uid\').val('.$data['c_uid'].');var pomucka = $(\'#fname_'.$data['c_uid'].'\').text(); $(\'#edit_file_fname\').val(pomucka);">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="edit" href="#" data-toggle="modal" data-target="#modal-copy-move-stor" onclick="$(\'#copy_move_file_uid\').val('.$data['c_uid'].');">
-                                                        <i class="fa fa-files-o"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
+                                    <div class="dropdown">
+                                        <div class="btn-group dropleft">
+                                          <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Actions
+                                          </button>
+                                          <div class="dropdown-menu">
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#confirm-modal" onclick="$(\'#delete_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-trash-o "></i> Delete</button>
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-edit-stor" onclick="$(\'#edit_file_uid\').val('.$data['c_uid'].');var pomucka = $(\'#fname_'.$data['c_uid'].'\').text(); $(\'#edit_file_fname\').val(pomucka);"><i class="fa fa-pencil"></i> Edit</button>
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-copy-move-stor" onclick="$(\'#copy_move_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-files-o"></i> Copy/Move</button>
+                                          </div>
                                         </div>
                                     </div>
                                 ';

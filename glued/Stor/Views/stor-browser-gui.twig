@@ -34,7 +34,7 @@
 </section>
 
 
-<div class="modal fade" id="confirm-modal">
+<div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" data-backdrop="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -59,7 +59,7 @@
 </div>
 <!-- /.modal -->
 
-<div class="modal fade" id="modal-edit-stor">
+<div class="modal fade" id="modal-edit-stor" tabindex="-1" role="dialog" data-backdrop="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form method="post" action="{{ url_for('stor.uploader.update') }}">
@@ -84,7 +84,7 @@
 </div>
 <!-- /.modal -->
 
-<div class="modal fade" id="modal-copy-move-stor">
+<div class="modal fade" id="modal-copy-move-stor" tabindex="-1" role="dialog" data-backdrop="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form method="post" action="{{ url_for('stor.uploader.copy.move') }}">
