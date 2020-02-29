@@ -20,7 +20,6 @@ $app->group('/stor', function (RouteCollectorProxy $group) {
     $group->get('/get/{id:[0-9]+}[/{filename}]', StorController::class . ':serveFile')->setName('stor.serve.file');
     // update editace stor file (nazev) TODO nemel by tu byt put, kdyz je to update?
     $group->post('/uploader/update', StorController::class . ':uploaderUpdate')->setName('stor.uploader.update');
-    $group->post('/uploader/copymove', StorController::class . ':uploaderCopyMove')->setName('stor.uploader.copy.move');
     // ajax co vraci optiony v jsonu pro select 2 filtr
     $group->get('/api/v1/stor/filteroptions', StorControllerApiV1::class . ':showFilterOptions')->setName('stor.api.filter.options');
     // ajax, ktery po odeslani filtru vraci soubory odpovidajici vyberu
@@ -31,6 +30,8 @@ $app->group('/stor', function (RouteCollectorProxy $group) {
     $group->post('/api/v1/stor/update', StorControllerApiV1::class . ':ajaxUpdate')->setName('stor.ajax.update');
     // ajax co vypise vhodne idecka k vybranemu diru, pro copy move
     $group->get('/api/v1/stor/modalobjects', StorControllerApiV1::class . ':showModalObjects')->setName('stor.api.modal.objects');
+    // copy nebo move z modalu pro copy move
+    $group->post('/item/copymove', StorController::class . ':itemCopyMove')->setName('stor.item.copy.move');
     
     // funkce na upload post formularem
     $group->post('/uploader', StorController::class . ':uploaderSave')->setName('stor.uploader');

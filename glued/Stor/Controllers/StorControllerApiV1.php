@@ -635,15 +635,19 @@ class StorControllerApiV1 extends AbstractTwigController
         
         $dirname = $request->getParam('dirname');
         
-        if (isset($this->container->stor->app_dirs[$dirname])) {
-            if (isset($this->container->stor->app_tables[$dirname])) {
+        // nacteme si to z containeru ktery to ma ze tridy
+        $app_dirs = $this->stor->app_dirs;
+        $app_tables = $this->stor->app_tables;
+        
+        if (isset($app_dirs[$dirname])) {
+            if (isset($app_tables[$dirname])) {
                 // nacteme idecka
-                $cols = Array("c_uid", "stor_name");
-                $this->container->db->orderBy("c_uid","asc");
-                $idecka = $this->container->db->get($this->container->stor->app_tables[$dirname], null, $cols);
-                if ($this->container->db->count > 0) {
+                $cols = Array("c_uid");
+                $this->db->orderBy("c_uid","asc");
+                $idecka = $this->db->get($app_tables[$dirname], null, $cols);
+                if ($this->db->count > 0) {
                     foreach ($idecka as $idecko) {
-                        $vystup .= '<option value="'.$idecko['c_uid'].'">'.$idecko['c_uid'].' - '.$idecko['stor_name'].'</option>';
+                        $vystup .= '<option value="'.$idecko['c_uid'].'">'.$idecko['c_uid'].' - nazev</option>';
                     }
                 }
             }
@@ -990,7 +994,7 @@ class StorControllerApiV1 extends AbstractTwigController
                             <td class="col-sm-2"><i class="fa fa-folder-o fa-2x"></i></td>
                             <td class="col-sm-2">
                                 <a href="" class="stor-shortcuts" data-id="/'.$objektovy_dir.'/'.$idecko['c_uid'].'" data-text="/'.$objektovy_dir.'/'.$idecko['c_uid'].' - pfff">
-                                    <h4 class="item-title"> '.$idecko['c_uid'].' - pfff </h4>
+                                    <h4 class="item-title"> '.$idecko['c_uid'].' - nazev </h4>
                                 </a>
                             </td>
                             <td class="col-sm-2"></td>
@@ -1090,58 +1094,16 @@ class StorControllerApiV1 extends AbstractTwigController
                             // jestli bude ozubene kolo
                             if (in_array('write', $allowed_global_actions)) {
                                 $action_dropdown = '
-                                
-<div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Dropdown button
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="#">Action</a>
-    <a class="dropdown-item" href="#">Another action</a>
-    <a class="dropdown-item" href="#">Something else here</a>
-  </div>
-</div>
-                                
-                                <div class="dropdown">
-                                    <div class="btn-group dropleft">
-                                      <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Dropleft
-                                      </button>
-                                      <div class="dropdown-menu">
-                                            <button class="dropdown-item" type="button">Action</button>
-                                            <button class="dropdown-item" type="button">Another action</button>
-                                            <button class="dropdown-item" type="button">Something else here</button>
-                                      </div>
-                                    </div>
-                                </div>
-                                    
-                                    <div class="item-actions-dropdown">
-                                        <a class="item-actions-toggle-btn">
-                                            <span class="inactive">
-                                                <i class="fa fa-cog"></i>
-                                            </span>
-                                            <span class="active">
-                                                <i class="fa fa-chevron-circle-right"></i>
-                                            </span>
-                                        </a>
-                                        <div class="item-actions-block">
-                                            <ul class="item-actions-list">
-                                                <li>
-                                                    <a class="remove" href="#" data-toggle="modal" data-target="#confirm-modal" onclick="$(\'#delete_file_uid\').val('.$data['c_uid'].');">
-                                                        <i class="fa fa-trash-o "></i>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="edit" href="#" data-toggle="modal" data-target="#modal-edit-stor" onclick="$(\'#edit_file_uid\').val('.$data['c_uid'].');var pomucka = $(\'#fname_'.$data['c_uid'].'\').text(); $(\'#edit_file_fname\').val(pomucka);">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="edit" href="#" data-toggle="modal" data-target="#modal-copy-move-stor" onclick="$(\'#copy_move_file_uid\').val('.$data['c_uid'].');">
-                                                        <i class="fa fa-files-o"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
+                                    <div class="dropdown">
+                                        <div class="btn-group dropleft">
+                                          <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Actions
+                                          </button>
+                                          <div class="dropdown-menu">
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#confirm-modal" onclick="$(\'#delete_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-trash-o "></i> Delete</button>
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-edit-stor" onclick="$(\'#edit_file_uid\').val('.$data['c_uid'].');var pomucka = $(\'#fname_'.$data['c_uid'].'\').text(); $(\'#edit_file_fname\').val(pomucka);"><i class="fa fa-pencil"></i> Edit</button>
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-copy-move-stor" onclick="$(\'#copy_move_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-files-o"></i> Copy/Move</button>
+                                          </div>
                                         </div>
                                     </div>
                                 ';
@@ -1344,7 +1306,7 @@ class StorControllerApiV1 extends AbstractTwigController
         // TODO zjistit jestli mame write prava na inherit table a objekt
         
         
-        $returned_data = $this->container->stor->delete_stor_file($link_id);
+        $returned_data = $this->stor->delete_stor_file($link_id);
         
         // protoze je to ajax, tak vystup nebudeme strkat do view ale rovnou ho vytiskneme
         
@@ -1360,29 +1322,35 @@ class StorControllerApiV1 extends AbstractTwigController
         $new_fname = $request->getParam('new_fname');
         
         // nacteme si link
-        $this->container->db->where("c_uid", $link_id);
-        $link_data = $this->container->db->getOne('t_stor_links');
-        if ($this->container->db->count == 0) { // TODO, asi misto countu pouzit nejaky test $link_data
+        $this->db->where("c_uid", $link_id);
+        $link_data = $this->db->getOne('t_stor_links');
+        if ($this->db->count == 0) { // TODO, asi misto countu pouzit nejaky test $link_data
             $vystup = 'pruser, soubor neexistuje, nevim na co jste klikli, ale jste tu spatne';
         }
         else {
-            // pokud mame prava na tento objekt
+            // pokud mame prava na tento objekt, TODO
+            
+            // zmenime nazev na novy
+            $data = Array (
+                'c_filename' => $new_fname
+            );
+            $this->db->where("c_uid", $link_id);
+            if ($this->db->update('t_stor_links', $data)) {
+                $vystup = 'soubor byl prejmenovan';
+            }
+            else {
+                $vystup = 'prejmenovani se nepovedlo';
+            }
+            
+            // byvale prava
+            /*
             if ($this->container->permissions->have_action_on_object($link_data['c_inherit_table'], $link_data['c_inherit_object'], 'write')) {
-                // zmenime nazev na novy
-                $data = Array (
-                    'c_filename' => $new_fname
-                );
-                $this->container->db->where("c_uid", $link_id);
-                if ($this->container->db->update('t_stor_links', $data)) {
-                    $vystup = 'soubor byl prejmenovan';
-                }
-                else {
-                    $vystup = 'prejmenovani se nepovedlo';
-                }
+                
             }
             else {
                 $vystup = 'k prejmenovani nemate prava';
             }
+            */
         }
         
         // protoze je to ajax, tak vystup nebudeme strkat do view ale rovnou ho vytiskneme
