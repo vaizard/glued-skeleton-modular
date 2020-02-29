@@ -641,7 +641,7 @@ class StorController extends AbstractTwigController
           dataType: "text",
           data: { link_id: link_id },
           success: function(data) {
-            // vyhodi nekde hlasku
+            // vyhodi nekde hlasku, todo
             
             filter_stor_files();
           }

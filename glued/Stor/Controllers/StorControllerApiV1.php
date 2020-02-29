@@ -1302,7 +1302,7 @@ class StorControllerApiV1 extends AbstractTwigController
         // TODO zjistit jestli mame write prava na inherit table a objekt
         
         
-        $returned_data = $this->container->stor->delete_stor_file($link_id);
+        $returned_data = $this->stor->delete_stor_file($link_id);
         
         // protoze je to ajax, tak vystup nebudeme strkat do view ale rovnou ho vytiskneme
         
