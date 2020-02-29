@@ -635,15 +635,19 @@ class StorControllerApiV1 extends AbstractTwigController
         
         $dirname = $request->getParam('dirname');
         
-        if (isset($this->container->stor->app_dirs[$dirname])) {
-            if (isset($this->container->stor->app_tables[$dirname])) {
+        // nacteme si to z containeru ktery to ma ze tridy
+        $app_dirs = $this->stor->app_dirs;
+        $app_tables = $this->stor->app_tables;
+        
+        if (isset($app_dirs[$dirname])) {
+            if (isset($app_tables[$dirname])) {
                 // nacteme idecka
-                $cols = Array("c_uid", "stor_name");
-                $this->container->db->orderBy("c_uid","asc");
-                $idecka = $this->container->db->get($this->container->stor->app_tables[$dirname], null, $cols);
-                if ($this->container->db->count > 0) {
+                $cols = Array("c_uid");
+                $this->db->orderBy("c_uid","asc");
+                $idecka = $this->db->get($app_tables[$dirname], null, $cols);
+                if ($this->db->count > 0) {
                     foreach ($idecka as $idecko) {
-                        $vystup .= '<option value="'.$idecko['c_uid'].'">'.$idecko['c_uid'].' - '.$idecko['stor_name'].'</option>';
+                        $vystup .= '<option value="'.$idecko['c_uid'].'">'.$idecko['c_uid'].' - nazev</option>';
                     }
                 }
             }
@@ -990,7 +994,7 @@ class StorControllerApiV1 extends AbstractTwigController
                             <td class="col-sm-2"><i class="fa fa-folder-o fa-2x"></i></td>
                             <td class="col-sm-2">
                                 <a href="" class="stor-shortcuts" data-id="/'.$objektovy_dir.'/'.$idecko['c_uid'].'" data-text="/'.$objektovy_dir.'/'.$idecko['c_uid'].' - pfff">
-                                    <h4 class="item-title"> '.$idecko['c_uid'].' - pfff </h4>
+                                    <h4 class="item-title"> '.$idecko['c_uid'].' - nazev </h4>
                                 </a>
                             </td>
                             <td class="col-sm-2"></td>
@@ -1318,29 +1322,35 @@ class StorControllerApiV1 extends AbstractTwigController
         $new_fname = $request->getParam('new_fname');
         
         // nacteme si link
-        $this->container->db->where("c_uid", $link_id);
-        $link_data = $this->container->db->getOne('t_stor_links');
-        if ($this->container->db->count == 0) { // TODO, asi misto countu pouzit nejaky test $link_data
+        $this->db->where("c_uid", $link_id);
+        $link_data = $this->db->getOne('t_stor_links');
+        if ($this->db->count == 0) { // TODO, asi misto countu pouzit nejaky test $link_data
             $vystup = 'pruser, soubor neexistuje, nevim na co jste klikli, ale jste tu spatne';
         }
         else {
-            // pokud mame prava na tento objekt
+            // pokud mame prava na tento objekt, TODO
+            
+            // zmenime nazev na novy
+            $data = Array (
+                'c_filename' => $new_fname
+            );
+            $this->db->where("c_uid", $link_id);
+            if ($this->db->update('t_stor_links', $data)) {
+                $vystup = 'soubor byl prejmenovan';
+            }
+            else {
+                $vystup = 'prejmenovani se nepovedlo';
+            }
+            
+            // byvale prava
+            /*
             if ($this->container->permissions->have_action_on_object($link_data['c_inherit_table'], $link_data['c_inherit_object'], 'write')) {
-                // zmenime nazev na novy
-                $data = Array (
-                    'c_filename' => $new_fname
-                );
-                $this->container->db->where("c_uid", $link_id);
-                if ($this->container->db->update('t_stor_links', $data)) {
-                    $vystup = 'soubor byl prejmenovan';
-                }
-                else {
-                    $vystup = 'prejmenovani se nepovedlo';
-                }
+                
             }
             else {
                 $vystup = 'k prejmenovani nemate prava';
             }
+            */
         }
         
         // protoze je to ajax, tak vystup nebudeme strkat do view ale rovnou ho vytiskneme

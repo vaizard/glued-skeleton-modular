@@ -203,7 +203,7 @@ class StorController extends AbstractTwigController
         // vyjimka na my_files
         if ($raw_path == 'my_files') {
             $actual_dir = 'users';
-            $actual_object = $_SESSION['user_id'];
+            $actual_object = $_SESSION['core_user_id'];
         }
         else {
             $parts = explode('/', $raw_path);
@@ -416,8 +416,8 @@ class StorController extends AbstractTwigController
         return $response->withRedirect($redirect_url);
     }
     
-    // copy nebo move
-    public function uploaderCopyMove($request, $response)
+    // copy nebo move z modalu
+    public function itemCopyMove($request, $response)
     {
         $link_id = (int) $request->getParam('file_id');
         $actual_dir = $request->getParam('actual_dir'); // jen v uploaderu
@@ -427,16 +427,20 @@ class StorController extends AbstractTwigController
         $set_new_owner = (int) $request->getParam('set_new_owner'); // 1 - system, 2 - prihlaseny, 3 - nemenit
         $action_source = $request->getParam('action_source');   // jen v browseru
         
+        // nacteme si to z containeru ktery to ma ze tridy
+        $app_dirs = $this->stor->app_dirs;
+        $app_tables = $this->stor->app_tables;
+        
         // nacteme si link
-        $this->container->db->where("c_uid", $link_id);
-        $link_data = $this->container->db->getOne('t_stor_links');
-        if ($this->container->db->count == 0) { // TODO, asi misto countu pouzit nejaky test $link_data
-            $this->container->flash->addMessage('error', 'pruser, soubor neexistuje, nevim na co jste klikli, ale jste tu spatne');
+        $this->db->where("c_uid", $link_id);
+        $link_data = $this->db->getOne('t_stor_links');
+        if ($this->db->count == 0) { // TODO, asi misto countu pouzit nejaky test $link_data
+            $this->flash->addMessage('error', 'pruser, soubor neexistuje, nevim na co jste klikli, ale jste tu spatne');
         }
         else {
             // nacteme prava na tabulku, TODO, meli bychom ale nacist prava na ten konkretni objekt, coz neni vyladene zatim
-            $allowed_global_actions = $this->container->permissions->read_global_privileges($link_data['c_inherit_table']);
-            $allowed_global_target_actions = $this->container->permissions->read_global_privileges($this->container->stor->app_tables[$target_dir]);
+            //$allowed_global_actions = $this->container->permissions->read_global_privileges($link_data['c_inherit_table']);
+            //$allowed_global_target_actions = $this->container->permissions->read_global_privileges($this->container->stor->app_tables[$target_dir]);
             
             // urceni ownera
             if ($set_new_owner == 1) {  // system select
@@ -445,63 +449,67 @@ class StorController extends AbstractTwigController
                     $new_owner = $target_object_id;
                 }
                 else {  // pokud je cil nejaky modul, tak u copy bych mel byt owner ja, a u move bud nemenit nebo ja
-                    $new_owner = $_SESSION['user_id'];
+                    $new_owner = $_SESSION['core_user_id'];
                 }
             }
-            else if ($set_new_owner == 2) { $new_owner = $_SESSION['user_id']; }    // vzdy ja
-            else if ($set_new_owner == 3) { $new_owner = $link_data['c_owner']; }   // nemenit
+            else if ($set_new_owner == 2) { $new_owner = $_SESSION['core_user_id']; }    // vzdy ja
+            else if ($set_new_owner == 3) { $new_owner = $link_data['c_user_id']; }   // nemenit
             
             if ($action_type == 'copy') {
-                if (in_array('read', $allowed_global_actions) and in_array('write', $allowed_global_target_actions)) {
+                //if (in_array('read', $allowed_global_actions) and in_array('write', $allowed_global_target_actions)) {
                     $data = Array (
                     "c_sha512" => $link_data['c_sha512'],
-                    "c_owner" => $new_owner,
+                    "c_user_id" => $new_owner,
                     "c_filename" => $link_data['c_filename'],
-                    "c_inherit_table" => $this->container->stor->app_tables[$target_dir],
+                    "c_inherit_table" => $app_tables[$target_dir],
                     "c_inherit_object" => $target_object_id
                     );
-                    if ($this->container->db->insert ('t_stor_links', $data)) {
-                        $this->container->flash->addMessage('info', 'soubor byl zkopirovan');
+                    if ($this->db->insert ('t_stor_links', $data)) {
+                        $this->flash->addMessage('info', 'soubor byl zkopirovan');
                     }
                     else {
-                        $this->container->flash->addMessage('error', 'kopirovani se nepovedlo');
+                        $this->flash->addMessage('error', 'kopirovani se nepovedlo');
                     }
+                /*
                 }
                 else {
-                    $this->container->flash->addMessage('error', 'ke kopirovani nemate prava');
+                    $this->flash->addMessage('error', 'ke kopirovani nemate prava');
                 }
+                */
             }
             else if ($action_type == 'move') {
-                if (in_array('write', $allowed_global_actions) and in_array('write', $allowed_global_target_actions)) {
+                //if (in_array('write', $allowed_global_actions) and in_array('write', $allowed_global_target_actions)) {
                     $data = Array (
-                        'c_owner' => $new_owner,
-                        'c_inherit_table' => $this->container->stor->app_tables[$target_dir],
+                        'c_user_id' => $new_owner,
+                        'c_inherit_table' => $app_tables[$target_dir],
                         'c_inherit_object' => $target_object_id
                     );
-                    $this->container->db->where("c_uid", $link_id);
-                    if ($this->container->db->update('t_stor_links', $data)) {
-                        $this->container->flash->addMessage('info', 'soubor byl presunut');
+                    $this->db->where("c_uid", $link_id);
+                    if ($this->db->update('t_stor_links', $data)) {
+                        $this->flash->addMessage('info', 'soubor byl presunut');
                     }
                     else {
-                        $this->container->flash->addMessage('error', 'presunuti se nepovedlo');
+                        $this->flash->addMessage('error', 'presunuti se nepovedlo');
                     }
+                /*
                 }
                 else {
-                    $this->container->flash->addMessage('error', 'k presunu nemate prava');
+                    $this->flash->addMessage('error', 'k presunu nemate prava');
                 }
+                */
             }
         }
         
         if ($action_source == 'browser') {
-            $redirect_url = $this->container->router->pathFor('stor.browser').'?filter=/'.$target_dir.'/'.$target_object_id;
+            $redirect_url = $this->routerParser->urlFor('stor.browser').'?filter=/'.$target_dir.'/'.$target_object_id;
         }
         else {
             // toto by melo byt vzdy nastaveno pri editaci, abychom mohli tu adresu zase vykreslit s uz zmenenym nazvem
             if (!empty($actual_dir)) {
-                $redirect_url = $this->container->router->pathFor('stor.uploader').'/~/'.$actual_dir;
+                $redirect_url = $this->routerParser->urlFor('stor.uploader').'/~/'.$actual_dir;
             }
             else {  // pro jistotu, kdyz to nebude nastaveno, jdeme na root
-                $redirect_url = $this->container->router->pathFor('stor.uploader');
+                $redirect_url = $this->routerParser->urlFor('stor.uploader');
             }
         }
         
@@ -733,7 +741,7 @@ class StorController extends AbstractTwigController
         // zavolame to defaultne na prazdny filtr
         filter_stor_files();
         // iniciujeme prvotni objekty v copy move modalu
-        //read_modal_objects();
+        read_modal_objects();
         
         
     });
