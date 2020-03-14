@@ -65,16 +65,12 @@ $app->add(\Glued\Core\Middleware\ValidationFormsMiddleware::class);
 // and AuthMiddleware into a single middleware TwigGlobalsMiddleware.
 // We're only setting twig globals in all three so, why not, eh?
 $app->add(new \Glued\Core\Middleware\TwigFlashMiddleware($container)); 
+
 $csp = new CSPBuilder($settings['headers']['csp']);
-// TODO: look at how to make this work with RJSF and its inlined evals and scripts
-// then kill the dummy nonce and keep on going with $csp->nonce() only
-// $nonce['script_src'] = $csp->nonce('script-src');
-// $nonce['style_src'] = $csp->nonce('style-src');
-$nonce['script_src'] = "dummy_nonce"; 
+$nonce['script_src'] = $csp->nonce('script-src');
+$nonce['style_src'] = $csp->nonce('style-src');
 $app->add(new Middlewares\Csp($csp));
 $app->add(new \Glued\Core\Middleware\TwigCspMiddleware($nonce, $container));
-
-
 
 $app->add(new Tuupola\Middleware\CorsMiddleware); // TODO add sane defaults to CorsMiddleware
 $app->add(new HeadersMiddleware($settings));

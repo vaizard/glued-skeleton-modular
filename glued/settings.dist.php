@@ -111,12 +111,15 @@ return [
          */ 
         'referrer-policy' => 'strict-origin-when-cross-origin',
         'content-type-options' => 'nosniff',
-        // TODO remove unsafe-inline and unsafe-eval once odan/twig-assets works with csp
+        // TODO remove unsafe-eval once odan/twig-assets works with csp
         'csp' => [
-            'script-src' => [ 'allow' => [ $_SERVER['SERVER_NAME'] ], 'unsafe-inline' => true,'unsafe-eval' => true,  ],
-            'object-src' => [ 'allow' => [ $_SERVER['SERVER_NAME'] ] ],
-            'frame-ancestors' => [ 'allow' => [ 'https://' . $_SERVER['SERVER_NAME'] ] ],
+            'script-src' => [ 'self' => true, 'allow' => [ $_SERVER['SERVER_NAME'] ], 'strict-dynamic' => true, 'unsafe-eval' => true ],
+            'object-src' => [ 'default-src' => 'false' ],
+            'frame-ancestors' => [ 'self' => true, 'allow' => [ 'https://' . $_SERVER['SERVER_NAME'] ] ],
+            'base-uri' => 'self',
+            'require-trusted-types-for' => 'script' // TODO not yet supported https://github.com/paragonie/csp-builder/issues/47
         ],
+
         /** Optimal production hsts values (see https://hstspreload.org/
          * before setting things up this)
          *   'enable' => false,
