@@ -49,8 +49,11 @@ The glue that keeps stuff together in Glued. To all microservices, core provides
 - (some of the) security (see https://securityheaders.com/)
   - CSRF prevention (session cookie) via the SessionMiddleware;
   - TODO / CSRF prevention (other cookies) - hack this https://github.com/selective-php/samesite-cookie/blob/master/src/SameSiteCookieMiddleware.php
-  - CSP prevention
-  - XSS prevention
+  - XSS prevention via
+    - CSP (content security policy) middleware
+    - output filtering
+      - the whole Core/Views/templates/default.twig is wrapped in `{% autoescape %}{% endautoescape %}`
+      - twig.js always initialized with `autoescape: true`
   - TODO unify header generation with someting like a middleware using https://github.com/BePsvPT/secure-headers
 
 **Caching**
