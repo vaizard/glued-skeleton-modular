@@ -20,7 +20,7 @@ class AuthorizationMiddleware extends AbstractMiddleware
         $check = $this->auth->check();
         $response = $this->auth->response();
         $response['check'] = $check;
-        // consider try/catch here
+        // TODO consider try/catch here
 
         $this->view->getEnvironment()->addGlobal('session', $_SESSION);
         $this->view->getEnvironment()->addGlobal('auth', $response); // old input data
