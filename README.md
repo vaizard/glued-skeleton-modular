@@ -54,6 +54,8 @@ The glue that keeps stuff together in Glued. To all microservices, core provides
     - output filtering
       - the whole Core/Views/templates/default.twig is wrapped in `{% autoescape %}{% endautoescape %}`
       - twig.js always initialized with `autoescape: true`
+    - input filtering
+      - see Core/Middleware/AntiXSSMiddleware.php
   - TODO unify header generation with someting like a middleware using https://github.com/BePsvPT/secure-headers
 
 **Caching**

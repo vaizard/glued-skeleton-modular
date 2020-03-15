@@ -3,9 +3,11 @@
 use DI\Container;
 use Glued\Core\Classes\Auth\Auth;
 use Glued\Core\Middleware\TranslatorMiddleware;
+use Glued\Stor\Classes\Stor as StorMainClass;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
+use Nyholm\Psr7\getParsedBody;
 use Odan\Twig\TwigAssetsExtension;
 use Odan\Twig\TwigTranslationExtension;
 use Psr\Log\LoggerInterface;
@@ -19,7 +21,7 @@ use Symfony\Component\Translation\IdentityTranslator;
 use Symfony\Component\Translation\Loader\MoFileLoader;
 use Symfony\Component\Translation\Translator;
 use Twig\Loader\FilesystemLoader;
-use Glued\Stor\Classes\Stor as StorMainClass;
+use voku\helper\AntiXSS;
 
 $container->set('settings', function() {
     return require_once(__ROOT__ . '/glued/settings.php');
@@ -49,6 +51,11 @@ $container->set('db', function (Container $c) {
     $mysqli = $c->get('mysqli');
     $db = new \MysqliDb($mysqli);
     return $db;
+});
+
+
+$container->set('antixss', function () {
+    return new AntiXSS();
 });
 
 
