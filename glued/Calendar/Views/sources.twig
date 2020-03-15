@@ -1,0 +1,186 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Calendars') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-id="" data-uri="" data-name="" data-domain="" data-driver="" data-target="#calendar_sources_create_modal">{{ __('New calendar') }}</button>
+</div>
+
+<div class="section-body">
+
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped" id="calendar_sources">
+              <thead>
+                <tr>
+                  <th class="col-sm-1">{{ __('Calendar') }}</th>
+                  <th class="col-sm-1">{{ __('Team') }}</th>
+                  <th class="col-sm-1">{{ __('Driver') }}</th>
+                  <th class="col-sm-3">{{ __('Name') }}</th>
+                  <th class="col-sm-4">{{ __('url') }}</th>
+                  <th class="col-sm-1">{{ __('Manage') }}</th>
+                </tr>
+              </thead>
+              <tbody id="calendar_sources_placeholder">
+                {% verbatim %}
+                <script type="text/twig" id="calendar_sources_obj_twig">
+                <tr id="calendar_sources_object_{{ row.id }}">
+                  <td class="col-sm-1">{{ row.id }}</td>
+                  <td class="col-sm-1">{{ row.domain_name }} ({{ row.domain }})</td>
+                  <td class="col-sm-1">{{ row.driver }}</td>
+                  <td class="col-sm-3">{{ row.name }}</td>
+                  <td class="col-sm-4"><a href="{{ row.uri }}">{{ row.uri }}</a></td>
+                  <td class="col-sm-1">
+                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#calendar_sources_update_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-driver="{{ row.driver }}"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#calendar_sources_delete_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                </script>
+                <script type="text/twig" id="calendar_sources_col_twig">
+                {% for row in data %}
+                {% include "calendar_sources_obj_twig" %}
+                {% endfor %}
+                </script>
+                {% endverbatim %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include '/Calendar/Views/Partials/calendar_sources_modal.twig' with {'calendar_sources_id': 'calendar_sources_create'} %}
+{% include '/Calendar/Views/Partials/calendar_sources_modal.twig' with {'calendar_sources_id': 'calendar_sources_update'} %}
+{% include '/Calendar/Views/Partials/calendar_sources_delete_modal.twig' with {'calendar_sources_id': 'calendar_sources_delete'} %}
+{% endblock %}
+
+
+{% block additionaljs %}
+{# twig.js initialized in public/assets/js/glued.js #}
+<script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+
+  //
+  // Onload ajax to fetch calendar data
+  // 
+  $( document ).ready(function() {
+    $.ajax({
+      url: "{{ url_for('calendar.sources.api01') }}",
+      contentType: "application/json",
+      dataType: 'json',
+      success: function(res) {
+        $("#calendar_sources_placeholder").append(Twig.twig({ ref: "calendar_sources_col_twig" }).render({ data: res.data }))
+      }
+    })
+  });
+  
+  //
+  // Create + Update + Delete modals
+  // 
+  $('#calendar_sources_update_modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    var e = $(event.relatedTarget) // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("Edit remote calendar") }} ' + e.data('id'));
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("calendar.sources.api01") }}/' + e.data('id') );
+    modal.find('.modal-body input[name="name"]').val(e.data('name'));
+    modal.find('.modal-body input[name="uri"]').val(e.data('uri'));
+  });
+
+  $('#calendar_sources_create_modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    var e = $(event.relatedTarget) // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("New remote calendar") }}');
+  });
+
+  $('#calendar_sources_delete_modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    var e = $(event.relatedTarget) // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("Delete remote calendar") }} ' + e.data('id'));
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("calendar.sources.api01") }}/' + e.data('id') );
+    modal.find('.modal-body').text('{{ __("Do you really want to delete the calendar:") }} ' + e.data('name') + ' (' + e.data('uri') + ')?');
+  });
+
+  //
+  // Create handle
+  // 
+  $("#calendar_sources_create_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    success: function(res) {
+      var idtwig = 'calendar_sources_obj_twig';
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'calendar_sources_obj_twig' }).render({ row: res.data })).prependTo("#calendar_sources > tbody");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+
+  //
+  // Update handle
+  // 
+  $("#calendar_sources_update_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    headers: {
+      "X-Http-Method-Override": "PATCH"
+    },
+    success: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar source") }}' , msg: '{{ __("Saved.") }}' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+      $('#calendar_sources_update_modal').modal('toggle');
+      $('#calendar_sources_placeholder').empty();
+      $.ajax({
+        url: "{{ url_for('calendar.sources.api01') }}",
+        contentType: "application/json",
+        dataType: 'json',
+        success: function(res) {
+          $("#calendar_sources_placeholder").append(Twig.twig({ ref: "calendar_sources_col_twig" }).render({ data: res.data }))
+        }
+      })
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+  //
+  // Delete handle
+  // 
+  $("#calendar_sources_delete_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    headers: {
+      "X-Http-Method-Override": "DELETE"
+    },
+    success: function(res) {
+      var idtwig = 'calendar_sources_obj_twig';
+      $('#toast-placeholder').empty();
+      $('#calendar_sources > tbody > #calendar_sources_object_' + res.data.id).remove();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Removed source ") }}' + res.data.id + '.' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+
+  </script>
+  {% endblock %}

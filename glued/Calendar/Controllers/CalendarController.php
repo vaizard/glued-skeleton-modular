@@ -17,15 +17,27 @@ use Slim\Exception\HttpNotFoundException;
 class CalendarController extends AbstractTwigController
 {
 
-    private $builder;
-    private $validator;
+    // ==========================================================
+    // HELPERS
+    // ==========================================================
 
-    public function __construct() {
-        $this->builder = new JsonResponseBuilder('calendar/sources', 1);
-        $this->$validator = new \Opis\JsonSchema\Validator;
+    private function sql_insert_with_json($table, $row) {
+        $this->db->startTransaction(); 
+        $id = $this->db->insert($table, $row);
+        $err = $this->db->getLastErrno();
+        if ($id) {
+          $updt = $this->db->rawQuery("UPDATE `".$table."` SET `c_json` = JSON_SET(c_json, '$.id', ?) WHERE c_uid = ?", Array ((int)$id, (int)$id));
+          $err += $this->db->getLastErrno();
+        }
+        if ($err >= 0) { $this->db->commit(); } else { $this->db->rollback(); throw new HttpInternalServerErrorException($request, __('Database error')." ".$err); }
+        return (int)$id;
     }
-    
-    public function calendars_fetch(Request $request, Response $response, array $args = []): Response
+
+    // ==========================================================
+    // EVENTS
+    // ==========================================================
+
+    public function events_fetch(Request $request, Response $response, array $args = []): Response
     {
         $collection = $this->db->get('t_calendar_uris');
         if (!$collection) {
@@ -61,9 +73,6 @@ class CalendarController extends AbstractTwigController
             if ( ($min_start === false) or $events[$uid]['start'] < $min_start ) { $min_start = $events[$uid]['start'] ; }
             if ( ($max_end === false) or $events[$uid]['end'] > $max_end ) { $max_end = $events[$uid]['end'] ; }
         }
-
-        //echo $min_start;
-        //echo $max_end;
         
         $period = new \DatePeriod(
             new \DateTime(date(DATE_ATOM, $min_start)),
@@ -97,7 +106,7 @@ class CalendarController extends AbstractTwigController
 
     public function events_list_ui(Request $request, Response $response, array $args = []): Response {
         return $this->render($response, 'Calendar/Views/list.twig', [
-            'pageTitle' => 'Calendar', 'out' => $out
+            'pageTitle' => 'Calendar'
         ]);
     }
 
@@ -107,25 +116,101 @@ class CalendarController extends AbstractTwigController
         ]);
     }
 
-    public function calendars_list_ui(Request $request, Response $response, array $args = []): Response {
-        $out = [];
+    // ==========================================================
+    // SOURCES
+    // ==========================================================
 
+    private function sql_sources_list() {
+        $data = $this->db->rawQuery("
+            SELECT
+                c_domain_id as 'domain',
+                t_calendar_sources.c_user_id as 'user',
+                t_core_users.c_name as 'user_name',
+                t_core_domains.c_name as 'domain_name',
+                c_json->>'$.id' as 'id',
+                c_json->>'$._s' as '_s',
+                c_json->>'$._v' as '_v',
+                c_json->>'$.uri' as 'uri',
+                c_json->>'$.name' as 'name',
+                c_json->>'$.driver' as 'driver'
+            FROM `t_calendar_sources` 
+            LEFT JOIN t_core_users ON t_calendar_sources.c_user_id = t_core_users.c_uid
+            LEFT JOIN t_core_domains ON t_calendar_sources.c_domain_id = t_core_domains.c_uid
+        ");
+        return $data;
+    }
+
+    public function sources_list_ui(Request $request, Response $response, array $args = []): Response {
         // TODO - write a core function that will get domains for a given user so that we dont copy paste tons of code around (once the oneliner below gets properly expanded)
         // TODO - preseed domains on installation with at least one domain
         $domains = $this->db->get('t_core_domains');
-
-
-        return $this->render($response, 'Calendar/Views/list.twig', [
-            'pageTitle' => 'Calendar', 'out' => $out, 'domains' => $domains
+        return $this->render($response, 'Calendar/Views/sources.twig', [
+            'domains' => $domains
         ]);
     }
 
-    public function calendars_post(Request $request, Response $response, array $args = []): Response {
+    // ==========================================================
+    // SOURCES API
+    // ==========================================================
 
-        // start off with the request body & add data
+    public function sources_list(Request $request, Response $response, array $args = []): Response
+    {
+        $builder = new JsonResponseBuilder('calendar.sources', 1);
+        $payload = $builder->withData((array)$this->sql_sources_list())->withCode(200)->build();
+        return $response->withJson($payload);
+        // TODO handle errors
+    }
+
+    public function sources_patch(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('calendar.sources', 1);
+
+        // Get patch data
         $req = $request->getParsedBody();
         $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['id'] = (int)$args['uid'];
         
+        // Get old data
+        $this->db->where('c_uid', $req['id']);
+        $doc = $this->db->getOne('t_calendar_sources', ['c_json'])['c_json'];
+        if (!$doc) { throw new HttpBadRequestException( $request, __('Bad source ID.')); }
+        $doc = json_decode($doc);
+
+        // TODO replace this lame acl with something propper.
+        if($doc->user != $req['user']) { throw new HttpForbiddenException( $request, 'Only own worklog items can be edited.'); }
+
+        // Patch old data
+        $doc->uri = $req['uri'];
+        $doc->name = $req['name'];
+        $doc->domain = $req['domain'];
+        $doc->driver = $req['driver'];
+        // TODO if $doc->domain is patched here, you have to first test, if user has access to the domain
+
+        // load the json schema and validate data against it
+        $loader = new \Opis\JsonSchema\Loaders\File("schema://calendar/", [
+            __ROOT__ . "/glued/Calendar/Controllers/Schemas/",
+        ]);
+        $validator = new \Opis\JsonSchema\Validator;
+        $schema = $loader->loadSchema("schema://calendar/calendar.v1.schema");
+        $result = $validator->schemaValidation($doc, $schema);
+
+        if ($result->isValid()) {
+            $row = [ 'c_json' => json_encode($doc) ];
+            $this->db->where('c_uid', $req['id']);
+            $id = $this->db->update('t_calendar_sources', $row);
+            if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating the calendar source failed.')); }
+        } else { throw new HttpBadRequestException( $request, __('Invalid calendar source data.')); }
+
+        // Success
+        $payload = $builder->withData((array)$req)->withCode(200)->build();
+        return $response->withJson($payload, 200);  
+    }
+
+    public function sources_post(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('calendar.sources', 1);
+        $req = $request->getParsedBody();
+        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['id'] = 0;
+         
         // TODO check again if user is member of a domain that was submitted
         if ( isset($req['domain']) ) { $req['domain'] = (int) $req['domain']; }
         if ( isset($req['private']) ) { $req['private'] = (bool) $req['private']; }
@@ -137,49 +222,36 @@ class CalendarController extends AbstractTwigController
         $loader = new \Opis\JsonSchema\Loaders\File("schema://calendar/", [
             __ROOT__ . "/glued/Calendar/Controllers/Schemas/",
         ]);
+        $validator = new \Opis\JsonSchema\Validator;
         $schema = $loader->loadSchema("schema://calendar/calendar.v1.schema");
-        $result = $this->validator->schemaValidation($req, $schema);
-// stophere
-//
-/*    "_s",
-    "_v",
-    "id",
-    "user",
-    "uri",
-    "name",
-    "driver"*/
+        $result = $validator->schemaValidation($req, $schema);
+
         if ($result->isValid()) {
             $row = array (
                 'c_domain_id' => (int)$req->domain, 
                 'c_user_id' => (int)$req->user,
                 'c_json' => json_encode($req)
             );
-            $this->db->startTransaction(); 
-            $id = $this->db->insert('t_worklog_items', $row);
-            $err = $this->db->getLastErrno();
-            if ($id) {
-              $req->id = (int)$id; 
-              $updt = $this->db->rawQuery("UPDATE `t_worklog_items` SET `c_json` = JSON_SET(c_json, '$.id', ?) WHERE c_uid = ?", Array ((int)$id, (int)$id));
-              $err += $this->db->getLastErrno();
-            }
-            if ($err >= 0) { $this->db->commit(); } else { $this->db->rollback(); throw new HttpInternalServerErrorException($request, __('Database error')); }
+            $req->id = $this->sql_insert_with_json('t_calendar_sources', $row);
             $payload = $builder->withData((array)$req)->withCode(200)->build();
             return $response->withJson($payload, 200);
         } else {
             $reseed = $request->getParsedBody();
             $payload = $builder->withValidationReseed($reseed)
-                               //->withValidationError($array)
+                               ->withValidationError($result->getErrors())
                                ->withCode(400)
                                ->build();
             return $response->withJson($payload, 400);
         }
-
     }
 
-    public function calendars_read(Request $request, Response $response, array $args = []): Response {
-        return $this->render($response, 'Calendar/Views/list.twig', [
-            'pageTitle' => 'Calendar', 'out' => $out
-        ]);
+    public function sources_delete(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('calendar.sources', 1);
+        $req = $request->getParsedBody();
+        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['id'] = (int)$args['uid'];
+        $payload = $builder->withData((array)$req)->withCode(200)->build();
+        return $response->withJson($payload, 200);
     }
 
 }
