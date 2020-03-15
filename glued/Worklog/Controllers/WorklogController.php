@@ -46,7 +46,7 @@ class WorklogController extends AbstractTwigController
      * @return object team worklog
      */
     private function we_helper() {
-        $log = $this->db->rawQuery("
+        $data = $this->db->rawQuery("
             SELECT
                 c_domain_id as 'domain',
                 t_worklog_items.c_user_id as 'user',
@@ -67,7 +67,7 @@ class WorklogController extends AbstractTwigController
             LEFT JOIN t_core_domains ON t_worklog_items.c_domain_id = t_core_domains.c_uid
             ORDER BY `date` DESC, `finished` DESC
         ");
-        return $log;
+        return $data;
     }
 
     public function we_get(Request $request, Response $response, array $args = []): Response
@@ -147,12 +147,13 @@ class WorklogController extends AbstractTwigController
         // Get old data
         $this->db->where('c_uid', $req['id']);
         $doc = $this->db->getOne('t_worklog_items', ['c_json'])['c_json'];
-        if(!$doc) { throw new HttpBadRequestException( $request, 'Bad worklog ID.'); }
+        if(!$doc) { throw new HttpBadRequestException( $request, __('Bad worklog ID.')); }
         $doc = json_decode($doc);
 
-        // Patch old data
-        //$req['user'] = 33;
+        // TODO replace this lame acl with something propper.
         if($doc->user != $req['user']) { throw new HttpForbiddenException( $request, 'Only own worklog items can be edited.'); }
+
+        // Patch old data
         $doc->date = $req['date'];
         $doc->time = $req['time'];
         $doc->finished = $req['finished'];
