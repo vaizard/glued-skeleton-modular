@@ -33,9 +33,9 @@ class Stor
     
     
     // konstruktor
-    public function __construct($container)
+    public function __construct($db)
     {
-        $this->container = $container;
+        $this->db = $db;
     }
     
     // cti tagy ke dvojici tabulka uid
@@ -173,9 +173,9 @@ class Stor
         $data['message'] = '';
         
         // nacteme si link a jeho sha512
-        $this->container->db->where("c_uid", $link_id);
-        $link_data = $this->container->db->getOne('t_stor_links');
-        if ($this->container->db->count == 0) { // TODO, asi misto countu pouzit nejaky test $link_data
+        $this->db->where("c_uid", $link_id);
+        $link_data = $this->db->getOne('t_stor_links');
+        if ($this->db->count == 0) { // TODO, asi misto countu pouzit nejaky test $link_data
             $data['success'] = false;
             $data['message'] = 'pruser, soubor neexistuje, nevim na co jste klikli, ale jste tu spatne';
         }
@@ -183,24 +183,24 @@ class Stor
             $hash = $link_data['c_sha512'];
             
             // spocitame kolik mame linku s timto hasem
-            $this->container->db->where("c_sha512", $hash);
-            $links = $this->container->db->get('t_stor_links');
+            $this->db->where("c_sha512", $hash);
+            $links = $this->db->get('t_stor_links');
             
             //pokud mame jen jeden, smazeme i objekt
             if (count($links) == 1) {
                 // nejdriv smazem z links
-                $this->container->db->where("c_uid", $link_id);
-                if ($this->container->db->delete('t_stor_links')) {
+                $this->db->where("c_uid", $link_id);
+                if ($this->db->delete('t_stor_links')) {
                     // nacteme si z object cestu ke smazani souboru, i kdz, sla by odvodit, ale muze tam byt prave jiny driver a pak cesta neni dana hashem, TODO
                     // zatim predpokladame driver fs, [0] znamena prvni prvek pole storage, coz je objekt takze za tim zase zaciname teckou
                     // rawQuery v joshcam vraci vzdy pole, i kdyz je vysledek jen jeden
-                    $objects = $this->container->db->rawQuery(" SELECT `doc`->>'$.data.storage[0].path' AS path FROM t_stor_objects WHERE sha512 = ? ", Array ($hash));
+                    $objects = $this->db->rawQuery(" SELECT `c_json`->>'$.data.storage[0].path' AS path FROM t_stor_objects WHERE c_sha512 = ? ", Array ($hash));
                     // TODO, kontrola jestli je jeden vysledek a jestli neni path prazdna
                     $file_to_delete = $objects[0]['path'].'/'.$hash;
                     unlink($file_to_delete);
                     // mazani z objects
-                    $this->container->db->where("sha512", $hash);
-                    if ($this->container->db->delete('t_stor_objects')) {
+                    $this->db->where("c_sha512", $hash);
+                    if ($this->db->delete('t_stor_objects')) {
                         $data['success'] = true;
                         $data['message'] = 'soubor '.$file_to_delete.' byl komplet smazan z links i object.';
                     }
@@ -216,8 +216,8 @@ class Stor
                 }
             }
             else if (count($links) > 1) {
-                $this->container->db->where("c_uid", $link_id);
-                if ($this->container->db->delete('t_stor_links')) {
+                $this->db->where("c_uid", $link_id);
+                if ($this->db->delete('t_stor_links')) {
                     $data['success'] = true;
                     $data['message'] = 'link na soubor byl smazan, ale bylo jich vic, takze soubor zustava';
                 }

@@ -115,7 +115,7 @@ $container->set('auth', function (Container $c) {
 
 // stor trida
 $container->set('stor', function (Container $c) {
-    return new StorMainClass($c);
+    return new StorMainClass($c->get('db'));
 });
 
 
