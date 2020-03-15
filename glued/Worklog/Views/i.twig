@@ -156,19 +156,13 @@
 {% endblock %}
 
 {% block additionaljs %}
+{# twig.js initialized in public/assets/js/glued.js #}
 <script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
   // Set up form elements
   $(function() {
     $('.mask_date').mask('0000-00-00');
     $('.mask_time').mask('00:00');
     $('.select2').select2();
-  });
-
-  // Compile twig.js templates
-  $("script[type='text/twig']").each(function() {
-    var id = $(this).attr("id"),
-    data = $(this).text();
-    Twig.twig({ id: id, data: data, allowInlineIncludes: true, autoescape: true });
   });
 
   // Onload ajax to fetch worklog data
