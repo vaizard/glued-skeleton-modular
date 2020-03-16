@@ -9,6 +9,7 @@
     "_v",
     "id",
     "user",
+    "domain",
     "uri",
     "name",
     "driver"
@@ -47,6 +48,14 @@
       "$id": "#/properties/user",
       "type": "integer",
       "title": "User ID who added the source",
+      "examples": [
+        "1"
+      ]
+    },
+    "domain": {
+      "$id": "#/properties/domain",
+      "type": "integer",
+      "title": "Domain ID (source relevancy)",
       "examples": [
         "1"
       ]

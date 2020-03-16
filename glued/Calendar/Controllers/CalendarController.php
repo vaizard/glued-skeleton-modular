@@ -181,7 +181,7 @@ class CalendarController extends AbstractTwigController
         // Patch old data
         $doc->uri = $req['uri'];
         $doc->name = $req['name'];
-        $doc->domain = $req['domain'];
+        $doc->domain = (int)$req['domain'];
         $doc->driver = $req['driver'];
         // TODO if $doc->domain is patched here, you have to first test, if user has access to the domain
 
