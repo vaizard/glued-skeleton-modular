@@ -14,6 +14,7 @@ use Sabre\VObject;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpForbiddenException;
 use Spatie\Browsershot\Browsershot;
+use Defr\Ares;
 
 class ContactsController extends AbstractTwigController
 {
@@ -24,6 +25,58 @@ class ContactsController extends AbstractTwigController
      *
      * @return Response
      */
+
+    public function cz_ares_ids(Request $request, Response $response, array $args = []): Response {
+      $ares = new Ares();
+      $record = $ares->findByIdentificationNumber($args['id']); 
+      $data['name'] = $record->getCompanyName();
+      $data['street'] = $record->getStreet();
+      $data['zip'] = $record->getZip();
+      $data['city'] = $record->getTown();
+      $data['id'] = $record->getCompanyId();
+      $data['taxid'] = $record->getTaxId();
+      $json = json_encode($data);
+      print_r($json);
+      return $response;
+    }
+
+    public function cz_ares_names(Request $request, Response $response, array $args = []): Response {
+      $name = $args['name'];
+      if (strlen($name) < 3) {
+          throw new InvalidArgumentException('Zadejte minimálně 3 znaky pro hledání.');
+      }
+
+      $uri = 'http://wwwinfo.mfcr.cz/cgi-bin/ares/ares_es.cgi?obch_jm='.urlencode($name).'&filtr=0';
+      $file = @file_get_contents($uri);
+      if($file)
+        {
+          $xml = @simplexml_load_string($file);
+        }
+       
+      if($xml) 
+        {
+          $ns = $xml->getDocNamespaces();
+          $data = $xml->children($ns['are']);
+          $dtt = $data->children($ns['dtt'])->V;
+        }
+      else
+        {
+          $ares_stav_fin  = __('The Czech ARES database is offline');
+        }
+
+      $records = json_decode(json_encode($dtt))->S;
+      $i = 0;
+      foreach ($records as $record) {
+        $out[$i]['id'] = $record->ico;
+        $out[$i]['name'] = $record->ojm;
+        $out[$i]['address'] = $record->jmn;
+        $i++;
+      }
+      $json = json_encode($out);
+      print_r($json);
+      print("<pre>".print_r($out,true)."</pre>");
+      return $response;
+  }
 
     public function collection_ui(Request $request, Response $response, array $args = []): Response
     {

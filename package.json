@@ -4,7 +4,8 @@
     "url": "git://github.com/vaizard/glued-skeleton.git"
   },
   "dependencies": {
-    "@babel/standalone": "^7.8.8",
+    "@babel/core": "^7.9",
+    "@babel/standalone": "^7.9",
     "@claviska/jquery-ajax-submit": "latest",
     "@rjsf/core": "v2.0.0-alpha.2",
     "bootstrap": "latest",
@@ -14,6 +15,7 @@
     "jquery": "^3",
     "jquery-jeditable": "^2.0.15",
     "jquery-mask-plugin": "latest",
+    "jquery-typeahead": "latest",
     "loose-envify": "^1.4.0",
     "moment": "latest",
     "popper.js": "^1.16.1",
