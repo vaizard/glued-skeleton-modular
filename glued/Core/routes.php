@@ -17,6 +17,13 @@ use Slim\Routing\RouteCollectorProxy;
 // Define the app routes.
 
 $app->get('/', Glued::class)->setName('core.web');
+
+/*$app->get ('/', function(Request $request, Response $response) { 
+    $myfile = fopen("/var/www/html/glued-skeleton/index.html", "r") or die("Unable to open file!");
+    echo fread($myfile,filesize("/var/www/html/glued-skeleton/index.html"));
+    fclose($myfile);
+    return $response;
+});*/
 $app->get ('/core/signout', AuthController::class . ':signout_get')->setName('core.signout.web');
 
 
