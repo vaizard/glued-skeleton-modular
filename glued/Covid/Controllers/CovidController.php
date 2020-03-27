@@ -202,7 +202,7 @@ public function zakladace_adr($request, $response, array $args = [])
     {
 
     $b = $request->getParsedBody();
-    print_r($b);
+    //print_r($b);
 
     $data = Array (
         'c_addr_street' => $b['ulice'],
