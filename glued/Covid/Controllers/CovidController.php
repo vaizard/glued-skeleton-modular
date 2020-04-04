@@ -10,6 +10,15 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use \Exception;
+use Swift_Mailer;
+use Swift_Message;
+use Swift_SmtpTransport;
+use Swift_Plugins_AntiFloodPlugin;
+use Swift_Plugins_ThrottlerPlugin;
+use Swift_Plugins_Loggers_ArrayLogger;
+use Swift_Plugins_LoggerPlugin;
+use Swift_Plugins_Loggers_EchoLogger;
+use Swift_Image;
 
 class CovidController extends AbstractTwigController
 
@@ -153,7 +162,7 @@ public function zakladace_stav($request, $response, array $args = [])
         if (!isset($result['c_email'])) { echo "Ajaj, je Váš mail správně zadán? Nemůžeme Vás v systému najít. Pokud jste si zakladač zdarma ještě neobjenal(a) a pomůže Vám, <a href='https://pomoc.industra.space/#zakladace'>klikněte zde</a>.<br><br>"; }
         else {
             echo "Našli jsme Vás <span style='color: red;'>❤️</span> ";
-            if($result['c_handovered'] == 1) { echo "Váš zakladač (".$result['c_amount']." ks) někdo (doufáme, že Vy) už vyzvedl osobně. Pokud k vám nedoputoval, nebo potřebujete další, dejte nám prosím vědět.<br><br>"; } 
+            if($result['c_handovered'] == 1) { echo "Váš zakladač (".$result['c_amount']." ks) někdo (doufáme, že Vy) už vyzvedl osobně. Pokud k vám nedoputoval, nebo potřebujete další, dejte nám <a href='https://pomoc.industra.space/#zakladace'>prosím vědět</a>.<br><br>"; } 
             if($result['c_delivered'] == 1) { echo "Váš zakladač (".$result['c_amount']." ks) jede poštou za Vámi na adresu ".$result['c_address']." 🚐<br><br>"; } 
             if(($result['c_handovered'] == 0) and ($result['c_delivered'] == 0)) { echo 'Váš zakladač ('.$result["c_amount"].' ks) na Vás čeká 🐶 Prosíme vyzvedněte si jej kdykoliv mezi <b>10 a 19 hod. v Industře, Masná 9, Brno</b>, nebo nám prosím upřesněte Vaši adresu, pošleme Vám ho.<br><br>
 
@@ -236,5 +245,117 @@ public function zakladace_adr($request, $response, array $args = [])
     return $response;
     }
 
+
+public function zakladace_email($request, $response, array $args = []) {
+    try {
+
+        // Some init stuff
+        $smtp = $this->settings['smtp'];
+        $this->db->where("c_email_sent", 0);
+        $recipients = $this->db->get("t_covid_zakladace", null);
+        if ($this->db->count > 0)
+            foreach ($recipients as $r) { 
+                /*
+                print_r ($r); 
+                if ($r['c_email_sent'] == 1) { echo 'MAILNUTO'; }
+                else {
+                    if ($r['c_handovered']) { echo 'PREDAN'; }
+                    if ($r['c_delivered']) { echo 'DODAN'; }
+                    if ($r['c_noneed']) { echo 'NEPOTRE'; }
+                }
+                echo '<br><br>';
+                */
+            }
+
+        // Create the SMTP Transport, Mailer, register Mailer plugins
+        $transport = (new Swift_SmtpTransport($smtp['addr'], $smtp['port'], $smtp['encr']))
+                     ->setUsername($smtp['user'])
+                     ->setPassword($smtp['pass'])
+                     ->setStreamOptions(array('ssl' => array('allow_self_signed' => true, 'verify_peer' => false)));
+        $mailer = new Swift_Mailer($transport);
+        if (is_numeric($smtp['reconnect.after']) and $smtp['reconnect.after'] > 0) {
+            $mailer->registerPlugin(new Swift_Plugins_AntiFloodPlugin($smtp['reconnect.after'], $smtp['reconnect.delay']));    
+        }
+        if (is_numeric($smtp['throttle.count']) and $smtp['throttle.count'] > 0) {
+            $mailer->registerPlugin(new Swift_Plugins_ThrottlerPlugin($smtp['throttle.count'], Swift_Plugins_ThrottlerPlugin::MESSAGES_PER_MINUTE));
+        }
+        if (is_numeric($smtp['throttle.data']) and $smtp['throttle.data'] > 0) {
+            $mailer->registerPlugin(new Swift_Plugins_ThrottlerPlugin(1024 * 1024 * 10, Swift_Plugins_ThrottlerPlugin::BYTES_PER_MINUTE));
+        }
+
+        // Create the Message & add the inline image
+        $message = new Swift_Message();
+        $message->setSubject('Máme zprávy o Vašem zakladači (na šití roušek) 💪.');
+        $message->setFrom([$smtp['user'] => 'Pomáháme s Industrou ♡']);
+        $inline_attachment = Swift_Image::fromPath( __ROOT__ . '/public/01.jpg');
+        $cid = $message->embed($inline_attachment);
+
+        echo '<table>';
+        foreach ($recipients as $r) {
+            // Add an "Attachment" (Also, the dynamic data can be attached)
+            //$attachment = Swift_Attachment::fromPath(__ROOT__ . '/public/somefile.pdf');
+            //$attachment->setFilename('report.pdf');
+            //$message->attach($attachment);
+
+            $message->setTo($r['c_email']);
+            if ($r['c_handovered'] == 1) { 
+                $body = '
+                <img src="'.$cid.'" width="300" height="300" style="float: right;">
+                Moc zdravíme z Industry <span style="color: red;">♡</span><br /><br />
+                Podle naší evidence někdo (doufáme, že Vy nebo vaši blízcí) vyzvedl Váš zakladač šikmého proužku a že už jej pár dní úspěšně používáte :) Budeme moc rádi když nám dáte vědět na <a href="https://facebook.com/industrabrno/">Facebooku</a> - pošlete nám třeba fotku, zda vše funguje dobře. Pokud k vám zakladač nedoputoval, rozbil se Vám, nebo prostě potřebujete další, prosíme <a href="https://pomoc.industra.space/#zakladace">dejte nám vědět</a>! Rádi zašleme další.<br><br>
+                V současné době vyrábíme navíc naplno obličejové štíty pro naše doktory, sestřičky a pracovníky v sociálních službách. Pokud víte, že nemocnici, praktikovi, zubaři, lékárnici či ošetřovatelům ve Vašem okolí stále ještě chybí ochranné pomůcky, pošlete jim prosím <a href="https://pomoc.industra.space/">odkaz na náš objednávkový formulář</a> (nevyplňujte jej ale prosím za ně, potřebujeme přímé spojení na nemocnici/ordinaci/sociální službu tak, aby dodávka proběhla co nejdřív).<br><br>
+                Chcete nám pomoct vyrábět dál? Přispějte prosím na náš transparentní účet <a href="https://ib.fio.cz/ib/transparent?a=2500781658">2500781658 / 2010</a> - pomůže doslova každá koruna. Váš dar nám pomůže zajistit materiál, výrobní prostředky a chod distribuce pomoci. Např. 500,- pokryje náklady na výrobu čtyř štítů.<br>
+                <br>
+
+                Můžeme pomoct jinak? Dejte nám vědět! Děkujeme, že šijete. Jste opravdu skvělí :)<br>
+                Spolu to zvládneme. Váš dobrovolnický tým Industry.';
+            }
+            if ($r['c_delivered']  == 1) { 
+                $body = '
+                <img src="'.$cid.'" width="300" height="300" style="float: right;">
+                Moc zdravíme z Industry <span style="color: red;">♡</span><br /><br />
+                Podle naší evidence Vám měl dojít poštou zakladač šikmého proužku. Doufáme, že dorazil v pořádku a že už jej pár dní úspěšně používáte :) Budeme moc rádi když nám dáte vědět na <a href="https://facebook.com/industrabrno/">Facebooku</a> - pošlete nám třeba fotku, zda vše funguje dobře. Pokud k vám zakladač nedoputoval, rozbil se Vám, nebo prostě potřebujete další, prosíme <a href="https://pomoc.industra.space/#zakladace">dejte nám vědět</a>! Rádi zašleme další.<br><br>
+                V současné době vyrábíme navíc naplno obličejové štíty pro naše doktory, sestřičky a pracovníky v sociálních službách. Pokud víte, že nemocnici, praktikovi, zubaři, lékárnici či ošetřovatelům ve Vašem okolí stále ještě chybí ochranné pomůcky, pošlete jim prosím <a href="https://pomoc.industra.space/">odkaz na náš objednávkový formulář</a> (nevyplňujte jej ale prosím za ně, potřebujeme přímé spojení na nemocnici/ordinaci/sociální službu tak, aby dodávka proběhla co nejdřív).<br><br>
+                Chcete nám pomoct vyrábět dál? Přispějte prosím na náš transparentní účet <a href="https://ib.fio.cz/ib/transparent?a=2500781658">2500781658 / 2010</a> - pomůže doslova každá koruna. Váš dar nám pomůže zajistit materiál, výrobní prostředky a chod distribuce pomoci. Např. 500,- pokryje náklady na výrobu čtyř štítů.<br>
+                <br>
+
+                Můžeme pomoct jinak? Dejte nám vědět! Děkujeme, že šijete. Jste opravdu skvělí :)<br>
+                Spolu to zvládneme. Váš dobrovolnický tým Industry.';
+            }
+            if ( (!($r['c_handovered'] == 1)) and (!($r['c_delivered']  == 1)) ) { 
+                $body = '
+                <img src="'.$cid.'" width="300" height="300" style="float: right;">
+                Moc zdravíme z Industry <span style="color: red;">♡</span><br /><br />
+                Omlouváme se, že ještě jednou píšeme, v naší evidenci stále chybí adresa kam zaslat Váš zakladač šikmého proužku. Nebo ji od Vás máme, ale pošta nám zakladač vrátila zpět jako nedoručený. Prosíme <a href="https://pomoc.industra.space/covid/zakladace/stav/' . $r["c_email"] . '">dejte nám vědět klikem na tento odkaz</a> (ještě jednou) Vaši adresu. Obratem zakladač odešleme.<br><br>
+                V současné době vyrábíme navíc naplno obličejové štíty pro naše doktory, sestřičky a pracovníky v sociálních službách. Pokud víte, že nemocnici, praktikovi, zubaři, lékárnici či ošetřovatelům ve Vašem okolí stále ještě chybí ochranné pomůcky, pošlete jim prosím <a href="https://pomoc.industra.space/">odkaz na náš objednávkový formulář</a> (nevyplňujte jej ale prosím za ně, potřebujeme přímé spojení na nemocnici/ordinaci/sociální službu tak, aby dodávka proběhla co nejdřív).<br><br>
+                Chcete nám pomoct vyrábět dál? Přispějte prosím na náš transparentní účet <a href="https://ib.fio.cz/ib/transparent?a=2500781658">2500781658 / 2010</a> - pomůže doslova každá koruna. Váš dar nám pomůže zajistit materiál, výrobní prostředky a chod distribuce pomoci. Např. 500,- pokryje náklady na výrobu čtyř štítů.<br>
+                <br>
+                Můžeme pomoct jinak? Dejte nám vědět! Děkujeme, že šijete. Jste opravdu skvělí :)<br>
+                Spolu to zvládneme. Váš dobrovolnický tým Industry.';            
+            }
+
+            $message->setBody($body, 'text/html');
+            $sent = $mailer->send($message);
+
+            echo "<tr><td>".$r['c_uid']."</td><td>".$r['c_email']."</td><td>".$sent."</td>";
+            $data = Array (
+                'c_email_sent' => 1,
+                'c_email_result' => $sent,
+                'c_email_body' => $body,
+            );
+            $this->db->where ('c_uid', $r['c_uid']);
+            if ($this->db->update ('t_covid_zakladace', $data))
+                echo '<td>['.$this->db->count . '] records were updated</td>';
+            else
+                echo '<td>update failed: ' . $this->db->getLastError().'</td>';
+            echo '</tr>';
+        }
+        echo '</table>';
+    } catch (Exception $e) {
+        echo $e->getMessage();
+    }
+    echo "all mail sent<br>";
+    return $response;
+}
 
 }

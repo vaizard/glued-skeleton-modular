@@ -35,6 +35,19 @@ return [
         'level' => \Monolog\Logger::DEBUG,
     ],
 
+    // E-mail (see swiftmailser)
+    'smtp' => [
+        'smtp' => 'smtp.example.com',
+        'port' => 465,
+        'encr' => 'ssl',
+        'user' => 'you@example.com',
+        'pass' => 'very-secret',
+        'reconnect.after' => '100',  // reconnect after x emails
+        'reconnect.delay' => '15',   // wait for x seconds between connections
+        'throttle.count' => '50',    // number of emails per minute
+        'throttle.data' => '',       // number of bytes per minute
+    ],
+
     // Cryptography keys
     'crypto' => [
         'mail' => 'mail-encryption-key',
