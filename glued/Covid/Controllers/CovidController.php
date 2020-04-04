@@ -297,58 +297,60 @@ public function zakladace_email($request, $response, array $args = []) {
             //$attachment->setFilename('report.pdf');
             //$message->attach($attachment);
 
-            $message->setTo($r['c_email']);
-            if ($r['c_handovered'] == 1) { 
-                $body = '
-                <img src="'.$cid.'" width="300" height="300" style="float: right;">
-                Moc zdravíme z Industry <span style="color: red;">♡</span><br /><br />
-                Podle naší evidence někdo (doufáme, že Vy nebo vaši blízcí) vyzvedl Váš zakladač šikmého proužku a že už jej pár dní úspěšně používáte :) Budeme moc rádi když nám dáte vědět na <a href="https://facebook.com/industrabrno/">Facebooku</a> - pošlete nám třeba fotku, zda vše funguje dobře. Pokud k vám zakladač nedoputoval, rozbil se Vám, nebo prostě potřebujete další, prosíme <a href="https://pomoc.industra.space/#zakladace">dejte nám vědět</a>! Rádi zašleme další.<br><br>
-                V současné době vyrábíme navíc naplno obličejové štíty pro naše doktory, sestřičky a pracovníky v sociálních službách. Pokud víte, že nemocnici, praktikovi, zubaři, lékárnici či ošetřovatelům ve Vašem okolí stále ještě chybí ochranné pomůcky, pošlete jim prosím <a href="https://pomoc.industra.space/">odkaz na náš objednávkový formulář</a> (nevyplňujte jej ale prosím za ně, potřebujeme přímé spojení na nemocnici/ordinaci/sociální službu tak, aby dodávka proběhla co nejdřív).<br><br>
-                Chcete nám pomoct vyrábět dál? Přispějte prosím na náš transparentní účet <a href="https://ib.fio.cz/ib/transparent?a=2500781658">2500781658 / 2010</a> - pomůže doslova každá koruna. Váš dar nám pomůže zajistit materiál, výrobní prostředky a chod distribuce pomoci. Např. 500,- pokryje náklady na výrobu čtyř štítů.<br>
-                <br>
+            if ( $r['c_email'] != "" ) {
+                $message->setTo($r['c_email']);
+                if ($r['c_handovered'] == 1) { 
+                    $body = '
+                    <img src="'.$cid.'" width="300" height="300" style="float: right;">
+                    Moc zdravíme z Industry <span style="color: red;">♡</span><br /><br />
+                    Podle naší evidence někdo (doufáme, že Vy nebo vaši blízcí) vyzvedl Váš zakladač šikmého proužku a že už jej pár dní úspěšně používáte :) Budeme moc rádi když nám dáte vědět na <a href="https://facebook.com/industrabrno/">Facebooku</a> - pošlete nám třeba fotku, zda vše funguje dobře. Pokud k vám zakladač nedoputoval, rozbil se Vám, nebo prostě potřebujete další, prosíme <a href="https://pomoc.industra.space/#zakladace">dejte nám vědět</a>! Rádi zašleme další.<br><br>
+                    V současné době vyrábíme navíc naplno obličejové štíty pro naše doktory, sestřičky a pracovníky v sociálních službách. Pokud víte, že nemocnici, praktikovi, zubaři, lékárnici či ošetřovatelům ve Vašem okolí stále ještě chybí ochranné pomůcky, pošlete jim prosím <a href="https://pomoc.industra.space/">odkaz na náš objednávkový formulář</a> (nevyplňujte jej ale prosím za ně, potřebujeme přímé spojení na nemocnici/ordinaci/sociální službu tak, aby dodávka proběhla co nejdřív).<br><br>
+                    Chcete nám pomoct vyrábět dál? Přispějte prosím na náš transparentní účet <a href="https://ib.fio.cz/ib/transparent?a=2500781658">2500781658 / 2010</a> - pomůže doslova každá koruna. Váš dar nám pomůže zajistit materiál, výrobní prostředky a chod distribuce pomoci. Např. 500,- pokryje náklady na výrobu čtyř štítů.<br>
+                    <br>
 
-                Můžeme pomoct jinak? Dejte nám vědět! Děkujeme, že šijete. Jste opravdu skvělí :)<br>
-                Spolu to zvládneme. Váš dobrovolnický tým Industry.';
+                    Můžeme pomoct jinak? Dejte nám vědět! Děkujeme, že šijete. Jste opravdu skvělí :)<br>
+                    Spolu to zvládneme. Váš dobrovolnický tým Industry.';
+                }
+                if ($r['c_delivered']  == 1) { 
+                    $body = '
+                    <img src="'.$cid.'" width="300" height="300" style="float: right;">
+                    Moc zdravíme z Industry <span style="color: red;">♡</span><br /><br />
+                    Podle naší evidence Vám měl dojít poštou zakladač šikmého proužku. Doufáme, že dorazil v pořádku a že už jej pár dní úspěšně používáte :) Budeme moc rádi když nám dáte vědět na <a href="https://facebook.com/industrabrno/">Facebooku</a> - pošlete nám třeba fotku, zda vše funguje dobře. Pokud k vám zakladač nedoputoval, rozbil se Vám, nebo prostě potřebujete další, prosíme <a href="https://pomoc.industra.space/#zakladace">dejte nám vědět</a>! Rádi zašleme další.<br><br>
+                    V současné době vyrábíme navíc naplno obličejové štíty pro naše doktory, sestřičky a pracovníky v sociálních službách. Pokud víte, že nemocnici, praktikovi, zubaři, lékárnici či ošetřovatelům ve Vašem okolí stále ještě chybí ochranné pomůcky, pošlete jim prosím <a href="https://pomoc.industra.space/">odkaz na náš objednávkový formulář</a> (nevyplňujte jej ale prosím za ně, potřebujeme přímé spojení na nemocnici/ordinaci/sociální službu tak, aby dodávka proběhla co nejdřív).<br><br>
+                    Chcete nám pomoct vyrábět dál? Přispějte prosím na náš transparentní účet <a href="https://ib.fio.cz/ib/transparent?a=2500781658">2500781658 / 2010</a> - pomůže doslova každá koruna. Váš dar nám pomůže zajistit materiál, výrobní prostředky a chod distribuce pomoci. Např. 500,- pokryje náklady na výrobu čtyř štítů.<br>
+                    <br>
+
+                    Můžeme pomoct jinak? Dejte nám vědět! Děkujeme, že šijete. Jste opravdu skvělí :)<br>
+                    Spolu to zvládneme. Váš dobrovolnický tým Industry.';
+                }
+                if ( (!($r['c_handovered'] == 1)) and (!($r['c_delivered']  == 1)) ) { 
+                    $body = '
+                    <img src="'.$cid.'" width="300" height="300" style="float: right;">
+                    Moc zdravíme z Industry <span style="color: red;">♡</span><br /><br />
+                    Omlouváme se, že ještě jednou píšeme, v naší evidenci stále chybí adresa kam zaslat Váš zakladač šikmého proužku. Nebo ji od Vás máme, ale pošta nám zakladač vrátila zpět jako nedoručený. Prosíme <a href="https://pomoc.industra.space/covid/zakladace/stav/' . $r["c_email"] . '">dejte nám vědět klikem na tento odkaz</a> (ještě jednou) Vaši adresu. Obratem zakladač odešleme.<br><br>
+                    V současné době vyrábíme navíc naplno obličejové štíty pro naše doktory, sestřičky a pracovníky v sociálních službách. Pokud víte, že nemocnici, praktikovi, zubaři, lékárnici či ošetřovatelům ve Vašem okolí stále ještě chybí ochranné pomůcky, pošlete jim prosím <a href="https://pomoc.industra.space/">odkaz na náš objednávkový formulář</a> (nevyplňujte jej ale prosím za ně, potřebujeme přímé spojení na nemocnici/ordinaci/sociální službu tak, aby dodávka proběhla co nejdřív).<br><br>
+                    Chcete nám pomoct vyrábět dál? Přispějte prosím na náš transparentní účet <a href="https://ib.fio.cz/ib/transparent?a=2500781658">2500781658 / 2010</a> - pomůže doslova každá koruna. Váš dar nám pomůže zajistit materiál, výrobní prostředky a chod distribuce pomoci. Např. 500,- pokryje náklady na výrobu čtyř štítů.<br>
+                    <br>
+                    Můžeme pomoct jinak? Dejte nám vědět! Děkujeme, že šijete. Jste opravdu skvělí :)<br>
+                    Spolu to zvládneme. Váš dobrovolnický tým Industry.';            
+                }
+
+                $message->setBody($body, 'text/html');
+                $sent = $mailer->send($message);
+
+                echo "<tr><td>".$r['c_uid']."</td><td>".$r['c_email']."</td><td>".$sent."</td>";
+                $data = Array (
+                    'c_email_sent' => 1,
+                    'c_email_result' => $sent,
+                    'c_email_body' => $body,
+                );
+                $this->db->where ('c_uid', $r['c_uid']);
+                if ($this->db->update ('t_covid_zakladace', $data))
+                    echo '<td>['.$this->db->count . '] records were updated</td>';
+                else
+                    echo '<td>update failed: ' . $this->db->getLastError().'</td>';
+                echo '</tr>';
             }
-            if ($r['c_delivered']  == 1) { 
-                $body = '
-                <img src="'.$cid.'" width="300" height="300" style="float: right;">
-                Moc zdravíme z Industry <span style="color: red;">♡</span><br /><br />
-                Podle naší evidence Vám měl dojít poštou zakladač šikmého proužku. Doufáme, že dorazil v pořádku a že už jej pár dní úspěšně používáte :) Budeme moc rádi když nám dáte vědět na <a href="https://facebook.com/industrabrno/">Facebooku</a> - pošlete nám třeba fotku, zda vše funguje dobře. Pokud k vám zakladač nedoputoval, rozbil se Vám, nebo prostě potřebujete další, prosíme <a href="https://pomoc.industra.space/#zakladace">dejte nám vědět</a>! Rádi zašleme další.<br><br>
-                V současné době vyrábíme navíc naplno obličejové štíty pro naše doktory, sestřičky a pracovníky v sociálních službách. Pokud víte, že nemocnici, praktikovi, zubaři, lékárnici či ošetřovatelům ve Vašem okolí stále ještě chybí ochranné pomůcky, pošlete jim prosím <a href="https://pomoc.industra.space/">odkaz na náš objednávkový formulář</a> (nevyplňujte jej ale prosím za ně, potřebujeme přímé spojení na nemocnici/ordinaci/sociální službu tak, aby dodávka proběhla co nejdřív).<br><br>
-                Chcete nám pomoct vyrábět dál? Přispějte prosím na náš transparentní účet <a href="https://ib.fio.cz/ib/transparent?a=2500781658">2500781658 / 2010</a> - pomůže doslova každá koruna. Váš dar nám pomůže zajistit materiál, výrobní prostředky a chod distribuce pomoci. Např. 500,- pokryje náklady na výrobu čtyř štítů.<br>
-                <br>
-
-                Můžeme pomoct jinak? Dejte nám vědět! Děkujeme, že šijete. Jste opravdu skvělí :)<br>
-                Spolu to zvládneme. Váš dobrovolnický tým Industry.';
-            }
-            if ( (!($r['c_handovered'] == 1)) and (!($r['c_delivered']  == 1)) ) { 
-                $body = '
-                <img src="'.$cid.'" width="300" height="300" style="float: right;">
-                Moc zdravíme z Industry <span style="color: red;">♡</span><br /><br />
-                Omlouváme se, že ještě jednou píšeme, v naší evidenci stále chybí adresa kam zaslat Váš zakladač šikmého proužku. Nebo ji od Vás máme, ale pošta nám zakladač vrátila zpět jako nedoručený. Prosíme <a href="https://pomoc.industra.space/covid/zakladace/stav/' . $r["c_email"] . '">dejte nám vědět klikem na tento odkaz</a> (ještě jednou) Vaši adresu. Obratem zakladač odešleme.<br><br>
-                V současné době vyrábíme navíc naplno obličejové štíty pro naše doktory, sestřičky a pracovníky v sociálních službách. Pokud víte, že nemocnici, praktikovi, zubaři, lékárnici či ošetřovatelům ve Vašem okolí stále ještě chybí ochranné pomůcky, pošlete jim prosím <a href="https://pomoc.industra.space/">odkaz na náš objednávkový formulář</a> (nevyplňujte jej ale prosím za ně, potřebujeme přímé spojení na nemocnici/ordinaci/sociální službu tak, aby dodávka proběhla co nejdřív).<br><br>
-                Chcete nám pomoct vyrábět dál? Přispějte prosím na náš transparentní účet <a href="https://ib.fio.cz/ib/transparent?a=2500781658">2500781658 / 2010</a> - pomůže doslova každá koruna. Váš dar nám pomůže zajistit materiál, výrobní prostředky a chod distribuce pomoci. Např. 500,- pokryje náklady na výrobu čtyř štítů.<br>
-                <br>
-                Můžeme pomoct jinak? Dejte nám vědět! Děkujeme, že šijete. Jste opravdu skvělí :)<br>
-                Spolu to zvládneme. Váš dobrovolnický tým Industry.';            
-            }
-
-            $message->setBody($body, 'text/html');
-            $sent = $mailer->send($message);
-
-            echo "<tr><td>".$r['c_uid']."</td><td>".$r['c_email']."</td><td>".$sent."</td>";
-            $data = Array (
-                'c_email_sent' => 1,
-                'c_email_result' => $sent,
-                'c_email_body' => $body,
-            );
-            $this->db->where ('c_uid', $r['c_uid']);
-            if ($this->db->update ('t_covid_zakladace', $data))
-                echo '<td>['.$this->db->count . '] records were updated</td>';
-            else
-                echo '<td>update failed: ' . $this->db->getLastError().'</td>';
-            echo '</tr>';
         }
         echo '</table>';
     } catch (Exception $e) {
