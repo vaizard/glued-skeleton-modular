@@ -7,7 +7,7 @@
     "@babel/core": "^7.9",
     "@babel/standalone": "^7.9",
     "@claviska/jquery-ajax-submit": "latest",
-    "@rjsf/core": "v2.0.0-alpha.2",
+    "@rjsf/core": "v2.0.0-alpha.5",
     "bootstrap": "latest",
     "core-js": "^3.6.4",
     "draft-js": "^0.11",

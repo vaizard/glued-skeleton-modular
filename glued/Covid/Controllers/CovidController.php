@@ -125,6 +125,113 @@ public function zakladace_import_v1($request, $response)
     return $response;
     }
 
+
+public function zakladace_import_v2($request, $response)
+    {
+
+    $inputFileName = '/var/www/html/glued-skeleton/private/data/export2.xlsx';
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($inputFileName);
+    $worksheet = $spreadsheet->getActiveSheet();
+    $rows = [];
+    foreach ($worksheet->getRowIterator() AS $row) {
+        $cellIterator = $row->getCellIterator();
+        $cellIterator->setIterateOnlyExistingCells(FALSE); // This loops through all cells,
+        $cells = [];
+        foreach ($cellIterator as $cell) {
+            $cells[] = $cell->getValue();
+        }
+        $bold = $worksheet->getStyle('A'.$row->getRowIndex())->getFont()->getBold();
+        $cells[] = $bold;
+
+        $rows[] = $cells;
+    }
+    //print("<pre>".print_r($rows,true)."</pre>");
+    echo '<html><head>
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    </head></html>';
+    echo '<table>';
+
+    $i = 0;
+    foreach ($rows as $row) {
+
+        $ts = $row[0];
+        $em = str_replace(' ', '', $row[1]);
+        $v['em'] = v::email()->validate($em);
+        $s['em'] = "color: red;";
+        if ($v['em'] == 1) { $s['em'] = "color: green;"; }
+        $pocet = $row[2];
+        $jm = $row[3].' '.$row[4];
+        $ph = str_replace(' ', '', $row[6]);
+        if ( (is_numeric($ph)) and (strlen($ph)==9) ) { 
+            $ph = "+420".$ph; 
+        }
+        $v['ph'] = v::phone()->length(13, 13)->validate($ph);
+        $s['ph'] = "color: red;";
+        if ($v['ph'] == 1) { $s['ph'] = "color: green;"; }
+        $no = $row[12]; // pozn
+        $gdpr = 0;
+        if ($row[13]=="ANO") {$gdpr = 1;} // gdpr yes
+
+        $ad = $row[7].', '.$row[8].', '.$row[9]; // adresa
+        if (strlen((string)$row[14]) > 0) { $yed = 1; } else { $yed = 0; } // dodáno
+        if (strlen((string)$row[15]) > 0) { $yeh = 1; } else { $yeh = 0; } // předáno
+        $xx = $row[16]; // problem
+
+        if ($i == 0) { $ye = "Dodáno"; $xx = "Špatná data"; }
+
+        echo "<tr>";
+        echo "<td>".$i."</td>"; // counter
+        echo "<td>".$ts."</td>"; // timestamp
+        echo "<td>".$jm."</td>";
+        echo "<td>".$pocet."</td>";
+        echo "<td style='".$s['ph']."'>".$ph."</td>";
+        echo "<td style='".$s['em']."'>".$em."</td>";
+        echo "<td>".$no."</td>";
+        echo "<td>".$gdpr."</td>";
+        echo "<td>".$ad."</td>";
+        echo "<td>".$yed."/".$yeh."</td>";
+        echo "<td>".$xx."</td>";
+        echo "</tr>";
+
+        if ($v['em'] == 0) { $em = ""; }
+        if ($v['ph'] == 0) { $ph = ""; }
+        if ($i != 0) {
+            $data = Array (
+                           "c_ts" => $ts,
+                           "c_name" => $jm,
+                           "c_phone" => $ph,
+                           "c_email" => $em,
+                           "c_notes" => $no,
+                           "c_gdpr_yes" => $gdpr,
+                           "c_address" => $ad,
+                           "c_addr_street" => $row[7],
+                           "c_addr_city" => $row[8],
+                           "c_addr_zip" => $row[9],
+                           "c_amount" => $pocet,
+                           "c_handovered" => (int)$yeh,
+                           "c_delivered" => (int)$yed,
+                           "c_bad_data" => $xx,
+                           "c_row_hash" => md5($ts.$em),
+            );
+            $updateColumns = Array ("c_handovered", "c_phone", "c_email", "c_row_hash");
+            $lastInsertId = "c_uid";
+            $this->db->onDuplicate($updateColumns, $lastInsertId);
+            $c_uid = $this->db->insert ('t_covid_zakladace', $data);
+            echo "<td>". $c_uid.$this->db->getLastError()."</td>";
+        }
+        echo "</tr>";
+        unset($v);
+        $i++;
+
+    }
+    echo '</table>';
+    return $response;
+    }
+
+
+
 public function zakladace_stav($request, $response, array $args = [])
     {
 
