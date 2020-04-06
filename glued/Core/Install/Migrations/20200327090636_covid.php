@@ -16,9 +16,6 @@ class Covid extends Phinx\Migration\AbstractMigration
                 'comment' => 'Uris to ICAL calendars and friends.',
                 'row_format' => 'DYNAMIC',
             ])
-            ->addColumn('c_attr', 'json', [
-                'null' => false,
-            ])
             ->addColumn('c_domain_id', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
@@ -32,56 +29,16 @@ class Covid extends Phinx\Migration\AbstractMigration
                 'encoding' => 'utf8mb4',
                 'after' => 'c_domain_id',
             ])
-            ->addColumn('c_json', 'json', [
-                'null' => false,
-                'comment' => 'Calendar data (json document)',
-                'after' => 'c_flag_deleted',
-            ])
-            ->addColumn('c_ts_created', 'timestamp', [
-                'null' => true,
-                'default' => 'CURRENT_TIMESTAMP',
-                'update' => 'CURRENT_TIMESTAMP',
-                'comment' => 'Timestamp created',
-                'after' => 'c_json',
-            ])
-            ->addColumn('c_ts_updated', 'timestamp', [
-                'null' => true,
-                'default' => 'CURRENT_TIMESTAMP',
-                'comment' => 'Timestamp updated',
-                'after' => 'c_ts_created',
-            ])
-            ->addColumn('c_uid', 'integer', [
-                'null' => false,
-                'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
-                'comment' => 'Unique row id',
-                'after' => 'c_ts_updated',
-            ])
-            ->addColumn('c_user_id', 'integer', [
-                'null' => false,
-                'limit' => MysqlAdapter::INT_REGULAR,
-                'comment' => 'Creator of the calendar (account)',
-                'after' => 'c_uid',
-            ])
             ->addIndex(['c_domain_id'], [
                 'name' => 'c_domain_id',
                 'unique' => false,
-            ])
-            ->addIndex(['c_user_id'], [
-                'name' => 'c_user_id',
-                'unique' => false,
-            ])
-            ->addForeignKey('c_user_id', 't_core_users', 'c_uid', [
-                'constraint' => 't_calendar_sources_ibfk_1',
-                'update' => 'NO_ACTION',
-                'delete' => 'CASCADE',
             ])
             ->addForeignKey('c_domain_id', 't_core_domains', 'c_uid', [
                 'constraint' => 't_calendar_sources_ibfk_3',
                 'update' => 'RESTRICT',
                 'delete' => 'CASCADE',
             ])
-            ->create();
+            ->update();
         $this->table('t_core_processlog', [
                 'id' => false,
                 'primary_key' => ['c_uid'],
