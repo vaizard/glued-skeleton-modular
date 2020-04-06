@@ -129,7 +129,7 @@ NOTE: Browsers support only GET/POST methods, but the backend api uses the the w
 Glued comes with phinx-migrations, which generates automatically database migration files. What this means is, that if you add a table, drop a column or do anything else to the structure of your database, a migration file will be generated to just automatically upgrade everyone's databases as well. Just run
 
 ```
-./vendor/bin/phinx-migrations generate -e production --name initial
+./vendor/bin/phinx-migrations generate -e production --name initial --overwrite
 ```
 
 ### Assets
