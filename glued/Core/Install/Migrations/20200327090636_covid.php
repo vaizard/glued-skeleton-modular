@@ -18,7 +18,8 @@ class Covid extends Phinx\Migration\AbstractMigration
             ])
             ->addColumn('c_domain_id', 'integer', [
                 'null' => false,
-                'limit' => MysqlAdapter::INT_REGULAR,
+                'limit' => '10',
+                'signed' => false,
                 'comment' => 'Domain id',
                 'after' => 'c_attr',
             ])
