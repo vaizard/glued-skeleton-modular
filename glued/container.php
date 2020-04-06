@@ -71,8 +71,10 @@ $container->set('view', function (Container $c) {
     $twig = Twig::create(__ROOT__ . '/glued/', $c->get('settings')['twig']);
     $loader = $twig->getLoader();
     $loader->addPath(__ROOT__ . '/public', 'public');
-    $twig->addExtension(new TwigAssetsExtension($twig->getEnvironment(), (array)$c->get('settings')['assets']));
-    $twig->addExtension(new TwigTranslationExtension());
+    $environment = $twig->getEnvironment();
+    // Add twig exensions here
+    $twig->addExtension(new TwigAssetsExtension($environment, (array)$c->get('settings')['assets']));
+    $twig->addExtension(new TwigTranslationExtension($c->get(Translator::class)));
     return $twig;
 });
 
