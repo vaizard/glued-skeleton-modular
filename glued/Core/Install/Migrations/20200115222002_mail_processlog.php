@@ -13,7 +13,7 @@ class MailProcesslog extends Phinx\Migration\AbstractMigration
                 'engine' => 'InnoDB',
                 'encoding' => 'utf8mb4',
                 'collation' => 'utf8mb4_0900_ai_ci',
-                'comment' => 'Mail accounts',
+                'comment' => 'Process log',
                 'row_format' => 'DYNAMIC',
             ])
             ->addColumn('c_domain_id', 'integer', [
@@ -117,7 +117,7 @@ class MailProcesslog extends Phinx\Migration\AbstractMigration
                 'null' => false,
                 'limit' => '10',
                 'signed' => false,
-                'comment' => 'Creator of the worklog item (account)',
+                'comment' => 'Creator of the processlog item (account)',
                 'after' => 'c_uid',
             ])
             ->addIndex(['c_domain_id'], [
