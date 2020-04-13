@@ -31,12 +31,14 @@
     },
     "deleted": {
       "$id": "#/properties/deleted",
-      "type": "boolean",
+      "type": "integer",
       "title": "Deleted flag",
-      "default": false,
+      "default": 0,
       "examples": [
         1
-      ]
+      ],
+      "minimum": 0,
+      "maximum": 1
     }
   }
 }

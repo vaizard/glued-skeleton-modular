@@ -18,10 +18,10 @@
               <thead>
                 <tr>
                   <th class="col-sm-1">{{ __('Calendar') }}</th>
-                  <th class="col-sm-1">{{ __('Team') }}</th>
+                  <th class="col-sm-2">{{ __('Team') }}</th>
                   <th class="col-sm-1">{{ __('Driver') }}</th>
                   <th class="col-sm-3">{{ __('Name') }}</th>
-                  <th class="col-sm-4">{{ __('url') }}</th>
+                  <th class="col-sm-3">{{ __('url') }}</th>
                   <th class="col-sm-1">{{ __('Manage') }}</th>
                 </tr>
               </thead>
@@ -29,11 +29,11 @@
                 {% verbatim %}
                 <script type="text/twig" id="calendar_sources_obj_twig">
                 <tr id="calendar_sources_object_{{ row.id }}">
-                  <td class="col-sm-1">{{ row.id }}</td>
-                  <td class="col-sm-1">{{ row.domain_name }} ({{ row.domain }})</td>
+                  <td class="col-sm-1">{{ row.id }} <a href="{{ url_for('calendar.sources.sync.api01') }}"><i class="fas fa-sync"></a></i></td>
+                  <td class="col-sm-2">{{ row.domain_name }} ({{ row.domain }})</td>
                   <td class="col-sm-1">{{ row.driver }}</td>
                   <td class="col-sm-3">{{ row.name }}</td>
-                  <td class="col-sm-4"><a href="{{ row.uri }}">{{ row.uri }}</a></td>
+                  <td class="col-sm-3"><a href="{{ row.uri }}">{{ row.uri }}</a></td>
                   <td class="col-sm-1">
                     <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#calendar_sources_update_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-driver="{{ row.driver }}"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#calendar_sources_delete_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}"><i class="fas fa-trash"></i></button>
                   </td>

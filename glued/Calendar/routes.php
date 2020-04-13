@@ -13,11 +13,12 @@ $app->group('/calendar', function (RouteCollectorProxy $group) {
 })->add(RedirectGuests::class)->add(AntiXSSMiddleware::class);
 
 $app->group('/api/calendar/v1', function (RouteCollectorProxy $group) {
-    $group->get ('/events[/{uid}]', CalendarController::class . ':events_list')->setName('calendar.events.api01'); 
-    $group->get ('/sources[/{uid}]', CalendarController::class . ':sources_list')->setName('calendar.sources.api01'); 
-    $group->post('/sources[/{uid}]', CalendarController::class . ':sources_post');
-    $group->patch('/sources[/{uid}]', CalendarController::class . ':sources_patch');
-    $group->delete('/sources[/{uid}]', CalendarController::class . ':sources_delete');
+    $group->get ('/events[/{uid:[0-9]+}]', CalendarController::class . ':events_list')->setName('calendar.events.api01'); 
+    $group->get ('/sources[/{uid:[0-9]+}]', CalendarController::class . ':sources_list')->setName('calendar.sources.api01'); 
+    $group->post('/sources[/{uid:[0-9]+}]', CalendarController::class . ':sources_post');
+    $group->patch('/sources[/{uid:[0-9]+}]', CalendarController::class . ':sources_patch');
+    $group->delete('/sources[/{uid:[0-9]+}]', CalendarController::class . ':sources_delete');
+    $group->get ('/sources/sync/{uid:[0-9]+}', CalendarController::class . ':sources_sync')->setName('calendar.sources.api01');
 })->add(RedirectGuests::class);
 
 /*

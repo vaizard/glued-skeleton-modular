@@ -37,14 +37,21 @@ class CalendarController extends AbstractTwigController
     // EVENTS
     // ==========================================================
 
-    public function events_fetch(Request $request, Response $response, array $args = []): Response
+    public function sources_sync(Request $request, Response $response, array $args = []): Response
     {
-        $collection = $this->db->get('t_calendar_uris');
-        if (!$collection) {
-            return false;
+
+        // TODO add rbac here
+        $this->db->where('c_uid', (int)$args['uid']);
+        $source = $this->db->getOne('t_calendar_sources');
+        //echo "Last executed query was ". $this->db->getLastQuery();
+        print_r($source);
+        if (!$source) {
+            $builder = new JsonResponseBuilder('calendar.sources.sync', 1);
+            $payload = $builder->withCode(404)->build();
+            return $response->withJson($payload);
         }
 
-        $ical = json_decode($collection['c_json'], true)['ical'];
+        $ical = json_decode($source['c_json'], true)['ical'];
         $calendar = VObject\Reader::read(
             fopen($ical,'r')
         );
