@@ -4,7 +4,7 @@
           <div class="section-header">
             <h1>{{ __('Sign up') }}</h1>
           </div>
-          <div class="section-body">
+          <div class="section-body" id="core_signup">
             {% include '/Core/Views/templates/partials/flash.twig' %}
             <div class="card card-primary col-4">
               <form action="{{ url_for('core.signup.web') }}" method="post" autocomplete="off" id="signup_form">
@@ -85,8 +85,7 @@
 
       $("#signup_form").ajaxSubmit({
           success: function(res) {
-              //console.log(res);
-              window.location.replace('/');
+              window.location.replace('//{{ server_name}}{{ url_for('core.web') }}');
           },
           error: function(res) {
               $("div.twigjs").each(function() {

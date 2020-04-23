@@ -19,6 +19,7 @@ class AuthController extends AbstractTwigController
     public function signout_get($request, $response)
     {
         $this->auth->signout();
+        $this->flash->addMessage('warning', 'You have been signed out.');
         return $response->withRedirect($this->routerParser->urlFor('core.web'));
     }
 
@@ -69,7 +70,7 @@ class AuthController extends AbstractTwigController
 
     public function signup_get($request, $response)
     {
-        return $this->view->render($response, 'Core/Views/signup.twig');
+        return $this->view->render($response, 'Core/Views/signup.twig', [ 'server_name' => $_SERVER['SERVER_NAME'] ]);
     }
 
 
@@ -84,16 +85,17 @@ class AuthController extends AbstractTwigController
             'password' => v::noWhitespace()->notEmpty(),
         ]);
 
+        if ($this->auth->check()) {
+            $payload = $builder->withMessage(__('Please sign out to sign up.'))->build();
+            return $response->withJson($payload, 403);            
+        }
         if ($validation->failed()) {
-
             $reseed = $this->validator->reseed($request, [ 'email', 'name' ]);
             $payload = $builder->withValidationError($validation->messages())
                                ->withValidationReseed($reseed)
                                ->build();
             return $response->withJson($payload, 400);
-
         } else {
-
             $this->auth->user_create($request->getParam('email'), $request->getParam('name'), $request->getParam('password'));
             $this->auth->attempt($request->getParam('email'), $request->getParam('password')); // auto sign-in after account creation
 
@@ -104,7 +106,6 @@ class AuthController extends AbstractTwigController
             $payload = $builder->withFlashMessage($flash)->withCode(200)->build();
             $this->flash->addMessage('info', __('You were signed up successfully. We signed you in too!'));
             return $response->withJson($payload, 200);
-
         }
     }
 

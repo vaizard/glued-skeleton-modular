@@ -70,6 +70,7 @@ class WorklogInitial extends Phinx\Migration\AbstractMigration
                 'delete' => 'CASCADE',
             ])
             ->create();
+        $this->execute("ALTER TABLE t_worklog_items DROP c_stor_name; ALTER TABLE t_worklog_items ADD c_stor_name VARCHAR(255) GENERATED ALWAYS AS (json_unquote(json_extract(c_json,'$.project'))) VIRTUAL NOT NULL AFTER c_user_id;");
         $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
     }
 }

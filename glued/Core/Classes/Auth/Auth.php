@@ -160,8 +160,8 @@ class Auth
         $result = $this->db->getOne("t_core_users u", $columns );
 
         if(!$result) {
-            signout();
-            throw new ErrorException(__('Forbidden and signed out.'), 403);
+            $this->signout();
+            //throw new ErrorException(__('Forbidden and signed out.'), 403);
         }
 
         return $result;

@@ -24,8 +24,6 @@ $app->get('/', Glued::class)->setName('core.web');
     fclose($myfile);
     return $response;
 });*/
-$app->get ('/core/signout', AuthController::class . ':signout_get')->setName('core.signout.web');
-
 
 $app->group('/core', function (RouteCollectorProxy $route) {
     $route->group('', function (RouteCollectorProxy $route) {
@@ -42,9 +40,14 @@ $app->group('/core', function (RouteCollectorProxy $route) {
         $route->get ('/signin', AuthController::class . ':signin_get')->setName('core.signin.web');
         $route->post('/signin', AuthController::class . ':signin_post');
         $route->get ('/signup', AuthController::class . ':signup_get')->setName('core.signup.web');
-        $route->post('/signup', AuthController::class . ':signup_post');
     })->add(RedirectAuthenticated::class);
 });
+// We have to have $app->post('/core/signup') outside the RedirectAuthenticated, becuase user gets signed in upon signup.
+// Since the signup page submits data with ajax, the json response will get replaced with the redirect prematurely.
+$app->post('/core/signup', AuthController::class . ':signup_post'); 
+$app->get ('/core/signout', AuthController::class . ':signout_get')->setName('core.signout.web');
+
+
 
 
 $app->group('/api/core/v1', function (RouteCollectorProxy $route) {
