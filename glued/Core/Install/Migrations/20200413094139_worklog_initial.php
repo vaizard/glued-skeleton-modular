@@ -51,6 +51,11 @@ class WorklogInitial extends Phinx\Migration\AbstractMigration
                 'comment' => 'Creator of the worklog item (account)',
                 'after' => 'c_uid',
             ])
+            ->addColumn('c_stor_name', 'integer', [
+                'null' => false,
+                'limit' => MysqlAdapter::INT_REGULAR,
+                'after' => 'c_user_id',
+            ])
             ->addIndex(['c_domain_id'], [
                 'name' => 'c_domain_id',
                 'unique' => false,
