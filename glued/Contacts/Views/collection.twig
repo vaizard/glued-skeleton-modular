@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="section-header">
-  <h1>{{ __('Contacts') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-target="#newContact">{{ __('New contact') }}</button>
+  <h1>{{ __('Contacts') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-target="#contacts_items_create_modal">{{ __('New contact') }}</button>
 </div>
 
   <div class="row">
@@ -60,6 +60,7 @@
                 {% endverbatim %}
               </tbody>
             </table>
+            lala <input style="contacts_items_company">
           </div>
         </div>
       </div>
@@ -67,25 +68,7 @@
   </div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="newContact">
-  <div class="modal-dialog modal-xl" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Modal title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div id="rjsf"></div>
-      </div>
-      <div class="modal-footer bg-whitesmoke br">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
+{% include '/Contacts/Views/Partials/contacts_items_modal.twig' with {'contacts_items_id': 'contacts_items_create'} %}
 
 {% endblock %}
 
@@ -136,5 +119,63 @@
       console.log(res);
     }
   });
+
+// Typeahead
+
+$.typeahead({
+    input: '.contacts_items_company',
+    minLength: 1,
+    maxItem: 15,
+    order: "asc",
+    hint: true,
+    group: {
+        template: "{% verbatim %}{{group}}{% endverbatim %} beers!"
+    },
+    maxItemPerGroup: 5,
+    backdrop: {
+        "background-color": "#fff"
+    },
+    href: "{% verbatim %}/beers/{{group|slugify}}/{{display|slugify}}/{% endverbatim %}",
+    dropdownFilter: "all beers",
+    emptyTemplate: 'No result for "{{query}}"',
+    source: {
+        "ale": {
+            ajax: {
+                url: "/api/contacts/search/v1/cz-ares/ids/29228107",
+                path: "name"
+            }
+        },
+        "lager": {
+            ajax: {
+                url: "/assets/cache/beer_v1.json",
+                path: "data.beer.lager"
+            }
+        },
+        "stout and porter": {
+            ajax: {
+                url: "/assets/cache/beer_v1.json",
+                path: "data.beer.stout"
+            }
+        },
+        "malt": {
+            ajax: {
+                url: "/assets/cache/beer_v1.json",
+                path: "data.beer.malt"
+            }
+        }
+    },
+    callback: {
+        onClickAfter: function (node, a, item, event) {
+ 
+            event.preventDefault;
+ 
+            // href key gets added inside item from options.href configuration
+            alert(item.href);
+ 
+        }
+    },
+    debug: true
+});
+
 </script>
 {% endblock %}
