@@ -35,9 +35,13 @@ class ContactsController extends AbstractTwigController
       $data['city'] = $record->getTown();
       $data['id'] = $record->getCompanyId();
       $data['taxid'] = $record->getTaxId();
-      $json = json_encode($data);
-      print_r($json);
-      return $response;
+      //$json = json_encode($data);
+      //print_r($json);
+      //return $response;
+      $builder = new JsonResponseBuilder('contacts.search', 1);
+      $payload = $builder->withData((array)$data)->withCode(200)->build();
+      return $response->withJson($payload);
+
     }
 
     public function cz_ares_names(Request $request, Response $response, array $args = []): Response {
@@ -72,10 +76,18 @@ class ContactsController extends AbstractTwigController
         $out[$i]['address'] = $record->jmn;
         $i++;
       }
-      $json = json_encode($out);
-      print_r($json);
-      print("<pre>".print_r($out,true)."</pre>");
+      print_r($out);
       return $response;
+      die();
+      //$json = json_encode($out);
+      //print_r($json);
+      //print("<pre>".print_r($out,true)."</pre>");
+      //return $response;
+      //$newresponse = $response->withJson($out)->withHeader('Content-type', 'application/json');
+      //return $newresponse;
+        $builder = new JsonResponseBuilder('contacts.search', 1);
+        $payload = $builder->withData((array)$out)->withCode(200)->build();
+        return $response->withJson($payload);
   }
 
     public function collection_ui(Request $request, Response $response, array $args = []): Response
@@ -88,7 +100,7 @@ class ContactsController extends AbstractTwigController
       $jsf_formdata = '{"data":{"ts_created":"'.time().'","ts_updated":"'.time().'"}}';
       $jsf_onsubmit = '
         $.ajax({
-          url: "'.$uribase.$this->routerParser->urlFor('contacts.collection.api01').'",
+          url: "'.$uribase.$this->routerParser->urlFor('contacts.items.api01').'",
           dataType: "text",
           type: "POST",
           data: "stockdata=" + JSON.stringify(formData.formData),
