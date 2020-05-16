@@ -13,8 +13,10 @@ use Respect\Validation\Validator as v;
 use Sabre\VObject;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpForbiddenException;
-use Spatie\Browsershot\Browsershot;
 use Defr\Ares;
+// grabbing
+use Symfony\Component\DomCrawler\Crawler;
+use Goutte\Client;
 
 class ContactsController extends AbstractTwigController
 {
@@ -25,6 +27,13 @@ class ContactsController extends AbstractTwigController
      *
      * @return Response
      */
+
+
+    private $client;
+    public function __construct(Client $client)
+    {
+        $this->client = $client; // Goutte\Client
+    }
 
     public function cz_ares_ids(Request $request, Response $response, array $args = []): Response {
       $ares = new Ares();
@@ -45,31 +54,54 @@ class ContactsController extends AbstractTwigController
     }
 
     public function cz_ares_names(Request $request, Response $response, array $args = []): Response {
+      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&nazev='.$args['name'].'&polozek=500';
+      $result = [];
+      $crawler = $this->client->request('GET', $uri);
+      $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
+        $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
+        $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
+        $r['adr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
+        $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
+        $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
+        $result[] = $r;
+        //vatid
+        //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
+      });
+      print("<pre>".print_r($result,true)."</pre>");
+      return $response;
+    }
+
+
+    public function cz_ares_names2(Request $request, Response $response, array $args = []): Response {
       $name = $args['name'];
+      $builder = new JsonResponseBuilder('contacts.search', 1);
+
       if (strlen($name) < 3) {
-          throw new InvalidArgumentException('Zadejte minimálně 3 znaky pro hledání.');
+         $payload = $builder->withMessage('Please use at least 3 characters for your search.')->withCode(200)->build();
+         return $response->withJson($payload);
       }
 
       $uri = 'http://wwwinfo.mfcr.cz/cgi-bin/ares/ares_es.cgi?obch_jm='.urlencode($name).'&filtr=0';
       $file = @file_get_contents($uri);
-      if($file)
-        {
+      if($file) {
           $xml = @simplexml_load_string($file);
-        }
+      }
        
-      if($xml) 
-        {
+      if($xml) {
           $ns = $xml->getDocNamespaces();
           $data = $xml->children($ns['are']);
           $dtt = $data->children($ns['dtt'])->V;
-        }
-      else
-        {
+      }
+      else {
           $ares_stav_fin  = __('The Czech ARES database is offline');
-        }
+      }
 
-      $records = json_decode(json_encode($dtt))->S;
+      //$records = json_decode(json_encode($dtt))->S;
+      $records = json_decode(json_encode($dtt));
       $i = 0;
+      print_r($records);
+      return $response;
+
       foreach ($records as $record) {
         $out[$i]['id'] = $record->ico;
         $out[$i]['name'] = $record->ojm;
@@ -78,16 +110,16 @@ class ContactsController extends AbstractTwigController
       }
       print_r($out);
       return $response;
-      die();
+      //die();
       //$json = json_encode($out);
       //print_r($json);
       //print("<pre>".print_r($out,true)."</pre>");
       //return $response;
       //$newresponse = $response->withJson($out)->withHeader('Content-type', 'application/json');
       //return $newresponse;
-        $builder = new JsonResponseBuilder('contacts.search', 1);
-        $payload = $builder->withData((array)$out)->withCode(200)->build();
-        return $response->withJson($payload);
+        //$builder = new JsonResponseBuilder('contacts.search', 1);
+        //$payload = $builder->withData((array)$out)->withCode(200)->build();
+        //return $response->withJson($payload);
   }
 
     public function collection_ui(Request $request, Response $response, array $args = []): Response

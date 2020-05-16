@@ -29,7 +29,7 @@
                 {% verbatim %}
                 <script type="text/twig" id="calendar_sources_obj_twig">
                 <tr id="calendar_sources_object_{{ row.id }}">
-                  <td class="col-sm-1">{{ row.id }} <a href="{{ url_for('calendar.sources.sync.api01') }}"><i class="fas fa-sync"></a></i></td>
+                  <td class="col-sm-1">{{ row.id }} <a href="{% endverbatim %}{{ url_for('calendar.sources.sync.api01') }}{% verbatim %}/{{ row.id }}"><i class="fas fa-sync"></a></i></td>
                   <td class="col-sm-2">{{ row.domain_name }} ({{ row.domain }})</td>
                   <td class="col-sm-1">{{ row.driver }}</td>
                   <td class="col-sm-3">{{ row.name }}</td>

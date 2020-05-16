@@ -18,7 +18,7 @@ $app->group('/api/calendar/v1', function (RouteCollectorProxy $group) {
     $group->post('/sources[/{uid:[0-9]+}]', CalendarController::class . ':sources_post');
     $group->patch('/sources[/{uid:[0-9]+}]', CalendarController::class . ':sources_patch');
     $group->delete('/sources[/{uid:[0-9]+}]', CalendarController::class . ':sources_delete');
-    $group->get ('/sources/sync/{uid:[0-9]+}', CalendarController::class . ':sources_sync')->setName('calendar.sources.api01');
+    $group->get ('/sources/sync[/{uid:[0-9]+}]', CalendarController::class . ':sources_sync')->setName('calendar.sources.sync.api01');
 })->add(RedirectGuests::class);
 
 /*

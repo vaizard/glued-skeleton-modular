@@ -11,8 +11,9 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Sabre\VObject;
+use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
-
+use \Opis\JsonSchema\Loaders\File as JSL;
 
 class CalendarController extends AbstractTwigController
 {
@@ -29,7 +30,7 @@ class CalendarController extends AbstractTwigController
           $updt = $this->db->rawQuery("UPDATE `".$table."` SET `c_json` = JSON_SET(c_json, '$.id', ?) WHERE c_uid = ?", Array ((int)$id, (int)$id));
           $err += $this->db->getLastErrno();
         }
-        if ($err >= 0) { $this->db->commit(); } else { $this->db->rollback(); throw new HttpInternalServerErrorException($request, __('Database error')." ".$err); }
+        if ($err === 0) { $this->db->commit(); } else { $this->db->rollback(); throw new \Exception(__('Database error: ')." ".$err." ".$this->db->getLastError()); }
         return (int)$id;
     }
 
@@ -43,40 +44,111 @@ class CalendarController extends AbstractTwigController
         // TODO add rbac here
         $this->db->where('c_uid', (int)$args['uid']);
         $source = $this->db->getOne('t_calendar_sources');
-        //echo "Last executed query was ". $this->db->getLastQuery();
-        print_r($source);
         if (!$source) {
             $builder = new JsonResponseBuilder('calendar.sources.sync', 1);
             $payload = $builder->withCode(404)->build();
             return $response->withJson($payload);
         }
 
-        $ical = json_decode($source['c_json'], true)['ical'];
-        $calendar = VObject\Reader::read(
-            fopen($ical,'r')
-        );
+        $uri = json_decode($source['c_json'], true)['uri'];
+        $calendar = VObject\Reader::read( fopen( $uri, 'r' ) );
 
         $min_start = false;
         $max_end = false;
         $carb_now = Carbon::now();
+        $table = 't_calendar_objects';
 
+ /*
+        $i = 1;
         foreach($calendar->vevent as $event) {
+            print_r($event->serialize()); 
+            echo '<br><br>';
+            $i++;
+        }
+*/
+
+        //print_r((array)$calendar->vevent[1]);
+        //echo $calendar->serialize();
+    //    return $response;    
+        foreach($calendar->vevent as $event) {
+
+            // pregen json
+            $object = null;
+            $json['dtstamp'] = (string)$event->dtstamp;
+            unset($event->DTSTAMP);
+
+            $json['uid'] = (string)$event->uid;
+            $json['created'] = (string)$event->created;
+            $json['summary'] = (string)$event->summary;
+            $json['description'] = (string)$event->description;
+            $json['last-modified'] = strtotime((string)$event->last_modified);
+            $json['dstart'] = (string)$event->dtstart;
+            $json['dtend'] = (string)$event->dtend;
+            if (empty($json['dtend'])) { $json['dtend'] = (string)$event->dtstart; }
+
+            // pregen row to compare against database and eventually upsert
+            $row['c_object'] = (string)$event->serialize();
+            $row['c_object_hash'] = hash('sha256', $row['c_object']);
+            $row['c_json'] = json_encode($json);
+            $rev[time()] = $row['c_object'];
+
+            // get object from db, if we already habe it
+            $this->db->where('c_source_id', (int)$args['uid']);
+            $this->db->where('c_object_uid', (string)$event->uid);
+            $object = $this->db->getOne('t_calendar_objects');
+
+            if ($object) {
+                // uptdate branch
+                if ($row['c_object_hash'] != $object['c_object_hash']) {
+                    // there is stuff to update
+                    // dtstamp!!!
+                    echo "<br><br>";
+                    echo $row['c_object_hash']."<br>";
+                    echo $object['c_object_hash']."<br>";
+                    echo $row['c_object']."<br>";
+                    echo $object['c_object']."<br>";
+                    if ($row['c_json'] == $object['c_json']) { echo "same"; }
+                    $row['c_revision_counter'] = $object['c_revision_counter'] + 1;
+                    //$row['c_revisions'] = json_encode($rev); // todo, zde pridej revizi
+                    print_r('<br/>UPDT '. $row['c_json']);
+                } else {
+                    // do nothing, we got current data in db already
+                    //print_r('<br/>KEEP '. $row['c_json']);
+                }
+            } else {
+                // create branch
+                    // default values
+                    $row['c_attr'] = '{}';
+                    $row['c_revisions'] = json_encode($rev);
+                    $row['c_revision_counter'] = 1;
+                    $row['c_source_id'] = (int)$args['uid'];
+                    $row['c_object_uid'] = $json['uid'];
+                    print_r('<br/>INST '. $row['c_json']);
+                    try { $row_ins = $this->sql_insert_with_json($table, $row); } catch (Exception $e) { 
+                        throw new HttpInternalServerErrorException($request, $e->getMessage());  
+                    }
+
+            }
+
+            // TODO check for deleted events
+
+
+            
+
+            
+            /*
+            
+
+
+*/
+/*
             $uid = (string)$event->created.(string)$event->uid;
-            $dtend = (string)$event->dtend;
-            if (empty($dtend)) { $dtend = (string)$event->dtstart; }
             $carb_created = Carbon::createFromFormat('Ymd\THis\Z', (string)$event->created);
-
-
-            $events[$uid]['uid'] = (string)$event->uid;
-            $events[$uid]['dtstart'] = (string)$event->dtstart;
             $events[$uid]['start'] = strtotime((string)$event->dtstart);
-            $events[$uid]['dtend'] = $dtend; 
             $events[$uid]['end'] = strtotime($dtend);
-            $events[$uid]['last_modified'] = strtotime((string)$event->last_modified);
             $events[$uid]['created'] = (string)$event->created;
             $events[$uid]['hrcreated'] = $carb_created->diffForHumans($carb_now);
-            $events[$uid]['description'] = (string)$event->description;
-            $events[$uid]['summary'] = (string)$event->summary;
+
             if ( ($min_start === false) or $events[$uid]['start'] < $min_start ) { $min_start = $events[$uid]['start'] ; }
             if ( ($max_end === false) or $events[$uid]['end'] > $max_end ) { $max_end = $events[$uid]['end'] ; }
         }
@@ -86,28 +158,9 @@ class CalendarController extends AbstractTwigController
             new \DateInterval('P1D'),
             new \DateTime(date(DATE_ATOM, $max_end))
         );
-
-       foreach ($period as $key => $value) {
-            $date = (string)$value->format('Y-m-d');
-            //echo "<br>".$date;
-            //$out[$date][] = [];
-
-            foreach ($events as $uid => $event) {
-                if (($date >= date('Y-m-d', $event['start'])) && ($date <= date('Y-m-d', $event['end']))) {
-                    $out[$date][$uid] = $event;
-                    //echo "<br>"."------ ".$event['start'].' ... '.$event['end'].': '.$event['summary'];
-                }
-            }
-
-
+*/
         }
-
-//print("<pre>".print_r($out,true)."</pre>");
-  //      return $response;
-
-        return $this->render($response, 'Calendar/Views/browse.twig', [
-            'pageTitle' => 'Calendar', 'out' => $out
-        ]);
+        return $response;
     }
 
 
@@ -168,6 +221,7 @@ class CalendarController extends AbstractTwigController
         // TODO handle errors
     }
 
+
     public function sources_patch(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('calendar.sources', 1);
 
@@ -193,12 +247,9 @@ class CalendarController extends AbstractTwigController
         // TODO if $doc->domain is patched here, you have to first test, if user has access to the domain
 
         // load the json schema and validate data against it
-        $loader = new \Opis\JsonSchema\Loaders\File("schema://calendar/", [
-            __ROOT__ . "/glued/Calendar/Controllers/Schemas/",
-        ]);
-        $validator = new \Opis\JsonSchema\Validator;
+        $loader = new JSL("schema://calendar/", [ __ROOT__ . "/glued/Calendar/Controllers/Schemas/" ]);
         $schema = $loader->loadSchema("schema://calendar/calendar.v1.schema");
-        $result = $validator->schemaValidation($doc, $schema);
+        $result = $this->jsonvalidator->schemaValidation($doc, $schema);
 
         if ($result->isValid()) {
             $row = [ 'c_json' => json_encode($doc) ];
@@ -211,6 +262,7 @@ class CalendarController extends AbstractTwigController
         $payload = $builder->withData((array)$req)->withCode(200)->build();
         return $response->withJson($payload, 200);  
     }
+
 
     public function sources_post(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('calendar.sources', 1);
@@ -226,20 +278,20 @@ class CalendarController extends AbstractTwigController
         // TODO replace manual coercion above with a function to recursively cast types of object values according to the json schema object (see below)       
     
         // load the json schema and validate data against it
-        $loader = new \Opis\JsonSchema\Loaders\File("schema://calendar/", [
-            __ROOT__ . "/glued/Calendar/Controllers/Schemas/",
-        ]);
-        $validator = new \Opis\JsonSchema\Validator;
+        $loader = new JSL("schema://calendar/", [ __ROOT__ . "/glued/Calendar/Controllers/Schemas/" ]);
         $schema = $loader->loadSchema("schema://calendar/calendar.v1.schema");
-        $result = $validator->schemaValidation($req, $schema);
+        $result = $this->jsonvalidator->schemaValidation($req, $schema);
 
         if ($result->isValid()) {
             $row = array (
                 'c_domain_id' => (int)$req->domain, 
                 'c_user_id' => (int)$req->user,
-                'c_json' => json_encode($req)
+                'c_json' => json_encode($req),
+                'c_attr' => '{}'
             );
-            $req->id = $this->sql_insert_with_json('t_calendar_sources', $row);
+            try { $req->id = $this->sql_insert_with_json('t_calendar_sources', $row); } catch (Exception $e) { 
+                throw new HttpInternalServerErrorException($request, $e->getMessage());  
+            }
             $payload = $builder->withData((array)$req)->withCode(200)->build();
             return $response->withJson($payload, 200);
         } else {
@@ -251,6 +303,7 @@ class CalendarController extends AbstractTwigController
             return $response->withJson($payload, 400);
         }
     }
+
 
     public function sources_delete(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('calendar.sources', 1);

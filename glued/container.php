@@ -63,6 +63,10 @@ $container->set('flash', function () {
     return new \Slim\Flash\Messages();
 });
 
+$container->set('jsonvalidator', function () {
+    return new \Opis\JsonSchema\Validator;
+
+});
 
 $container->set('routerParser', $app->getRouteCollector()->getRouteParser());
 
