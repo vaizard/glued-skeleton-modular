@@ -14,7 +14,7 @@
     modal.find('#for_id').text(id)
     modal.find('#cil_hidden_dir').val(module + '/' + id)
     // tady musime dat aktualni adresu aby se to tam vratilo
-    modal.find('#cil_return_url').val('{{ url_for("stor.uploader") }}')
+    modal.find('#cil_return_url').val('{{ url_for("stor.browser") }}')
     modal.find('.modal-dialog form').attr('action', '{{ url_for("stor.uploader") }}')
   });
   
