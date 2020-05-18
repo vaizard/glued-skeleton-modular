@@ -1,0 +1,21 @@
+
+<script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+  
+  // Show modal
+  $('#storFileUpload').on('show.bs.modal', function (event) {
+    // Button that triggered the modal
+    var button = $(event.relatedTarget)
+    // Extract info from data-* attributes
+    var id = button.data('id')
+    var module = button.data('module')
+    var modal = $(this)
+    // Update the modal's content.
+    modal.find('#for_module').text(module)
+    modal.find('#for_id').text(id)
+    modal.find('#cil_hidden_dir').val(module + '/' + id)
+    // tady musime dat aktualni adresu aby se to tam vratilo
+    modal.find('#cil_return_url').val('{{ url_for("stor.uploader") }}')
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("stor.uploader") }}')
+  });
+  
+</script>
