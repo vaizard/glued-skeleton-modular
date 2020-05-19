@@ -147,7 +147,9 @@
       <section class="section">
         
         {% block content %}{% endblock %}
-
+        
+        {% include '/Stor/Views/fileupload.twig' %}
+        
       </section>
       </div>
       <footer class="main-footer">
@@ -193,6 +195,7 @@
 
 
   {% block additionaljs %}{% endblock %}
+  {% include '/Stor/Views/fileupload.js.twig' %}
 
   <script nonce="{{ csp_nonce.script_src }}">
   $(".alert-dismissible").fadeTo(2000, 500).slideUp(500, function(){

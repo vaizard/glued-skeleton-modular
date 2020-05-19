@@ -91,7 +91,10 @@
                 </td>
                 <td>{{ row.location | default('') }}</td>
                 <td>{{ row.details | default('') }} 
-                {% if row._s == 'worklog/work' %}<button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#editLog" data-id="{{ row.id }}" data-date="{{ row.date }}" data-finished="{{ row.finished }}" data-summary="{{ row.summary }}" data-time="{{ row.time }}"><i class="fas fa-edit"></i></button>{% endif %}
+                {% if row._s == 'worklog/work' %}
+                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#editLog" data-id="{{ row.id }}" data-date="{{ row.date }}" data-finished="{{ row.finished }}" data-summary="{{ row.summary }}" data-time="{{ row.time }}"><i class="fas fa-edit"></i></button>
+                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#storFileUpload" data-id="{{ row.id }}" data-module="worklog"><i class="fas fa-paperclip"></i></button>
+                {% endif %}
                 </tr>
                 </script>
                 <script type="text/twig" id="worklog_rows_twig">
