@@ -205,8 +205,10 @@
 
 $.typeahead({
     input: '.js-typeahead-beer_v1',
+    debug: true,
     minLength: 1,
     maxItem: 15,
+    dynamic: true,
     order: "asc",
     hint: true,
     group: {
@@ -216,12 +218,78 @@ $.typeahead({
     backdrop: {
         "background-color": "#fff"
     },
-    href: "{% verbatim %}/beers/{{group|slugify}}/{{display|slugify}}/{% endverbatim %}",
-    dropdownFilter: "all beers",
+    {% verbatim %}
+    template: function (query, item) {
+         var color = "#777";
+        if (item.status === "owner") {
+            color = "#ff1493";
+        }
+ 
+        return '<span class="row">' +
+            '<span class="avatar">' +
+                '<img src="{{avatar}}">' +
+            "</span>" +
+            '<span class="username">{{username}}{{org}} <small style="color: ' + color + ';">({{status}}{{regid}})</small></span>' +
+            '<span class="id">({{id}})</span>' +
+        "</span>"
+    },
+    {% endverbatim %}
+    //dropdownFilter: "all beers",
     emptyTemplate: 'No result for "{{query}}"',
     // so there's a difference here in the data ... "data.beer.stout" returns an array, "data.name" in contacts just the string.
     source: {
-        "lager": {
+        user: {
+            display: "username",
+            ajax: function (query) {
+                return {
+                    url: "/assets/cache/users_v1.json",
+                    path: "data.user",
+                    type: "GET",
+                    data: {
+                        q: "{{query}}"
+                    },
+                    callback: {
+                        done: function (data) {
+                            for (var i = 0; i < data.data.user.length; i++) {
+                                if (data.data.user[i].username === 'running-coder') {
+                                    data.data.user[i].status = 'owner';
+                                } else {
+                                    data.data.user[i].status = 'contributor';
+                                }
+                            }
+                            return data;
+                        }
+                    }
+                }
+            }
+        },
+        cz_justice: {
+            display: "org",
+            ajax: function (query) {
+                return {
+                    url: "/api/contacts/search/v1/cz-ares/names/vaiz",
+                    path: "data",
+                    type: "GET",
+                    data: {
+                        q: "{{query}}"
+                    },{% verbatim %}
+                    // tady by se mi mel prepisovat defaultni template templatem uvedenym nize, ale nedeje se. proc?
+                    template: function (query, item) {
+                        return '<span class="row">' +
+                            '<span class="avatar">' +
+                                '<img src="{{avatar}}">' +
+                            "</span>" +
+                            '<span class="username">{{org}} <small>({{regid}})</small></span>' +
+                            '<span class="id">({{adr}})</span>' +
+                        "</span>";
+                    }
+                    {% endverbatim %}
+                }
+            }
+        },
+        /*
+        user: {
+            display: "username",
             ajax: {
                 url: "/api/contacts/search/v1/cz-ares/ids/29228107",
                 path: "data.name"
@@ -250,7 +318,8 @@ $.typeahead({
  
         }
     },
-    debug: true
+    debug: true*/
+  }
 });
 
 

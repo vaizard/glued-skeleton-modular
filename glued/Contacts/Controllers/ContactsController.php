@@ -16,7 +16,6 @@ use Slim\Exception\HttpForbiddenException;
 use Defr\Ares;
 // grabbing
 use Symfony\Component\DomCrawler\Crawler;
-use Goutte\Client;
 
 class ContactsController extends AbstractTwigController
 {
@@ -28,13 +27,14 @@ class ContactsController extends AbstractTwigController
      * @return Response
      */
 
+/*
 
     private $client;
     public function __construct(Client $client)
     {
         $this->client = $client; // Goutte\Client
     }
-
+*/
     public function cz_ares_ids(Request $request, Response $response, array $args = []): Response {
       $ares = new Ares();
       $record = $ares->findByIdentificationNumber($args['id']); 
@@ -54,9 +54,16 @@ class ContactsController extends AbstractTwigController
     }
 
     public function cz_ares_names(Request $request, Response $response, array $args = []): Response {
+      $name = $args['name'];
+      if (strlen($name) < 3) {
+         $payload = $builder->withMessage('Please use at least 3 characters for your search.')->withCode(200)->build();
+         return $response->withJson($payload);
+      }
+
       $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&nazev='.$args['name'].'&polozek=500';
+      $builder = new JsonResponseBuilder('contacts.search', 1);
       $result = [];
-      $crawler = $this->client->request('GET', $uri);
+      $crawler = $this->goutte->request('GET', $uri);
       $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
         $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
         $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
@@ -67,8 +74,10 @@ class ContactsController extends AbstractTwigController
         //vatid
         //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
       });
-      print("<pre>".print_r($result,true)."</pre>");
-      return $response;
+      $payload = $builder->withData((array)$result)->withCode(200)->build();
+      return $response->withJson($payload);
+      //print("<pre>".print_r($result,true)."</pre>");
+      //return $response;
     }
 
 

@@ -4,6 +4,7 @@ use DI\Container;
 use Glued\Core\Classes\Auth\Auth;
 use Glued\Core\Middleware\TranslatorMiddleware;
 use Glued\Stor\Classes\Stor as StorMainClass;
+use Goutte\Client;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
@@ -22,6 +23,7 @@ use Symfony\Component\Translation\Loader\MoFileLoader;
 use Symfony\Component\Translation\Translator;
 use Twig\Loader\FilesystemLoader;
 use voku\helper\AntiXSS;
+
 
 $container->set('settings', function() {
     return require_once(__ROOT__ . '/glued/settings.php');
@@ -58,6 +60,10 @@ $container->set('antixss', function () {
     return new AntiXSS();
 });
 
+
+$container->set('goutte', function () {
+    return new Goutte\Client();
+});
 
 $container->set('flash', function () {
     return new \Slim\Flash\Messages();

@@ -29,7 +29,7 @@
     "nyholm/psr7": "^1",
     "nyholm/psr7-server": "^0.4",
     "php-di/php-di": "^6",
-    "robmorgan/phinx": ">0.11",
+    "robmorgan/phinx": ">0.12",
     "thingengineer/mysqli-database-class": "dev-master",
     "monolog/monolog": "^2",
     "respect/validation": "^1.1",
