@@ -33,8 +33,10 @@ $app->group('/stor', function (RouteCollectorProxy $group) {
     // copy nebo move z modalu pro copy move
     $group->post('/item/copymove', StorController::class . ':itemCopyMove')->setName('stor.item.copy.move');
     
-    // funkce na upload post formularem
+    // funkce na upload post formularem, klasicky reload stranky nebo presmerovani
     $group->post('/uploader', StorController::class . ':uploaderSave')->setName('stor.uploader');
+    // upload pres ajax api, taky z post formulare ale bez reloadu stranky, jen vraci nejaky json
+    $group->post('/api/v1/uploader', StorControllerApiV1::class . ':uploaderApiSave')->setName('stor.api.uploader');
     
 });
 
