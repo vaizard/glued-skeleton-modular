@@ -16,14 +16,14 @@
     // tady musime dat aktualni adresu aby se to tam vratilo
     modal.find('#cil_return_url').val('{{ url_for("stor.browser") }}')
     modal.find('.modal-dialog form').attr('action', '{{ url_for("stor.uploader") }}')
+    // fill reload values at ajax upload button
+    modal.find('#ajax-upload').attr("data-freload", button.data('freload'));
   });
   
   // ajax upload
   $('#storFileUpload #ajax-upload').on('click', function (event) {
-        //alert("dir " + $('#storFileUpload #cil_hidden_dir').val())
-        //var formData = new FormData();
-        //formData.append('file', $('#storFileUpload #ajax-file')[0].files[0]);
-        //formData.append('actual_dir', 'sobota');
+        // button ktery to zmackl ma na sobe data
+        var button = $(this);
         
         // insert complete form into FormData object
         var formData = new FormData(document.getElementById("storFileUploadForm"));
@@ -40,7 +40,11 @@
                     $('#toast-placeholder').empty();
                     $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Stor uploader") }}' , msg: '{{ __("file uploaded") }}' })).appendTo("#toast-placeholder");
                     $('.toast').toast('show');
-                    //alert(retData.data.message);
+                    // mozny reload casti stranky
+                    var reload_function_name = button.data('freload');
+                    if (reload_function_name != '') {
+                        window[reload_function_name]();
+                    }
                }
         });
         
