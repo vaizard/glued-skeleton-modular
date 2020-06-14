@@ -27,6 +27,13 @@ class StorControllerApiV1 extends AbstractTwigController
             throw new Exception('Expected uploaded file, got none.');
         }
         
+        // promenne, ktere se budou vracet
+        $return_code = 0;
+        $return_data = array();
+        $return_message = '';
+        $file_index = 0;
+        $files_stored = 0;
+        
         // nacteme si to z containeru ktery to ma ze tridy
         $app_dirs = $this->stor->app_dirs;
         $app_tables = $this->stor->app_tables;
@@ -62,7 +69,7 @@ class StorControllerApiV1 extends AbstractTwigController
                 
                 // zjistime jestli soubor se stejnym hashem uz mame
                 $this->db->where("c_sha512", $sha512);
-                $this->db->getOne('t_stor_objects');
+                $file_object = $this->db->getOne('t_stor_objects');
                 if ($this->db->count == 0) {
                     
                     // vytvorime tomu adresar
@@ -108,10 +115,19 @@ class StorControllerApiV1 extends AbstractTwigController
                     "c_inherit_table" => $app_tables[$actual_dir],
                     "c_inherit_object" => $actual_object
                     );
-                    $this->db->insert ('t_stor_links', $data);
+                    $new_id = $this->db->insert ('t_stor_links', $data);
                     
                     $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully.');
                     $output_json .= 'uploaded successfully.';
+                    
+                    // priprava navratovych dat
+                    $return_data[$file_index]['link-id'] = $new_id;
+                    $return_data[$file_index]['name'] = $filename;
+                    $return_data[$file_index]['module-name'] = $actual_dir;
+                    $return_data[$file_index]['object-id'] = $sha512;
+                    $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $new_id, 'filename' => $filename]);
+                    $return_data[$file_index]['size'] = $new_file_array['size'];
+                    $return_data[$file_index]['mime-type'] = $new_file_array['mime'];
                 }
                 else {
                     // soubor uz existuje v objects ale vlozime ho aspon do links
@@ -122,27 +138,44 @@ class StorControllerApiV1 extends AbstractTwigController
                     "c_inherit_table" => $app_tables[$actual_dir],
                     "c_inherit_object" => $actual_object
                     );
-                    $this->db->insert ('t_stor_links', $data);
+                    $new_id = $this->db->insert ('t_stor_links', $data);
                     
                     $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully as link. Its hash already exists in objects table.');
                     $output_json .= 'uploaded successfully as link.';
+                    
+                    // priprava navratovych dat
+                    $file_data = json_decode($file_object['c_json'], true);
+                    
+                    $return_data[$file_index]['link-id'] = $new_id;
+                    $return_data[$file_index]['name'] = $filename;
+                    $return_data[$file_index]['module-name'] = $actual_dir;
+                    $return_data[$file_index]['object-id'] = $sha512;
+                    $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $new_id, 'filename' => $filename]);
+                    $return_data[$file_index]['size'] = $file_data['data']['size'];
+                    $return_data[$file_index]['mime-type'] = $file_data['data']['mime'];
                 }
+                
+                $file_index++;
+                $files_stored++;
+                
+                $return_message = 'Upload successful ('.$files_stored.')files stored';
+                $return_code = 200;
             }
             else {
                 $this->flash->addMessage('error', 'your file failed to upload.');
-                $output_json .= 'your file failed to upload.';
+                $return_message = 'your file failed to upload.';
+                $return_code = 500;
             }
         }
         else {
             $this->flash->addMessage('error', 'your cannot upload into this dir.');
-            $output_json .= 'your cannot upload into this dir.';
+            $return_message = 'your cannot upload into this dir.';
+            $return_code = 500;
         }
-        
-        $work = array('message' => $output_json);
         
         // vybuildime json response
         $builder = new JsonResponseBuilder('stor/upload', 1);
-        $payload = $builder->withData((array)$work)->withCode(200)->build();
+        $payload = $builder->withData($return_data)->withMessage($return_message)->withCode($return_code)->build();
         return $response->withJson($payload);
     }
     
