@@ -18,6 +18,16 @@ class Auth
     }
 
 
+    public function log($request, $event, $details)
+    {
+        $user_id = $_SESSION['core_user_id'] ?? false;
+        $auth_id = $_SESSION['core_auth_id'] ?? false;
+        $fingerprint['ua'] = $request->getUserAgent();
+        $fingerprint['ua'] = $request->getUserAgent();
+        
+    }
+
+
     public function user_create($email, $name, $password) {
         $trx_error = false;
         $this->db->startTransaction();
@@ -126,6 +136,27 @@ class Auth
         $auth_id = $_SESSION['core_auth_id'] ?? false;
         if ($user_id === false or $auth_id === false) { return false; }
         else { return true; }
+    }
+
+    public function reset($email)
+    {
+        $trx_error = false;
+        $this->db->startTransaction();
+        $data = array (
+            'c_email' => $email,
+        );
+        if (!$this->db->insert ('t_core_users', $data)) { $trx_error = true; }
+        $subq = $this->db->subQuery()->where('c_type', 0)->where('c_email', $email)->getOne('t_core_authn', 'c_uid as c_authn_uid, c_user_uid');
+        $data = array (
+            'c_type' => 0,
+            'c_user_uid' => $subq['c_user_uid'],
+            'c_user_authn' => $subq['c_authn_uid'],
+            'c_token' => random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES),
+            'c_ts_'
+        );
+        if (!$this->db->insert ('t_core_authn', $data)) { $trx_error = true; }
+        if ($trx_error === true) { $this->db->rollback(); } 
+        else { $this->db->commit(); }
     }
 
 

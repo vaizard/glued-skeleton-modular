@@ -28,6 +28,13 @@ return [
         'collation' => ' utf8mb4_unicode_ci'
     ],
 
+
+    // Geoip
+    'geoip' => [
+        'geoip_engine' => 'maxmind',
+        'maxmind_licence_key' => '' // Maxmind GeoLite2 Licence key (its free, you just need to sign up for an account)
+    ],
+
     // Monolog
     'logger' => [
         'name' => 'glued',

@@ -56,7 +56,10 @@
     "zeuxisoo/slim-whoops": "^0.7.2",
     "sabre/vobject": "^4",
     "voku/anti-xss": "^4",
-    "symfony/yaml": "^5"
+    "symfony/yaml": "^5",
+    "geocoder-php/geoip2-provider": "^4.0",
+    "kriswallsmith/buzz": "^1.1",
+    "geocoder-php/nominatim-provider": "^5.1"
   },
   "repositories": [
     {
@@ -96,7 +99,6 @@
       "chmod 777 private/locale",
       "chmod 777 private/locale",
       "Glued\\Core\\Install\\ComposerHooks::postInstall",
-      "./install.sh",
       "php vendor/bin/phinx migrate -e production"
     ]
   },

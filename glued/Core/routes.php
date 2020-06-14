@@ -1,4 +1,5 @@
 <?php
+use Geocoder\geocode;
 use Glued\Core\Controllers\Accounts;
 use Glued\Core\Controllers\AuthController;
 use Glued\Core\Controllers\DomainsController as Domains;
@@ -39,6 +40,8 @@ $app->group('/core', function (RouteCollectorProxy $route) {
     $route->group('', function ($route) {
         $route->get ('/signin', AuthController::class . ':signin_get')->setName('core.signin.web');
         $route->post('/signin', AuthController::class . ':signin_post');
+        $route->get ('/reset', AuthController::class . ':reset_get')->setName('core.reset.web');
+        $route->post('/reset', AuthController::class . ':reset_post');
         $route->get ('/signup', AuthController::class . ':signup_get')->setName('core.signup.web');
     })->add(RedirectAuthenticated::class);
 });
@@ -62,6 +65,13 @@ $app->group('/api/core/v1', function (RouteCollectorProxy $route) {
 
 
 $app->get ('/core/admin/playground', function(Request $request, Response $response) { 
+    $reader = new \GeoIp2\Database\Reader(__ROOT__ . '/private/data/core/maxmind-geolite2-city.mmdb');
+    $adapter = new \Geocoder\Provider\GeoIP2\GeoIP2Adapter($reader);
+    $provider = new \Geocoder\Provider\GeoIP2\GeoIP2($adapter);
+
+    $results = $provider->geocodeQuery(Geocoder\Query\GeocodeQuery::create('74.200.247.59'))->first()->getCountry()->getCode();
+    print("<pre>".print_r($results,true)."</pre>");
+
 
     $key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES); // 256 bit
     

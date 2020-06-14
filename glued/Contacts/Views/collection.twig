@@ -272,20 +272,21 @@ $.typeahead({
                     type: "GET",
                     data: {
                         q: "{{query}}"
-                    },{% verbatim %}
-                    // tady by se mi mel prepisovat defaultni template templatem uvedenym nize, ale nedeje se. proc?
-                    template: function (query, item) {
-                        return '<span class="row">' +
-                            '<span class="avatar">' +
-                                '<img src="{{avatar}}">' +
-                            "</span>" +
-                            '<span class="username">{{org}} <small>({{regid}})</small></span>' +
-                            '<span class="id">({{adr}})</span>' +
-                        "</span>";
                     }
-                    {% endverbatim %}
                 }
+            },
+            {% verbatim %}
+            // tady by se mi mel prepisovat defaultni template templatem uvedenym nize, ale nedeje se. proc?
+            template: function (query, item) {
+                return '<span class="row">' +
+                    '<span class="avatar">' +
+                        '<img src="{{avatar}}">' +
+                    "</span>" +
+                    '<span class="username">{{org}} <small>({{regid}})</small></span>' +
+                    '<span class="id">({{adr}})</span>' +
+                "</span>";
             }
+            {% endverbatim %}
         },
         /*
         user: {

@@ -2,13 +2,13 @@
 
 {% block content %}
           <div class="section-header">
-            <h1>{{ __('Sign in') }}</h1>
+            <h1>{{ __('Password reset') }}</h1>
           </div>
           <div class="section-body">
             {% include '/Core/Views/templates/partials/flash.twig' %}
             <div class="card card-primary col-4">
-              <form action="{{ url_for('core.signin.web') }}" method="post" autocomplete="off">
-                <div class="card-header">{{ __('Please provide your details below.')}}&nbsp; <a href="{{ url_for('core.reset.web') }}">{{ __('Forgot your password?') }}</a></div>
+              <form action="{{ url_for('core.reset.web') }}" method="post" autocomplete="off">
+                <div class="card-header">{{ __('Please provide your details below, or')}}&nbsp;<a href="{{ url_for('core.signin.web') }}">{{ __('sign in instead') }}</a>.</div>
                   <div class="card-body pb-0">
                         <div class="form-group">
                             <label for="email">{{ __('Email') }}</label>
@@ -16,20 +16,12 @@
                             {% if validation_errors.email %}
                                 <span class="invalid-feedback">{{ validation_errors.email | first }}</span>
                             {% endif %}
-                        </div>
-                        <div class="form-group">
-                            <label for="password">{{ __('Password') }}</label>
-                            <input type="password" name="password" id="password" class="form-control{{ validation_errors.password ? ' is-invalid' : '' }}">
-                            {% if validation_errors.password %}
-                                <span class="invalid-feedback">{{ validation_errors.password | first }}</span>
-
-                            {% endif %}
-                            
+                            <span style='float: right'></span>
                         </div>
                     </div>
                     <div class="card-footer">
                       <input type="hidden" name="redirect" value="{{ redirect }}">
-                      <button type="submit" class="btn btn-primary">{{ __('Sign in') }}</button>
+                      <button type="submit" class="btn btn-primary">{{ __('Request password reset') }}</button>
                     </div>
                 </form>
               </div>

@@ -24,6 +24,48 @@ class AuthController extends AbstractTwigController
     }
 
 
+    public function reset_get($request, $response)
+    {
+        return $this->view->render($response, 'Core/Views/reset.twig', [
+            'redirect' => $request->getParams()['redirect'] ?? null 
+        ]);
+    }
+
+
+    public function reset_post($request, $response)
+    {
+        $builder = new JsonResponseBuilder('auth-reset', 1);
+
+        // TODO verify that a posted json will yield same results as XHR posting a form
+        // TODO add throttling for too many reset requests for diff accounts from one source and/or overall
+        $validation = $this->validator->validate($request, [
+            'email' => v::noWhitespace()->notEmpty()->email(),
+        ]);
+
+        if ($this->auth->check()) {
+            $payload = $builder->withMessage(__('You are signed in.'))->build();
+            return $response->withJson($payload, 403); 
+            // TODO mozna by tudy mohl resetovat hesla root? nebo mu dame tlacitko           
+        }
+        if ($validation->failed()) {
+            $reseed = $this->validator->reseed($request, [ 'email' ]);
+            $payload = $builder->withValidationError($validation->messages())
+                               ->withValidationReseed($reseed)
+                               ->build();
+            // TODO test if email exists
+            // TODO test if throttling should apply on this particular email addr
+            // TODO log attempt
+            return $response->withJson($payload, 400);
+        } else {
+            $this->auth->reset($request->getParam('email')); // auto sign-in after account creation
+            $flash = [
+                "info" => 'A password reset token has been sent to you. Please follow the instructions received by e-mail.',
+            ];
+            $payload = $builder->withFlashMessage($flash)->withCode(200)->build();
+            return $response->withJson($payload, 200);
+        }
+    }
+
     public function signin_get($request, $response)
     {
         return $this->view->render($response, 'Core/Views/signin.twig', [

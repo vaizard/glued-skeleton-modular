@@ -74,18 +74,37 @@ class CalendarController extends AbstractTwigController
 
             // pregen json
             $object = null;
-            $json['dtstamp'] = (string)$event->dtstamp;
-            unset($event->DTSTAMP);
+            unset($event->DTSTAMP); // current grabbing timestamp. keeping this would mean you cant hash-compare
 
             $json['uid'] = (string)$event->uid;
+            $json['recurrence-id'] = (string)$event->recurrence_id;
             $json['created'] = (string)$event->created;
             $json['summary'] = (string)$event->summary;
             $json['description'] = (string)$event->description;
             $json['last-modified'] = strtotime((string)$event->last_modified);
             $json['dstart'] = (string)$event->dtstart;
             $json['dtend'] = (string)$event->dtend;
+            $json['rrule'] = json_encode($event->rrule);
+            $json['rdate'] = json_encode($event->rdate);
+            $json['exrule'] = json_encode($event->exrule);
+            $json['exdate'] = json_encode($event->exdate);
+            $json['location'] = (string)$event->location;
+            $json['sequence'] = (string)$event->sequence;
+            $json['attach'] = (array)($event->attach);
             if (empty($json['dtend'])) { $json['dtend'] = (string)$event->dtstart; }
 
+            echo "<br>------------------------------";
+            echo (string)$event->uid;
+            echo " ";
+            echo $event->attach;
+
+            if ((string)$event->uid == "857pobo94q3377f4u2foct4024@google.com") { echo(json_encode( $event->attach )); }
+            // tady udelej test na to jestli je rrul, rdate, exrule, exdate objekt
+            // pak prijde recurreccneid do unikatniho identifikatoru, nastavuj ho asi vzdy? nebo jen kdyz je nastavene?
+
+            //if is_object($event->attach) {
+            //foreach ($event->attach as $x) { echo $x; }
+            //}
             // pregen row to compare against database and eventually upsert
             $row['c_object'] = (string)$event->serialize();
             $row['c_object_hash'] = hash('sha256', $row['c_object']);
@@ -104,13 +123,13 @@ class CalendarController extends AbstractTwigController
                     // dtstamp!!!
                     echo "<br><br>";
                     echo $row['c_object_hash']."<br>";
-                    echo $object['c_object_hash']."<br>";
-                    echo $row['c_object']."<br>";
-                    echo $object['c_object']."<br>";
+                    echo $object['c_object_hash']."<br>OBJECT OLD START<br>";
+                    echo $row['c_object']."<br>OBJECT OLD END<br>OBJECT NEW START<br>";
+                    echo $object['c_object']."<br>OBJECT NEW END";
                     if ($row['c_json'] == $object['c_json']) { echo "same"; }
                     $row['c_revision_counter'] = $object['c_revision_counter'] + 1;
                     //$row['c_revisions'] = json_encode($rev); // todo, zde pridej revizi
-                    print_r('<br/>UPDT '. $row['c_json']);
+                    print_r('<br/>UPDTATING... <br>New value is:<br>'. $row['c_json'].'<br>old is:<br>'.$object['c_json']);
                 } else {
                     // do nothing, we got current data in db already
                     //print_r('<br/>KEEP '. $row['c_json']);
