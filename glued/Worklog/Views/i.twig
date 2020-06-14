@@ -93,7 +93,7 @@
                 <td>{{ row.details | default('') }} 
                 {% if row._s == 'worklog/work' %}
                     <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#editLog" data-id="{{ row.id }}" data-date="{{ row.date }}" data-finished="{{ row.finished }}" data-summary="{{ row.summary }}" data-time="{{ row.time }}"><i class="fas fa-edit"></i></button>
-                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#storFileUpload" data-id="{{ row.id }}" data-module="worklog"><i class="fas fa-paperclip"></i></button>
+                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#storFileUpload" data-id="{{ row.id }}" data-module="worklog" data-freload="worklog_refresh_rows"><i class="fas fa-paperclip"></i></button>
                 {% endif %}
                 </tr>
                 </script>
@@ -167,23 +167,28 @@
     $('.mask_time').mask('00:00');
     $('.select2').select2();
   });
-
-  // Onload ajax to fetch worklog data
-  $( document ).ready(function() {
-    var api_url = '{{ url_for('worklog.users.api01') }}'
-    $.ajax({
-      url: api_url,
-      contentType: "application/json",
-      dataType: 'json',
-      success: function(res){
-        console.log(res);
+    
+    function worklog_refresh_rows() {
         var idhold = 'worklog_rows_placeholder';
         var idtwig = 'worklog_rows_twig';
-        $("#" + idhold).append(
-          Twig.twig({ ref: idtwig }).render({ work: res.data })
-          )
-      }
-    })
+        var api_url = '{{ url_for('worklog.users.api01') }}';
+        $('#' + idhold).empty();
+        $.ajax({
+          url: api_url,
+          contentType: "application/json",
+          dataType: 'json',
+          success: function(res){
+            console.log(res);
+            $("#" + idhold).append(
+              Twig.twig({ ref: idtwig }).render({ work: res.data })
+              )
+          }
+        })
+    }
+    
+  // Onload ajax to fetch worklog data
+  $( document ).ready(function() {
+        worklog_refresh_rows();
   });
 
   // Post (new) data, modify current page
