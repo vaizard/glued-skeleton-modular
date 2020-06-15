@@ -38,7 +38,7 @@
                     $('#storFileUpload').modal('toggle');
                     console.log(retData);
                     $('#toast-placeholder').empty();
-                    $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Stor uploader") }}' , msg: '{{ __("file uploaded") }}' })).appendTo("#toast-placeholder");
+                    $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Stor uploader") }}' , msg: retData.message })).appendTo("#toast-placeholder");
                     $('.toast').toast('show');
                     // mozny reload casti stranky
                     var reload_function_name = button.data('freload');

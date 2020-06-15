@@ -23,22 +23,16 @@ class StorControllerApiV1 extends AbstractTwigController
     public function uploaderApiSave($request, $response)
     {
         $files = $request->getUploadedFiles();
-        if (empty($files['file'])) {
-            throw new Exception('Expected uploaded file, got none.');
-        }
         
         // promenne, ktere se budou vracet
         $return_code = 0;
         $return_data = array();
         $return_message = '';
-        $file_index = 0;
         $files_stored = 0;
         
         // nacteme si to z containeru ktery to ma ze tridy
         $app_dirs = $this->stor->app_dirs;
         $app_tables = $this->stor->app_tables;
-        
-        $newfile = $files['file'];
         
         $raw_path = $request->getParam('actual_dir');
         
@@ -58,118 +52,140 @@ class StorControllerApiV1 extends AbstractTwigController
             }
         }
         
-        $output_json = 'zaciname upload do '.$actual_dir.'.';
-        
-        // pokud dir existuje v seznamu povolenych diru, uploadujem (ovsem je zadany timpadem i objekt)
-        if (isset($app_dirs[$actual_dir])) {
+        if (!empty($files['file']) and count($files['file']) > 0) {
             
-            if ($newfile->getError() === UPLOAD_ERR_OK) {
-                $filename = $newfile->getClientFilename();
-                $sha512 = hash_file('sha512', $_FILES['file']['tmp_name']);
+            // pokud dir existuje v seznamu povolenych diru, uploadujem (ovsem je zadany timpadem i objekt)
+            if (isset($app_dirs[$actual_dir])) {
                 
-                // zjistime jestli soubor se stejnym hashem uz mame
-                $this->db->where("c_sha512", $sha512);
-                $file_object = $this->db->getOne('t_stor_objects');
-                if ($this->db->count == 0) {
+                // $files['file'] je pole, s idexy 0 1 2 ... 
+                // musime to projit vsechno
+                $pocet_souboru = count($files['file']);
+                
+                foreach ($files['file'] as $file_index => $newfile) {
                     
-                    // vytvorime tomu adresar
-                    $dir1 = substr($sha512, 0, 1);
-                    $dir2 = substr($sha512, 1, 1);
-                    $dir3 = substr($sha512, 2, 1);
-                    $dir4 = substr($sha512, 3, 1);
+                    //$newfile = $files['file'][0];
                     
-                    $cilovy_dir = __ROOT__.'/private/data/stor/'.$dir1.'/'.$dir2.'/'.$dir3.'/'.$dir4;
-                    
-                    if (!is_dir($cilovy_dir)) { mkdir($cilovy_dir, 0777, true); }
-                    
-                    // presuneme
-                    // $full_path = "/var/www/html/glued/private/";
-                    $newfile->moveTo($cilovy_dir.'/'.$sha512);
-                    
-                    // pokud ne, vlozime
-                    $new_file_array = array();
-                    $new_file_array['_v'] = '1';
-                    $new_file_array['sha512'] = $sha512;
-                    $new_file_array['size'] = $newfile->getSize();
-                    $new_file_array['mime'] = $newfile->getClientMediaType();
-                    $new_file_array['checked'] = false;
-                    $new_file_array['ts_created'] = time();
-                    $new_file_array['storage'] = array(array("driver" => "fs", "path" => $cilovy_dir));
-                    
-                    $new_data_array = array();
-                    $new_data_array['data'] = $new_file_array;
-                    
-                    $json_string = json_encode($new_data_array);
-                    
-                    // pozor, spojit dve vkladani pres commit, TODO
-                    
-                    // vlozime do objects
-                    $data = Array ("c_json" => $json_string);
-                    $this->db->insert ('t_stor_objects', $data);
-                    
-                    // vlozime do links
-                    $data = Array (
-                    "c_sha512" => $sha512,
-                    "c_user_id" => $_SESSION['core_user_id'],
-                    "c_filename" => $filename,
-                    "c_inherit_table" => $app_tables[$actual_dir],
-                    "c_inherit_object" => $actual_object
-                    );
-                    $new_id = $this->db->insert ('t_stor_links', $data);
-                    
-                    $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully.');
-                    $output_json .= 'uploaded successfully.';
-                    
-                    // priprava navratovych dat
-                    $return_data[$file_index]['link-id'] = $new_id;
-                    $return_data[$file_index]['name'] = $filename;
-                    $return_data[$file_index]['module-name'] = $actual_dir;
-                    $return_data[$file_index]['object-id'] = $sha512;
-                    $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $new_id, 'filename' => $filename]);
-                    $return_data[$file_index]['size'] = $new_file_array['size'];
-                    $return_data[$file_index]['mime-type'] = $new_file_array['mime'];
+                    if ($newfile->getError() === UPLOAD_ERR_OK) {
+                        $filename = $newfile->getClientFilename();
+                        
+                        // ziskame tmp path ktere je privatni vlastnost $newfile, jeste zanorene v Stream, takze nejde normalne precist
+                        // vypichneme si stream a pouzijeme na to reflection
+                        $stream = $newfile->getStream();
+                        $reflectionProperty = new \ReflectionProperty(\Nyholm\Psr7\Stream::class, 'uri');
+                        $reflectionProperty->setAccessible(true);
+                        $tmp_path = $reflectionProperty->getValue($stream);
+                        
+                        $sha512 = hash_file('sha512', $tmp_path);
+                        
+                        // zjistime jestli soubor se stejnym hashem uz mame
+                        $this->db->where("c_sha512", $sha512);
+                        $file_object = $this->db->getOne('t_stor_objects');
+                        if ($this->db->count == 0) {
+                            
+                            // vytvorime tomu adresar
+                            $dir1 = substr($sha512, 0, 1);
+                            $dir2 = substr($sha512, 1, 1);
+                            $dir3 = substr($sha512, 2, 1);
+                            $dir4 = substr($sha512, 3, 1);
+                            
+                            $cilovy_dir = __ROOT__.'/private/data/stor/'.$dir1.'/'.$dir2.'/'.$dir3.'/'.$dir4;
+                            
+                            if (!is_dir($cilovy_dir)) { mkdir($cilovy_dir, 0777, true); }
+                            
+                            // presuneme
+                            // $full_path = "/var/www/html/glued/private/";
+                            $newfile->moveTo($cilovy_dir.'/'.$sha512);
+                            
+                            // pokud ne, vlozime
+                            $new_file_array = array();
+                            $new_file_array['_v'] = '1';
+                            $new_file_array['sha512'] = $sha512;
+                            $new_file_array['size'] = $newfile->getSize();
+                            $new_file_array['mime'] = $newfile->getClientMediaType();
+                            $new_file_array['checked'] = false;
+                            $new_file_array['ts_created'] = time();
+                            $new_file_array['storage'] = array(array("driver" => "fs", "path" => $cilovy_dir));
+                            
+                            $new_data_array = array();
+                            $new_data_array['data'] = $new_file_array;
+                            
+                            $json_string = json_encode($new_data_array);
+                            
+                            // pozor, spojit dve vkladani pres commit, TODO
+                            
+                            // vlozime do objects
+                            $data = Array ("c_json" => $json_string);
+                            $this->db->insert ('t_stor_objects', $data);
+                            
+                            // vlozime do links
+                            $data = Array (
+                            "c_sha512" => $sha512,
+                            "c_user_id" => $_SESSION['core_user_id'],
+                            "c_filename" => $filename,
+                            "c_inherit_table" => $app_tables[$actual_dir],
+                            "c_inherit_object" => $actual_object
+                            );
+                            $new_id = $this->db->insert ('t_stor_links', $data);
+                            
+                            $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully.');
+                            
+                            // priprava navratovych dat
+                            $return_data[$file_index]['link-id'] = $new_id;
+                            $return_data[$file_index]['name'] = $filename;
+                            $return_data[$file_index]['module-name'] = $actual_dir;
+                            $return_data[$file_index]['object-id'] = $sha512;
+                            $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $new_id, 'filename' => $filename]);
+                            $return_data[$file_index]['size'] = $new_file_array['size'];
+                            $return_data[$file_index]['mime-type'] = $new_file_array['mime'];
+                        }
+                        else {
+                            // soubor uz existuje v objects ale vlozime ho aspon do links
+                            $data = Array (
+                            "c_sha512" => $sha512,
+                            "c_user_id" => $_SESSION['core_user_id'],
+                            "c_filename" => $filename,
+                            "c_inherit_table" => $app_tables[$actual_dir],
+                            "c_inherit_object" => $actual_object
+                            );
+                            $new_id = $this->db->insert ('t_stor_links', $data);
+                            
+                            $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully as link. Its hash already exists in objects table.');
+                            
+                            // priprava navratovych dat
+                            $file_data = json_decode($file_object['c_json'], true);
+                            
+                            $return_data[$file_index]['link-id'] = $new_id;
+                            $return_data[$file_index]['name'] = $filename;
+                            $return_data[$file_index]['module-name'] = $actual_dir;
+                            $return_data[$file_index]['object-id'] = $sha512;
+                            $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $new_id, 'filename' => $filename]);
+                            $return_data[$file_index]['size'] = $file_data['data']['size'];
+                            $return_data[$file_index]['mime-type'] = $file_data['data']['mime'];
+                        }
+                        
+                        $files_stored++;
+                    }
+                }   // konec cyklu pres nahrane soubory
+                
+                if ($files_stored > 0) {
+                    $return_message = 'Upload successful ('.$files_stored.')files stored.';
+                    $return_code = 200;
                 }
                 else {
-                    // soubor uz existuje v objects ale vlozime ho aspon do links
-                    $data = Array (
-                    "c_sha512" => $sha512,
-                    "c_user_id" => $_SESSION['core_user_id'],
-                    "c_filename" => $filename,
-                    "c_inherit_table" => $app_tables[$actual_dir],
-                    "c_inherit_object" => $actual_object
-                    );
-                    $new_id = $this->db->insert ('t_stor_links', $data);
-                    
-                    $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully as link. Its hash already exists in objects table.');
-                    $output_json .= 'uploaded successfully as link.';
-                    
-                    // priprava navratovych dat
-                    $file_data = json_decode($file_object['c_json'], true);
-                    
-                    $return_data[$file_index]['link-id'] = $new_id;
-                    $return_data[$file_index]['name'] = $filename;
-                    $return_data[$file_index]['module-name'] = $actual_dir;
-                    $return_data[$file_index]['object-id'] = $sha512;
-                    $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $new_id, 'filename' => $filename]);
-                    $return_data[$file_index]['size'] = $file_data['data']['size'];
-                    $return_data[$file_index]['mime-type'] = $file_data['data']['mime'];
+                    $this->flash->addMessage('error', 'your file failed to upload.');
+                    $return_message = 'your file failed to upload.';
+                    $return_code = 500;
                 }
-                
-                $file_index++;
-                $files_stored++;
-                
-                $return_message = 'Upload successful ('.$files_stored.')files stored';
-                $return_code = 200;
             }
             else {
-                $this->flash->addMessage('error', 'your file failed to upload.');
-                $return_message = 'your file failed to upload.';
+                $this->flash->addMessage('error', 'your cannot upload into this dir.');
+                $return_message = 'your cannot upload into this dir.';
                 $return_code = 500;
             }
         }
         else {
-            $this->flash->addMessage('error', 'your cannot upload into this dir.');
-            $return_message = 'your cannot upload into this dir.';
+            $this->flash->addMessage('error', 'Expected uploaded file, got none.');
+            $return_message = 'Expected uploaded file, got none.';
             $return_code = 500;
         }
         
