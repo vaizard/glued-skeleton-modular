@@ -85,7 +85,8 @@ class StorController extends AbstractTwigController
     // definice funkce
     function show_files(dirname, can_upload) {
         $.ajax({
-          url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.files').'",
+          url: "https://'.$this->settings['glued']['hostname'].$this->routerParser->urlFor('stor.api.files').'",  
+          //url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.files').'",
           dataType: "text",
           type: "GET",
           data: "dirname=" + dirname,
@@ -150,7 +151,8 @@ class StorController extends AbstractTwigController
         var dirname = $("#stor_copy_move_target_dir").val();
         
         $.ajax({
-          url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.modal.objects').'",
+          url: "https://'.$this->settings['glued']['hostname'].$this->routerParser->urlFor('stor.api.modal.objects').'",  
+          //url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.modal.objects').'",
           dataType: "text",
           type: "GET",
           data: "dirname=" + dirname,
@@ -331,10 +333,10 @@ class StorController extends AbstractTwigController
             $redirect_url = $return_uri;
         }
         else if (!empty($actual_delete_dir)) {
-            $redirect_url = $this->container->router->pathFor('stor.uploader').'/~/'.$actual_delete_dir;
+            $redirect_url = $this->container->router->urlFor('stor.uploader').'/~/'.$actual_delete_dir;
         }
         else {
-            $redirect_url = $this->container->router->pathFor('stor.uploader');
+            $redirect_url = $this->container->router->urlFor('stor.uploader');
         }
         
         return $response->withRedirect($redirect_url);
@@ -407,10 +409,10 @@ class StorController extends AbstractTwigController
         
         // toto by melo byt vzdy nastaveno pri editaci, abychom mohli tu adresu zase vykreslit s uz zmenenym nazvem
         if (!empty($actual_dir)) {
-            $redirect_url = $this->container->router->pathFor('stor.uploader').'/~/'.$actual_dir;
+            $redirect_url = $this->container->router->urlFor('stor.uploader').'/~/'.$actual_dir;
         }
         else {  // pro jistotu, kdyz to nebude nastaveno, jdeme na root
-            $redirect_url = $this->container->router->pathFor('stor.uploader');
+            $redirect_url = $this->container->router->urlFor('stor.uploader');
         }
         
         return $response->withRedirect($redirect_url);
@@ -578,7 +580,8 @@ class StorController extends AbstractTwigController
         // ted to posleme jako zestringovany json
         
         $.ajax({
-          url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.filtered.files').'",
+          url: "https://'.$this->settings['glued']['hostname'].$this->routerParser->urlFor('stor.api.filtered.files').'",  
+          //url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.filtered.files').'",
           type: "GET",
           dataType: "text",
           data: { filters: upraveno, orderby: orderby, direction: direction, page: page },
@@ -644,7 +647,8 @@ class StorController extends AbstractTwigController
     function delete_stor_file_ajax() {
         var link_id = $("#delete_file_uid").val();
         $.ajax({
-          url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.ajax.delete').'",
+          url: "https://'.$this->settings['glued']['hostname'].$this->routerParser->urlFor('stor.ajax.delete').'",  
+          //url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.ajax.delete').'",
           type: "POST",
           dataType: "text",
           data: { link_id: link_id },
@@ -661,7 +665,8 @@ class StorController extends AbstractTwigController
         var link_id = $("#edit_file_uid").val();
         var new_fname = $("#edit_file_fname").val();
         $.ajax({
-          url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.ajax.update').'",
+          url: "https://'.$this->settings['glued']['hostname'].$this->routerParser->urlFor('stor.ajax.update').'",  
+          //url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.ajax.update').'",
           type: "POST",
           dataType: "text",
           data: { link_id: link_id, new_fname: new_fname },
@@ -679,7 +684,8 @@ class StorController extends AbstractTwigController
         var dirname = $("#stor_copy_move_target_dir").val();
         
         $.ajax({
-          url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.modal.objects').'",
+          url: "https://'.$this->settings['glued']['hostname'].$this->routerParser->urlFor('stor.api.modal.objects').'",  
+          //url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.modal.objects').'",
           dataType: "text",
           type: "GET",
           data: "dirname=" + dirname,
