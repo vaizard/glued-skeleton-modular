@@ -15,8 +15,7 @@ return [
 
     // Glued globals
     'glued' => [
-        'timezone' => 'Europe/Prague',
-        'hostname' => $_SERVER['SERVER_NAME']
+        'timezone' => 'Europe/Prague'
     ],
 
     // Database
