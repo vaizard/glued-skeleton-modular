@@ -16,8 +16,8 @@ $app->group('/api/contacts/v1', function (RouteCollectorProxy $group) {
 })->add(RestrictGuests::class);
 
 $app->group('/api/contacts/search/v1', function (RouteCollectorProxy $group) {
-    $group->get ('/cz-ares/names/{name}', ContactsController::class . ':cz_ares_names')->setName('contacts.search.cz-ares.names.api01'); 
-    $group->get ('/cz-ares/ids/{id}', ContactsController::class . ':cz_ares_ids')->setName('contacts.search.cz-ares.ids.api01'); 
+    $group->get ('/cz/names/{name}', ContactsController::class . ':cz_names')->setName('contacts.search.cz.names.api01'); 
+    $group->get ('/cz/ids/{id}', ContactsController::class . ':cz_ids')->setName('contacts.search.cz.ids.api01'); 
 })->add(RestrictGuests::class);
 
 $app->group('/contacts', function (RouteCollectorProxy $group) {
