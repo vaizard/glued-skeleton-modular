@@ -203,21 +203,29 @@
 
 // Typeahead
 
+/*
+debug: true,
+hint: true,
+backdrop: {
+    "background-color": "#fff"
+},
+//dropdownFilter: "all beers",
+*/
+
 $.typeahead({
     input: '.js-typeahead-beer_v1',
-    debug: true,
+    filter: false,
     minLength: 1,
     maxItem: 15,
     dynamic: true,
+    delay: 500,
     order: "asc",
-    hint: true,
+    
     group: {
         template: "{% verbatim %}{{group}}{% endverbatim %} beers!"
     },
     maxItemPerGroup: 5,
-    backdrop: {
-        "background-color": "#fff"
-    },
+
     {% verbatim %}
     /*
     template: function (query, item) {
@@ -235,11 +243,13 @@ $.typeahead({
         "</span>"
     },*/
     {% endverbatim %}
-    //dropdownFilter: "all beers",
-    emptyTemplate: 'No result for "{{query}}"',
+    
+    {% verbatim %}
+    emptyTemplate: 'No result for "{{query}}" ',
+    {% endverbatim %}
     // so there's a difference here in the data ... "data.beer.stout" returns an array, "data.name" in contacts just the string.
     source: {
-   /*
+        /*
         user: {
             display: "username",
             ajax: function (query) {
@@ -264,7 +274,9 @@ $.typeahead({
                     }
                 }
             }
-        },*/
+        },
+        */
+        
         cz_names: {
             display: "org",
             ajax: function (query) {
@@ -287,6 +299,8 @@ $.typeahead({
             }
             {% endverbatim %}
         },
+        
+        
         cz_ids: {
             display: "org",
             ajax: function (query) {
@@ -308,20 +322,20 @@ $.typeahead({
                 "</span>";
             }
             {% endverbatim %}
-        },
-        /*
+        }
+        
+    },
+    
+    /*
     callback: {
         onClickAfter: function (node, a, item, event) {
- 
-            event.preventDefault;
- 
-            // href key gets added inside item from options.href configuration
+             event.preventDefault;
+             // href key gets added inside item from options.href configuration
             alert(item.href);
- 
         }
-    },
-    debug: true*/
-  }
+    }
+    */
+    
 });
 
 

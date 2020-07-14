@@ -54,26 +54,29 @@ class ContactsController extends AbstractTwigController
     }
 
     public function cz_names(Request $request, Response $response, array $args = []): Response {
-      $name = $args['name'];
-      if (strlen($name) < 3) {
+        $builder = new JsonResponseBuilder('contacts.search', 1);
+        $search_string = $args['name'];
+        
+      if (strlen($search_string) < 3) {
          $payload = $builder->withMessage('Please use at least 3 characters for your search.')->withCode(200)->build();
          return $response->withJson($payload);
       }
-
-      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&nazev='.$args['name'].'&polozek=500';
-      $builder = new JsonResponseBuilder('contacts.search', 1);
-      $result = [];
-      $crawler = $this->goutte->request('GET', $uri);
-      $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
-        $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
-        $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
-        $r['adr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
-        $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
-        $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
-        $result[] = $r;
-        //vatid
-        //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
-      });
+        
+        $result = [];
+        
+          $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&nazev='.$search_string.'&polozek=500';
+          $crawler = $this->goutte->request('GET', $uri);
+          $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
+            $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
+            $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
+            $r['adr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
+            $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
+            $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
+            $result[] = $r;
+            //vatid
+            //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
+          });
+        
       $payload = $builder->withData((array)$result)->withCode(200)->build();
       return $response->withJson($payload);
       //print("<pre>".print_r($result,true)."</pre>");
@@ -81,6 +84,7 @@ class ContactsController extends AbstractTwigController
     }
 
     public function cz_ids(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('contacts.search', 1);
       $id = $args['id'];
       if (strlen($id) != 8) {
          $payload = $builder->withMessage('Czech company IDs are 8 numbers in total.')->withCode(200)->build();
@@ -88,7 +92,7 @@ class ContactsController extends AbstractTwigController
       }
 
       $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&ico='.$args['id'].'&polozek=500';
-      $builder = new JsonResponseBuilder('contacts.search', 1);
+      
       $result = [];
       $crawler = $this->goutte->request('GET', $uri);
       $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
