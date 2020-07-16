@@ -49,20 +49,19 @@
             </table>
 
             <form id="form-beer_v1" name="form-beer_v1">
-    <div class="typeahead__container">
-        <div class="typeahead__field">
-            <div class="typeahead__query">
-                <input class="js-typeahead-beer_v1" name="beer_v1[query]" placeholder="Search" autocomplete="off">
-            </div>
-            <div class="typeahead__button">
-                <button type="submit">
-                    <i class="typeahead__search-icon"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</form>
-
+                <div class="typeahead__container">
+                    <div class="typeahead__field">
+                        <div class="typeahead__query">
+                            <input class="js-typeahead-beer_v1" name="beer_v1[query]" placeholder="Search" autocomplete="off">
+                        </div>
+                        <div class="typeahead__button">
+                            <button type="submit">
+                                <i class="typeahead__search-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
 
 
           </div>
@@ -70,6 +69,31 @@
       </div>
     </div>
   </div>
+  
+  
+  <div class="row">
+    <div class="col-12">
+      <div class="card card-secondary">
+        <form action="" method="post" autocomplete="off">
+          <div class="card-header"><h4>Contact from search</h4></div>
+          <div class="card-body pb-0">
+            <div class="form-group ">
+              <label for="name">Name</label>
+              <input type="text" name="name" id="new_contact_name" class="form-control" value="">
+            </div>
+            <div class="form-group">
+              <label for="email">IC</label>
+              <input type="text" name="ic" id="new_contact_ic" class="form-control" value="">
+            </div>
+          </div>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
 </div>
 {% include '/Contacts/Views/Partials/contacts_items_modal.twig' with {'contacts_items_id': 'contacts_items_create'} %}
 {% include '/Contacts/Views/Partials/contacts_items_modal.twig' with {'contacts_items_id': 'contacts_items_update'} %}
@@ -210,6 +234,9 @@ backdrop: {
     "background-color": "#fff"
 },
 //dropdownFilter: "all beers",
+
+// the most importat thing is filter: false
+// so typehead dont filter results before printing
 */
 
 $.typeahead({
@@ -326,15 +353,19 @@ $.typeahead({
         
     },
     
-    /*
     callback: {
         onClickAfter: function (node, a, item, event) {
-             event.preventDefault;
-             // href key gets added inside item from options.href configuration
-            alert(item.href);
+            //event.preventDefault;
+            
+            //console.log(item);
+            //alert("org " + item.org + ", ic " + item.regid);
+            
+            // here we can do what we want with item data
+            $("#new_contact_name").val(item.org);
+            $("#new_contact_ic").val(item.regid);
+            
         }
     }
-    */
     
 });
 
