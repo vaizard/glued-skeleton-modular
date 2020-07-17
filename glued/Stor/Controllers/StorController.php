@@ -356,7 +356,8 @@ class StorController extends AbstractTwigController
         $sloupce = array("c_json->>'$.data.mime' as mime", "c_json->>'$.data.storage[0].path' as path");
         $this->db->where("c_sha512", $file_link['c_sha512']);
         $file_data = $this->db->getOne("t_stor_objects", $sloupce);
-        
+        // select `c_json`->>'$.data.mime' as mime, `c_json`->>'$.data.storage[0].path' as path from t_stor_objects
+        // 
         // path mame v takovem nejakem tvaru
         // ../private/stor/0/2/8/0
         $fullpath = $file_data['path'].'/'.$file_link['c_sha512'];
@@ -367,7 +368,7 @@ class StorController extends AbstractTwigController
         
         return $this->container->view->render($response, 'stor-obecny-vystup.twig', array('vystup' => $vystup));
         */
-        
+
         header('Content-Type: '.$file_data['mime']);
         readfile($fullpath);    // taky vlastne nevim jestli to takto vypsat
         exit(); // ? nevim nevim
