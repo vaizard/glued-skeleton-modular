@@ -10,9 +10,6 @@
     RewriteRule ^ index.php [QSA,L]
 </IfModule>
 
-# Ensure $HTTP_RAW_POST_DATA is deprecated warning does not appear
-php_value   always_populate_raw_post_data   -1
-
 <IfModule mod_deflate.c>
   <IfModule mod_filter.c>
   # Compress HTML, CSS, JavaScript, Text, XML and fonts
