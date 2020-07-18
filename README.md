@@ -18,7 +18,6 @@ This skeleton application was built for [Composer](https://getcomposer.org/).
 
 ## Installation
 
-
 ### From github (on apache or nginx)
 
 * Run `git clone https://github.com/vaizard/glued-skeleton` in `/var/www/html`
@@ -30,6 +29,12 @@ This skeleton application was built for [Composer](https://getcomposer.org/).
 * Run `composer create-project vaizard/glued-skeleton [my-app-name]`
 * Point your virtual host document root to your new application's `public/` directory.
 * Ensure `public/cache/` and `private/cache/*` is web writable.
+
+### Configuring the webserver
+
+* Running Glued on Apache requires mod_rewrite and takes advantage of mod_deflate, mod_headers and mod_expires
+  (see the `public/.htaccess` file). 
+* Running Glued on nginx requires the .htaccess converted into their respective server conf.
 
 
 **That's it! Now go build something cool.**
