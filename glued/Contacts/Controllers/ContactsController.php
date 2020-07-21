@@ -91,8 +91,7 @@ class ContactsController extends AbstractTwigController
          return $response->withJson($payload);
       }
 
-      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&ico='.$args['id'].'&polozek=500';
-      
+      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&ico='.$id.'&polozek=500';
       $result = [];
       $crawler = $this->goutte->request('GET', $uri);
       $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
@@ -102,9 +101,18 @@ class ContactsController extends AbstractTwigController
         $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
         $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
         $result[] = $r;
-        //vatid
-        //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
       });
+
+      // TODO / get the css selector right
+      /*
+      $uri = 'https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic='.$id;
+      $crawler = $this->goutte->request('GET', $uri);
+      $crawler->filter('div.tableUcty[0]')->each(function (Crawler $table) use (&$result) {
+         $r['bank'] = $table->filter('tbody > tr:nth-child(1) > td:nth-child(1) > span')->text();
+      });
+      */
+      
+      
       $payload = $builder->withData((array)$result)->withCode(200)->build();
       return $response->withJson($payload);
       //print("<pre>".print_r($result,true)."</pre>");

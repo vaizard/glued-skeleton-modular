@@ -47,12 +47,12 @@
                 {% endverbatim %}
               </tbody>
             </table>
-
-            <form id="form-beer_v1" name="form-beer_v1">
+<!--
+            <form action="{{ url_for('contacts.items.api01') }}" method="post" autocomplete="off" id="{{ contact_items_id }}_form_">
                 <div class="typeahead__container">
                     <div class="typeahead__field">
                         <div class="typeahead__query">
-                            <input class="js-typeahead-beer_v1" name="beer_v1[query]" placeholder="Search" autocomplete="off">
+                            <input class="typeahead_new_contact" name="contact_items[query]" placeholder="{{__('Search ...')}}" autocomplete="off">
                         </div>
                         <div class="typeahead__button">
                             <button type="submit">
@@ -62,7 +62,7 @@
                     </div>
                 </div>
             </form>
-
+-->
 
           </div>
         </div>
@@ -70,7 +70,7 @@
     </div>
   </div>
   
-  
+<!--  
   <div class="row">
     <div class="col-12">
       <div class="card card-secondary">
@@ -93,16 +93,14 @@
       </div>
     </div>
   </div>
-  
+-->  
 </div>
 {% include '/Contacts/Views/Partials/contacts_items_modal.twig' with {'contacts_items_id': 'contacts_items_create'} %}
 {% include '/Contacts/Views/Partials/contacts_items_modal.twig' with {'contacts_items_id': 'contacts_items_update'} %}
 {# {% include '/Contacts/Views/Partials/contacts_items_delete_modal.twig' with {'contacts_items_id': 'contacts_items_delete'} %} #}
 {% endblock %}
 
-
 {% block additionaljs %}
-{# twig.js initialized in public/assets/js/glued.js #}
 <script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
 
   //
@@ -125,7 +123,7 @@
   $('#contacts_items_update_modal').on('show.bs.modal', function (event) {
     var modal = $(this)
     var e = $(event.relatedTarget) // event which triggered the modal
-    modal.find('.modal-title').text('{{ __("Edit remote calendar") }} ' + e.data('id'));
+    modal.find('.modal-title').text('{{ __("Edit contact") }} ' + e.data('id'));
     modal.find('.modal-dialog form').attr('action', '{{ url_for("contacts.items.api01") }}/' + e.data('id') );
     modal.find('.modal-body input[name="name"]').val(e.data('name'));
     modal.find('.modal-body input[name="uri"]').val(e.data('uri'));
@@ -134,13 +132,13 @@
   $('#contacts_items_create_modal').on('show.bs.modal', function (event) {
     var modal = $(this)
     var e = $(event.relatedTarget) // event which triggered the modal
-    modal.find('.modal-title').text('{{ __("New remote calendar") }}');
+    modal.find('.modal-title').text('{{ __("New contact") }}');
   });
 
   $('#contacts_items_delete_modal').on('show.bs.modal', function (event) {
     var modal = $(this)
     var e = $(event.relatedTarget) // event which triggered the modal
-    modal.find('.modal-title').text('{{ __("Delete remote calendar") }} ' + e.data('id'));
+    modal.find('.modal-title').text('{{ __("Delete contact") }} ' + e.data('id'));
     modal.find('.modal-dialog form').attr('action', '{{ url_for("calendar.sources.api01") }}/' + e.data('id') );
     modal.find('.modal-body').text('{{ __("Do you really want to delete the calendar:") }} ' + e.data('name') + ' (' + e.data('uri') + ')?');
   });
@@ -156,13 +154,13 @@
       var idtwig = 'contacts_items_obj_twig';
       $('#toast-placeholder').empty();
       $(Twig.twig({ ref: 'contacts_items_obj_twig' }).render({ row: res.data })).prependTo("#contacts_items > tbody");
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Contact items") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
       $('.toast').toast('show');
       $('#contacts_items_create_modal').modal('toggle');
     },
     error: function(res) {
       $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Contact items") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
       $('.toast').toast('show');
     }
   });
@@ -180,7 +178,7 @@
     },
     success: function(res) {
       $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar source") }}' , msg: '{{ __("Saved.") }}' })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Contact item") }}' , msg: '{{ __("Saved.") }}' })).appendTo("#toast-placeholder");
       $('.toast').toast('show');
       $('#contacts_items_update_modal').modal('toggle');
       $('#contacts_items_placeholder').empty();
@@ -195,7 +193,7 @@
     },
     error: function(res) {
       $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Contact items") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
       $('.toast').toast('show');
     }
   });
@@ -215,162 +213,20 @@
       $('#toast-placeholder').empty();
       $('#contacts_items > tbody > #contacts_items_object_' + res.data.id).remove();
       $('#contacts_items_delete_modal').modal('toggle'); 
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Removed source ") }}' + res.data.id + '.' })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Contact items") }}' , msg: '{{ __("Removed contact ") }}' + res.data.id + '.' })).appendTo("#toast-placeholder");
       $('.toast').toast('show');
     },
     error: function(res) {
       $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Contact items") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
       $('.toast').toast('show');
     }
   });
-
-// Typeahead
-
-/*
-debug: true,
-hint: true,
-backdrop: {
-    "background-color": "#fff"
-},
-//dropdownFilter: "all beers",
-
-// the most importat thing is filter: false
-// so typehead dont filter results before printing
-*/
-
-$.typeahead({
-    input: '.js-typeahead-beer_v1',
-    filter: false,
-    minLength: 1,
-    maxItem: 15,
-    dynamic: true,
-    delay: 500,
-    order: "asc",
-    
-    group: {
-        template: "{% verbatim %}{{group}}{% endverbatim %} beers!"
-    },
-    maxItemPerGroup: 5,
-
-    {% verbatim %}
-    /*
-    template: function (query, item) {
-         var color = "#777";
-        if (item.status === "owner") {
-            color = "#ff1493";
-        }
- 
-        return '<span class="row">' +
-            '<span class="avatar">' +
-                '<img src="{{avatar}}">' +
-            "</span>" +
-            '<span class="username">{{username}}{{org}} <small style="color: ' + color + ';">({{status}}{{regid}})</small></span>' +
-            '<span class="id">({{id}})</span>' +
-        "</span>"
-    },*/
-    {% endverbatim %}
-    
-    {% verbatim %}
-    emptyTemplate: 'No result for "{{query}}" ',
-    {% endverbatim %}
-    // so there's a difference here in the data ... "data.beer.stout" returns an array, "data.name" in contacts just the string.
-    source: {
-        /*
-        user: {
-            display: "username",
-            ajax: function (query) {
-                return {
-                    url: "/assets/cache/users_v1.json",
-                    path: "data.user",
-                    type: "GET",
-                    data: {
-                        q: "{{query}}"
-                    },
-                    callback: {
-                        done: function (data) {
-                            for (var i = 0; i < data.data.user.length; i++) {
-                                if (data.data.user[i].username === 'running-coder') {
-                                    data.data.user[i].status = 'owner';
-                                } else {
-                                    data.data.user[i].status = 'contributor';
-                                }
-                            }
-                            return data;
-                        }
-                    }
-                }
-            }
-        },
-        */
-        
-        cz_names: {
-            display: "org",
-            ajax: function (query) {
-                return {
-                    url: "/api/contacts/search/v1/cz/names/" + query,
-                    path: "data",
-                    type: "GET",
-                }
-            },
-            {% verbatim %}
-            // tady by se mi mel prepisovat defaultni template templatem uvedenym nize, ale nedeje se. proc?
-            template: function (query, item) {
-                return '<span class="row">' +
-                    '<span class="avatar">' +
-                        '<img src="{{avatar}}">' +
-                    "</span>" +
-                    '<span class="username">{{org}} <small>({{regid}})</small></span>' +
-                    '<span class="id">({{adr}})</span>' +
-                "</span>";
-            }
-            {% endverbatim %}
-        },
-        
-        
-        cz_ids: {
-            display: "org",
-            ajax: function (query) {
-                return {
-                    url: "/api/contacts/search/v1/cz/ids/" + query,
-                    path: "data",
-                    type: "GET",
-                }
-            },
-            {% verbatim %}
-            // tady by se mi mel prepisovat defaultni template templatem uvedenym nize, ale nedeje se. proc?
-            template: function (query, item) {
-                return '<span class="row">' +
-                    '<span class="avatar">' +
-                        '<img src="{{avatar}}">' +
-                    "</span>" +
-                    '<span class="username">{{org}} <small>({{regid}})</small></span>' +
-                    '<span class="id">({{adr}})</span>' +
-                "</span>";
-            }
-            {% endverbatim %}
-        }
-        
-    },
-    
-    callback: {
-        onClickAfter: function (node, a, item, event) {
-            //event.preventDefault;
-            
-            //console.log(item);
-            //alert("org " + item.org + ", ic " + item.regid);
-            
-            // here we can do what we want with item data
-            $("#new_contact_name").val(item.org);
-            $("#new_contact_ic").val(item.regid);
-            
-        }
-    }
-    
-});
-
-
   </script>
+
+  {# TODO ok, icnluding the hardcoded file here into the addtionaljs is ugly. we should somehow extend the additionaljs block #}
+  {% include '/Contacts/Views/Partials/contacts_items_modal_js.twig' %}
+
   {% endblock %}
 
 
