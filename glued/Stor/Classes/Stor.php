@@ -147,6 +147,7 @@ class Stor
     }
     
     // funkce ktera nacte adresu souboru z jeho link id
+    // TODO toto je stara funkce, kterou ale chceme pouzit v budoucnu a je treba ji upravit na novou syntaxi containeru
     public function read_stor_file_info($link_id) {
         
         // nacteme sha512

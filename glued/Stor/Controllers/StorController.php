@@ -25,7 +25,11 @@ class StorController extends AbstractTwigController
      *
      * @return Response
      */
-
+    
+    
+    // !!! netusim co tohle je. jestli je to priprava na neco, nebo k cemu to melo slouzit. ted to neni nikde pouzite, asi
+    // ale ja to asi nepsal. zrejme pavel neco pripravuje. ma to i odpovidajici twig sablonu
+    // TODO diskutujme :)
     public function browser(Request $request, Response $response, array $args = []): Response
     {
         // TODO add constrains on what domains a user can actually list
@@ -37,153 +41,6 @@ class StorController extends AbstractTwigController
         ]);
     }
 
-    /* puvodni funkce z old gluedu */
-    
-    // fukce co vypise prehled nahranych a formular pro nahrani dalsiho
-    public function storUploadGui($request, $response, $args)
-    {
-        $vystup = '';
-        
-        // zatim nevim jak to dat do containeru
-        $app_dirs = array(
-           "my_files"    => 'My private files',
-           "my_owned"    => 'My owned files',
-           "users"    => 'Users',
-           "assets"    => 'Assets',
-           "consumables"    => 'Consumables',
-           "parts"    => 'Parts',
-           "accounting-costs"    => 'Accounting costs',
-           "helper"    => 'Helper'
-        );
-        
-        
-        $actual_dirname = '';
-        if (!empty($args['dir'])) {
-            if (!empty($args['oid'])) {
-                $actual_dirname = $args['dir'].'/'.$args['oid'];
-            }
-            else {
-                $actual_dirname = $args['dir'];
-            }
-        }
-        
-        // priprava vyberu diru do copy move popupu
-        $stor_dirs_options = '';
-        foreach ($app_dirs as $dir => $description) {
-            if ($dir == 'my_owned' or $dir == 'my_files') { continue; }
-            $stor_dirs_options .= '<option value="'.$dir.'">'.$description.'</option>';
-        }
-        
-        $additional_javascript = '';
-        
-
-        $additional_javascript = '
-    <script>
-    
-    var actual_dirname = "'.$actual_dirname.'";
-    
-    // definice funkce
-    function show_files(dirname, can_upload) {
-        $.ajax({
-          url: "'.$this->routerParser->urlFor('stor.api.files').'",  
-          //url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.files').'",
-          dataType: "text",
-          type: "GET",
-          data: "dirname=" + dirname,
-          success: function(data) {
-            $("#stor-files-output").html(data);
-            
-            // prepneme form do uploadovaciho nebo zakazaneho stavu
-            if (can_upload) {
-                $("#can_upload_button").show();
-                $("#cannot_upload_message").hide();
-            }
-            else {
-                $("#can_upload_button").hide();
-                $("#cannot_upload_message").show();
-            }
-            
-            // nastavime prepnuty dir do uploadovaciho a mazaciho formu (a dalsich formu), vsechny kontejnery maji stejnou class
-            $(".stor_hidden_actual_dir").val(dirname);
-            /*
-            $("#actual_dir").val(dirname);
-            $("#actual_delete_dir").val(dirname);
-            $("#stor_edit_form_actual_dir").val(dirname);
-            $("#stor_copy_move_form_actual_dir").val(dirname);
-            */
-            
-            // musime znova inicializovat rozklikavaci ozubena kola na konci radku, coz se normalne dela v app.js pri nacteni stranky
-            var $itemActions = $(".item-actions-dropdown");
-            $(document).on("click",function(e) {
-                if (!$(e.target).closest(".item-actions-dropdown").length) {
-                    $itemActions.removeClass("active");
-                }
-            });
-            $(".item-actions-toggle-btn").on("click",function(e){
-                e.preventDefault();
-                var $thisActionList = $(this).closest(".item-actions-dropdown");
-                $itemActions.not($thisActionList).removeClass("active");
-                $thisActionList.toggleClass("active");
-            });
-            
-            // zmenime adresu
-            if (typeof (history.pushState) != "undefined") {
-                if (dirname == "") {
-                    var obj = { Title: "ugo", Url: "'.$this->routerParser->urlFor('stor.uploader').'" };
-                }
-                else {
-                    var obj = { Title: "ugo", Url: "'.$this->routerParser->urlFor('stor.uploader').'/~/'.'" + dirname };
-                }
-                history.pushState(obj, obj.Title, obj.Url);
-            }
-            
-          },
-          error: function(xhr, status, err) {
-            alert("ERROR: xhr status: " + xhr.status + ", status: " + status + ", err: " + err);
-          }
-        });
-    }
-    
-    // cte existujici objekty do modalu pro copy move
-    function read_modal_objects() {
-        // zjistime si ktery dir je vybrany
-        
-        var dirname = $("#stor_copy_move_target_dir").val();
-        
-        $.ajax({
-          url: "'.$this->routerParser->urlFor('stor.api.modal.objects').'",  
-          //url: "https://japex01.vaizard.xyz'.$this->routerParser->urlFor('stor.api.modal.objects').'",
-          dataType: "text",
-          type: "GET",
-          data: "dirname=" + dirname,
-          success: function(data) {
-            $("#stor_copy_move_target_object_id").html(data);
-          },
-          error: function(xhr, status, err) {
-            alert("ERROR: xhr status: " + xhr.status + ", status: " + status + ", err: " + err);
-          }
-        });
-    }
-    
-    // na zacatku to zavolame se stor parametrem (mozna az po nahrani cele stranky)
-    $(document).ready(function() {
-        show_files(actual_dirname, false);
-        read_modal_objects();
-    });
-    
-    </script>
-        ';
-        
-        return $this->render($response, 'Stor/Views/stor-upload-gui.twig',
-        array(
-            'vystup' => $vystup,
-            'article_class' => 'items-list-page',
-            'additional_javascript' => $additional_javascript,
-            'stor_dirs_options' => $stor_dirs_options,
-            'ui_menu_active' => 'stor.uploader'
-        ));
-    }
-    
     
     // funkce co zpracuje poslany nahravany soubor
     public function uploaderSave($request, $response)
@@ -308,35 +165,6 @@ class StorController extends AbstractTwigController
         else {
             // jinak tu byl uploader, ale ten uz nemame, takze to posleme na root browseru
             $redirect_url = $this->routerParser->urlFor('stor.browser');
-        }
-        
-        return $response->withRedirect($redirect_url);
-    }
-    
-    // funkce pro post smazani linku (a pokud je posledni tak i objektu)
-    public function uploaderDelete($request, $response)
-    {
-        $link_id = (int) $request->getParam('file_uid');
-        $actual_delete_dir = $request->getParam('actual_delete_dir');
-        $return_uri = $request->getParam('return_uri');
-        
-        $returned_data = $this->container->stor->delete_stor_file($link_id);
-        
-        if ($returned_data['success']) {
-            $this->container->flash->addMessage('info', $returned_data['message']);
-        }
-        else {
-            $this->container->flash->addMessage('error', $returned_data['message']);
-        }
-        
-        if (!empty($return_uri)) {  // pokud mazeme z jineho mista, a chceme se tam pak vratit, je v post promennych return_uri
-            $redirect_url = $return_uri;
-        }
-        else if (!empty($actual_delete_dir)) {
-            $redirect_url = $this->container->router->urlFor('stor.uploader').'/~/'.$actual_delete_dir;
-        }
-        else {
-            $redirect_url = $this->container->router->urlFor('stor.uploader');
         }
         
         return $response->withRedirect($redirect_url);
