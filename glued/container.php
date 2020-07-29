@@ -74,6 +74,14 @@ $container->set('jsonvalidator', function () {
 
 });
 
+$container->set('jwt', function (Container $c) {
+    $jwt = $c->get('settings')['jwt'];
+    return new Tuupola\Middleware\JwtAuthentication([
+        "secret" => $jwt['secret'],
+        "path" => $jwt['path']
+    ]);
+});
+
 $container->set('routerParser', $app->getRouteCollector()->getRouteParser());
 
 

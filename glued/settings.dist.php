@@ -28,6 +28,11 @@ return [
         'collation' => ' utf8mb4_unicode_ci'
     ],
 
+    // JWT
+    'jwt' => [
+        'secret' => 'ChangeMe!@#%',
+        'path' => [ '/api' ]
+    ],
 
     // Geoip
     'geoip' => [
