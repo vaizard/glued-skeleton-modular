@@ -31,7 +31,8 @@ return [
     // JWT
     'jwt' => [
         'secret' => 'ChangeMe!@#%',
-        'path' => [ '/api' ]
+        'path' => [ '/api/jwt' ],
+        'secure' => true // if set to false, jwt will run over http and leave a nasty security gap
     ],
 
     // Geoip

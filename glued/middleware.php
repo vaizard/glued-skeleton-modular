@@ -77,6 +77,11 @@ $app->add(new HeadersMiddleware($settings));
 $app->add(new \Glued\Core\Middleware\AuthorizationMiddleware($container));
 $app->add(new SessionMiddleware($settings));
 
+$app->add(new Tuupola\Middleware\JwtAuthentication($settings['jwt']));
+
+
+
+
 /**
  * *******************************
  * METHOD OVERRIDE MIDDLEWARE
