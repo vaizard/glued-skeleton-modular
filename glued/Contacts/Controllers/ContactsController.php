@@ -91,28 +91,73 @@ class ContactsController extends AbstractTwigController
          return $response->withJson($payload);
       }
 
-      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&ico='.$id.'&polozek=500';
+
       $result = [];
+
+      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&ico='.$id.'&polozek=500';
       $crawler = $this->goutte->request('GET', $uri);
-      $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
+      $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result, &$id) {
+        $r['adr'][0]['type'] = 'main';
         $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
         $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
-        $r['adr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
+        $r['adr'][0]['unstructured'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
         $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
         $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
+ 
+        $m_in = [
+            'ledna', 'února', 'března', 'dubna', 'května',
+            'června', 'července', 'srpna', 'září', 'října',
+            'listopadu', 'prosince'
+        ];
+
+        $m_out = [
+            'leden', 'únor', 'březen', 'duben', 'květen',
+            'červen', 'červenec', 'srpen', 'září', 'říjen',
+            'listopad', 'prosinec'
+        ];
+
+        $m_out = [
+            'January', 'February', 'March', 'April', 'May',
+            'June', 'July', 'August', 'September', 'October',
+            'November', 'December'
+        ];
+
+        $date = str_replace($m_in, $m_out, $r['regdt']);
+        $date = str_replace(".", "", $date);
+        $r['xxx'] = strtotime($date);
+        //$r['xxx'] = $date->isoFormat('LLLL');;
+
+        $client = new \SoapClient("http://adisrws.mfcr.cz/adistc/axis2/services/rozhraniCRPDPH.rozhraniCRPDPHSOAP?wsdl", array('trace' => true));
+
+        $arr = json_decode(
+          json_encode(
+            $client->__call("getStatusNespolehlivyPlatceRozsireny", array(0 => array($id)))
+          ), true
+        );
+
+        if (($arr['status']['statusCode'] === 0) and strcasecmp($arr['statusPlatceDPH']['nazevSubjektu'], $r['org'])) { 
+          //echo '<br>'.$arr['statusPlatceDPH']['nespolehlivyPlatce'];
+
+          $r['adr'][0]['street'] = $arr['statusPlatceDPH']['adresa']['uliceCislo'];
+          $r['adr'][0]['locacity'] = $arr['statusPlatceDPH']['adresa']['mesto'];
+          $r['adr'][0]['zip'] = $arr['statusPlatceDPH']['adresa']['psc'];
+          $r['adr'][0]['country'] = $arr['statusPlatceDPH']['adresa']['stat'];
+
+          $a = 0;
+          foreach ($arr['statusPlatceDPH']['zverejneneUcty']['ucet'] as $ucet) {
+            $acc[$a]['number'] = $ucet['standardniUcet']['cislo'];
+            $acc[$a]['bank-code'] = $ucet['standardniUcet']['kodBanky'];
+            $acc[$a]['country'] = 'CZ';
+            $acc[$a]['meta'][0]['source'] = 'adisrws.mfcr.cz';
+            $acc[$a]['meta'][0]['date-published'] = $ucet['datumZverejneni'];
+            $a++;
+          }
+
+          $r['acc'] = $acc;
+        }
         $result[] = $r;
       });
 
-      // TODO / get the css selector right
-      /*
-      $uri = 'https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic='.$id;
-      $crawler = $this->goutte->request('GET', $uri);
-      $crawler->filter('div.tableUcty[0]')->each(function (Crawler $table) use (&$result) {
-         $r['bank'] = $table->filter('tbody > tr:nth-child(1) > td:nth-child(1) > span')->text();
-      });
-      */
-      
-      
       $payload = $builder->withData((array)$result)->withCode(200)->build();
       return $response->withJson($payload);
       //print("<pre>".print_r($result,true)."</pre>");
