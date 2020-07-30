@@ -4,6 +4,7 @@
 declare(strict_types=1);
 
 namespace Glued\Core\Controllers;
+use Firebase\JWT\JWT;
 use Glued\Core\Classes\Auth\Auth;
 use Glued\Core\Classes\Crypto\Crypto;
 use Glued\Core\Classes\Json\JsonResponseBuilder;
@@ -71,6 +72,35 @@ class AuthController extends AbstractTwigController
         return $this->view->render($response, 'Core/Views/signin.twig', [
             'redirect' => $request->getParams()['redirect'] ?? null 
         ]);
+    }
+
+
+    public function jwt_signin_post($request, $response)
+    {
+        $auth = $this->auth->jwt_attempt(
+            $request->getParam('email'),
+            $request->getParam('password')
+        );
+
+        if (!$auth) {
+            //$this->flash->addMessage('error', 'Could not sign you in with those details.');
+            //return $response->withRedirect($this->routerParser->urlFor('core.signin.web'));
+            // TODO return json ze blbe login
+            die('ble auth');
+        }
+        $now = new \DateTime();
+        $future = new \DateTime('+1 week');
+        $jti = uniqid();
+        $payload = [
+            'iss' => $_SERVER['SERVER_NAME'],
+            'iat' => $now->getTimeStamp(),
+            'exp' => $future->getTimeStamp(),
+            'jti' => $jti,
+            'sub' => $request->getParam('email'),
+        ];
+        $token = JWT::encode($payload, $this->settings['jwt']['secret'], $this->settings['jwt']['algorithm']);
+        //die($token);
+        return $response->withJson(['status' => 'OK', 'token' => $token]);
     }
 
 

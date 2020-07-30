@@ -118,6 +118,34 @@ class Auth
         return $authenticated;
     }
 
+
+    /**
+     *  attempt to sign in user, return true|false on success or failure   
+     */ 
+    public function jwt_attempt($email, $password) {
+        // TODO unify attempt() and jwt_attempt() here
+        $authenticated = false;
+        $this->db->join("t_core_authn a", "a.c_user_uid=u.c_uid", "LEFT");
+        $this->db->where("u.c_email", $email);
+        $this->db->where("a.c_type", 0); // 0 = passwords, 1 = api keys,
+        $result = $this->db->get("t_core_users u", null);
+        
+        if ($this->db->count > 0) {
+            foreach ($result as $user) {
+                // TODO: test here if an disabled/old auth password/token are used
+                // If yes, then:
+                // - log the issue and notify user
+                // - ratelimit IP
+                if (password_verify($password, $user['c_hash'])) {
+                    $authenticated = true;
+                    break;
+                }
+            }
+        }
+        return $authenticated;
+    }
+
+
     public function signout() {
         unset($_SESSION['core_user_id']);
         unset($_SESSION['core_auth_id']);

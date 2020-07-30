@@ -32,6 +32,7 @@ return [
     'jwt' => [
         'secret' => 'ChangeMe!@#%',
         'path' => [ '/api/jwt' ],
+        'algorithm' => 'HS512',
         'secure' => true // if set to false, jwt will run over http and leave a nasty security gap
     ],
 

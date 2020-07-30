@@ -40,6 +40,7 @@ $app->group('/core', function (RouteCollectorProxy $route) {
     $route->group('', function ($route) {
         $route->get ('/signin', AuthController::class . ':signin_get')->setName('core.signin.web');
         $route->post('/signin', AuthController::class . ':signin_post');
+        $route->post('/api/signin', AuthController::class . ':jwt_signin_post');
         $route->get ('/reset', AuthController::class . ':reset_get')->setName('core.reset.web');
         $route->post('/reset', AuthController::class . ':reset_post');
         $route->get ('/signup', AuthController::class . ':signup_get')->setName('core.signup.web');
