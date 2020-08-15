@@ -30,9 +30,6 @@ class ContactsController extends AbstractTwigController
      * @return Response
      */
 
-
-    private $cacheStrategy = 'YW';
-
     public function cz_ares_ids(Request $request, Response $response, array $args = []): Response {
       $ares = new Ares();
       $record = $ares->findByIdentificationNumber($args['id']); 
