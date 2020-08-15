@@ -70,7 +70,8 @@
     "symfony/yaml": "^5",
     "geocoder-php/geoip2-provider": "^4.0",
     "kriswallsmith/buzz": "^1.1",
-    "geocoder-php/nominatim-provider": "^5.1"
+    "geocoder-php/nominatim-provider": "^5.1",
+    "phpfastcache/phpfastcache": "^8.0"
   },
   "repositories": [
     {
