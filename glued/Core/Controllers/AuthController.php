@@ -135,6 +135,29 @@ class AuthController extends AbstractTwigController
             }
         }
 
+    /* START OF THE JWT BLOCK */
+        $now = new \DateTime();
+        $future = new \DateTime('+1 week');
+        $jti = uniqid();
+        $payload = [
+            'iss' => $_SERVER['SERVER_NAME'],
+            'iat' => $now->getTimeStamp(),
+            'exp' => $future->getTimeStamp(),
+            'jti' => $jti,
+            'sub' => $request->getParam('email'),
+        ];
+        $token = JWT::encode($payload, $this->settings['jwt']['secret'], $this->settings['jwt']['algorithm']);
+        setcookie($this->settings['jwt']['cookie'], $token, [
+            'expires' => $future->getTimeStamp(),
+            'path' => '/', // todo add to config
+            'domain' => $_SERVER['SERVER_NAME'],
+            'secure' => false,
+            'httponly' => false,
+            'samesite' => 'lax',
+        ]);
+        // todo: insteadl of false for secure and httponly use true true from config. also samesite needs to be gotten from config.
+    /* END OF THE JWT BLOCK */
+
         $this->flash->addMessage('info', 'Welcome back, you are signed in!');
         return $response->withRedirect($redirect);
     }

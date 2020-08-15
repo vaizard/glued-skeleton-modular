@@ -30,9 +30,10 @@ return [
 
     // JWT
     'jwt' => [
-        'secret' => 'ChangeMe!@#%',
+        'secret' => 'ChangeMe!@#%', // todo - generate in installer some randomness for this
         'path' => [ '/api/jwt' ],
         'algorithm' => 'HS512',
+        'cookie' => 'token',
         'secure' => true // if set to false, jwt will run over http and leave a nasty security gap
     ],
 
