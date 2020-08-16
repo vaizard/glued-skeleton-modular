@@ -367,7 +367,6 @@ class StorCalendarCoreUpdates extends Phinx\Migration\AbstractMigration
                 'comment' => 'Content aware storage objects table. An object is a file with a unique sha512 hash (see the c_sha512 generated from c_json).',
                 'row_format' => 'DYNAMIC',
             ])
-            ->removeIndexByName("c_sha512")
             ->addIndex(['c_sha512'], [
                 'name' => 'c_sha512',
                 'unique' => false,
