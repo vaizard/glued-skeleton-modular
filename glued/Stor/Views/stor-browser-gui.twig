@@ -2,36 +2,42 @@
 
 {% block content %}
 
-<div class="title-block">
+<div class="section-header">
     <h3 class="title"> Stored Files </h3>
     <p class="title-description"> Browser with a filter. Start typing the fileename. Try also / (apps), # (tags) or @ (users). If you filter apps and there is just one app left, you can type second / and objects in app will appear.</p>
 </div>
 
-<section class="section">
+<section class="section-body">
+    
     <div class="row">
-        <div class="col-md-11">
-            
-            {{ vystup | raw }}
-            
-            <select id="stor-files-select2-filter" name="filters[]" multiple="multiple">
-                {{ preset_options | raw }}
-            </select>
-            
+        <div class="col-10">
+            <div class="card">
+                <div class="card-body">
+                    {{ vystup | raw }}
+                    
+                    <select id="stor-files-select2-filter" name="filters[]" multiple="multiple">
+                        {{ preset_options | raw }}
+                    </select>
+                </div>
+            </div>
         </div>
-        <div class="col-md-1">
-            <button id="stor-files-filter-button">filter</button>
+        <div class="col-2">
+            <div class="card">
+                <div class="card-body">
+                    <button id="stor-files-filter-button" class="btn btn-primary btn-lg">filter</button>
+                </div>
+            </div>
         </div>
     </div>
-</section>
-
-
-<section class="section">
+    
     <div class="row">
-        <div class="col-12" id="stor-files-output">
+        <div id="stor-files-output" class="col-12">
             
         </div>
     </div>
+    
 </section>
+
 
 
 <div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" data-backdrop="false">

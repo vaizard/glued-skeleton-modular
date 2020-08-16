@@ -200,15 +200,15 @@ class StorControllerApiV1 extends AbstractTwigController
     private function firstRowUplinkBrowser($dataID, $dataText) {
         return '
                         <tr role="row" class="odd">
-                            <td class="col-sm-2"><i class="fa fa-folder-o fa-2x"></i></td>
-                            <td class="col-sm-2">
+                            <td class="col-sm-1"><i class="fa fa-folder"></i></td>
+                            <td class="col-sm-3">
                                 <a href="" class="stor-shortcuts" data-id="'.$dataID.'" data-text="'.$dataText.'">
-                                    <h4 class="item-title"> .. </h4>
+                                    <b class="item-title"> .. </b>
                                 </a>
                             </td>
                             <td class="col-sm-2"></td>
                             <td class="col-sm-2"></td>
-                            <td class="col-sm-2"></td>
+                            <td class="col-sm-2 d-none d-sm-table-cell"></td>
                             <td class="col-sm-2"></td>
                         </tr>
             ';
@@ -427,25 +427,25 @@ class StorControllerApiV1 extends AbstractTwigController
         // dekodujeme na pole
         $filters = json_decode($raw_filters, true);
         
-        $vystup .= '<div>filtrovaci json: '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page.'</div>';
-        
         // vrsek vzdy
+        // kvuli tomu, ze tu mame dropdown, ktery muze sahat mimo tabulku, dame tam defaultni overflow-x: visible; ktere prebije csskove auto
+        // a min width ma responsive table 800px ale to je tady zbytecne moc. prebijeme to 400px
         $vystup .= '<div class="card">';
         $vystup .= '
         <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-striped">';
+          <div class="table-responsive" style="overflow-x: visible;">
+            <table class="table table-sm table-hover" style="min-width: 400px;">';
         
         // header tabulky
         $vystup .= '
               <thead>
                 <tr>
-                  <th class="col-sm-2">Type</th>
-                  <th class="col-sm-2">Name</th>
+                  <th class="col-sm-1">Type</th>
+                  <th class="col-sm-3">Name</th>
                   <th class="col-sm-2">Size</th>
                   <th class="col-sm-2">App</th>
-                  <th class="col-sm-2">Owner</th>
-                  <th class="col-sm-2">Uploaded</th>
+                  <th class="col-sm-2 d-none d-sm-table-cell">Uploaded</th>
+                  <th class="col-sm-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -550,15 +550,15 @@ class StorControllerApiV1 extends AbstractTwigController
                     if (!isset($app_tables[$dir])) { continue; }
                     $vystup .= '
                         <tr role="row" class="odd">
-                            <td class="col-sm-2"><i class="fa fa-folder-o fa-2x"></i></td>
-                            <td class="col-sm-2">
+                            <td class="col-sm-1"><i class="fa fa-folder"></i></td>
+                            <td class="col-sm-3">
                                 <a href="" class="stor-shortcuts" data-id="/'.$dir.'/" data-text="/'.$dir.'/">
-                                    <h4 class="item-title">/'.$dir.'/</h4>
+                                    <b class="item-title">/'.$dir.'/</b>
                                 </a>
                             </td>
                             <td class="col-sm-2"></td>
                             <td class="col-sm-2"></td>
-                            <td class="col-sm-2"></td>
+                            <td class="col-sm-2 d-none d-sm-table-cell"></td>
                             <td class="col-sm-2"></td>
                         </tr>
                     ';
@@ -604,15 +604,15 @@ class StorControllerApiV1 extends AbstractTwigController
                         // '.$idecko['stor_name'].'
                         $vystup .= '
                         <tr role="row" class="odd">
-                            <td class="col-sm-2"><i class="fa fa-folder-o fa-2x"></i></td>
-                            <td class="col-sm-2">
+                            <td class="col-sm-1"><i class="fa fa-folder"></i></td>
+                            <td class="col-sm-3">
                                 <a href="" class="stor-shortcuts" data-id="/'.$objektovy_dir.'/'.$idecko['c_uid'].'" data-text="/'.$objektovy_dir.'/'.$idecko['c_uid'].' - pfff">
-                                    <h4 class="item-title"> '.$idecko['c_uid'].' - nazev </h4>
+                                    <b class="item-title"> '.$idecko['c_uid'].' - nazev </b>
                                 </a>
                             </td>
                             <td class="col-sm-2"></td>
                             <td class="col-sm-2"></td>
-                            <td class="col-sm-2"></td>
+                            <td class="col-sm-2 d-none d-sm-table-cell"></td>
                             <td class="col-sm-2"></td>
                         </tr>
                         ';
@@ -709,10 +709,10 @@ class StorControllerApiV1 extends AbstractTwigController
                                 $action_dropdown = '
                                     <div class="dropdown">
                                         <div class="btn-group dropleft">
-                                          <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                          <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             Actions
                                           </button>
-                                          <div class="dropdown-menu">
+                                          <div class="dropdown-menu dropleft" x-placement="left-start" style="background-color: #cdd3d8; font-size: 12px;">
                                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#confirm-modal" onclick="$(\'#delete_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-trash-o "></i> Delete</button>
                                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-edit-stor" onclick="$(\'#edit_file_uid\').val('.$data['c_uid'].');var pomucka = $(\'#fname_'.$data['c_uid'].'\').text(); $(\'#edit_file_fname\').val(pomucka);"><i class="fa fa-pencil"></i> Edit</button>
                                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-copy-move-stor" onclick="$(\'#copy_move_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-files-o"></i> Copy/Move</button>
@@ -723,27 +723,26 @@ class StorControllerApiV1 extends AbstractTwigController
                             }
                             
                             // <i class="fa '.$this->container->stor->font_awesome_mime_icon($data['mime']).' fa-2x"></i>
-                            // '.$this->container->stor->human_readable_size($data['size']).'
                             // '.$this->container->auth->user_screenname($data['c_owner']).'
                             $vystup .= '
                                 <tr role="row" class="odd">
-                                    <td class="col-sm-2"><i class="fa fa-folder-o fa-2x"></i></td>
-                                    <td class="col-sm-2">
+                                    <td class="col-sm-1"><i class="fa fa-file"></i></td>
+                                    <td class="col-sm-3">
                                         '.(in_array('read', $allowed_global_actions)?'
                                         <a href="'.$this->routerParser->urlFor('stor.serve.file', ['id' => $data['c_uid'], 'filename' => $data['c_filename']]).'" class="">
-                                            <h4 id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</h4>
+                                            <b id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</b>
                                         </a>
                                         ':'
-                                            <h4 id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</h4>
+                                            <b id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</b>
                                         ').'
                                     </td>
-                                    <td class="col-sm-2"></td>
+                                    <td class="col-sm-2">'.$this->stor->human_readable_size($data['size']).'</td>
                                     <td class="col-sm-2">
                                         <a href="" class="stor-shortcuts" data-id="/'.$full_path.'" data-text="/'.$full_path.'">
                                             /'.$full_path.'
                                         </a>
                                     </td>
-                                    <td class="col-sm-2">'.$data['c_ts_created'].'</td>
+                                    <td class="col-sm-2 d-none d-sm-table-cell">'.$data['c_ts_created'].'</td>
                                     <td class="col-sm-2">'.$action_dropdown.'</td>
                                 </tr>
                             ';
@@ -795,6 +794,24 @@ class StorControllerApiV1 extends AbstractTwigController
                             */
                         }
                     }
+                    
+                    // na konec pridame jeden prazdny radek
+                    /*
+                    $vystup .= '
+                        <tr role="row" class="odd">
+                            <td class="col-sm-2"></td>
+                            <td class="col-sm-2">
+                                <div style="height: 150px;">nic</div>
+                            </td>
+                            <td class="col-sm-2"></td>
+                            <td class="col-sm-2">
+                            </td>
+                            <td class="col-sm-2"></td>
+                            <td class="col-sm-2"></td>
+                        </tr>
+                    ';
+                    */
+                    
                 }
             }
         }
@@ -806,28 +823,28 @@ class StorControllerApiV1 extends AbstractTwigController
             
             $vystup .= '
                 <tr role="row" class="odd">
-                    <td class="col-sm-2"><i class="fa fa-folder-o fa-2x"></i></td>
-                    <td class="col-sm-2">
+                    <td class="col-sm-1"><i class="fa fa-folder"></i></td>
+                    <td class="col-sm-3">
                         <a href="" class="stor-shortcuts" data-id="@'.$your_user_id.'" data-text="@'.$your_user_id.' - '.$your_screenname.'">
-                            <h4 class="item-title">Files I created</h4>
+                            <b class="item-title">Files I created</b>
                         </a>
                     </td>
                     <td class="col-sm-2"></td>
                     <td class="col-sm-2"></td>
-                    <td class="col-sm-2"></td>
+                    <td class="col-sm-2 d-none d-sm-table-cell"></td>
                     <td class="col-sm-2"></td>
                 </tr>
                 
                 <tr role="row" class="odd">
-                    <td class="col-sm-2"><i class="fa fa-folder-o fa-2x"></i></td>
-                    <td class="col-sm-2">
+                    <td class="col-sm-1"><i class="fa fa-folder"></i></td>
+                    <td class="col-sm-3">
                         <a href="" class="stor-shortcuts" data-id="//" data-text="//apps">
-                            <h4 class="item-title">Apps</h4>
+                            <b class="item-title">Apps</b>
                         </a>
                     </td>
                     <td class="col-sm-2"></td>
                     <td class="col-sm-2"></td>
-                    <td class="col-sm-2"></td>
+                    <td class="col-sm-2 d-none d-sm-table-cell"></td>
                     <td class="col-sm-2"></td>
                 </tr>
             ';
@@ -893,6 +910,10 @@ class StorControllerApiV1 extends AbstractTwigController
           </div>
         </div>';
         $vystup .= '</div>';    // .card
+        
+        // debug
+        $vystup .= '<div class="alert alert-info" role="alert">filtrovaci json: '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page.'</div>';
+        
         
         // textovy vystup ajaxu nejdriv vyrenderujeme pres view, aby se tam dosadilo csrf pres middleware
         if ($bude_uploader) {
