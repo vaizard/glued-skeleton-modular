@@ -93,7 +93,6 @@ class StorControllerApiV1 extends AbstractTwigController
                             if (!is_dir($cilovy_dir)) { mkdir($cilovy_dir, 0777, true); }
                             
                             // presuneme
-                            // $full_path = "/var/www/html/glued/private/";
                             $newfile->moveTo($cilovy_dir.'/'.$sha512);
                             
                             // pokud ne, vlozime
@@ -199,47 +198,19 @@ class StorControllerApiV1 extends AbstractTwigController
     // davam to do samostatne funkce, protoze to bude pouzite 4x v showFilteredFiles a bude to tak prehlednejsi
     private function firstRowUplinkBrowser($dataID, $dataText) {
         return '
-                        <tr role="row" class="odd">
-                            <td class="col-sm-1"><i class="fa fa-folder"></i></td>
-                            <td class="col-sm-3">
-                                <a href="" class="stor-shortcuts" data-id="'.$dataID.'" data-text="'.$dataText.'">
-                                    <b class="item-title"> .. </b>
-                                </a>
-                            </td>
-                            <td class="col-sm-2"></td>
-                            <td class="col-sm-2"></td>
-                            <td class="col-sm-2 d-none d-sm-table-cell"></td>
-                            <td class="col-sm-2"></td>
-                        </tr>
-            ';
-        
-        /*
-                        <li class="item">
-                            <div class="item-row">
-                                <div class="item-col fixed">
-                                    <i class="fa fa-folder-open-o fa-2x"></i>
-                                </div>
-                                <div class="item-col fixed pull-left item-col-title">
-                                    <div class="item-heading">Name</div>
-                                    <div>
-                                        <a href="" class="stor-shortcuts" data-id="'.$dataID.'" data-text="'.$dataText.'">
-                                            <h4 class="item-title"> .. </h4>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="item-col">
-                                </div>
-                                <div class="item-col">
-                                </div>
-                                <div class="item-col">
-                                </div>
-                                <div class="item-col item-col-date">
-                                </div>
-                                <div class="item-col fixed item-col-actions-dropdown">
-                                </div>
-                            </div>
-                        </li>
-        */
+            <tr role="row" class="odd">
+                <td class="col-sm-1"><i class="fa fa-folder"></i></td>
+                <td class="col-sm-3">
+                    <a href="" class="stor-shortcuts" data-id="'.$dataID.'" data-text="'.$dataText.'">
+                        <b class="item-title"> .. </b>
+                    </a>
+                </td>
+                <td class="col-sm-2"></td>
+                <td class="col-sm-2"></td>
+                <td class="col-sm-2 d-none d-sm-table-cell"></td>
+                <td class="col-sm-2"></td>
+            </tr>
+        ';
     }
     
     // prehled odpovidajicich objektu do modal popupu pro kopirovani
@@ -451,43 +422,10 @@ class StorControllerApiV1 extends AbstractTwigController
               <tbody>
         ';
         
-        /*
-                        <li class="item item-list-header">
-                            <div class="item-row">
-                                <div class="item-col item-col-header fixed">
-                                    <div>
-                                        <span>Type</span>
-                                    </div>
-                                </div>
-                                <div class="item-col item-col-header item-col-title" onclick="filter_stor_files(\'name\', \''.(($orderby == 'name' and $direction == 'asc')?'desc':'asc').'\', 1);">
-                                    <div>
-                                        <span><i class="fa fa-sort"></i> Name</span>
-                                    </div>
-                                </div>
-                                <div class="item-col item-col-header" onclick="filter_stor_files(\'size\', \''.(($orderby == 'size' and $direction == 'asc')?'desc':'asc').'\', 1);">
-                                    <div>
-                                        <span><i class="fa fa-sort"></i> Size</span>
-                                    </div>
-                                </div>
-                                <div class="item-col item-col-header">
-                                    <div class="no-overflow">
-                                        <span>App</span>
-                                    </div>
-                                </div>
-                                <div class="item-col item-col-header">
-                                    <div class="no-overflow">
-                                        <span>Owner</span>
-                                    </div>
-                                </div>
-                                <div class="item-col item-col-header item-col-date" onclick="filter_stor_files(\'uploaded\', \''.(($orderby == 'uploaded' and $direction == 'asc')?'desc':'asc').'\', 1);">
-                                    <div>
-                                        <span><i class="fa fa-sort"></i> Uploaded</span>
-                                    </div>
-                                </div>
-                                <div class="item-col item-col-header fixed item-col-actions-dropdown"> </div>
-                            </div>
-                        </li>
-        */
+        // drive byly nadpisy vyuzite i na trideni, je mozne doplnit
+        // onclick="filter_stor_files(\'name\', \''.(($orderby == 'name' and $direction == 'asc')?'desc':'asc').'\', 1);"
+        // onclick="filter_stor_files(\'size\', \''.(($orderby == 'size' and $direction == 'asc')?'desc':'asc').'\', 1);"
+        // onclick="filter_stor_files(\'uploaded\', \''.(($orderby == 'uploaded' and $direction == 'asc')?'desc':'asc').'\', 1);"
         
         
         // zanalyzujeme si co mame zadane ($filters)
@@ -504,8 +442,6 @@ class StorControllerApiV1 extends AbstractTwigController
             $uploader_path = '';
             
             foreach ($filters as $filter) {
-                
-                //$vystup .= '<li class="item">zpracovavam filter: '.$filter.'</li>';
                 
                 // podle toho cim to zacne
                 // lomitko = adresar, @ = uzivatel, # = tag
@@ -526,7 +462,6 @@ class StorControllerApiV1 extends AbstractTwigController
                             $objektovy_dir = $dir;
                         }
                     }
-                    //$vystup .= '<li class="item">objektovy dir: '.$objektovy_dir.'</li>';
                 }
                 // ownerovy filtr muze byt taky jen jeden, taky vemem jen prvni (a nebo to muzeme vzit jako or?)
                 else if ($prvni_znak == '@') {
@@ -562,46 +497,18 @@ class StorControllerApiV1 extends AbstractTwigController
                             <td class="col-sm-2"></td>
                         </tr>
                     ';
-                    /*
-                        <li class="item">
-                            <div class="item-row">
-                                <div class="item-col fixed">
-                                    <i class="fa fa-folder-o fa-2x"></i>
-                                </div>
-                                <div class="item-col fixed pull-left item-col-title">
-                                    <div class="item-heading">Name</div>
-                                    <div>
-                                        <a href="" class="stor-shortcuts" data-id="/'.$dir.'/" data-text="/'.$dir.'/">
-                                            <h4 class="item-title">/'.$dir.'/</h4>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="item-col">
-                                </div>
-                                <div class="item-col">
-                                </div>
-                                <div class="item-col">
-                                </div>
-                                <div class="item-col item-col-date">
-                                </div>
-                                <div class="item-col fixed item-col-actions-dropdown">
-                                </div>
-                            </div>
-                        </li>
-                    */
                 }
             }
             else if ($jsou_tam_objekty) {   // to znamena ze jsme v jedne app a vypisujeme jeji objekty
                 // nejdriv zpet do app
                 $vystup .= $this->firstRowUplinkBrowser('//', '//apps');
                 // nacteme idecka
-                //$cols = Array("c_uid", "stor_name");
                 $cols = Array("c_uid");
                 $this->db->orderBy("c_uid","asc");
                 $idecka = $this->db->get($app_tables[$objektovy_dir], null, $cols);
                 if ($this->db->count > 0) {
                     foreach ($idecka as $idecko) {
-                        // '.$idecko['stor_name'].'
+                        // nazev objektu pozdeji bude v $idecko['stor_name'], ale musime to nacist v cols a ta tabulka to musi mit
                         $vystup .= '
                         <tr role="row" class="odd">
                             <td class="col-sm-1"><i class="fa fa-folder"></i></td>
@@ -616,32 +523,6 @@ class StorControllerApiV1 extends AbstractTwigController
                             <td class="col-sm-2"></td>
                         </tr>
                         ';
-                        
-                        /*
-                                    <li class="item">
-                                        <div class="item-row">
-                                            <div class="item-col fixed">
-                                                <i class="fa fa-folder-o fa-2x"></i>
-                                            </div>
-                                            <div class="item-col fixed pull-left item-col-title">
-                                                <div class="item-heading">Name</div>
-                                                <div>
-
-                                                </div>
-                                            </div>
-                                            <div class="item-col">
-                                            </div>
-                                            <div class="item-col">
-                                            </div>
-                                            <div class="item-col">
-                                            </div>
-                                            <div class="item-col item-col-date">
-                                            </div>
-                                            <div class="item-col fixed item-col-actions-dropdown">
-                                            </div>
-                                        </div>
-                                    </li>
-                        */
                     }
                 }
             }
@@ -696,6 +577,7 @@ class StorControllerApiV1 extends AbstractTwigController
                         //if ($this->container->permissions->have_action_on_object($data['c_inherit_table'], $data['c_inherit_object'], 'read')) { $allowed_global_actions[] = 'read'; }
                         //if ($this->container->permissions->have_action_on_object($data['c_inherit_table'], $data['c_inherit_object'], 'write')) { $allowed_global_actions[] = 'write'; }
                         
+                        // zatim nastavujeme, ze ma vsechny prava. pozdeji toto nebude vzdy vyplneno. az budou fungovat nove prava
                         $allowed_global_actions[] = 'list';
                         $allowed_global_actions[] = 'read';
                         $allowed_global_actions[] = 'write';
@@ -722,8 +604,10 @@ class StorControllerApiV1 extends AbstractTwigController
                                 ';
                             }
                             
+                            // ulozene do budoucna, jak bylo drive mime souboru a creator name
                             // <i class="fa '.$this->container->stor->font_awesome_mime_icon($data['mime']).' fa-2x"></i>
                             // '.$this->container->auth->user_screenname($data['c_owner']).'
+                            
                             $vystup .= '
                                 <tr role="row" class="odd">
                                     <td class="col-sm-1"><i class="fa fa-file"></i></td>
@@ -746,77 +630,12 @@ class StorControllerApiV1 extends AbstractTwigController
                                     <td class="col-sm-2">'.$action_dropdown.'</td>
                                 </tr>
                             ';
-                            /*
-                                <li class="item">
-                                    <div class="item-row">
-                                        <div class="item-col fixed">
-                                            
-                                        </div>
-                                        <div class="item-col fixed pull-left item-col-title">
-                                            <div class="item-heading">Name</div>
-                                            <div>
-                                                '.(in_array('read', $allowed_global_actions)?'
-                                                <a href="'.$this->routerParser->urlFor('stor.serve.file', ['id' => $data['c_uid'], 'filename' => $data['c_filename']]).'" class="">
-                                                    <h4 id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</h4>
-                                                </a>
-                                                ':'
-                                                    <h4 id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</h4>
-                                                ').'
-                                            </div>
-                                        </div>
-                                        <div class="item-col">
-                                            <div class="item-heading">Sales</div>
-                                            <div>  </div>
-                                        </div>
-                                        <div class="item-col">
-                                            <div class="item-heading">Category</div>
-                                            <div class="no-overflow">
-                                                <a href="" class="stor-shortcuts" data-id="/'.$full_path.'" data-text="/'.$full_path.'">
-                                                    /'.$full_path.'
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="item-col">
-                                            <div class="item-heading">Owner</div>
-                                            <div class="no-overflow">
-                                                <a href=""></a>
-                                            </div>
-                                        </div>
-                                        <div class="item-col item-col-date">
-                                            <div class="item-heading">Uploaded</div>
-                                            <div class="no-overflow"> '.$data['c_ts_created'].' </div>
-                                        </div>
-                                        <div class="item-col fixed item-col-actions-dropdown">
-                                            '.$action_dropdown.'
-                                        </div>
-                                    </div>
-                                </li>
-                            */
                         }
                     }
-                    
-                    // na konec pridame jeden prazdny radek
-                    /*
-                    $vystup .= '
-                        <tr role="row" class="odd">
-                            <td class="col-sm-2"></td>
-                            <td class="col-sm-2">
-                                <div style="height: 150px;">nic</div>
-                            </td>
-                            <td class="col-sm-2"></td>
-                            <td class="col-sm-2">
-                            </td>
-                            <td class="col-sm-2"></td>
-                            <td class="col-sm-2"></td>
-                        </tr>
-                    ';
-                    */
-                    
                 }
             }
         }
         else {  // jsme v zakladnim vyberu my files a app
-            //$your_user_id = $this->container->auth_user->user_id;
             $your_user_id = $_SESSION['core_user_id'];
             //$your_screenname = $this->container->auth->user_screenname($your_user_id);
             $your_screenname = 'noob';
@@ -848,61 +667,6 @@ class StorControllerApiV1 extends AbstractTwigController
                     <td class="col-sm-2"></td>
                 </tr>
             ';
-            
-            /*
-            $vystup .= '
-                <li class="item">
-                    <div class="item-row">
-                        <div class="item-col fixed">
-                            <i class="fa fa-folder-o fa-2x"></i>
-                        </div>
-                        <div class="item-col fixed pull-left item-col-title">
-                            <div class="item-heading">Name</div>
-                            <div>
-                                <a href="" class="stor-shortcuts" data-id="@'.$your_user_id.'" data-text="@'.$your_user_id.' - '.$your_screenname.'">
-                                    <h4 class="item-title">My files</h4>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="item-col">
-                        </div>
-                        <div class="item-col">
-                        </div>
-                        <div class="item-col">
-                        </div>
-                        <div class="item-col item-col-date">
-                        </div>
-                        <div class="item-col fixed item-col-actions-dropdown">
-                        </div>
-                    </div>
-                </li>
-                <li class="item">
-                    <div class="item-row">
-                        <div class="item-col fixed">
-                            <i class="fa fa-folder-o fa-2x"></i>
-                        </div>
-                        <div class="item-col fixed pull-left item-col-title">
-                            <div class="item-heading">Name</div>
-                            <div>
-                                <a href="" class="stor-shortcuts" data-id="//" data-text="//apps">
-                                    <h4 class="item-title">Apps</h4>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="item-col">
-                        </div>
-                        <div class="item-col">
-                        </div>
-                        <div class="item-col">
-                        </div>
-                        <div class="item-col item-col-date">
-                        </div>
-                        <div class="item-col fixed item-col-actions-dropdown">
-                        </div>
-                    </div>
-                </li>
-            ';
-            */
         }
         
         $vystup .= '</tbody>';
