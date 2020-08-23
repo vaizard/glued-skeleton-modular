@@ -27,20 +27,6 @@ class StorController extends AbstractTwigController
      */
     
     
-    // !!! netusim co tohle je. jestli je to priprava na neco, nebo k cemu to melo slouzit. ted to neni nikde pouzite, asi
-    // ale ja to asi nepsal. zrejme pavel neco pripravuje. ma to i odpovidajici twig sablonu
-    // TODO diskutujme :)
-    public function browser(Request $request, Response $response, array $args = []): Response
-    {
-        // TODO add constrains on what domains a user can actually list
-        $domains = $this->db->get('t_core_domains');
-        
-        // TODO add default domain for each user - maybe base this on some stats?
-        return $this->render($response, 'Stor/Views/browser.twig', [
-            'domains' => $domains
-        ]);
-    }
-
     
     // funkce co zpracuje poslany nahravany soubor
     public function uploaderSave($request, $response)
@@ -190,13 +176,6 @@ class StorController extends AbstractTwigController
         // ../private/stor/0/2/8/0
         $fullpath = $file_data['path'].'/'.$file_link['c_sha512'];
         
-        /*
-        $vystup = '<div>vypisuji soubor na adrese '.$fullpath.'</div>';
-        $vystup .= '<div>nacteno z db: '.print_r($file_data, true).'</div>';
-        
-        return $this->container->view->render($response, 'stor-obecny-vystup.twig', array('vystup' => $vystup));
-        */
-
         header('Content-Type: '.$file_data['mime']);
         readfile($fullpath);    // taky vlastne nevim jestli to takto vypsat
         exit(); // ? nevim nevim
@@ -208,7 +187,6 @@ class StorController extends AbstractTwigController
     {
         $link_id = (int) $request->getParam('file_id');
         $actual_dir = $request->getParam('actual_dir');
-        //$return_uri = $request->getParam('return_uri');
         
         // nacteme si link
         $this->container->db->where("c_uid", $link_id);
