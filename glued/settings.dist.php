@@ -141,9 +141,9 @@ return [
         'content-type-options' => 'nosniff',
         // TODO remove unsafe-eval once odan/twig-assets works with csp
         'csp' => [
-            'script-src' => [ 'self' => true, 'allow' => [ $_SERVER['SERVER_NAME'] ], 'strict-dynamic' => true, 'unsafe-eval' => true ],
+            'script-src' => [ 'self' => true, 'allow' => [ $_SERVER['SERVER_NAME'] ?? 'cli-run-or-unsupported-webserver'], 'strict-dynamic' => true, 'unsafe-eval' => true ],
             'object-src' => [ 'default-src' => 'false' ],
-            'frame-ancestors' => [ 'self' => true, 'allow' => [ 'https://' . $_SERVER['SERVER_NAME'] ] ],
+            'frame-ancestors' => [ 'self' => true, 'allow' => [ 'https://' . ( $_SERVER['SERVER_NAME'] ?? 'cli-run-or-unsupported-webserver' ) ] ],
             'base-uri' => 'self',
             'require-trusted-types-for' => 'script' // TODO not yet supported https://github.com/paragonie/csp-builder/issues/47
         ],
