@@ -213,7 +213,7 @@ class StorControllerApiV1 extends AbstractTwigController
         ';
     }
     
-    // prehled odpovidajicich objektu do modal popupu pro kopirovani
+    // prehled odpovidajicich objektu do modal popupu pro copy/move
     public function showModalObjects($request, $response) {
         $vystup = '';
         
@@ -226,12 +226,12 @@ class StorControllerApiV1 extends AbstractTwigController
         if (isset($app_dirs[$dirname])) {
             if (isset($app_tables[$dirname])) {
                 // nacteme idecka
-                $cols = Array("c_uid");
+                $cols = Array("c_uid", "c_stor_name");
                 $this->db->orderBy("c_uid","asc");
                 $idecka = $this->db->get($app_tables[$dirname], null, $cols);
                 if ($this->db->count > 0) {
                     foreach ($idecka as $idecko) {
-                        $vystup .= '<option value="'.$idecko['c_uid'].'">'.$idecko['c_uid'].' - nazev</option>';
+                        $vystup .= '<option value="'.$idecko['c_uid'].'">'.$idecko['c_uid'].' - '.$idecko['c_stor_name'].'</option>';
                     }
                 }
             }
@@ -294,15 +294,13 @@ class StorControllerApiV1 extends AbstractTwigController
             ';
             if (isset($casti[2]) and count($objekty_adresaru) == 1) { // je tam druhe lomitko, nabidneme teda objekty
                 $objekt_cast = $casti[2];
-                //$cols = Array("c_uid", "stor_name");
-                $cols = Array("c_uid");
+                $cols = Array("c_uid", "c_stor_name");
                 $this->db->orderBy("c_uid","asc");
                 $idecka = $this->db->get($app_tables[$posledni_dir], null, $cols);
                 if ($this->db->count > 0) {
                     $objekty_modulu = array();
                     foreach ($idecka as $idecko) {
-                        //$nazev = $idecko['c_uid'].' - '.$idecko['stor_name'];
-                        $nazev = $idecko['c_uid'];
+                        $nazev = $idecko['c_uid'].' - '.$idecko['c_stor_name'];
                         if (empty($objekt_cast) or substr_count(mb_strtolower($nazev, 'utf-8'), mb_strtolower($objekt_cast, 'utf-8')) > 0) {
                             $objekty_modulu[] = '
             {
@@ -503,18 +501,17 @@ class StorControllerApiV1 extends AbstractTwigController
                 // nejdriv zpet do app
                 $vystup .= $this->firstRowUplinkBrowser('//', '//apps');
                 // nacteme idecka
-                $cols = Array("c_uid");
+                $cols = Array("c_uid", "c_stor_name");
                 $this->db->orderBy("c_uid","asc");
                 $idecka = $this->db->get($app_tables[$objektovy_dir], null, $cols);
                 if ($this->db->count > 0) {
                     foreach ($idecka as $idecko) {
-                        // nazev objektu pozdeji bude v $idecko['stor_name'], ale musime to nacist v cols a ta tabulka to musi mit
                         $vystup .= '
                         <tr role="row" class="odd">
                             <td class="col-sm-1"><i class="fa fa-folder"></i></td>
                             <td class="col-sm-3">
-                                <a href="" class="stor-shortcuts" data-id="/'.$objektovy_dir.'/'.$idecko['c_uid'].'" data-text="/'.$objektovy_dir.'/'.$idecko['c_uid'].' - pfff">
-                                    <b class="item-title"> '.$idecko['c_uid'].' - nazev </b>
+                                <a href="" class="stor-shortcuts" data-id="/'.$objektovy_dir.'/'.$idecko['c_uid'].'" data-text="/'.$objektovy_dir.'/'.$idecko['c_uid'].' - '.$idecko['c_stor_name'].'">
+                                    <b class="item-title">'.$idecko['c_uid'].' - '.$idecko['c_stor_name'].'</b>
                                 </a>
                             </td>
                             <td class="col-sm-2"></td>

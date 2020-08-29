@@ -111,7 +111,7 @@
                         {% endif %}
                     </select></div>
                     <div>target dir:</div>
-                    <div><select id="stor_copy_move_target_dir" name="target_dir" onchange="read_modal_objects();">
+                    <div><select id="stor_copy_move_target_dir" name="target_dir">
                         {{ stor_dirs_options | raw }}
                     </select></div>
                     <div>target object id:</div>
@@ -330,7 +330,11 @@
         filter_stor_files();
         // iniciujeme prvotni objekty v copy move modalu
         read_modal_objects();
-
+        // priradime onchange event na select v copy move modalu
+        $("#stor_copy_move_target_dir").on("change", function() {
+            read_modal_objects();
+        });
+        
     });
 
 
