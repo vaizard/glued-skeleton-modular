@@ -77,7 +77,8 @@ class WorklogInitial extends Phinx\Migration\AbstractMigration
                 'delete' => 'CASCADE',
             ])
             ->create();
-        $this->execute("ALTER TABLE t_worklog_items DROP c_stor_name; ALTER TABLE t_worklog_items ADD c_stor_name VARCHAR(255) GENERATED ALWAYS AS (json_unquote(json_extract(c_json,'$.name'))) VIRTUAL NOT NULL AFTER c_user_id;");
+        // c_stor_name is used as the virtual directory name for the stor CAS module (specifically for its browsing component). Since the c_json schema/structure of each module each app/module is different, we need to make sure to set up the path individually.
+        $this->execute("ALTER TABLE t_worklog_items DROP c_stor_name; ALTER TABLE t_worklog_items ADD c_stor_name VARCHAR(255) GENERATED ALWAYS AS (json_unquote(json_extract(c_json,'$.summary'))) VIRTUAL NOT NULL AFTER c_user_id;");
         $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
     }
 }
