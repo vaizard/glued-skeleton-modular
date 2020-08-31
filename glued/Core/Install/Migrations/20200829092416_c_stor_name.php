@@ -141,39 +141,6 @@ class CStorName extends Phinx\Migration\AbstractMigration
                 'after' => 'c_users_uid',
             ])
             ->save();
-        $this->table('t_stor_objects', [
-                'id' => false,
-                'engine' => 'InnoDB',
-                'encoding' => 'utf8mb4',
-                'collation' => 'utf8mb4_0900_ai_ci',
-                'comment' => 'Content aware storage objects table. An object is a file with a unique sha512 hash (see the c_sha512 generated from c_json).',
-                'row_format' => 'DYNAMIC',
-            ])
-            ->changeColumn('c_sha512', 'char', [
-                'null' => false,
-                'limit' => 128,
-                'collation' => 'utf8mb4_0900_ai_ci',
-                'encoding' => 'utf8mb4',
-                'after' => 'c_json',
-            ])
-            ->save();
-        $this->table('t_worklog_items', [
-                'id' => false,
-                'primary_key' => ['c_uid'],
-                'engine' => 'InnoDB',
-                'encoding' => 'utf8mb4',
-                'collation' => 'utf8mb4_0900_ai_ci',
-                'comment' => 'Sellers are entities who sell stuff at specified conditions (think aliexpress or amazon sellers)',
-                'row_format' => 'DYNAMIC',
-            ])
-            ->changeColumn('c_stor_name', 'string', [
-                'null' => false,
-                'limit' => 255,
-                'collation' => 'utf8mb4_0900_ai_ci',
-                'encoding' => 'utf8mb4',
-                'after' => 'c_user_id',
-            ])
-            ->save();
         $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
     }
 }
