@@ -1,0 +1,51 @@
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive" style="overflow-x: visible;">
+            <table class="table table-sm table-hover" style="min-width: 400px;">
+              <thead>
+                <tr>
+                  <th class="col-sm-1">Type</th>
+                  <th class="col-sm-3">Name</th>
+                  <th class="col-sm-2">Size</th>
+                  <th class="col-sm-2">App</th>
+                  <th class="col-sm-2 d-none d-sm-table-cell">Uploaded</th>
+                  <th class="col-sm-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+
+{% for row in rows %}
+
+<tr role="row" class="odd">
+{% if row.type == 'file' %}
+    <td class="col-sm-1"><i class="fa fa-file"></i></td>
+    <td class="col-sm-3">
+        {{ row.shortcut | raw }}
+    </td>
+    <td class="col-sm-2">{{ row.size }}</td>
+    <td class="col-sm-2">{{ row.path | raw }}</td>
+    <td class="col-sm-2 d-none d-sm-table-cell">{{ row.created }}</td>
+    <td class="col-sm-2">{{ row.action_buttons | raw }}</td>
+{% else %}
+    <td class="col-sm-1"><i class="fa fa-folder"></i></td>
+    <td class="col-sm-3">
+            <a href="" class="stor-shortcuts" data-id="{{ row.shortcut_id }}" data-text="{{ row.shortcut_text }}">
+                <b class="item-title">{{ row.shortcut_title }}</b>
+            </a>
+    </td>
+    <td class="col-sm-2"></td>
+    <td class="col-sm-2"></td>
+    <td class="col-sm-2 d-none d-sm-table-cell"></td>
+    <td class="col-sm-2"></td>
+{% endif %}
+</tr>
+
+{% endfor %}
+
+              </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info" role="alert">{{ debug_vystup }}</div>

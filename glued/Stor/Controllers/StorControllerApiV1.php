@@ -197,20 +197,15 @@ class StorControllerApiV1 extends AbstractTwigController
     // funkce, ktera vraci prvni radek s dvojteckou, patri do browseru
     // davam to do samostatne funkce, protoze to bude pouzite 4x v showFilteredFiles a bude to tak prehlednejsi
     private function firstRowUplinkBrowser($dataID, $dataText) {
-        return '
-            <tr role="row" class="odd">
-                <td class="col-sm-1"><i class="fa fa-folder"></i></td>
-                <td class="col-sm-3">
-                    <a href="" class="stor-shortcuts" data-id="'.$dataID.'" data-text="'.$dataText.'">
-                        <b class="item-title"> .. </b>
-                    </a>
-                </td>
-                <td class="col-sm-2"></td>
-                <td class="col-sm-2"></td>
-                <td class="col-sm-2 d-none d-sm-table-cell"></td>
-                <td class="col-sm-2"></td>
-            </tr>
-        ';
+        
+        $row_data = array(
+            'type' => 'folder',
+            'shortcut_id' => $dataID,
+            'shortcut_text' => $dataText,
+            'shortcut_title' => ' .. '
+        );
+        
+        return $row_data;
     }
     
     // prehled odpovidajicich objektu do modal popupu pro copy/move
@@ -381,6 +376,7 @@ class StorControllerApiV1 extends AbstractTwigController
     public function showFilteredFiles($request, $response)
     {
         $vystup = '';
+        $stor_rows = array();
         $uploader = '';
         $bude_uploader = false;
         
@@ -399,26 +395,6 @@ class StorControllerApiV1 extends AbstractTwigController
         // vrsek vzdy
         // kvuli tomu, ze tu mame dropdown, ktery muze sahat mimo tabulku, dame tam defaultni overflow-x: visible; ktere prebije csskove auto
         // a min width ma responsive table 800px ale to je tady zbytecne moc. prebijeme to 400px
-        $vystup .= '<div class="card">';
-        $vystup .= '
-        <div class="card-body">
-          <div class="table-responsive" style="overflow-x: visible;">
-            <table class="table table-sm table-hover" style="min-width: 400px;">';
-        
-        // header tabulky
-        $vystup .= '
-              <thead>
-                <tr>
-                  <th class="col-sm-1">Type</th>
-                  <th class="col-sm-3">Name</th>
-                  <th class="col-sm-2">Size</th>
-                  <th class="col-sm-2">App</th>
-                  <th class="col-sm-2 d-none d-sm-table-cell">Uploaded</th>
-                  <th class="col-sm-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-        ';
         
         // drive byly nadpisy vyuzite i na trideni, je mozne doplnit
         // onclick="filter_stor_files(\'name\', \''.(($orderby == 'name' and $direction == 'asc')?'desc':'asc').'\', 1);"
@@ -478,48 +454,35 @@ class StorControllerApiV1 extends AbstractTwigController
             // pokud je tam apps, vypiseme jen apps
             if ($je_tam_apps) {
                 // zpet do rootu
-                $vystup .= $this->firstRowUplinkBrowser('', '');
+                $stor_rows[] = $this->firstRowUplinkBrowser('', '');
                 foreach ($app_dirs as $dir => $description) {
                     if (!isset($app_tables[$dir])) { continue; }
-                    $vystup .= '
-                        <tr role="row" class="odd">
-                            <td class="col-sm-1"><i class="fa fa-folder"></i></td>
-                            <td class="col-sm-3">
-                                <a href="" class="stor-shortcuts" data-id="/'.$dir.'/" data-text="/'.$dir.'/">
-                                    <b class="item-title">/'.$dir.'/</b>
-                                </a>
-                            </td>
-                            <td class="col-sm-2"></td>
-                            <td class="col-sm-2"></td>
-                            <td class="col-sm-2 d-none d-sm-table-cell"></td>
-                            <td class="col-sm-2"></td>
-                        </tr>
-                    ';
+                    
+                    $stor_rows[] = array(
+                        'type' => 'folder',
+                        'shortcut_id' => '/'.$dir.'/',
+                        'shortcut_text' => '/'.$dir.'/',
+                        'shortcut_title' => '/'.$dir.'/'
+                    );
                 }
             }
             else if ($jsou_tam_objekty) {   // to znamena ze jsme v jedne app a vypisujeme jeji objekty
                 // nejdriv zpet do app
-                $vystup .= $this->firstRowUplinkBrowser('//', '//apps');
+                $stor_rows[] = $this->firstRowUplinkBrowser('//', '//apps');
                 // nacteme idecka
                 $cols = Array("c_uid", "c_stor_name");
                 $this->db->orderBy("c_uid","asc");
                 $idecka = $this->db->get($app_tables[$objektovy_dir], null, $cols);
                 if ($this->db->count > 0) {
                     foreach ($idecka as $idecko) {
-                        $vystup .= '
-                        <tr role="row" class="odd">
-                            <td class="col-sm-1"><i class="fa fa-folder"></i></td>
-                            <td class="col-sm-3">
-                                <a href="" class="stor-shortcuts" data-id="/'.$objektovy_dir.'/'.$idecko['c_uid'].'" data-text="/'.$objektovy_dir.'/'.$idecko['c_uid'].' - '.$idecko['c_stor_name'].'">
-                                    <b class="item-title">'.$idecko['c_uid'].' - '.$idecko['c_stor_name'].'</b>
-                                </a>
-                            </td>
-                            <td class="col-sm-2"></td>
-                            <td class="col-sm-2"></td>
-                            <td class="col-sm-2 d-none d-sm-table-cell"></td>
-                            <td class="col-sm-2"></td>
-                        </tr>
-                        ';
+                        
+                        $stor_rows[] = array(
+                            'type' => 'folder',
+                            'shortcut_id' => '/'.$objektovy_dir.'/'.$idecko['c_uid'],
+                            'shortcut_text' => '/'.$objektovy_dir.'/'.$idecko['c_uid'].' - '.$idecko['c_stor_name'],
+                            'shortcut_title' => $idecko['c_uid'].' - '.$idecko['c_stor_name']
+                        );
+                        
                     }
                 }
             }
@@ -539,7 +502,7 @@ class StorControllerApiV1 extends AbstractTwigController
                         $uploader_path = $casti[1].'/'.$casti[2];
                     }
                     // jsme v lomitkovem filtru, takze mame nejakou app, pridame prvni radek ktery do ni povede zpet
-                    $vystup .= $this->firstRowUplinkBrowser('/'.$casti[1].'/', '/'.$casti[1].'/');
+                    $stor_rows[] = $this->firstRowUplinkBrowser('/'.$casti[1].'/', '/'.$casti[1].'/');
                 }
                 if (count($pole_useru) > 0) {
                     $this->db->where("c_user_id", $pole_useru[0]);
@@ -605,28 +568,34 @@ class StorControllerApiV1 extends AbstractTwigController
                             // <i class="fa '.$this->container->stor->font_awesome_mime_icon($data['mime']).' fa-2x"></i>
                             // '.$this->container->auth->user_screenname($data['c_owner']).'
                             
-                            $vystup .= '
-                                <tr role="row" class="odd">
-                                    <td class="col-sm-1"><i class="fa fa-file"></i></td>
-                                    <td class="col-sm-3">
-                                        '.(in_array('read', $allowed_global_actions)?'
+                            if (in_array('read', $allowed_global_actions)) {
+                                $shortcut = '
                                         <a href="'.$this->routerParser->urlFor('stor.serve.file', ['id' => $data['c_uid'], 'filename' => $data['c_filename']]).'" class="">
                                             <b id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</b>
                                         </a>
-                                        ':'
-                                            <b id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</b>
-                                        ').'
-                                    </td>
-                                    <td class="col-sm-2">'.$this->stor->human_readable_size($data['size']).'</td>
-                                    <td class="col-sm-2">
+                                ';
+                            }
+                            else {
+                                $shortcut = '
+                                <b id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</b>
+                                ';
+                            }
+                            
+                            $path = '
                                         <a href="" class="stor-shortcuts" data-id="/'.$full_path.'" data-text="/'.$full_path.'">
                                             /'.$full_path.'
                                         </a>
-                                    </td>
-                                    <td class="col-sm-2 d-none d-sm-table-cell">'.$data['c_ts_created'].'</td>
-                                    <td class="col-sm-2">'.$action_dropdown.'</td>
-                                </tr>
                             ';
+                            
+                            $stor_rows[] = array(
+                                'type' => 'file',
+                                'shortcut' => $shortcut,
+                                'size' => $this->stor->human_readable_size($data['size']),
+                                'path' => $path,
+                                'created' => $data['c_ts_created'],
+                                'action_buttons' => $action_dropdown
+                            );
+                            
                         }
                     }
                 }
@@ -637,45 +606,26 @@ class StorControllerApiV1 extends AbstractTwigController
             //$your_screenname = $this->container->auth->user_screenname($your_user_id);
             $your_screenname = 'noob';
             
-            $vystup .= '
-                <tr role="row" class="odd">
-                    <td class="col-sm-1"><i class="fa fa-folder"></i></td>
-                    <td class="col-sm-3">
-                        <a href="" class="stor-shortcuts" data-id="@'.$your_user_id.'" data-text="@'.$your_user_id.' - '.$your_screenname.'">
-                            <b class="item-title">Files I created</b>
-                        </a>
-                    </td>
-                    <td class="col-sm-2"></td>
-                    <td class="col-sm-2"></td>
-                    <td class="col-sm-2 d-none d-sm-table-cell"></td>
-                    <td class="col-sm-2"></td>
-                </tr>
-                
-                <tr role="row" class="odd">
-                    <td class="col-sm-1"><i class="fa fa-folder"></i></td>
-                    <td class="col-sm-3">
-                        <a href="" class="stor-shortcuts" data-id="//" data-text="//apps">
-                            <b class="item-title">Apps</b>
-                        </a>
-                    </td>
-                    <td class="col-sm-2"></td>
-                    <td class="col-sm-2"></td>
-                    <td class="col-sm-2 d-none d-sm-table-cell"></td>
-                    <td class="col-sm-2"></td>
-                </tr>
-            ';
+            $stor_rows[] = array(
+                'type' => 'folder',
+                'shortcut_id' => '@'.$your_user_id,
+                'shortcut_text' => '@'.$your_user_id.' - '.$your_screenname,
+                'shortcut_title' => 'Files I created'
+            );
+            
+            $stor_rows[] = array(
+                'type' => 'folder',
+                'shortcut_id' => '//',
+                'shortcut_text' => '//apps',
+                'shortcut_title' => 'Apps'
+            );
+            
         }
         
-        $vystup .= '</tbody>';
-        $vystup .= '</table>
-          </div>
-        </div>';
-        $vystup .= '</div>';    // .card
-        
         // debug
-        $vystup .= '<div class="alert alert-info" role="alert">filtrovaci json: '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page.'</div>';
+        $vystup .= 'filtrovaci json: '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page.'';
         
-        
+        /*
         // textovy vystup ajaxu nejdriv vyrenderujeme pres view, aby se tam dosadilo csrf pres middleware
         if ($bude_uploader) {
             return $this->render($response, 'Stor/Views/partials/filter-with-upload.twig',
@@ -690,6 +640,17 @@ class StorControllerApiV1 extends AbstractTwigController
                 'vystup' => $vystup
             ));
         }
+        */
+        
+        // vratime to vzdy pres stor_rows
+        return $this->render($response, 'Stor/Views/partials/stor_rows.twig',
+        array(
+                'rows' => $stor_rows,
+                'debug_vystup' => $vystup
+            )
+        );
+        
+        
     }
     
     // mazani ajaxem
