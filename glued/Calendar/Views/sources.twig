@@ -120,7 +120,7 @@
     },
     error: function(res) {
       $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
       $('.toast').toast('show');
     }
   });
@@ -138,7 +138,7 @@
     },
     success: function(res) {
       $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar source") }}' , msg: '{{ __("Saved.") }}' })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Entry updated.") }}' })).appendTo("#toast-placeholder");
       $('.toast').toast('show');
       $('#calendar_sources_update_modal').modal('toggle');
       $('#calendar_sources_placeholder').empty();
@@ -178,7 +178,7 @@
     },
     error: function(res) {
       $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.status })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Calendar sources") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
       $('.toast').toast('show');
     }
   });

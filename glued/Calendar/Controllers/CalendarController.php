@@ -11,6 +11,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Sabre\VObject;
+use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
 use \Opis\JsonSchema\Loaders\File as JSL;
@@ -196,7 +197,27 @@ class CalendarController extends AbstractTwigController
     }
 
     // ==========================================================
-    // SOURCES
+    // SOURCES UI
+    // ==========================================================
+
+    public function sources_list_ui(Request $request, Response $response, array $args = []): Response {
+        // Since we don't have RBAC implemented yet, we're passing all domains
+        // to the view. The view uses them in the form which adds/modifies a view.
+        // 
+        // TODO - write a core function that will get only the domains for a given user
+        // so that we dont copy paste tons of code around and we don't present sources out of RBAC
+        // scope of a user.
+        // 
+        // TODO - preseed domains on installation with at least one domain
+        $domains = $this->db->get('t_core_domains');
+
+        return $this->render($response, 'Calendar/Views/sources.twig', [
+            'domains' => $domains
+        ]);
+    }
+
+    // ==========================================================
+    // SOURCES API
     // ==========================================================
 
     private function sql_sources_list() {
@@ -219,18 +240,6 @@ class CalendarController extends AbstractTwigController
         return $data;
     }
 
-    public function sources_list_ui(Request $request, Response $response, array $args = []): Response {
-        // TODO - write a core function that will get domains for a given user so that we dont copy paste tons of code around (once the oneliner below gets properly expanded)
-        // TODO - preseed domains on installation with at least one domain
-        $domains = $this->db->get('t_core_domains');
-        return $this->render($response, 'Calendar/Views/sources.twig', [
-            'domains' => $domains
-        ]);
-    }
-
-    // ==========================================================
-    // SOURCES API
-    // ==========================================================
 
     public function sources_list(Request $request, Response $response, array $args = []): Response
     {
@@ -256,7 +265,7 @@ class CalendarController extends AbstractTwigController
         $doc = json_decode($doc);
 
         // TODO replace this lame acl with something propper.
-        if($doc->user != $req['user']) { throw new HttpForbiddenException( $request, 'Only own worklog items can be edited.'); }
+        if($doc->user != $req['user']) { throw new HttpForbiddenException( $request, 'You can only edit your own calendar sources.'); }
 
         // Patch old data
         $doc->uri = $req['uri'];
@@ -292,7 +301,7 @@ class CalendarController extends AbstractTwigController
         // TODO check again if user is member of a domain that was submitted
         if ( isset($req['domain']) ) { $req['domain'] = (int) $req['domain']; }
         if ( isset($req['private']) ) { $req['private'] = (bool) $req['private']; }
-        // convert bodyay to object
+        // convert body to object
         $req = json_decode(json_encode((object)$req));
         // TODO replace manual coercion above with a function to recursively cast types of object values according to the json schema object (see below)       
     
