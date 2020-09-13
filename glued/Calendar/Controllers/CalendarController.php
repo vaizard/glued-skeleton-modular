@@ -206,12 +206,12 @@ class CalendarController extends AbstractTwigController
                 t_calendar_sources.c_user_id as 'user',
                 t_core_users.c_name as 'user_name',
                 t_core_domains.c_name as 'domain_name',
-                c_json->>'$.id' as 'id',
-                c_json->>'$._s' as '_s',
-                c_json->>'$._v' as '_v',
-                c_json->>'$.uri' as 'uri',
-                c_json->>'$.name' as 'name',
-                c_json->>'$.driver' as 'driver'
+                t_calendar_sources.c_json->>'$.id' as 'id',
+                t_calendar_sources.c_json->>'$._s' as '_s',
+                t_calendar_sources.c_json->>'$._v' as '_v',
+                t_calendar_sources.c_json->>'$.uri' as 'uri',
+                t_calendar_sources.c_json->>'$.name' as 'name',
+                t_calendar_sources.c_json->>'$.driver' as 'driver'
             FROM `t_calendar_sources` 
             LEFT JOIN t_core_users ON t_calendar_sources.c_user_id = t_core_users.c_uid
             LEFT JOIN t_core_domains ON t_calendar_sources.c_domain_id = t_core_domains.c_uid
