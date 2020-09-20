@@ -72,6 +72,12 @@
     }
   ],
   "scripts": {
+    "configure": [
+        "Glued\\Core\\Install\\ComposerHooks::configTool"
+    ],
+    "migrate": [
+        "php vendor/bin/phinx migrate -e production"
+    ],
     "start": "php -S localhost:8080 -t public",
     "post-update-cmd": [
       "mkdir -p public/assets/js",
@@ -84,7 +90,6 @@
       "chmod 777 private/data",
       "chmod 777 private/locale",
       "chmod 777 private/locale",
-      "Glued\\Core\\Install\\ComposerHooks::configTool",
       "php vendor/bin/phinx migrate -e production"
     ],
     "post-install-cmd": [
