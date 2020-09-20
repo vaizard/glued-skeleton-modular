@@ -41,8 +41,8 @@ class StorInitial extends Phinx\Migration\AbstractMigration
             ->addColumn('c_sha512', 'char', [
                 'null' => false,
                 'limit' => 128,
-                'collation' => 'ascii_general_ci',
-                'encoding' => 'ascii',
+                'collation' => 'utf8mb4_0900_ai_ci',
+                'encoding' => 'utf8mb4',
                 'comment' => 'Assigns a link to a specific object (row in t_stor_objects).',
                 'after' => 'c_inherit_table',
             ])

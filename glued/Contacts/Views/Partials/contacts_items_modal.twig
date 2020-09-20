@@ -10,21 +10,50 @@
       </div>
       <div class="modal-body">
 
+            <form action="{{ url_for('contacts.items.api01') }}" method="post" autocomplete="off" id="{{ contact_items_id }}_form_">
+                <div class="typeahead__container">
+                    <div class="typeahead__field">
+                        <div class="typeahead__query">
+                            <input class="typeahead_new_contact" name="contact_items[query]" placeholder="{{__('Search ...')}}" autocomplete="off">
+                        </div>
+                        <div class="typeahead__button">
+                            <button type="submit">
+                                <i class="typeahead__search-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
           <div class="form-row"> 
            <div class="form-group col-md-6">
             <label>{{ __('Company') }}*</label>
             <div class="input-group">
-              <input type="text" class="form-control" name="uri" id="contacts_items_companyXX">
+              <input type="text" id="contacts_items_org" class="form-control" value="">
             </div>
           </div>
           <div class="form-group col-md-6">
-            <label>{{ __('Street') }}</label>
+            <label>{{ __('Address') }}</label>
             <div class="input-group">
-              <input type="text" class="form-control" name="name">
+              <input type="text" id="contacts_items_adr" class="form-control" value="">
             </div>
           </div>   
         </div>
-
+          <div class="form-row"> 
+           <div class="form-group col-md-6">
+            <label>{{ __('Registered by') }}*</label>
+            <div class="input-group">
+              <input type="text" id="contacts_items_regby" class="form-control" value="">
+            </div>
+          </div>
+          <div class="form-group col-md-6">
+            <label>{{ __('Registration ID') }}</label>
+            <div class="input-group">
+              <input type="text" id="contacts_items_regid" class="form-control" value="">
+            </div>
+          </div>   
+        </div>
         
       </div>
       <div class="modal-footer bg-whitesmoke br">
@@ -37,9 +66,9 @@
 
 
 
-<div class="modal fade" tabindex="-1" role="dialog" id="{{ calendar_sources_id }}_modal" data-backdrop="false">
+<div class="modal fade" tabindex="-1" role="dialog" id="{{ contact_items_id }}_modal" data-backdrop="false">
   <div class="modal-dialog modal-lg" role="document">
-    <form action="{{ url_for('calendar.sources.api01') }}" method="post" autocomplete="off" id="{{ calendar_sources_id }}_form">
+    <form action="{{ url_for('calendar.sources.api01') }}" method="post" autocomplete="off" id="{{ contact_items_id }}_form">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Remote calendar</h5>
@@ -89,4 +118,6 @@
   </form>
 </div>
 </div>
+
+
 

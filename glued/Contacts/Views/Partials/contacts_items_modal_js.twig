@@ -1,0 +1,70 @@
+
+<script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+//
+// Typeahead
+//
+$.typeahead({
+    input: '.typeahead_new_contact',
+    filter: false,
+    minLength: 1,
+    maxItem: 15,
+    dynamic: true,
+    delay: 500,
+    order: "asc", 
+    group: {
+        template: "<span class='badge badge-pill badge-primary'>{{__('Results from')}} {% verbatim %}{{group}}{% endverbatim %}</span>"
+    },
+    maxItemPerGroup: 5,
+    {% verbatim %}
+    emptyTemplate: '{{__("No result for")}} "{{query}}" ',
+    {% endverbatim %}
+    source: {
+        // searching by names
+        cz_names: {
+            display: "org",
+            ajax: function (query) {
+                return {
+                    url: "/api/contacts/search/v1/cz/names/" + query,
+                    path: "data",
+                    type: "GET",
+                }
+            },
+            {% verbatim %}
+            template: function (query, item) {
+                return '<span>' +
+                    '<span class="username">{{org}} <small>({{regid}})</small></span>' +
+                    '<span class="id">({{adr}})</span>' +
+                "</span>";
+            }
+            {% endverbatim %}
+        },
+        // searching by company ids
+        cz_ids: {
+            display: "org",
+            ajax: function (query) {
+                return {
+                    url: "/api/contacts/search/v1/cz/ids/" + query,
+                    path: "data",
+                    type: "GET",
+                }
+            },
+            {% verbatim %}
+            template: function (query, item) {
+                return '<span class="row">' +
+                    '<span class="username">{{org}} <small><b>({{regid}})</b></small></span>' +
+                    '<span class="id">({{adr}})</span>' +
+                "</span>";
+            }
+            {% endverbatim %}
+        }
+    },
+    callback: {
+        onClickAfter: function (node, a, item, event) {
+            $("#contacts_items_org").val(item.org);
+            $("#contacts_items_adr").val(item.adr);
+            $("#contacts_items_regid").val(item.regid);
+            $("#contacts_items_regby").val(item.regby);
+        }
+    }
+});
+</script>

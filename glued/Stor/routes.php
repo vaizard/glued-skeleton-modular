@@ -10,9 +10,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 // Define the app routes.
 
 $app->group('/stor', function (RouteCollectorProxy $group) {
-    // zpracovani uploadu z formu
-    //$this->get('/uploader[/~/{dir}[/{oid:[0-9]+}]]', StorController::class . ':storUploadGui')->setName('stor.uploader');
-    //$this->post('/uploader', StorController::class . ':uploaderSave');
     
     // zakladni stranka s browserem
     $group->get('/browser', StorController::class . ':storBrowserGui')->setName('stor.browser');
@@ -34,6 +31,8 @@ $app->group('/stor', function (RouteCollectorProxy $group) {
     $group->post('/item/copymove', StorController::class . ':itemCopyMove')->setName('stor.item.copy.move');
     
     // funkce na upload post formularem, klasicky reload stranky nebo presmerovani
+    // je jako test pouzito napriklad ve worklog popupu pro upload souboru k zaznamu
+    // je mozne toto casem odbourat a dat vsude ajax. nebo nechat pro specialni pripady.
     $group->post('/uploader', StorController::class . ':uploaderSave')->setName('stor.uploader');
     // upload pres ajax api, taky z post formulare ale bez reloadu stranky, jen vraci nejaky json
     $group->post('/api/v1/uploader', StorControllerApiV1::class . ':uploaderApiSave')->setName('stor.api.uploader');

@@ -14,6 +14,9 @@ use Sabre\VObject;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpForbiddenException;
 use Defr\Ares;
+use Phpfastcache\Helper\Psr16Adapter;
+use Phpfastcache\CacheManager;
+use Phpfastcache\Config\Config;
 // grabbing
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -27,14 +30,6 @@ class ContactsController extends AbstractTwigController
      * @return Response
      */
 
-/*
-
-    private $client;
-    public function __construct(Client $client)
-    {
-        $this->client = $client; // Goutte\Client
-    }
-*/
     public function cz_ares_ids(Request $request, Response $response, array $args = []): Response {
       $ares = new Ares();
       $record = $ares->findByIdentificationNumber($args['id']); 
@@ -84,29 +79,128 @@ class ContactsController extends AbstractTwigController
     }
 
     public function cz_ids(Request $request, Response $response, array $args = []): Response {
-        $builder = new JsonResponseBuilder('contacts.search', 1);
+      $builder = new JsonResponseBuilder('contacts.search', 1);
       $id = $args['id'];
       if (strlen($id) != 8) {
          $payload = $builder->withMessage('Czech company IDs are 8 numbers in total.')->withCode(200)->build();
          return $response->withJson($payload);
       }
-
-      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&ico='.$args['id'].'&polozek=500';
-      
       $result = [];
-      $crawler = $this->goutte->request('GET', $uri);
-      $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
-        $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
-        $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
-        $r['adr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
-        $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
-        $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
-        $result[] = $r;
-        //vatid
-        //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
-      });
+
+
+      //
+      // JUSTICE
+      // 
+      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&ico='.$id.'&polozek=500';
+      $key = 'contacts.cz_ids.justice.'.md5($uri);
+      if ($this->fscache->has($key)) {
+          $result = $this->fscache->get($key);
+      } else {
+          $crawler = $this->goutte->request('GET', $uri);
+          $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result, &$id) {
+              $r['adr'][0]['type'] = 'main';
+              $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
+              $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
+              $r['adr'][0]['unstructured'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
+              $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
+
+              $m_in = [ 'ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince' ];
+              $m_out = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
+              $date = str_replace($m_in, $m_out, $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text());
+              $date = str_replace(".", "", $date);
+              $r['regdt'] = date("Ymd",strtotime($date));
+              $result[] = $r;
+          });
+          $this->fscache->set($key, $result, 3600); // 60 minutes
+      }
+
+
+      //
+      // ADISRWS
+      // 
+      $uri = 'http://adisrws.mfcr.cz/adistc/axis2/services/rozhraniCRPDPH.rozhraniCRPDPHSOAP?wsdl';
+      $key = 'contacts.cz_ids.afisrws.'.md5($uri."&getStatusNespolehlivyPlatceRozsireny&".$id);
+      if ($this->fscache->has($key)) {
+          $arr = $this->fscache->get($key);
+      } else {
+          try {
+              ini_set("default_socket_timeout", "1");  // TODO improve timeouting here
+              $soap = new \SoapClient($uri, array('trace' => true));
+              $data = $soap->__call("getStatusNespolehlivyPlatceRozsireny", array(0 => array($id)));
+              $arr = json_decode(json_encode($data), true);
+          } catch (\SoapFault $e) { 
+              $arr['status']['statusCode'] = 500; 
+          }
+
+          if (($arr['status']['statusCode'] === 0) and strcasecmp($arr['statusPlatceDPH']['nazevSubjektu'], $result[0]['org'])) { 
+              $this->fscache->set($key, $arr, 3600); // 60 minutes
+              $r['adr'][0]['street'] = $arr['statusPlatceDPH']['adresa']['uliceCislo'];
+              $r['adr'][0]['locacity'] = $arr['statusPlatceDPH']['adresa']['mesto'];
+              $r['adr'][0]['zip'] = $arr['statusPlatceDPH']['adresa']['psc'];
+              $r['adr'][0]['country'] = $arr['statusPlatceDPH']['adresa']['stat'];
+              // TODO - add $arr['statusPlatceDPH']['nespolehlivyPlatce'];
+              $i = 0;            
+              foreach ($arr['statusPlatceDPH']['zverejneneUcty']['ucet'] as $ucet) {
+                  $acc[$i]['number'] = $ucet['standardniUcet']['cislo'];
+                  $acc[$i]['bank-code'] = $ucet['standardniUcet']['kodBanky'];
+                  $acc[$i]['country'] = 'CZ';
+                  $acc[$i]['meta'][0]['source'] = 'adisrws.mfcr.cz';
+                  $acc[$i]['meta'][0]['date-published'] = $ucet['datumZverejneni'];
+                  $i++;
+              }
+              $result[0]['acc'] = $acc;
+          }
+      }
+
+
+      //
+      // VREO
+      // 
+      $url = "https://wwwinfo.mfcr.cz/cgi-bin/ares/darv_vreo.cgi?ico=".$id."&jazyk=cz";
+      $key = 'contacts.cz_ids.vreo.'.md5($uri);
+      if ($this->fscache->has($key)) {
+          $data = $this->fscache->get($key);
+      } else {
+          $curl_handle = curl_init();
+          curl_setopt($curl_handle, CURLOPT_URL, $url);
+          curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
+          curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
+          curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0');
+          $data = curl_exec($curl_handle);
+          curl_close($curl_handle);
+          $this->fscache->set($key, $data, 3600); // 60 minutes
+      }
+     
+      $xml = new \SimpleXMLElement($data);
+      $ns = $xml->getNamespaces(true);
+      $are = $xml->children($ns['are']);
+       print("<pre>".print_r($are,true)."</pre>"); 
+      // spojena adresa = label
+      $vreo['ico'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->ICO;
+      $vreo['adr'][0]['country'] = 'Czech republic';
+      $vreo['adr'][0]['type'] = 'main';
+      $vreo['adr'][0]['zip'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->psc;
+      //$vreo['address']['region'] = 'kraj';
+      $vreo['adr'][0]['district'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->okres;
+      $vreo['adr'][0]['locacity'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->okres;
+      $vreo['adr'][0]['quarter'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->castObce;
+      $vreo['adr'][0]['street'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->ulice;
+      $vreo['adr'][0]['street-nr']['cz-p'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->cisloPop;
+      $vreo['adr'][0]['street-nr']['cz-o'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->cisloOr;
+      $vreo['adr'][0]['full'] = $vreo['adr'][0]['street'] . ' ' . $vreo['adr'][0]['street-nr']['cz-p'] . '/' . $vreo['adr'][0]['street-nr']['cz-o'] . ', ' . $vreo['adr'][0]['locacity'] . ', ' . $vreo['adr'][0]['zip'] . $vreo['adr'][0]['country'];
+
+      print_r($vreo);
+      die();
+
+
+      //
+      // RESULT
+      // 
+
       $payload = $builder->withData((array)$result)->withCode(200)->build();
-      return $response->withJson($payload);
+      print_r($payload);
+      //die();
+      //return $response->withJson($payload);
       //print("<pre>".print_r($result,true)."</pre>");
       //return $response;
     }

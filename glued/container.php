@@ -11,6 +11,9 @@ use Monolog\Processor\UidProcessor;
 use Nyholm\Psr7\getParsedBody;
 use Odan\Twig\TwigAssetsExtension;
 use Odan\Twig\TwigTranslationExtension;
+use Phpfastcache\CacheManager;
+use Phpfastcache\Config\Config;
+use Phpfastcache\Helper\Psr16Adapter;
 use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Factory\AppFactory;
@@ -55,6 +58,13 @@ $container->set('db', function (Container $c) {
     return $db;
 });
 
+$container->set('fscache', function () {
+        CacheManager::setDefaultConfig(new Config([
+        "path" => '/var/www/html/glued-skeleton/private/cache/psr16',
+        "itemDetailedDate" => false
+      ]));
+      return new Psr16Adapter('files');
+});
 
 $container->set('antixss', function () {
     return new AntiXSS();
