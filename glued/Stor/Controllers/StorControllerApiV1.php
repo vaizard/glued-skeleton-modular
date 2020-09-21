@@ -513,6 +513,7 @@ class StorControllerApiV1 extends AbstractTwigController
                 if (count($pole_nazvu) > 0) {
                     $this->db->where("c_filename", '%'.$pole_nazvu[0].'%', 'like');
                 }
+                
                 // oderby
                 if ($orderby == 'name') {
                     $this->db->orderBy("c_filename", $direction);
@@ -589,6 +590,11 @@ class StorControllerApiV1 extends AbstractTwigController
                             
                             $stor_rows[] = array(
                                 'type' => 'file',
+                                'uid' => $data['c_uid'],
+                                'sha512' => $data['c_sha512'],
+                                'filename' => $data['c_filename'],
+                                'inherit_object' => $data['c_inherit_object'],
+                                'inherit_table' => $data['c_inherit_table'],
                                 'shortcut' => $shortcut,
                                 'size' => $this->stor->human_readable_size($data['size']),
                                 'path' => $path,
@@ -623,7 +629,7 @@ class StorControllerApiV1 extends AbstractTwigController
         }
         
         // debug
-        $vystup .= 'filtrovaci json: '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page.'';
+        $vystup .= 'filtrovaci json: '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page;
         
         /*
         // textovy vystup ajaxu nejdriv vyrenderujeme pres view, aby se tam dosadilo csrf pres middleware
