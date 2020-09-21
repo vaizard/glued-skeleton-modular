@@ -3,6 +3,7 @@
 use Alcohol\ISO4217;
 use DI\Container;
 use Glued\Core\Classes\Auth\Auth;
+use Glued\Core\Classes\Utils\Utils;
 use Glued\Core\Middleware\TranslatorMiddleware;
 use Glued\Stor\Classes\Stor as StorMainClass;
 use Goutte\Client;
@@ -142,6 +143,10 @@ $container->set('validator', function (Container $c) {
 
 $container->set('auth', function (Container $c) {
     return new Auth($c->get('db'), $c->get('settings'));
+});
+
+$container->set('utils', function (Container $c) {
+    return new Utils($c->get('db'));
 });
 
 // stor trida

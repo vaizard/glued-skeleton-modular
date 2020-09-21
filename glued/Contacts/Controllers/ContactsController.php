@@ -122,6 +122,8 @@ class ContactsController extends AbstractTwigController
       $key = 'contacts.cz_ids.afisrws.'.md5($uri."&getStatusNespolehlivyPlatceRozsireny&".$id);
       if ($this->fscache->has($key)) {
           $arr = $this->fscache->get($key);
+          echo "get from cache";
+          print_r($arr);
       } else {
           try {
               ini_set("default_socket_timeout", "1");  // TODO improve timeouting here
@@ -131,7 +133,8 @@ class ContactsController extends AbstractTwigController
           } catch (\SoapFault $e) { 
               $arr['status']['statusCode'] = 500; 
           }
-
+          //echo "arr zde" ; print_r($arr);die();
+          echo is_soap_fault($soap);
           if (($arr['status']['statusCode'] === 0) and strcasecmp($arr['statusPlatceDPH']['nazevSubjektu'], $result[0]['org'])) { 
               $this->fscache->set($key, $arr, 3600); // 60 minutes
               $r['adr'][0]['street'] = $arr['statusPlatceDPH']['adresa']['uliceCislo'];
@@ -149,8 +152,10 @@ class ContactsController extends AbstractTwigController
                   $i++;
               }
               $result[0]['acc'] = $acc;
+              print_r($acc);die();
           }
       }
+
 
 
       //
@@ -174,22 +179,33 @@ class ContactsController extends AbstractTwigController
       $xml = new \SimpleXMLElement($data);
       $ns = $xml->getNamespaces(true);
       $are = $xml->children($ns['are']);
-       print("<pre>".print_r($are,true)."</pre>"); 
+       //print("<pre>".print_r($are,true)."</pre>"); 
       // spojena adresa = label
-      $vreo['ico'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->ICO;
-      $vreo['adr'][0]['country'] = 'Czech republic';
+      $zu = json_decode(json_encode($are->Odpoved->Vypis_VREO->Zakladni_udaje), true);
+      $vreo['ico'] = $zu['ICO'];
       $vreo['adr'][0]['type'] = 'main';
-      $vreo['adr'][0]['zip'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->psc;
+      $vreo['adr'][0]['country'] = 'Czech republic';
+      $vreo['adr'][0]['zip'] = $zu['Sidlo']['psc'];
       //$vreo['address']['region'] = 'kraj';
-      $vreo['adr'][0]['district'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->okres;
-      $vreo['adr'][0]['locacity'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->okres;
-      $vreo['adr'][0]['quarter'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->castObce;
-      $vreo['adr'][0]['street'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->ulice;
-      $vreo['adr'][0]['street-nr']['cz-p'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->cisloPop;
-      $vreo['adr'][0]['street-nr']['cz-o'] = $are->Odpoved->Vypis_VREO->Zakladni_udaje->Sidlo->cisloOr;
-      $vreo['adr'][0]['full'] = $vreo['adr'][0]['street'] . ' ' . $vreo['adr'][0]['street-nr']['cz-p'] . '/' . $vreo['adr'][0]['street-nr']['cz-o'] . ', ' . $vreo['adr'][0]['locacity'] . ', ' . $vreo['adr'][0]['zip'] . $vreo['adr'][0]['country'];
+      $vreo['adr'][0]['district'] = $zu['Sidlo']['okres'];
+      $vreo['adr'][0]['locacity'] = $zu['Sidlo']['obec'];
+      $vreo['adr'][0]['quarter'] = $zu['Sidlo']['castObce'];
+      $vreo['adr'][0]['street'] = $zu['Sidlo']['ulice'];
+      $vreo['adr'][0]['streetnumber'] = $zu['Sidlo']['cisloOr'];
+      $vreo['adr'][0]['conscriptionnumber'] = $zu['Sidlo']['cisloPop'];
+      //$vreo['adr'][0]['housenumber'] = $zu['Sidlo']['cislo'];
+      $vreo['adr'][0]['full'] = $vreo['adr'][0]['street'] . ' ' . $vreo['adr'][0]['streetnumber'] . '/' . $vreo['adr'][0]['conscriptionnumber'] . ', ' . $vreo['adr'][0]['locacity'] . ', ' . $vreo['adr'][0]['zip'] . ', '. $vreo['adr'][0]['country'];
+      $vreo['adr'][0]['ref:cz.ruian'] = $zu['Sidlo']['ruianKod'];
 
-      print_r($vreo);
+      $i = 0;
+      foreach ($are->Odpoved->Vypis_VREO->Statutarni_organ->Clen as $key => $item) {
+         $vreo['statuotory'][$i] = json_decode(json_encode($item), true);
+         $i++;
+      }
+      
+
+
+      print("<pre>".print_r($vreo,true)."</pre>"); 
       die();
 
 

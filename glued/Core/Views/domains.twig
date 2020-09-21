@@ -13,18 +13,21 @@
                               <label>{{ __('Domain name') }}*</label>
                               <input type="text" class="form-control" name="name" required>
                             </div>
-
+                            <div class="form-group col-md-4">
+                              <label>{{ __('Description') }}*</label>
+                              <input type="text" class="form-control" name="description" required>
+                            </div>
                             <div class="form-group">
-                              <label class="form-label">{{ __('Add to domain after') }}</label>
-                              <div class="selectgroup selectgroup-pills">
-                                <label class="selectgroup-item">
-                                  <input type="checkbox" name="signin" value="true" class="selectgroup-input" disabled="true">
-                                  <span class="selectgroup-button selectgroup-button-icon">signin (autoadd)</span>
-                                </label>
-                                <label class="selectgroup-item">
-                                  <input type="checkbox" name="invite" value="true" class="selectgroup-input" disabled="true">
-                                  <span class="selectgroup-button selectgroup-button-icon">invite</span>
-                                </label>
+                              <label class="form-label">{{ __('Users join domain:') }}</label><br>
+                                <div class="form-check form-check-inline">
+                                <div class="selectgroup-item">
+                                  <input type="radio" id="join_rule_auto" name="join_rule" class="selectgroup-input" checked value="auto">
+                                  <label class="selectgroup-button selectgroup-button-icon" for="join_rule_auto">{{ __('Automatically') }}</label>
+                                </div>
+                                <div class="selectgroup-item">
+                                  <input type="radio" id="join_rule_invite" name="join_rule" class="selectgroup-input"  value="invite">
+                                  <label class="selectgroup-button selectgroup-button-icon" for="join_rule_invite">{{ __('By invitation') }}</label>
+                                </div>
                               </div>
                             </div>
 
@@ -40,18 +43,24 @@
             <table class="table table-hover" id="core-accounts-col">
             <thead>
             <tr>
-                <th>uid</th>
-                <th>ts created</th>
-                <th>ts updated</th>
-                <th>name</th>
+                <th class="col-md-1">uid</th>
+                <th class="col-md-2">ts created</th>
+                <th class="col-md-2">ts updated</th>
+                <th class="col-md-2">name</th>
+                <th class="col-md-3">description</th>
+                <th class="col-md-1">join rule</th>
+                <th class="col-md-1">manage</th>
             </tr>
             </thead>
             {% for domain in domains %}
             <tr>
-                <td>{{ domain.c_uid }}</a></td>
-                <td>{{ domain.c_ts_created }}</a></td>
-                <td>{{ domain.c_ts_updated }}</a></td>
-                <td>{{ domain.c_name }}</a></td>
+                <td>{{ domain.c_uid }}</td>
+                <td>{{ domain.c_ts_created }}</td>
+                <td>{{ domain.c_ts_updated }}</td>
+                <td><b>{{ domain.c_name }}</b></td>
+                <td>{{ domain.c_json | json_decode . description }}</td>
+                <td>{{ domain.c_json | json_decode . join_rule }}</td>
+                <td><a href="#{{ domain.c_uid }}"><i class="fa fa-trash"></i></a></td>
             </tr>
             {% endfor %}
             </table>

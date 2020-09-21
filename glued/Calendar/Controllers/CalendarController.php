@@ -334,6 +334,12 @@ class CalendarController extends AbstractTwigController
 
 
     public function sources_delete(Request $request, Response $response, array $args = []): Response {
+        try { 
+          $this->db->where('c_uid', (int)$args['uid']);
+          $this->db->delete('t_calendar_sources');
+        } catch (Exception $e) { 
+          throw new HttpInternalServerErrorException($request, $e->getMessage());  
+        }
         $builder = new JsonResponseBuilder('calendar.sources', 1);
         $req = $request->getParsedBody();
         $req['user'] = (int)$_SESSION['core_user_id'];
@@ -341,5 +347,4 @@ class CalendarController extends AbstractTwigController
         $payload = $builder->withData((array)$req)->withCode(200)->build();
         return $response->withJson($payload, 200);
     }
-
 }
