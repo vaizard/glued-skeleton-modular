@@ -34,7 +34,6 @@
             
         </div>
     </div>
-    
 </section>
 
 
@@ -67,7 +66,7 @@
 <div class="modal fade" id="modal-edit-stor" tabindex="-1" role="dialog" data-backdrop="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form method="post" action="{{ url_for('stor.uploader.update') }}">
+            <form method="post" action="">
                 <input id="edit_file_uid" type="hidden" value="" />
                 <div class="modal-header">
                     <h4 class="modal-title">Edit file</h4>
@@ -79,7 +78,7 @@
                     <div><input style="width: 100%;" id="edit_file_fname" type="text" value="" /></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="edit_stor_file_ajax();">Change filename</button>
+                    <button id="pop_stor_change_filename_button" type="button" class="btn btn-primary" data-dismiss="modal">Change filename</button>
                 </div>
             </form>
         </div>
@@ -247,22 +246,35 @@
         });
     }
     
-    // funkce, kterou zeditujeme nazev souboru ajaxem a obnovime vypis souboru podle zadaneho filtru
-    function edit_stor_file_ajax() {
+    // callback pro otevreni modalu na zmenu jmena
+    $('#modal-edit-stor').on('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        var button = $(event.relatedTarget);
+        // Extract info from data-* attributes
+        var tmp_uid = button.data("uid");
+        var tmp_fname = button.data("filename");
+        // Update the modal's content.
+        $("#edit_file_uid").val(tmp_uid);
+        $("#edit_file_fname").val(tmp_fname);
+    });
+    
+    // zavolani funkce na zmenu nazvu souboru pres tlacitko
+    $("#pop_stor_change_filename_button").on('click', function() {
         var link_id = $("#edit_file_uid").val();
         var new_fname = $("#edit_file_fname").val();
         $.ajax({
-          url: "{{ url_for('stor.ajax.update') }}",  
+          url: "{{ url_for('stor.ajax.update') }}",
           type: "POST",
           dataType: "text",
           data: { link_id: link_id, new_fname: new_fname },
           success: function(data) {
             // vyhodi nekde hlasku
-            
+            console.log(data);
+            // obnovime vypis souboru podle zadaneho filtru
             filter_stor_files();
           }
         });
-    }
+    });
     
     // cte existujici objekty do modalu pro copy move
     function read_modal_objects() {

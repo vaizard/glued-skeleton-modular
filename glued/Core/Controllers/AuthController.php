@@ -247,7 +247,7 @@ class AuthController extends AbstractTwigController
             
          
             $validation = $this->validator->validate($request, [
-                'password_old' => v::noWhitespace()->notEmpty()->matchesPassword($this->container, $user_id, $auth_id),
+                'password_old' => v::noWhitespace()->notEmpty()->matchesPassword($this->db, $user_id, $auth_id),
                 'password' => v::noWhitespace()->notEmpty(),
             ]);
             
@@ -255,19 +255,20 @@ class AuthController extends AbstractTwigController
             // function won't get exectuted
             if ($validation->failed()) {
                 $this->logger->warn("Password change failed. Validation error.");
-                return $response->withRedirect($this->router->urlFor('auth.settings'));
+                return $response->withRedirect($this->routerParser->urlFor('core.accounts.read.web',['uid' => $user_id]));
             }
             
             // change the password, emit flash message and redirect
-            $this->auth->update_password($uid, $auth_id, $request->getParam('password'));
+            $update = $this->auth->update_password($user_id, $auth_id, $request->getParam('password'));
             
             if (!$update) {
                 $this->logger->warn("Password change failed. DB error.");
-                return $response->withRedirect($this->router->urlFor('auth.settings'));
+                return $response->withRedirect($this->routerParser->urlFor('core.accounts.read.web',['uid' => $user_id]));
             }
             else {
+                $this->logger->info("One password changed.");
                 $this->flash->addMessage('info', 'Your password was changed');
-                return $response->withRedirect($this->router->urlhFor('home'));
+                return $response->withRedirect($this->routerParser->urlFor('core.accounts.read.web',['uid' => $user_id]));
             }
         }
         

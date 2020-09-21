@@ -37,30 +37,22 @@ class DomainsController extends AbstractTwigController
                                ->build();
             return $response->withJson($payload, 400);
         } else {
+            $json = $request->getParsedBody();
+            $json['_v'] = 1;
+            $json['_s'] = 'core/domains';
+            $json = json_encode($json);
             $row = [
                 'c_name' => $request->getParam('name'),
-                'c_user_id' => $_SESSION['core_user_id']
+                'c_user_id' => $_SESSION['core_user_id'],
+                'c_json' => $json
             ];
             print_r($row);
             $id = $this->db->insert('t_core_domains', $row);
             if ($id)
-              echo 'user was created. Id=' . $id;
+                $msg = 'Domain '.$row['c_name'].' was created (id '.$id.')';
             else
-              echo 'insert failed: ' . $this->db->getLastError();      
-
-            /*
-            $flash = [
-                "info" => 'You have been signed up',
-                "info" => 'You have been signed in too'
-            ];
-            $payload = $builder->withFlashMessage($flash)->withCode(200)->build();
-            $this->flash->addMessage('info', __('You were signed up successfully. We signed you in too!'));
-            return $response->withJson($payload, 200);
-            */
-
-
-            return $response;
-
+                $msg = 'Domain creation failed: ' . $this->db->getLastError();
+            return $response->withRedirect($this->routerParser->urlFor('core.domains'));
         }
     }
 

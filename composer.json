@@ -73,7 +73,10 @@
     "geocoder-php/nominatim-provider": "^5.1",
     "phpfastcache/phpfastcache": "^8.0",
     "league/flysystem": "^1.1",
-    "spatie/dropbox-api": "^1.15"
+    "spatie/dropbox-api": "^1.15",
+    "globalcitizen/php-iban": "^4.0",
+    "alcohol/iso4217": "^3.1",
+    "league/omnipay": "^3.0"
   },
   "repositories": [
     {
@@ -102,7 +105,6 @@
       "chmod 777 public/assets/cache",
       "chmod 777 private/cache",
       "chmod 777 private/data",
-      "chmod 777 private/locale",
       "chmod 777 private/locale",
       "php vendor/bin/phinx migrate -e production"
     ],

@@ -1,7 +1,9 @@
 <?php
 
+use Alcohol\ISO4217;
 use DI\Container;
 use Glued\Core\Classes\Auth\Auth;
+use Glued\Core\Classes\Utils\Utils;
 use Glued\Core\Middleware\TranslatorMiddleware;
 use Glued\Stor\Classes\Stor as StorMainClass;
 use Goutte\Client;
@@ -25,14 +27,15 @@ use Symfony\Component\Translation\IdentityTranslator;
 use Symfony\Component\Translation\Loader\MoFileLoader;
 use Symfony\Component\Translation\Translator;
 use Twig\Loader\FilesystemLoader;
+use Twig\TwigFilter;
 use voku\helper\AntiXSS;
 
 
 $container->set('settings', function() {
-    return require_once(__ROOT__ . '/glued/settings.php');
+    return require_once(__ROOT__ . '/config/settings.php');
 });
 
-$container->set(LoggerInterface::class, function (Container $c) {
+$container->set('logger', function (Container $c) {
     $settings = $c->get('settings')['logger'];
     $logger = new Logger($settings['name']);
     $processor = new UidProcessor();
@@ -95,6 +98,9 @@ $container->set('view', function (Container $c) {
     // Add twig exensions here
     $twig->addExtension(new TwigAssetsExtension($environment, (array)$c->get('settings')['assets']));
     $twig->addExtension(new TwigTranslationExtension($c->get(Translator::class)));
+    $environment->addFilter(new TwigFilter('json_decode', function ($string) {
+        return json_decode($string);
+    }));
     return $twig;
 });
 
@@ -120,6 +126,10 @@ $container->set(TranslatorMiddleware::class, static function (Container $contain
 });
 
 
+$container->set('iso4217', function() {
+    return new Alcohol\ISO4217();
+});
+
 // *************************************************
 // GLUED CLASSES ***********************************
 // ************************************************* 
@@ -133,6 +143,10 @@ $container->set('validator', function (Container $c) {
 
 $container->set('auth', function (Container $c) {
     return new Auth($c->get('db'), $c->get('settings'));
+});
+
+$container->set('utils', function (Container $c) {
+    return new Utils($c->get('db'));
 });
 
 // stor trida

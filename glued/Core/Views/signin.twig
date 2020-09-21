@@ -6,7 +6,7 @@
           </div>
           <div class="section-body">
             {% include '/Core/Views/templates/partials/flash.twig' %}
-            <div class="card card-primary col-4">
+            <div class="card card-primary col-lg-4 col-sm-8 col-xs-12">
               <form action="{{ url_for('core.signin.web') }}" method="post" autocomplete="off">
                 <div class="card-header">{{ __('Please provide your details below.')}}&nbsp; <a href="{{ url_for('core.reset.web') }}">{{ __('Forgot your password?') }}</a></div>
                   <div class="card-body pb-0">

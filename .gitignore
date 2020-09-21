@@ -3,7 +3,7 @@
 .tmp
 composer.lock
 coverage
-glued/settings.php
+config/settings.php
 public/assets/node_modules/**
 public/assets/cache/**
 phinx.yml
@@ -12,6 +12,7 @@ private/cache/**
 private/crypto/**
 private/data/**
 private/log/**
+private/backups/**
 vendor
 yarn.lock
 yarn-error.log

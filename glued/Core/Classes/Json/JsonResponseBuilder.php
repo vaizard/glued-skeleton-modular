@@ -16,6 +16,13 @@ class JsonResponseBuilder {
     protected $payload = [];
     
 
+    private function is_json($string) {
+        if (is_string($string)) {
+            json_decode($string);
+            return (json_last_error() == JSON_ERROR_NONE);
+        } 
+        return false;
+    }
 
     public function __construct($api_name, $api_version) {
         if (empty($api_name) or empty($api_version)) { throw new \RuntimeException('API name or version not set.'); }

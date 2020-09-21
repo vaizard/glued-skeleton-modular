@@ -513,6 +513,7 @@ class StorControllerApiV1 extends AbstractTwigController
                 if (count($pole_nazvu) > 0) {
                     $this->db->where("c_filename", '%'.$pole_nazvu[0].'%', 'like');
                 }
+                
                 // oderby
                 if ($orderby == 'name') {
                     $this->db->orderBy("c_filename", $direction);
@@ -556,7 +557,7 @@ class StorControllerApiV1 extends AbstractTwigController
                                           </button>
                                           <div class="dropdown-menu dropleft" x-placement="left-start" style="background-color: #cdd3d8; font-size: 12px;">
                                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#confirm-modal" onclick="$(\'#delete_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-trash-o "></i> Delete</button>
-                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-edit-stor" onclick="$(\'#edit_file_uid\').val('.$data['c_uid'].');var pomucka = $(\'#fname_'.$data['c_uid'].'\').text(); $(\'#edit_file_fname\').val(pomucka);"><i class="fa fa-pencil"></i> Edit</button>
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-edit-stor" data-uid="'.$data['c_uid'].'" data-filename="'.htmlspecialchars($data['c_filename']).'"><i class="fa fa-pencil"></i> Edit</button>
                                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-copy-move-stor" onclick="$(\'#copy_move_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-files-o"></i> Copy/Move</button>
                                           </div>
                                         </div>
@@ -589,6 +590,11 @@ class StorControllerApiV1 extends AbstractTwigController
                             
                             $stor_rows[] = array(
                                 'type' => 'file',
+                                'uid' => $data['c_uid'],
+                                'sha512' => $data['c_sha512'],
+                                'filename' => $data['c_filename'],
+                                'inherit_object' => $data['c_inherit_object'],
+                                'inherit_table' => $data['c_inherit_table'],
                                 'shortcut' => $shortcut,
                                 'size' => $this->stor->human_readable_size($data['size']),
                                 'path' => $path,
@@ -623,7 +629,7 @@ class StorControllerApiV1 extends AbstractTwigController
         }
         
         // debug
-        $vystup .= 'filtrovaci json: '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page.'';
+        $vystup .= 'filtrovaci json: '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page;
         
         /*
         // textovy vystup ajaxu nejdriv vyrenderujeme pres view, aby se tam dosadilo csrf pres middleware
