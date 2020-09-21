@@ -21,13 +21,6 @@ class CoreDomains extends Phinx\Migration\AbstractMigration
                 'comment' => 'Domain json',
                 'after' => 'c_user_id',
             ])
-            ->changeColumn('c_stor_name', 'string', [
-                'null' => true,
-                'limit' => 255,
-                'collation' => 'utf8mb4_0900_ai_ci',
-                'encoding' => 'utf8mb4',
-                'after' => 'c_json',
-            ])
             ->save();
         $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
     }
