@@ -32,7 +32,7 @@ use voku\helper\AntiXSS;
 
 
 $container->set('settings', function() {
-    return require_once(__ROOT__ . '/glued/settings.php');
+    return require_once(__ROOT__ . '/config/settings.php');
 });
 
 $container->set('logger', function (Container $c) {

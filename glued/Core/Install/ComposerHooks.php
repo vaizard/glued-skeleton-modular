@@ -30,7 +30,7 @@ class ComposerHooks
         $fn['pubkey']        = getcwd().'/private/crypto/public.key';
         $fn['geoip-city']    = getcwd().'/private/data/core/maxmind-geolite2-city.mmdb.tar.gz';
         $fn['phinx']         = getcwd().'/phinx.yml';
-        $fn['settings']      = getcwd().'/glued/settings.php';
+        $fn['settings']      = getcwd().'/config/settings.php';
         // get settings interactively
         if ( !file_exists($fn['phinx']) or !file_exists($fn['settings']) ) {
           $ioresp['dbhost'] = $io->ask(">>> Mysql database host [127.0.0.1]: ", "127.0.0.1");
@@ -75,9 +75,9 @@ class ComposerHooks
           exec("php vendor/bin/phinx test -e production");
         }
         if ( !file_exists($fn['settings']) ) {
-          echo "*** Generating /glued/settings.php." . PHP_EOL;
+          echo "*** Generating /config/settings.php." . PHP_EOL;
           $crypto = new Crypto;
-          $str=file_get_contents(getcwd().'/glued/settings.dist.php');
+          $str=file_get_contents(getcwd().'/config/settings.dist.php');
           $str=str_replace("mail-encryption-key", $crypto->genkey_base64(), $str);
           $str=str_replace("reqparams-encryption-key", $crypto->genkey_base64(), $str);
           $str=str_replace("db_host", $ioresp['dbhost'], $str);
@@ -92,7 +92,7 @@ class ComposerHooks
           // Ugly $settings getter without too much work + download uris
           define("__ROOT__", getcwd());
           $_SERVER['SERVER_NAME'] = "(composer)";
-          $settings = require_once(getcwd() . '/glued/settings.php');
+          $settings = require_once(getcwd() . '/config/settings.php');
           $data_uri = 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key='.$settings['geoip']['maxmind_licence_key'].'&suffix=tar.gz';
           $hash_uri = 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key='.$settings['geoip']['maxmind_licence_key'].'&suffix=tar.gz.sha256';
           $hash_file = '';
