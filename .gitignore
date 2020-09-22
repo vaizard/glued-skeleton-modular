@@ -16,3 +16,5 @@ private/backups/**
 vendor
 yarn.lock
 yarn-error.log
+*~
+

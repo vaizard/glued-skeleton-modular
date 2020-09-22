@@ -1,0 +1,26 @@
+version: "3.6"
+
+services:
+    web-interface:
+        build: .
+        ports: 
+            - 8080:80
+        environment:
+            - MYSQL_HOST=mysql
+            - MYSQL_USERNAME=root
+            - MYSQL_PASSWORD=eyeeXei9oSei7ahvo8ahchoh2Iteiwo3
+            - MYSQL_DATABASE=glued
+        volumes:
+            - glued_private:/var/www/glued/private
+            - ./config:/var/www/glued/config
+        depends_on:
+            - mysql
+        command: ["wait-for", "mysql:3306", "--", "start"]
+    mysql:
+        image: mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=eyeeXei9oSei7ahvo8ahchoh2Iteiwo3
+            - MYSQL_DATABASE=glued
+
+volumes:
+    glued_private:

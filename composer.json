@@ -81,19 +81,22 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/vaizard/Ares"
+      "url": "https://github.com/vaizard/Ares",
+      "no-api": true
     },
     { 
       "type": "vcs",
-      "url": "https://github.com/ThingEngineer/PHP-MySQLi-Database-Class"
+      "url": "https://github.com/ThingEngineer/PHP-MySQLi-Database-Class",
+      "no-api": true
     }
   ],
   "scripts": {
     "configure": [
-        "Glued\\Core\\Install\\ComposerHooks::configTool"
+        "Glued\\Core\\Install\\ComposerHooks::configTool",
+        "composer migrate"
     ],
     "migrate": [
-        "php vendor/bin/phinx migrate -e production"
+        "php vendor/bin/phinx migrate -e production --configuration=phinx.yml"
     ],
     "start": "php -S localhost:8080 -t public",
     "post-update-cmd": [
@@ -106,7 +109,7 @@
       "chmod 777 private/cache",
       "chmod 777 private/data",
       "chmod 777 private/locale",
-      "php vendor/bin/phinx migrate -e production"
+      "test -n \"$GLUED_IN_DOCKER\" || composer configure"
     ],
     "post-install-cmd": [
       "mkdir -p public/assets/js",
@@ -118,9 +121,7 @@
       "chmod 777 private/cache",
       "chmod 777 private/data",
       "chmod 777 private/locale",
-      "chmod 777 private/locale",
-      "Glued\\Core\\Install\\ComposerHooks::postInstall",
-      "php vendor/bin/phinx migrate -e production"
+      "chmod 777 private/locale"
     ]
   },
   "extra": {
