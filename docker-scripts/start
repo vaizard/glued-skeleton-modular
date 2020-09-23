@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+
+# Fuj. The app itself should do this
+mkdir -p private/api
+mkdir -p private/backups
+mkdir -p private/cache
+mkdir -p private/crypto
+mkdir -p private/data
+mkdir -p private/locale
+mkdir -p private/log
+
+chmod 777 private/cache
+chmod 777 private/data
+chmod 777 private/locale
+
+chmod -R 777 public/assets/cache
+
+export PHINX_DBHOST=$MYSQL_HOST
+export PHINX_DBNAME=$MYSQL_DATABASE
+export PHINX_DBUSER=$MYSQL_USERNAME
+export PHINX_DBPASS=$MYSQL_PASSWORD
+export PHINX_DBPORT=$MYSQL_PORT
+
+
+composer run-script migrate
+apache2-foreground

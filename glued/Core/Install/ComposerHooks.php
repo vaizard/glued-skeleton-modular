@@ -41,6 +41,7 @@ class ComposerHooks
         if ( !file_exists($fn['privkey']) ) {
           $ioresp['rsabit'] = $io->ask(">>> What rsa key bitsize do you want to use, should be >=1024 [2048]: ", "2048");
         }
+        
         // sanity check
         if ( !file_exists($fn['phinx']) or !file_exists($fn['settings']) ) {
           echo "*** Testing MySQL connection ..." . PHP_EOL;
@@ -54,6 +55,7 @@ class ComposerHooks
           echo "+++ MySQL connection OK to " . mysqli_get_host_info($link) . PHP_EOL;
           mysqli_close($link);
         }
+        
         // do whats missing
         if ( !file_exists($fn['privkey']) ) {
           echo "*** Generating private key, this can take a while. If it goes on for too long, reduce keybit size." . PHP_EOL;
