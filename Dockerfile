@@ -26,7 +26,8 @@ COPY docker/apache-config.conf /etc/apache2/sites-available/glued.conf
 COPY docker/phinx.docker.yml /var/www/glued/phinx.yml
 
 RUN rm /etc/apache2/sites-enabled/* && \
-    ln -s /etc/apache2/sites-available/glued.conf /etc/apache2/sites-enabled/glued.conf
+    ln -s /etc/apache2/sites-available/glued.conf /etc/apache2/sites-enabled/glued.conf && \
+    a2enmod rewrite
 
 # TODO: zdokumentovat volumes
 
