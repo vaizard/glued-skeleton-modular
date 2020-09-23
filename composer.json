@@ -109,7 +109,7 @@
       "chmod 777 private/cache",
       "chmod 777 private/data",
       "chmod 777 private/locale",
-      "test -n \"$GLUED_IN_DOCKER\" || composer configure"
+      "test -n \"$GLUED_IN_DOCKER\" || composer configure < /dev/tty"
     ],
     "post-install-cmd": [
       "mkdir -p public/assets/js",
