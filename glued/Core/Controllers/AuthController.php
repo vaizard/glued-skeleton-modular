@@ -130,12 +130,12 @@ class AuthController extends AbstractTwigController
             $crypto = new Crypto;
             try {
                 $redirect = $crypto->decrypt($enc, $this->settings['crypto']['reqparams']);
-                //if (!$redirect) { $redirect = $this->routerParser->urlFor('core.dashboard.web'); }
+                if (!$redirect) { $redirect = $this->routerParser->urlFor('core.dashboard.web'); }
             } catch (Exception $e) {
-                //$redirect = $this->routerParser->urlFor('core.dashboard.web');
+                $redirect = $this->routerParser->urlFor('core.dashboard.web');
             }
         } else {
-            //$redirect = $this->routerParser->urlFor('core.dashboard.web'); 
+            $redirect = $this->routerParser->urlFor('core.dashboard.web'); 
         }
 
 
