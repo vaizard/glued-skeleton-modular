@@ -69,13 +69,14 @@ class JsonResponseBuilder {
     }
 
     public function withCode(int $code) {
-        $status[200] = 'success';
-        $status[201] = 'created';
-        $status[400] = 'bad request';
-        $status[401] = 'unauthorized';
-        $status[403] = 'forbidden';
-        $status[404] = 'not found';
-        $status[500] = 'internal server error';
+        $status[200] = 'Success';
+        $status[201] = 'Created';
+        $status[400] = 'Bad request';
+        $status[401] = 'Unauthorized';
+        $status[403] = 'Forbidden';
+        $status[404] = 'Not found';
+        $status[429] = 'Too many requests';
+        $status[500] = 'Internal server error';
         if (!array_key_exists($code, $status)) { $status[$code] = "unknown"; }
         $this->setProperty('status', $status[$code]);
         return $this->setProperty('code', $code);

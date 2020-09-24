@@ -85,7 +85,7 @@
 
       $("#signup_form").ajaxSubmit({
           success: function(res) {
-              window.location.replace('//{{ server_name}}{{ url_for('core.web') }}');
+              window.location.reload();
           },
           error: function(res) {
               $("div.twigjs").each(function() {

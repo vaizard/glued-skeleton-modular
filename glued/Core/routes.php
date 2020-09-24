@@ -38,13 +38,13 @@ $app->group('/core', function (RouteCollectorProxy $route) {
         $route->get ('/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); return $response; }) -> setName('core.admin.phpconst.web');
     })->add(RedirectGuests::class);
     $route->group('', function ($route) {
-        $route->get ('/signin', AuthController::class . ':signin_get')->setName('core.signin.web');
+        $route->get ('/signin', AuthController::class . ':signin_get')->setName('core.signin.web')->add(RedirectAuthenticated::class);
         $route->post('/signin', AuthController::class . ':signin_post');
         $route->post('/api/signin', AuthController::class . ':jwt_signin_post');
-        $route->get ('/reset', AuthController::class . ':reset_get')->setName('core.reset.web');
+        $route->get ('/reset', AuthController::class . ':reset_get')->setName('core.reset.web')->add(RedirectAuthenticated::class);
         $route->post('/reset', AuthController::class . ':reset_post');
-        $route->get ('/signup', AuthController::class . ':signup_get')->setName('core.signup.web');
-    })->add(RedirectAuthenticated::class);
+        $route->get ('/signup', AuthController::class . ':signup_get')->setName('core.signup.web')->add(RedirectAuthenticated::class);;
+    });
 });
 // We have to have $app->post('/core/signup') outside the RedirectAuthenticated, becuase user gets signed in upon signup.
 // Since the signup page submits data with ajax, the json response will get replaced with the redirect prematurely.

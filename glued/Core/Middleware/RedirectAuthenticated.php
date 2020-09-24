@@ -19,7 +19,7 @@ class RedirectAuthenticated extends AbstractMiddleware
     {
         $response = $handler->handle($request);
         if ($this->auth->check()) {
-            $this->flash->addMessage('info', __('You can\'t do this right now unless you log out. Going back to the dashboard.'));
+            $this->flash->addMessage('info', __('You have been signed up and signed in.'));
             return $response->withHeader('Location',$this->routerParser->urlFor('core.dashboard.web') )->withStatus(302);
         }
         return $response;

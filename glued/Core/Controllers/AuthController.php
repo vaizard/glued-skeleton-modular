@@ -124,16 +124,20 @@ class AuthController extends AbstractTwigController
         // errors caused by a truncated get paramter (i.e. user copying an incomplete
         // link and using it later/elsewhere). The if (!redirect) deals with garbled
         // get param (i.e. string length is correct, but user changed a letter or two).
-        $redirect = $this->routerParser->urlFor('core.dashboard.web'); 
+
+
         if ($enc = $request->getParam('redirect')) {
             $crypto = new Crypto;
             try {
                 $redirect = $crypto->decrypt($enc, $this->settings['crypto']['reqparams']);
-                if (!$redirect) { $redirect = $this->routerParser->urlFor('core.dashboard.web'); }
+                //if (!$redirect) { $redirect = $this->routerParser->urlFor('core.dashboard.web'); }
             } catch (Exception $e) {
-                $redirect = $this->routerParser->urlFor('core.dashboard.web');
+                //$redirect = $this->routerParser->urlFor('core.dashboard.web');
             }
+        } else {
+            //$redirect = $this->routerParser->urlFor('core.dashboard.web'); 
         }
+
 
     /* START OF THE JWT BLOCK */
         $now = new \DateTime();
@@ -165,7 +169,7 @@ class AuthController extends AbstractTwigController
 
     public function signup_get($request, $response)
     {
-        return $this->view->render($response, 'Core/Views/signup.twig', [ 'server_name' => $_SERVER['SERVER_NAME'] ]);
+        return $this->view->render($response, 'Core/Views/signup.twig', []);
     }
 
 
