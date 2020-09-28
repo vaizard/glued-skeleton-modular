@@ -14,7 +14,9 @@
     "currency",
     "name",
     "description",
-    "config"
+    "config",
+    "color",
+    "icon"
   ],
   "additionalProperties": false,
   "properties": {
@@ -119,6 +121,26 @@
         "token": "some-token-here"
       }],
       "additionalProperties": true
+    },
+    "color": {
+      "$id": "#/properties/color",
+      "type": "string",
+      "title": "The color schema",
+      "description": "Account color.",
+      "default": "",
+      "examples": [
+        "#0A6A07"
+      ]
+    },
+    "icon": {
+      "$id": "#/properties/icon",
+      "type": "string",
+      "title": "The icon schema",
+      "description": "Account icon.",
+      "default": "",
+      "examples": [
+        "ghost"
+      ]
     }
   }
 }

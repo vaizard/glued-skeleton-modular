@@ -3,36 +3,54 @@
     <form action="{{ url_for('fin.accounts.api01') }}" method="post" autocomplete="off" id="{{ fin_accounts_id }}_form">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Account</h5>
+          <h5 class="modal-title">{{ __('Account') }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
 
-
-
           <div class="form-row"> 
-
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-3">
               <label>{{ __('Type') }}*</label><br>
-              <select class="form-control select2" name="type" id="fin_accounts_form_type" required style="width: 100%">
+              <select class="form-control select2" name="type" id="{{ fin_accounts_id }}_form_type" required style="width: 100%">
                 <option value="cash">{{ __('Cash account') }}</option>
                 <option value="fio_cz">{{ __('Bank account') }} / fio.cz</option>
                 <option value="transferwise_com">{{ __('Bank account') }} / transferwise.com</option>
               </select>
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-3">
               <label>{{ __('Main currency') }}</label>
-              <select class="form-control select2" name="currency" required style="width: 100%" id="fin_accounts_form_currency">
+              <select class="form-control select2" name="currency" id="{{ fin_accounts_id }}_form_currency" required style="width: 100%" >
                 {% for cur in currencies %}
                 <option value="{{ cur.alpha3 }}">{{ cur.alpha3 }} / {{ cur.name }}</option>
                 {% endfor %}
               </select>
             </div>
 
-          </div>   
+            <div class="form-group col-md-3">
+              <label>{{ __('Color') }}</label>
+              <div class="input-group">
+                <input type="text" class="colorpickerinput form-control" name="color" id="{{ fin_accounts_id }}_form_color" required>
+              </div>
+            </div>
 
+            <div class="form-group col-md-3">
+              <label>{{ __('Icon') }}*</label><br>
+              <select class="form-control select2" name="icon" id="{{ fin_accounts_id }}_form_icon" required style="width: 100%">
+                <option value="circle">{{ __('Circle') }}</option>
+                <option value="ghost">{{ __('Ghost') }}</option>
+                <option value="frog">{{ __('Frog') }}</option>
+                <option value="leaf">{{ __('Leaf') }}</option>
+                <option value="paw">{{ __('Paw') }}</option>
+                <option value="fire">{{ __('Fire') }}</option>
+                <option value="ice-cream">{{ __('Ice cream') }}</option>
+                <option value="pastafarianism">{{ __('Spagetti monster') }}</option>
+                <option value="hat-wizard">{{ __('Wizard hat') }}</option>
+              </select>
+            </div>
+          </div>
+   
           <div class="form-row"> 
             <div class="form-group col-md-6">
               <label>{{ __('Name') }}*</label>
@@ -61,7 +79,7 @@
           <div class="form-group col-md-12">
             <label>{{ __('Configuration') }}*</label><br>
             <div class="input-group">
-              <textarea class="col-md-12" name="config" id="fin_accounts_form_config" rows="6"></textarea>
+              <textarea class="col-md-12" name="config" id="{{ fin_accounts_id }}_form_config" rows="6"></textarea>
             </div>
           </div>
         </div>

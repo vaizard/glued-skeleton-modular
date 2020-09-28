@@ -1,9 +1,9 @@
-<div class="modal fade" tabindex="-1" role="dialog" id="{{ fin_accounts_id }}_modal" data-backdrop="false">
+<div class="modal fade" tabindex="-1" role="dialog" id="{{ fin_trx_id }}_modal" data-backdrop="false">
   <div class="modal-dialog modal-lg" role="document">
-    <form action="{{ url_for('fin.accounts.api01') }}" method="post" autocomplete="off" id="{{ fin_accounts_id }}_form">
+    <form action="{{ url_for('fin.trx.api01') }}" method="post" autocomplete="off" id="{{ fin_trx_id }}_form">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">{{ __('Account') }}</h5>
+          <h5 class="modal-title">{{ __('Transaction') }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>

@@ -18,6 +18,7 @@ use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Symfony\Component\DomCrawler\Crawler;
+use Glued\Fin\Classes\Utils as FinUtils;
 require_once(__ROOT__ . '/vendor/globalcitizen/php-iban/php-iban.php');
 
 class FinController extends AbstractTwigController
@@ -30,250 +31,142 @@ class FinController extends AbstractTwigController
      * @return Response
      */
 
-    private function cz_valid_bank_account($accNumber) {
-        $matches = [];
-        if (!preg_match('/^(?:([0-9]{1,6})-)?([0-9]{2,10})\/([0-9]{4})$/', $accNumber, $matches)) {
-            return false;
-        }
-        $weights = [6, 3, 7, 9, 10, 5, 8, 4, 2, 1];
-        $prefix = str_pad($matches[1], 10, '0', STR_PAD_LEFT);
-        $main   = str_pad($matches[2], 10, '0', STR_PAD_LEFT);
-        // Check prefix
-        $checkSum = 0;
-        for ($i=0; $i < strlen($prefix); $i++) {
-            $checkSum += $weights[$i] * (int)$prefix[$i];
-        }
-        if ($checkSum % 11 !== 0) {
-            return false;
-        }
-        // Check main part
-        $checkSum = 0;
-        for ($i=0; $i < strlen($main); $i++) {
-            $checkSum += $weights[$i] * (int)$main[$i];
-        }
-        if ($checkSum % 11 !== 0) {
-            return false;
-        }
-        return true;
-    }
-
-    private function cz_number_to_iban(string $accNumber, string $countryCode = 'CZ'): ?string {
-        if(!$this->cz_valid_bank_account($accNumber)
-            || !in_array($countryCode, ['CZ', 'SK'])
-            || !preg_match('/^(?:([0-9]{2,6})-)?([0-9]{2,10})\/([0-9]{4})$/', $accNumber, $matches)
-        ) {
-            return null;
-        }
-        $bban = $matches[3].str_pad($matches[1], 6, '0', STR_PAD_LEFT).str_pad($matches[2], 10, '0', STR_PAD_LEFT);
-        $iban = 'CZ' . '00' . $bban;
-        $iban = iban_set_checksum($iban);
-        if (verify_iban($iban,$machine_format_only=true)) {
-            return $iban;
-        } else {
-            return false;
-        }
-    }
 
 
 
 
     public function accounts_sync(Request $request, Response $response, array $args = []): Response {
 
+      // Args & init
+      $builder = new JsonResponseBuilder('fin.sync.banks', 1);
+      if (!array_key_exists('uid', $args)) {
+        $payload = $builder->withMessage(__('Syncing multiple accounts not supported (yet).'))->withCode(500)->build();
+        return $response->withJson($payload); 
+      }
       $account_uid = (int)$args['uid'];
+      
+
+      // Fetch (locally stored) account properties
       $this->db->where('c_uid', $account_uid);
-      $obj = $this->db->getOne('t_fin_accounts', ['c_json', 'c_ts_synced']);
-      $doc = json_decode($obj['c_json'], true);
-      $doc['synced'] = $obj['c_ts_synced'];
+      $account_obj = $this->db->getOne('t_fin_accounts', ['c_json', 'c_ts_synced']);
+      if (!is_array($account_obj)) {
+        $payload = $builder->withMessage(__('Account not found.'))->withCode(404)->build();
+        return $response->withJson($payload);
+      }
+      $account = json_decode($account_obj['c_json'], true);
+      $account['synced'] = $account_obj['c_ts_synced'];
+
+
+      // Fetch all (locally stored) transactions
+      $this->db->where('c_account_id', $account_uid);
+      $this->db->orderBy('c_trx_dt', 'Desc');
+      $this->db->orderBy('c_ext_trx_id', 'Desc');
+      $local_trxs = $this->db->get('t_fin_trx', null, ['c_trx_dt','c_ext_trx_id']);
+
+
+      // Throttle in case of too many requests
+      $t1 = new \DateTime($account['synced']);
+      $t2 = new \Datetime();
+      $tdiff = ($t1)->diff($t2)->format('%s');
+      if ($tdiff < 30) { 
+        // TODO replace hard throttling with queuing
+        $payload = $builder->withMessage(__('Account synchronization throttled. Please retry in: ').(30 - $tdiff).' '.__('seconds').print_r($t1).' '.print_r($t2))->withCode(429)->build();
+        return $response->withJson($payload);
+      }
+
+
+      // Set the fetch intervals & update sync time in account properties
+      $date_from = (string)(new \DateTime($args['from'] ?? $local_trxs[0]['c_trx_dt'] ?? '2000-01-01'))->modify('-1 day')->format('Y-m-d');
+      $date_to = (string)($args['to'] ?? date('Y-m-d'));
       $this->db->where('c_uid', $account_uid);
-      $this->db->update('t_fin_accounts', ['c_ts_synced' => $this->db->now() ]);
+      $this->db->update('t_fin_accounts', [ 'c_ts_synced' => $this->db->now() ]);
 
-      $date_from = (string)isset($args['from']) ?? '2020-01-01';
-      $date_to   = (string)$args['to'] ?? date('Y-m-d');
+      // FIO.CZ ACCOUNTS ================================================
 
-      die();
-      $uri = 'https://www.fio.cz/ib_api/rest/periods/'.$doc['config']['token'].'/2020-01-01/2020-08-08/transactions.json';
-      $curl_handle = curl_init();
-      $curl_options = array_replace( $this->settings['curl'], [ CURLOPT_URL => $uri ] );
-      curl_setopt_array($curl_handle, $curl_options);
+      if ($account['type'] === 'fio_cz') {
+        // Get transactions from the api, return tranactions not known locally
+        $uri = 'https://www.fio.cz/ib_api/rest/periods/'.$account['config']['token'].'/'.$date_from.'/'.$date_to.'/transactions.json';
+        $data = (array)json_decode($this->utils->fetch_uri($uri), true);
+        if (!array_key_exists('accountStatement', $data)) { throw new HttpInternalServerErrorException( $request, __('Syncing with remote server failed.')); }
+        $fin = new FinUtils();
+        $data = $fin->fio_cz($data['accountStatement']['transactionList']['transaction'], $local_trxs);
 
-      $ext_types = [
-        'Příjem převodem uvnitř banky' => [
-          'electronic' => 1,
-          'flow' => 'i',
-          'withinbank' => 1,
-          'dscr' => 'Inbound electronic transfer within the bank',
-        ],
-        'Platba převodem uvnitř banky' => [
-          'electronic' => 1,
-          'flow' => 'o',
-          'withinbank' => 1,
-          'dscr' => 'Outbound electronic transfer within the bank',
-        ],
-        'Vklad pokladnou' => [
-          'bank-cashier' => 1,
-          'flow' => 'i',
-          'dscr' => 'Deposit at the cashier',
-        ],
-        'Výběr pokladnou' => [
-          'bank-cashier' => 1,
-          'flow' => 'o',
-          'dscr' => 'Deposit at the cashier',
-        ],
-        'Bezhotovostní příjem' => [
-          'electronic' => 1,
-          'flow' => 'i',
-          'dscr' => 'Inbound electronic transfer',
-        ],
-        'Bezhotovostní platba' => [
-          'electronic' => 1,
-          'flow' => 'o',
-          'dscr' => 'Outbound electronic transfer',
-        ],
-        'Platba kartou' => [
-          'electronic' => 1,
-          'card' => 1,
-          'flow' => 'o',
-          'dscr' => 'Card payment',
-        ],
-        'Poplatek' => [
-          'electronic' => 1,
-          'fee' => 1,
-          'flow' => 'o',
-          'dscr' => 'Fee',
-        ],
-        'Platba v jiné měně' => [
-          'electronic' => 1,
-          'flow' => 'o',
-          'fx' => 1,
-          'dscr' => 'Outbound electronic transfer in foreign currency',
-        ],
-        'Poplatek - platební karta' => [
-          'electronic' => 1,
-          'fee' => 1,
-          'card' => 1,
-          'flow' => 'o',
-          'dscr' => 'Fee (card services)',
-        ],
-        'Inkaso' => [
-          'electronic' => 1,
-          'cash-collect' => 1,
-          'flow' => 'o',
-          'dscr' => 'Cash collection',
-        ],
-        'Okamžitá příchozí platba' => [
-          'electronic' => 1,
-          'flow' => 'i',
-          'instant' => 1,
-          'dscr' => 'Inbound instant electronic transfer',
-        ],
-        'Okamžitá odchozí platba' => [
-          'electronic' => 1,
-          'flow' => 'o',
-          'instant' => 1,
-          'dscr' => 'Outbound instant electronic transfer',
-        ],
-      ];
-
-      $data = (array)json_decode(curl_exec($curl_handle), true);
-      foreach ($data['accountStatement']['transactionList']['transaction'] as $trx) {
-          $trx = (array)$trx;
-          $helper = [];
-          //print_r($trx);
-          //die();
-          $helper['uuid'] = sodium_bin2base64(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES), SODIUM_BASE64_VARIANT_URLSAFE);
-          $helper['order']['uuid'] = sodium_bin2base64(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES), SODIUM_BASE64_VARIANT_URLSAFE);
-          $helper['order']['created_by_name'] = $trx['column9']['value'] ?? '';
-          $helper['order']['created_by_uid'] = "";
-          $helper['order']['created_dt'] = "";
-          $helper['order']['authed_by_name'] = $trx['column9']['value'] ?? '';
-          $helper['order']['authed_by_uid'] = "";
-          $helper['order']['authed_dt'] = "";
-          $helper['dt'] = (new \DateTime($trx['column0']['value']))->format(DATE_W3C);
-          $helper['volume'] = $trx['column1']['value'];
-          $helper['currency'] = $trx['column14']['value'];
-          if (verify_iban($trx['column2']['value'] ?? '',$machine_format_only=true)) {
-              $helper['offset']['account_iban'] = $trx['column2']['value'];
-              $helper['offset']['bank_bic'] = $trx['column26']['value'] ?? '';
-              $helper['intl']['volume'] = (float)explode(' ', (string)$trx['column18']['value'] ?? '')[0];
-              $helper['intl']['currency'] = explode(' ', (string)$trx['column18']['value'] ?? '')[1];
-              if (((float)$helper['intl']['volume'] ?? 0) != 0) {
-                 $helper['intl']['rate'] = abs($helper['volume'] / ((float)$helper['intl']['volume']));
-              }
-          } else {
-              $helper['offset']['name'] = '';
-              $helper['offset']['address'] = '';
-              $helper['offset']['id'] = '';
-              $helper['offset']['uid'] = '';
-              $helper['offset']['bank_name'] = $trx['column12']['value'] ?? '';
-              $helper['offset']['bank_address'] = '';
-              $helper['offset']['bank_code'] = $trx['column3']['value'] ?? '';
-              $helper['offset']['bank_bic'] = $trx['column26']['value'] ?? '';
-              $helper['offset']['account_number'] = $trx['column2']['value'] ?? '';
-              $helper['offset']['account_name'] = $trx['column10']['value'];
-              $helper['offset']['account_iban'] = $this->cz_number_to_iban($helper['offset']['account_number'].'/'.$helper['offset']['bank_code']);
-          }
-          $helper['ref']['variable'] = $trx['column5']['value'] ?? '';
-          $helper['ref']['specific'] = $trx['column6']['value'] ?? '';
-          $helper['ref']['internal'] = $trx['column7']['value'] ?? ''; // uziv. identifikace
-          $helper['ref']['constant'] = $trx['column4']['value'] ?? '';
-          $helper['message'] = $trx['column16']['value'] ?? ''; // to recipient
-          $helper['comment'] = $trx['column25']['value'] ?? ''; // lokal koment
-          $helper['specification'] = $trx['column18']['value'] ?? '';  // upřesnění (cizoměn)
-          $helper['ext']['trx_id'] = $trx['column22']['value'];
-          $helper['ext']['order_id'] = $trx['column17']['value'] ?? ''; 
-          $helper['ext']['order_by'] = $trx['column9']['value'] ?? ''; 
-          $helper['ext']['type'] = $trx['column8']['value'] ?? ''; // type
-          if (array_key_exists($helper['ext']['type'], $ext_types)) {
-              $helper['type'] = $ext_types[$helper['ext']['type']];  
-          } else {
-              $flow = 'i';
-              if ($helper['volume'] > 0) {
-                  $flow = 'i';
-              } 
-              if ($helper['volume'] < 0) {
-                  $flow = 'o';
-              }
-              $helper['type'] = [
-                  'dscr' => 'Other / unknown',
-                  'flow' => $flow,
+        // Insert new transactions
+        foreach ($data as $helper) {       
+              $insertdata[] = [
+                "c_json" => json_encode($helper),
+                "c_account_id" => $account_uid
               ];
-          }
-              
-          $final[] = $helper;
-          $data = Array ("c_json" => json_encode($helper),
-                         "c_account_id" => $account_uid    // TODO add foreign index
-                         //"createdAt" => $db->now(),
-                         //"updatedAt" => $db->now(),
-          );
-          $updateColumns = Array ("c_ts_modified");
-          $lastInsertId = "c_uid";
-          //$this->db->onDuplicate($updateColumns, $lastInsertId);
-          $id = $this->db->insert ('t_fin_trx', $data);
-          //echo "<br>".$this->db->getLastError();
-          
+        }
+        if (isset($insertdata)) {
+          $ids = $this->db->insertMulti('t_fin_trx', $insertdata);
+        }
 
+        // Respond to client
+        $msg = (isset($ids) ? count($ids).' items synced.' : 'Even with remote source, nothing to sync.');
+        $payload = $builder->withMessage($msg)->withData((array)$data)->withCode(200)->build();
+        return $response->withJson($payload);
+      } 
+
+      // LOCAL ACCOUNTS ================================================
+
+      else {
+        $payload = $builder->withMessage('Primary account data held locally, nothing to sync.')->withCode(200)->build();
+        return $response->withJson($payload);
+      }
+    }
+
+
+    public function trx_list(Request $request, Response $response, array $args = []): Response {
+      $builder = new JsonResponseBuilder('fin.trx', 1);
+
+      if (array_key_exists('uid', $args)) {
+        $trx_uid = (int)$args['uid'];
+        //$this->db->where('c_account_id', $account_uid);
+        // TODO get access from rbac middleware here
+      } else {
+        // TODO get allowed IDs from rbac middleware here and construct $this->db->where() accordingly
       }
       
-      curl_close($curl_handle);
-      //die();
-      $builder = new JsonResponseBuilder('fin.sync.banks', 1);
-      $data = $final;
-      $payload = $builder->withData((array)$data)->withCode(200)->build();
+      // TODO seriously perf optimize the shit out of this
+      //      - drop the JSON_MERGE and add the c_uid on insert
+      //      - drop the json_decode and withJson, just add a json output to the JsonResponseBuilder and use relevant headers
+      //      
+      // SELECT JSON_ARRAYAGG(JSON_MERGE(t_fin_trx.c_json,JSON_OBJECT('id',t_fin_trx.c_uid),JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'),JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'),JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon'))) FROM t_fin_trx LEFT JOIN t_fin_accounts ON t_fin_trx.c_account_id = t_fin_accounts.c_uid ORDER BY c_trx_dt DESC, c_ext_trx_id DESC 
+
+      $this->db->orderBy('t_fin_trx.c_trx_dt', 'Desc');
+      $this->db->orderBy('t_fin_trx.c_ext_trx_id', 'Desc');
+      $this->db->join('t_fin_accounts', 't_fin_trx.c_account_id = t_fin_accounts.c_uid', 'LEFT');
+      $json = "JSON_ARRAYAGG(JSON_MERGE(t_fin_trx.c_json, JSON_OBJECT('id',t_fin_trx.c_uid), JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'), JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'), JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon')))";
+      $json = "JSON_MERGE(t_fin_trx.c_json, JSON_OBJECT('id',t_fin_trx.c_uid), JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'), JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'), JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon'))";
+      $result = $this->db->get('t_fin_trx', null, [ $json ]);
+      $key = array_keys($result[0])[0];
+      $data = [];
+      foreach ($result as $obj) {
+        $data[] = json_decode($obj[$key]);
+      }
+      $payload = $builder->withData($data)->withCode(200)->build();
       return $response->withJson($payload);
-
-    }
-    public function trx_list(Request $request, Response $response, array $args = []): Response {
-        $builder = new JsonResponseBuilder('fin.trx.list', 1);
-        $search_string = $args['name'];
-        $result = 'aha';
-      $payload = $builder->withData((array)$result)->withCode(200)->build();
-      print_r($payload);
-      //die();
-      //return $response->withJson($payload);
-      //print("<pre>".print_r($result,true)."</pre>");
-      //return $response;
     }
 
+
+    public function trx_list_ui(Request $request, Response $response, array $args = []): Response {
+        // Since we don't have RBAC implemented yet, we're passing all domains
+        // to the view. The view uses them in the form which adds/modifies a view.
+        // 
+        // TODO - write a core function that will get only the domains for a given user
+        // so that we dont copy paste tons of code around and we don't present sources out of RBAC
+        // scope of a user.
+        // 
+        // TODO - preseed domains on installation with at least one domain
+        $domains = $this->db->get('t_core_domains');
+        $accounts = $this->db->where('c_json->>"$.type" = \'cash\'')->get('t_fin_accounts', null, ['c_uid as id', 'c_json->>"$.name" as name', 'c_json->>"$.currency" as currency']);
+        return $this->render($response, 'Fin/Views/trx.twig', [
+            'domains' => $domains,
+            'accounts' => $accounts,
+            'currencies' => $this->iso4217->getAll()
+        ]);
+    }
 
     // ==========================================================
     // ACCOUNTS UI
@@ -312,6 +205,8 @@ class FinController extends AbstractTwigController
                 t_fin_accounts.c_json->>'$.type' as 'type',
                 t_fin_accounts.c_json->>'$.currency' as 'currency',
                 t_fin_accounts.c_json->>'$.name' as 'name',
+                t_fin_accounts.c_json->>'$.color' as 'color',
+                t_fin_accounts.c_json->>'$.icon' as 'icon',
                 t_fin_accounts.c_json->>'$.description' as 'description',
                 t_fin_accounts.c_json->>'$.config' as 'config',
                 t_fin_accounts.c_ts_synced as 'ts_synced'
@@ -355,31 +250,28 @@ class FinController extends AbstractTwigController
         $doc->description = $req['description'];
         $doc->name = $req['name'];
         $doc->type = $req['type'];
+        $doc->color = $req['color'];
+        $doc->icon = $req['icon'];
         $doc->domain = (int)$req['domain'];
-        //$doc->config = json_decode($req['config']);
-
         if (array_key_exists('config', $req)) {
           $config = json_decode(trim($req['config']), true);
           if (json_last_error() !== 0) throw new HttpBadRequestException( $request, __('Config contains invalid json.'));
-          $doc->config = $config;
+          $doc->config = (object)$config;
         } else { $doc->config = new \stdClass(); }
         if (!array_key_exists('currency', $req)) { $doc->currency = ''; }
 
         // TODO if $doc->domain is patched here, you have to first test, if user has access to the domain
 
         // load the json schema and validate data against it
-
         $loader = new JSL("schema://fin/", [ __ROOT__ . "/glued/Fin/Controllers/Schemas/" ]);
         $schema = $loader->loadSchema("schema://fin/accounts.v1.schema");
         $result = $this->jsonvalidator->schemaValidation($doc, $schema);
-print_r($result); die();
         if ($result->isValid()) {
             $row = [ 'c_json' => json_encode($doc) ];
             $this->db->where('c_uid', $req['id']);
             $id = $this->db->update('t_fin_accounts', $row);
             if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating of the account failed.')); }
         } else { throw new HttpBadRequestException( $request, __('Invalid account data.')); }
-
 
         // Success
         $payload = $builder->withData((array)$req)->withCode(200)->build();
@@ -390,7 +282,7 @@ print_r($result); die();
     public function accounts_post(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('fin.accounts', 1);
         $req = $request->getParsedBody();
-        
+
         if (array_key_exists('config', $req)) {
           $config = json_decode(trim($req['config']), true);
           if (json_last_error() !== 0) throw new HttpBadRequestException( $request, __('Config contains invalid json.'));

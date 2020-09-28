@@ -7,8 +7,6 @@
 </div>
 
 <div class="section-body">
-
-
   <div class="row">
     <div class="col-12">
       <div class="card">
@@ -30,14 +28,14 @@
                 {% verbatim %}
                 <script type="text/twig" id="fin_accounts_obj_twig">
                 <tr id="fin_accounts_object_{{ row.id }}">
-                  <td class="col-sm-1">{{ row.id }} <a href="{% endverbatim %}{{ url_for('fin.accounts.sync.api01') }}{% verbatim %}/{{ row.id }}"><i class="fas fa-sync"></a></i></td>
+                  <td class="col-sm-1">{{ row.id }} <a href="{% endverbatim %}{{ url_for('fin.accounts.sync.api01') }}{% verbatim %}/{{ row.id }}"><i class="fas fa-sync"></i></a></td>
                   <td class="col-sm-1">{{ row.domain_name }} ({{ row.domain }})</td>
                   <td class="col-sm-1">{{ row.type }}</td>
-                  <td class="col-sm-2">{{ row.name }}</td>
+                  <td class="col-sm-2"><i class="fas fa-{{ row.icon }}" style="color: {{ row.color }}; padding-right: 1em;"></i>{{ row.name }}</td>
                   <td class="col-sm-1">{{ row.currency }}</td>
                   <td class="col-sm-4">{{ row.description }}</td>
                   <td class="col-sm-1">
-                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_accounts_update_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-currency="{{ row.currency }}" data-description="{{ row.description }}" data-config="{{ row.config }}"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_accounts_delete_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }} data-currency="{{ row.currency }}"><i class="fas fa-trash"></i></button>
+                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_accounts_update_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-currency="{{ row.currency }}" data-description="{{ row.description }}" data-config="{{ row.config }}" data-icon="{{ row.icon }}" data-color="{{ row.color }}"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_accounts_delete_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }}" data-currency="{{ row.currency }}"><i class="fas fa-trash"></i></button>
                   </td>
                 </tr>
                 </script>
@@ -65,8 +63,13 @@
 {# twig.js initialized in public/assets/js/glued.js #}
 <script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
 
+  $(".colorpickerinput").colorpicker({
+    format: 'hex',
+    component: '.input-group-append',
+  });
+
   //
-  // Onload ajax to fetch calendar data
+  // Onload ajax to fetch account data
   // 
   $( document ).ready(function() {
     $.ajax({
@@ -88,9 +91,11 @@
     modal.find('.modal-title').text('{{ __("Edit account") }} ' + e.data('id'));
     modal.find('.modal-dialog form').attr('action', '{{ url_for("fin.accounts.api01") }}/' + e.data('id') );
     modal.find('.modal-body input[name="name"]').val(e.data('name'));
-    modal.find('.modal-body input[name="type"]').val(e.data('type'));
+    modal.find('.modal-body input[name="type"]').val(e.data('type')); // TODO wrong selector, need to add prop selected to select option
+    modal.find('.modal-body input[name="icon"]').val(e.data('icon'));
+    modal.find('.modal-body input[name="color"]').val(e.data('color'));
     modal.find('.modal-body input[name="description"]').val(e.data('description'));
-    modal.find('.modal-body input[name="currency"]').val(e.data('currency'));
+    modal.find('.modal-body .fin_accounts_update_form_currency option[value=CZK]').attr('selected','selected'); // TODO make this selector work, replace fixed value with value from e.data()
     modal.find('.modal-body textarea[name="config"]').text(JSON.stringify(e.data('config')));
   });
 
@@ -105,7 +110,7 @@
     var e = $(event.relatedTarget) // event which triggered the modal
     modal.find('.modal-title').text('{{ __("Delete account") }} ' + e.data('id'));
     modal.find('.modal-dialog form').attr('action', '{{ url_for("fin.accounts.api01") }}/' + e.data('id') );
-    modal.find('.modal-body').text('{{ __("Do you really want to delete the calendar:") }} ' + e.data('name') + ' (' + e.data('type') + ' ' + e.data('currency') + ')?');
+    modal.find('.modal-body').text('{{ __("Do you really want to delete the account:") }} ' + e.data('name') + ' (' + e.data('type') + ' ' + e.data('currency') + ')?');
   });
 
   //
