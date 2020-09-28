@@ -52,16 +52,16 @@ class WorklogController extends AbstractTwigController
                 t_worklog_items.c_user_id as 'user',
                 t_core_users.c_name as 'user_name',
                 t_core_domains.c_name as 'domain_name',
-                c_json->>'$._s' as '_s',
-                c_json->>'$._v' as '_v',
-                c_json->>'$.summary' as 'summary',
-                c_json->>'$.date' as 'date',
-                c_json->>'$.time' as 'time',
-                c_json->>'$.location' as 'location',
-                c_json->>'$.status' as 'status',
-                c_json->>'$.private' as 'private',
-                c_json->>'$.finished' as 'finished',
-                c_json->>'$.project' as 'project'
+                t_worklog_items.c_json->>'$._s' as '_s',
+                t_worklog_items.c_json->>'$._v' as '_v',
+                t_worklog_items.c_json->>'$.summary' as 'summary',
+                t_worklog_items.c_json->>'$.date' as 'date',
+                t_worklog_items.c_json->>'$.time' as 'time',
+                t_worklog_items.c_json->>'$.location' as 'location',
+                t_worklog_items.c_json->>'$.status' as 'status',
+                t_worklog_items.c_json->>'$.private' as 'private',
+                t_worklog_items.c_json->>'$.finished' as 'finished',
+                t_worklog_items.c_json->>'$.project' as 'project'
             FROM `t_worklog_items` 
             LEFT JOIN t_core_users ON t_worklog_items.c_user_id = t_core_users.c_uid
             LEFT JOIN t_core_domains ON t_worklog_items.c_domain_id = t_core_domains.c_uid
