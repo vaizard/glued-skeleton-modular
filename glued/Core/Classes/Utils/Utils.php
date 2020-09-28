@@ -12,9 +12,9 @@ class Utils
     protected $settings;
 
 
-    public function __construct($db) { //, $settings) {
+    public function __construct($db, $settings) {
         $this->db = $db;
-//        $this->settings = $settings;
+        $this->settings = $settings;
     }
 
 
@@ -28,6 +28,15 @@ class Utils
         }
         if ($err === 0) { $this->db->commit(); } else { $this->db->rollback(); throw new \Exception(__('Database error: ')." ".$err." ".$this->db->getLastError()); }
         return (int)$id;
+    }
+
+    public function fetch_uri($uri) {
+        $curl_handle = curl_init();
+        $curl_options = array_replace( $this->settings['curl'], [ CURLOPT_URL => $uri ] );
+        curl_setopt_array($curl_handle, $curl_options);
+        $data = curl_exec($curl_handle);
+        curl_close($curl_handle);
+        return $data;
     }
 
 

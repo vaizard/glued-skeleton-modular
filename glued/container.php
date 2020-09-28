@@ -146,7 +146,7 @@ $container->set('auth', function (Container $c) {
 });
 
 $container->set('utils', function (Container $c) {
-    return new Utils($c->get('db'));
+    return new Utils($c->get('db'), $c->get('settings'));
 });
 
 // stor trida

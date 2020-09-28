@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>{{ pageTitle }}</title>
+  <title>Glued / {{ pageTitle }}</title>
   <!-- CSS Files -->
   {{ assets({files: [
     '@public/assets/node_modules/bootstrap/dist/css/bootstrap.min.css',
@@ -13,6 +13,8 @@
     '@public/assets/node_modules/stisla/assets/css/components.css',
     '@public/assets/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css',
     '@public/assets/node_modules/datatables.net-select-bs4/css/select.bootstrap4.min.css',
+    '@public/assets/node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css',
+    '@public/assets/node_modules/bootstrap-timepicker/css/bootstrap-timepicker.min.css',
     '@public/assets/css/glued.css',
     ], name: 'styles'}) }}
 </head>
@@ -145,6 +147,7 @@
                 <li><a class="nav-link" href="/tutorial/01">Controllers</a></li>
               </ul>
             </li>
+          </ul>
             {% endif %}
         </aside>
       </div>
@@ -188,7 +191,9 @@
     '@public/assets/node_modules/moment/min/moment.min.js',
     '@public/assets/node_modules/datatables.net/js/jquery.dataTables.min.js',
     '@public/assets/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.min.js',
-    '@public/assets/node_modules/datatables.net-select-bs4/js/select.bootstrap4.min.js'
+    '@public/assets/node_modules/datatables.net-select-bs4/js/select.bootstrap4.min.js',
+    '@public/assets/node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js',
+    '@public/assets/node_modules/bootstrap-timepicker/js/bootstrap-timepicker.min.js'
     ], name: 'stisla-general.js', nonce: csp_nonce.script_src, inline: false}) }}
 
   {{ assets({files: [
