@@ -39,9 +39,9 @@ class CalendarController extends AbstractTwigController
     // EVENTS
     // ==========================================================
 
-    public function sources_sync(Request $request, Response $response, array $args = []): Response
-    {
+    public function sources_sync(Request $request, Response $response, array $args = []): Response {
 
+        // Get info about calendar
         // TODO add rbac here
         $this->db->where('c_uid', (int)$args['uid']);
         $source = $this->db->getOne('t_calendar_sources');
@@ -51,32 +51,29 @@ class CalendarController extends AbstractTwigController
             return $response->withJson($payload);
         }
 
+        $t_remote = microtime(true);
         $uri = json_decode($source['c_json'], true)['uri'];
         $calendar = VObject\Reader::read( fopen( $uri, 'r' ) );
+        echo 'read remote: '.(microtime(true)-$t_remote);
+        set_time_limit(300);
 
-        $min_start = false;
-        $max_end = false;
-        $carb_now = Carbon::now();
-        $table = 't_calendar_objects';
 
- /*
-        $i = 1;
-        foreach($calendar->vevent as $event) {
-            print_r($event->serialize()); 
-            echo '<br><br>';
-            $i++;
-        }
-*/
-
-        //print_r((array)$calendar->vevent[1]);
-        //echo $calendar->serialize();
-    //    return $response;    
         foreach($calendar->vevent as $event) {
 
-            // pregen json
-            $object = null;
-            unset($event->DTSTAMP); // current grabbing timestamp. keeping this would mean you cant hash-compare
+            // (Re)initialize helper variables and unset Google specific noise
+            $curr = null;
+            $test = null;
+            $updt = true;
+            $json = [];
+            $new = [];
+            $new_rev = [];
+            $revs = [];
 
+            // Unset noise
+            unset($event->DTSTAMP); // current timestamp (of grabbing the ical from remote)
+            unset($event->VALARM);  // we don't support importing alarms ATM
+
+            // Standardize data
             $json['uid'] = (string)$event->uid;
             $json['recurrence-id'] = (string)$event->recurrence_id;
             $json['created'] = (string)$event->created;
@@ -91,77 +88,76 @@ class CalendarController extends AbstractTwigController
             $json['exdate'] = json_encode($event->exdate);
             $json['location'] = (string)$event->location;
             $json['sequence'] = (string)$event->sequence;
-            $json['attach'] = (array)($event->attach);
+            $json['attach'] = (string)($event->attach);
             if (empty($json['dtend'])) { $json['dtend'] = (string)$event->dtstart; }
 
-            echo "<br>------------------------------";
-            echo (string)$event->uid;
-            echo " ";
-            echo $event->attach;
+            // We keep track of changes in ical events. With every sync,
+            // the raw data of updated events will be stored as new revisions.
+            // Every revision is identified by its timestamp and hash too.
+            $new_rev['ts'] = time();
+            $new_rev['data'] = (string)$event->serialize();
+            $new_rev['hash'] = hash('sha256', $new_rev['data']);
 
-            if ((string)$event->uid == "857pobo94q3377f4u2foct4024@google.com") { echo(json_encode( $event->attach )); }
-            // tady udelej test na to jestli je rrul, rdate, exrule, exdate objekt
-            // pak prijde recurreccneid do unikatniho identifikatoru, nastavuj ho asi vzdy? nebo jen kdyz je nastavene?
-
-            //if is_object($event->attach) {
-            //foreach ($event->attach as $x) { echo $x; }
-            //}
-            // pregen row to compare against database and eventually upsert
-            $row['c_object'] = (string)$event->serialize();
-            $row['c_object_hash'] = hash('sha256', $row['c_object']);
-            $row['c_json'] = json_encode($json);
-            $rev[time()] = $row['c_object'];
-
-            // get object from db, if we already habe it
+            // Get event from db, if we already habe it
             $this->db->where('c_source_id', (int)$args['uid']);
             $this->db->where('c_object_uid', (string)$event->uid);
-            $object = $this->db->getOne('t_calendar_objects');
+            $curr = $this->db->getOne('t_calendar_objects');
 
-            if ($object) {
+            if ($curr) {
                 // uptdate branch
-                if ($row['c_object_hash'] != $object['c_object_hash']) {
-                    // there is stuff to update
-                    // dtstamp!!!
-                    echo "<br><br>";
-                    echo $row['c_object_hash']."<br>";
-                    echo $object['c_object_hash']."<br>OBJECT OLD START<br>";
-                    echo $row['c_object']."<br>OBJECT OLD END<br>OBJECT NEW START<br>";
-                    echo $object['c_object']."<br>OBJECT NEW END";
-                    if ($row['c_json'] == $object['c_json']) { echo "same"; }
-                    $row['c_revision_counter'] = $object['c_revision_counter'] + 1;
-                    //$row['c_revisions'] = json_encode($rev); // todo, zde pridej revizi
-                    print_r('<br/>UPDTATING... <br>New value is:<br>'. $row['c_json'].'<br>old is:<br>'.$object['c_json']);
+                if ($new_rev['hash'] != $curr['c_object_hash']) {
+
+                    // update only when the hash of the new event revision
+                    // is unknown (an unknown revision)
+                    // TODO this may break if someone changes event A to B and back to A (relies on remote setting the $event->last_modified correctly)
+                    $revs = json_decode($curr['c_revisions'], true);
+                    foreach ($revs as $test) {
+                        if ($test['hash'] == $new_rev['hash']) { $updt = false; }
+                    }
+                    
+                    if ($updt == true) {
+                        $revs[] = $new_rev;
+                        $json['id'] = $curr['c_uid'];
+                        $new['c_json'] = json_encode($json);
+                        $new['c_revision_counter'] = $curr['c_revision_counter'] + 1;
+                        $new['c_revisions'] = json_encode($revs);
+                        $new['c_object_hash'] = $new_rev['hash'];
+                        $this->db->where('c_uid', $curr['c_uid']);
+                        $this->db->update('t_calendar_objects', $new);
+                    }
+
                 } else {
+
                     // do nothing, we got current data in db already
-                    //print_r('<br/>KEEP '. $row['c_json']);
+                    
                 }
             } else {
                 // create branch
-                    // default values
-                    $row['c_attr'] = '{}';
-                    $row['c_revisions'] = json_encode($rev);
-                    $row['c_revision_counter'] = 1;
-                    $row['c_source_id'] = (int)$args['uid'];
-                    $row['c_object_uid'] = $json['uid'];
-                    print_r('<br/>INST '. $row['c_json']);
-                    try { $row_ins = $this->sql_insert_with_json($table, $row); } catch (Exception $e) { 
-                        throw new HttpInternalServerErrorException($request, $e->getMessage());  
-                    }
-
+                $new['c_attr'] = '{}';
+                $new['c_json'] = json_encode($json);
+                $revs[] = $new_rev;
+                $new['c_revisions'] = json_encode($revs);
+                $new['c_revision_counter'] = 0;
+                $new['c_source_id'] = (int)$args['uid'];
+                $new['c_object_uid'] = $json['uid'];
+                $new['c_object_hash'] = $new_rev['hash'];
+                $new['c_object'] = 'prc';
+                $new['c_object_sequence'] = $json['sequence'];
+                echo " <i style='color: green;'>insert done</i>";
+                try { $new_ins = $this->sql_insert_with_json('t_calendar_objects', $new); } catch (Exception $e) { 
+                    throw new HttpInternalServerErrorException($request, $e->getMessage());  
+                }
             }
 
             // TODO check for deleted events
 
-
-            
+         
 
             
             /*
-            
-
-
-*/
-/*
+        $min_start = false;
+        $max_end = false;            
+        $carb_now = Carbon::now();
             $uid = (string)$event->created.(string)$event->uid;
             $carb_created = Carbon::createFromFormat('Ymd\THis\Z', (string)$event->created);
             $events[$uid]['start'] = strtotime((string)$event->dtstart);
