@@ -229,12 +229,12 @@ class StorController extends AbstractTwigController
     public function itemCopyMove($request, $response)
     {
         $link_id = (int) $request->getParam('file_id');
-        $actual_dir = $request->getParam('actual_dir'); // jen v uploaderu
+        $actual_dir = $request->getParam('actual_dir'); // jen v uploaderu (ten jeste existuje?)
         $action_type = $request->getParam('action_type');
         $target_dir = $request->getParam('target_dir');
         $target_object_id = $request->getParam('target_object_id');
-        $set_new_owner = (int) $request->getParam('set_new_owner'); // 1 - system, 2 - prihlaseny, 3 - nemenit
-        $action_source = $request->getParam('action_source');   // jen v browseru
+        $set_new_owner = (int) $request->getParam('set_new_owner'); // 1 - system select, 2 - prihlaseny, 3 - nemenit
+        $action_source = $request->getParam('action_source');   // jen v browseru (je to volane i odjinud?)
         
         // nacteme si to z containeru ktery to ma ze tridy
         $app_dirs = $this->stor->app_dirs;

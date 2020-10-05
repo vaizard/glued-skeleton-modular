@@ -558,7 +558,7 @@ class StorControllerApiV1 extends AbstractTwigController
                                           <div class="dropdown-menu dropleft" x-placement="left-start" style="background-color: #cdd3d8; font-size: 12px;">
                                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#confirm-modal" onclick="$(\'#delete_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-trash-o "></i> Delete</button>
                                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-edit-stor" data-uid="'.$data['c_uid'].'" data-filename="'.htmlspecialchars($data['c_filename']).'"><i class="fa fa-pencil"></i> Edit</button>
-                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-copy-move-stor" onclick="$(\'#copy_move_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-files-o"></i> Copy/Move</button>
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-copy-move-stor" data-uid="'.$data['c_uid'].'"><i class="fa fa-files-o"></i> Copy/Move</button>
                                           </div>
                                         </div>
                                     </div>
