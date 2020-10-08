@@ -144,7 +144,7 @@ class Utils
         $helper['order']['audit_by_uid'] = "";
         $helper['order']['audit_dt'] = "";
         $helper['order']['audit_note'] = "";
-        $helper['dt'] = (new \DateTime()->format(DATE_W3C);
+        $helper['dt'] = (new \DateTime())->format(DATE_W3C);
         $helper['volume'] = $trx['column1']['value'];
         $helper['currency'] = $trx['column14']['value'];
         $helper['offset']['name'] = '';
