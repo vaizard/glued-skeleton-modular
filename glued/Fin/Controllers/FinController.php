@@ -70,7 +70,7 @@ class FinController extends AbstractTwigController
       $tdiff = ($t1)->diff($t2)->format('%s');
       if ($tdiff < 30) { 
         // TODO replace hard throttling with queuing
-        $payload = $builder->withMessage(__('Account synchronization throttled. Please retry in: ').(30 - $tdiff).' '.__('seconds').print_r($t1).' '.print_r($t2))->withCode(429)->build();
+        $payload = $builder->withMessage(__('Account synchronization throttled [t1 = '.(string)$t1.', t2 = '.(string)$t2.', tdiff = '.(string)$tdiff.']. Please retry in: ').(30 - $tdiff).' '.__('seconds').print_r($t1).' '.print_r($t2))->withCode(429)->build();
         return $response->withJson($payload);
       }
 
@@ -89,7 +89,7 @@ class FinController extends AbstractTwigController
         $data = (array)json_decode($this->utils->fetch_uri($uri), true);
         if (!array_key_exists('accountStatement', $data)) { throw new HttpInternalServerErrorException( $request, __('Syncing with remote server failed.')); }
         $fin = new FinUtils();
-        $data = $fin->fio_cz($data['accountStatement']['transactionList']['transaction'], $local_trxs);
+        $data = $fin->fio_cz($data['accountStatement']['transactionList']['transaction'], [ 'account_id' => $account_uid ], $local_trxs);
 
         // Insert new transactions
         foreach ($data as $helper) {       
@@ -100,7 +100,10 @@ class FinController extends AbstractTwigController
         }
         if (isset($insertdata)) {
           $ids = $this->db->insertMulti('t_fin_trx', $insertdata);
+          $query = 'UPDATE `t_fin_trx` SET `c_json` = JSON_SET(`c_json`, "$.id", `c_uid`) WHERE (NOT `c_uid` = c_json->>"$.id") or (NOT JSON_CONTAINS_PATH(c_json, "one", "$.id"));';
+          $this->db->rawQuery($query);
         }
+
 
         // Respond to client
         $msg = (isset($ids) ? count($ids).' items synced.' : 'Even with remote source, nothing to sync.');
@@ -137,8 +140,7 @@ class FinController extends AbstractTwigController
       $this->db->orderBy('t_fin_trx.c_trx_dt', 'Desc');
       $this->db->orderBy('t_fin_trx.c_ext_trx_id', 'Desc');
       $this->db->join('t_fin_accounts', 't_fin_trx.c_account_id = t_fin_accounts.c_uid', 'LEFT');
-      $json = "JSON_ARRAYAGG(JSON_MERGE(t_fin_trx.c_json, JSON_OBJECT('id',t_fin_trx.c_uid), JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'), JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'), JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon')))";
-      $json = "JSON_MERGE(t_fin_trx.c_json, JSON_OBJECT('id',t_fin_trx.c_uid), JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'), JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'), JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon'))";
+      $json = "JSON_MERGE(t_fin_trx.c_json, JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'), JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'), JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon'))";
       $result = $this->db->get('t_fin_trx', null, [ $json ]);
       $key = array_keys($result[0])[0];
       $data = [];
@@ -346,6 +348,48 @@ class FinController extends AbstractTwigController
         return $response->withJson($payload, 200);
     }
 
+
+
+    public function trx_post(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('fin.accounts', 1);
+        $req = $request->getParsedBody();
+
+        $meta['user_id'] = (int)$_SESSION['core_user_id'];
+        $fin = new FinUtils();
+        $data = $fin->cash($req['data'], [ 'user_id' => (int)$_SESSION['core_user_id'] ], $req);
+        // convert body to object
+        //$req = json_decode(json_encode((object)$req));
+  
+        // TODO replace manual coercion above with a function to recursively cast types of object values according to the json schema object (see below)       
+    
+        // load the json schema and validate data against it
+        /*
+        $loader = new JSL("schema://fin/", [ __ROOT__ . "/glued/Fin/Controllers/Schemas/" ]);
+        $schema = $loader->loadSchema("schema://fin/accounts.v1.schema");
+        $result = $this->jsonvalidator->schemaValidation($req, $schema);
+
+        if ($result->isValid()) {
+          */
+            $row = array (
+                //'c_domain_id' => (int)$req->domain, 
+                'c_account_id' => (int)$data[0]['account_id'],
+                'c_user_id' => (int)$meta['user_id'],
+                'c_json' => json_encode($data[0]),
+            );
+            try { $this->utils->sql_insert_with_json('t_fin_trx', $row); } catch (Exception $e) { 
+                throw new HttpInternalServerErrorException($request, $e->getMessage());  
+            }
+            $payload = $builder->withData((array)$req)->withCode(200)->build();
+            return $response->withJson($payload, 200);
+       /* } else {
+            $reseed = $request->getParsedBody();
+            $payload = $builder->withValidationReseed($reseed)
+                               ->withValidationError($result->getErrors())
+                               ->withCode(400)
+                               ->build();
+            return $response->withJson($payload, 400);
+        }*/
+    }
 
 
 
