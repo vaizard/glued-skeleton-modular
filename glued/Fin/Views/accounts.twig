@@ -91,12 +91,11 @@
     modal.find('.modal-title').text('{{ __("Edit account") }} ' + e.data('id'));
     modal.find('.modal-dialog form').attr('action', '{{ url_for("fin.accounts.api01") }}/' + e.data('id') );
     modal.find('.modal-body input[name="name"]').val(e.data('name'));
-    //modal.find('.modal-body input[name="type"]').val(e.data('type')); // TODO wrong selector, need to add prop selected to select option
     modal.find('.modal-body #fin_accounts_update_form_type').val(e.data('type')).trigger('change');
-    modal.find('.modal-body input[name="icon"]').val(e.data('icon'));
+    modal.find('.modal-body #fin_accounts_update_form_icon').val(e.data('icon')).trigger('change');
     modal.find('.modal-body input[name="color"]').val(e.data('color'));
     modal.find('.modal-body input[name="description"]').val(e.data('description'));
-    modal.find('.modal-body .fin_accounts_update_form_currency option[value=CZK]').attr('selected','selected'); // TODO make this selector work, replace fixed value with value from e.data()
+    modal.find('.modal-body #fin_accounts_update_form_currency').val(e.data('currency')).trigger('change');
     modal.find('.modal-body textarea[name="config"]').text(JSON.stringify(e.data('config')));
   });
 
