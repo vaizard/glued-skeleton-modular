@@ -255,7 +255,7 @@ class FinController extends AbstractTwigController
         $doc->color = $req['color'];
         $doc->icon = $req['icon'];
         $doc->domain = (int)$req['domain'];
-        if (array_key_exists('config', $req)) {
+        if (array_key_exists('config', $req) and ($req['config'] != "")) {
           $config = json_decode(trim($req['config']), true);
           if (json_last_error() !== 0) throw new HttpBadRequestException( $request, __('Config contains invalid json.'));
           $doc->config = (object)$config;

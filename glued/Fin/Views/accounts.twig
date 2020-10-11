@@ -96,7 +96,7 @@
     modal.find('.modal-body input[name="color"]').val(e.data('color'));
     modal.find('.modal-body input[name="description"]').val(e.data('description'));
     modal.find('.modal-body #fin_accounts_update_form_currency').val(e.data('currency')).trigger('change');
-    modal.find('.modal-body textarea[name="config"]').text(JSON.stringify(e.data('config')));
+    modal.find('.modal-body #fin_accounts_update_form_config').text(JSON.stringify(e.data('config')));
   });
 
   $('#fin_accounts_create_modal').on('show.bs.modal', function (event) {
