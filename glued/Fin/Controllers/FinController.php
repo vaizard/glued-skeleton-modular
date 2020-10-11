@@ -308,7 +308,7 @@ class FinController extends AbstractTwigController
         $schema = $loader->loadSchema("schema://fin/accounts.v1.schema");
         $result = $this->jsonvalidator->schemaValidation($req, $schema);
 
-        if ($result->isValid()) {
+        if ($result->isValid()) {   // TODO, tohle nejak nejede   or true
             $row = array (
                 'c_domain_id' => (int)$req->domain, 
                 'c_user_id' => (int)$req->user,
