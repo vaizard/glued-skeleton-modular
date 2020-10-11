@@ -176,6 +176,7 @@ $app->get ('/core/admin/playground', function(Request $request, Response $respon
             });
         </script>
         ';
+        // https://www.srijan.net/blog/integrating-google-sheets-with-php-is-this-easy-know-how
         $client = new \Google_Client();
         $client->setApplicationName('Google Sheets and PHP');
         $client->setScopes([\Google_Service_Sheets::SPREADSHEETS]);
