@@ -14,6 +14,7 @@ $app->group('/api/fin/v1', function (RouteCollectorProxy $group) {
     $group->delete('/accounts[/{uid:[0-9]+}]', FinController::class . ':accounts_delete');
     $group->get ('/accounts/sync[/{uid:[0-9]+}[/{from:[12]\d{3}\-\d{2}\-\d{2}}[/{to:[12]\d{3}\-\d{2}\-\d{2}}]]]', FinController::class . ':accounts_sync')->setName('fin.accounts.sync.api01');
     $group->get ('/trx[/{uid:[0-9]+}]', FinController::class . ':trx_list')->setName('fin.trx.api01'); 
+    $group->post ('/trx[/{uid:[0-9]+}]', FinController::class . ':trx_post');
 })->add(RestrictGuests::class);
 
 $app->group('/fin', function (RouteCollectorProxy $group) {

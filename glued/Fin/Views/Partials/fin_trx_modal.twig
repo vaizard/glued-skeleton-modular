@@ -15,7 +15,7 @@
           <div class="form-row"> 
             <div class="form-group col-md-3">
               <label>{{ __('Account') }}*</label><br>
-              <select class="form-control select2" name="account_id" id="{{ fin_trx_id }}_form_account" required style="width: 100%">
+              <select class="form-control select2" name="data[0][account_id]" id="{{ fin_trx_id }}_form_account" required style="width: 100%">
               {% for account in accounts %}
                 <option value="{{ account.id }}">{{ account.name }}</option>
               {% endfor %}
@@ -24,12 +24,12 @@
             <div class="form-group col-md-3">
               <label>{{ __('Volume') }}</label>
               <div class="input-group">
-                <input type="text" class="form-control" name="volume" required placeholder="{{ __('- for outgoing payments') }}">
+                <input type="text" class="form-control" name="data[0][volume]" required placeholder="{{ __('-outbound +inbound') }}">
               </div>
             </div>
             <div class="form-group col-md-3">
               <label>{{ __('Currency') }}</label>
-              <select class="form-control select2" name="currency" required style="width: 100%" id="{{ fin_trx_id }}_form_currency">
+              <select class="form-control select2" name="data[0][currency]" required style="width: 100%" id="{{ fin_trx_id }}_form_currency">
                 {% for cur in currencies %}
                 <option value="{{ cur.alpha3 }}" {% if cur.alpha3 == 'CZK' %}selected{% endif %}>{{ cur.alpha3 }} / {{ cur.name }}</option>
                 {% endfor %}
@@ -38,7 +38,7 @@
             <div class="form-group col-md-3">
               <label>{{ __('Transfer date') }}*</label>
               <div class="input-group">
-                <input type="text" class="form-control datepicker" name="dt" required placeholder="RRRR-MM-DD"> <!-- TODO Datepicker not initializing, why? -->
+                <input type="text" class="form-control datepicker" name="data[0][dt]" required placeholder="RRRR-MM-DD"> <!-- TODO Datepicker not initializing, why? -->
               </div>
             </div>  
           </div>   
@@ -47,17 +47,17 @@
             <div class="form-group col-md-6">
               <label>{{ __('Offset name') }}*</label>
               <div class="input-group">
-                <input type="text" class="form-control" name="offset_name" required placeholder="{{ __('Name Surname, (Organization)') }}">
+                <input type="text" class="form-control" name="data[0][offset_name]" required placeholder="{{ __('Name Surname, (Organization)') }}">
               </div>
             </div>
             <div class="form-group col-md-3">
-              <label>{{ __('Offset ID') }}*</label><br>
-              <input type="text" class="form-control" name="offset_id">
+              <label>{{ __('Offset ID') }}</label><br>
+              <input type="text" class="form-control" name="data[0][offset_id]">
             </div>
             <div class="form-group col-md-3">
               <label>{{ __('Offset ID-type') }}</label>
               <div class="input-group">
-                <select class="form-control select2" name="offset_id_type" style="width: 100%">
+                <select class="form-control select2" name="data[0][offset_id_type]" style="width: 100%">
                    <option value="dob">{{ __('Date of birth') }}</option>
                    <option value="natid">{{ __('National identification number') }}</option>
                    <option value="regid">{{ __('Registration number') }}</option>
@@ -70,37 +70,37 @@
         </div>
         <div class="form-row"> 
             <div class="form-group col-md-6">
-              <label>{{ __('Linked docs') }}*</label>
+              <label>{{ __('Linked docs') }}</label>
               <div class="input-group">
-                <input type="text" class="form-control" name="links" disabled>
+                <input type="text" class="form-control" name="data[0][links]" disabled>
               </div>
             </div>   
             <div class="form-group col-md-6">
-              <label>{{ __('Freeform ref.') }}*</label><br>
-              <input type="text" class="form-control" name="ref_freeform" required>
+              <label>{{ __('Freeform ref.') }}</label><br>
+              <input type="text" class="form-control" name="data[0][ref_freeform]">
             </div>
         </div>
         <div class="form-row"> 
           <div class="form-group col-md-12">
             <label>{{ __('Message to offset (description)') }}*</label>
             <div class="input-group">
-              <input type="text" class="form-control" name="message" required>
+              <input type="text" class="form-control" name="data[0][message]" required>
             </div>
           </div>   
         </div>    
         <div class="form-row"> 
           <div class="form-group col-md-12">
-            <label>{{ __('Internal comment') }}*</label>
+            <label>{{ __('Internal comment') }}</label>
             <div class="input-group">
-              <input type="text" class="form-control" name="comment" required>
+              <input type="text" class="form-control" name="data[0][comment]">
             </div>
           </div>   
         </div>    
         <div class="form-row">
           <div class="form-group col-md-12">
-            <label>{{ __('Offset address') }}*</label><br>
+            <label>{{ __('Offset address') }}</label><br>
             <div class="input-group">
-              <textarea class="col-md-12" name="offset_address" id="{{ fin_trx_id }}_form_offset_address" rows="3"></textarea>
+              <textarea class="col-md-12" name="data[0][offset_address]" id="{{ fin_trx_id }}_form_offset_address" rows="3"></textarea>
             </div>
           </div>
         </div>
@@ -109,11 +109,11 @@
             <label class="form-label">{{ __('Paid out') }}</label>
             <div class="input-group selectgroup mt-1">
               <label class="selectgroup-item">
-                <input type="radio" name="paid_status" value="true" class="selectgroup-input" checked="">
+                <input type="radio" name="data[0][paid_status]" value="true" class="selectgroup-input" checked="">
                 <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-check"></i></span>
               </label>
               <label class="selectgroup-item">
-                <input type="radio" name="paid_status" value="false" class="selectgroup-input">
+                <input type="radio" name="data[0][paid_status]" value="false" class="selectgroup-input">
                 <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-times"></i></span>
               </label>
               </div>
@@ -122,11 +122,11 @@
             <label class="form-label">{{ __('Authorized') }}</label>
             <div class="input-group selectgroup mt-1">
               <label class="selectgroup-item">
-                <input type="radio" name="auth_status" value="true" class="selectgroup-input" checked="">
+                <input type="radio" name="data[0][auth_status]" value="true" class="selectgroup-input" checked="">
                 <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-check"></i></span>
               </label>
               <label class="selectgroup-item">
-                <input type="radio" name="auth_status" value="false" class="selectgroup-input">
+                <input type="radio" name="data[0][auth_status]" value="false" class="selectgroup-input">
                 <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-times"></i></span>
               </label>
               </div>
@@ -134,7 +134,7 @@
           <div class="form-group col-md-8">
             <label>{{ __('Authorized / declined note') }}</label>
             <div class="input-group">
-              <input type="text" class="form-control" name="auth_note" required>
+              <input type="text" class="form-control" name="data[0][auth_note]">
             </div>
           </div>   
         </div>    

@@ -14,7 +14,7 @@
       <div class="card">
         <div class="card-body p-0">
           <div class="table-responsive">
-            <table class="table table-striped" id="fin_trx">
+            <table class="table table-hover" id="fin_trx">
               <thead>
                 <tr>
                   <th class="">{{ __('ID') }}</th>
@@ -36,8 +36,8 @@
                   <td class=""><i class="fas fa-{{ row.account_icon }}" style="color: {{ row.account_color }}; padding-right: 0.5em;" title="{{ row.account_name }}"></i>{{ row.id }}
                   <td class="" title="{{ row.dt }}"><i class="fas fa-{% if row.type.card %}credit-card{% else %}{%if row.type.fee %}university{% else %}{% if row.type.electronic %}laptop{% else %}wallet{% endif %}{% endif%}{% endif%}" style="padding-right: 0.5em;"></i>{{ row.dt | slice(2, 8) }}</td>
                   <td class="col-sm-1 text-right" style="color: {{ row.type.flow == 'i' ?  'green' : 'red'}}" title="Rate: {{ row.intl.rate }}">{{ row.volume  }}&nbsp;{{ row.currency }}{% if row.intl.volume %}<br>{{ row.intl.volume }}&nbsp;{{ row.intl.currency }} {% endif %}</td>
-                  <td class="col-sm-2"><b>{{ row.offset.name | default(row.offset.account_name)}}</b>{% if row.offset.name or row.offset.account_name %}<br>{% endif %}{{ row.offset.account_number }}{% if row.offset.account_number and row.offset.bank_code %} / {% endif %}{{ row.offset.bank_code }} {{ row.offset.account_iban }}</td>
-                  <td class="col-sm-1">{% if row.ref.variable %}VS {{ row.ref.variable }}<br>{% endif %}{% if row.ref.constant %}KS {{ row.ref.constant }}<br>{% endif %}{% if row.ref.specific %}SS {{ row.ref.specific }}<br>{% endif %}{{ row.ref.internal }}</td>
+                  <td class="col-sm-2"><b>{{ row.offset.name | default(row.offset.account_name)}}</b>{% if row.offset.name or row.offset.account_name %}<br>{% endif %}{{ row.offset.account_number }}{% if row.offset.account_number and row.offset.bank_code %} / {% endif %}{{ row.offset.bank_code }} {{ row.offset.account_iban }} {{ row.offset.aid_type }} {{ row.offset.aid }}</td>
+                  <td class="col-sm-1">{% if row.ref.variable %}VS {{ row.ref.variable }}<br>{% endif %}{% if row.ref.constant %}KS {{ row.ref.constant }}<br>{% endif %}{% if row.ref.specific %}SS {{ row.ref.specific }}<br>{% endif %}{{ row.ref.freeform }}</td>
                   <td class="col-sm-4">{% if row.comment %}<i class="far fa-folder" style="padding-right: 1em"></i>{{ row.comment }}{%endif%}{% if row.message %}<br><i class="far fa-paper-plane" style="padding-right: 1em"></i><i>{{ row.message }}</i>{%endif%}</td>
                   <td class="">
                     <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_trx_update_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-currency="{{ row.currency }}" data-description="{{ row.description }}" data-config="{{ row.config }}"><i class="far fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_trx_delete_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }} data-currency="{{ row.currency }}"><i class="far fa-trash-alt"></i></button>
@@ -71,15 +71,15 @@
   //
   // Onload ajax to fetch transaction data
   // 
-  $( document ).ready(function() {
-    $.ajax({
-      url: "{{ url_for('fin.trx.api01') }}",
-      contentType: "application/json",
-      dataType: 'json',
-      success: function(res) {
+  $.ajax({
+    url: "{{ url_for('fin.trx.api01') }}",
+    contentType: "application/json",
+    dataType: 'json',
+    success: function(res) {
+      $( document ).ready(function() {
         $("#fin_trx_placeholder").append(Twig.twig({ ref: "fin_trx_col_twig" }).render({ data: res.data }))
-      }
-    })
+      })
+    }
   });
   
   //
@@ -210,6 +210,6 @@
     }
   }).trigger('change');
 
-  $('.datepicker').daterangepicker( { singleDatePicker: true, } );
+  $('.datepicker').daterangepicker( { singleDatePicker: true, startDate: today, } );
   </script>
   {% endblock %}
