@@ -176,6 +176,18 @@ $app->get ('/core/admin/playground', function(Request $request, Response $respon
             });
         </script>
         ';
+        $client = new \Google_Client();
+        $client->setApplicationName('Google Sheets and PHP');
+        $client->setScopes([\Google_Service_Sheets::SPREADSHEETS]);
+        $client->setAccessType('offline');
+        $client->setAuthConfig(__ROOT__ . '/private/api/glued-dev-91338368ae7d.json');
+        $service = new Google_Service_Sheets($client);
+        // https://docs.google.com/spreadsheets/d/1oxELlgVRr5ro3NyVeH-bT_GvGh72FjazaLTT9VDMmtc/edit#gid=0
+        $spreadsheetId = "1oxELlgVRr5ro3NyVeH-bT_GvGh72FjazaLTT9VDMmtc"; //It is present in your URL
+        $get_range = "Sheet1!A1:G5";
+        $gresponse = $service->spreadsheets_values->get($spreadsheetId, $get_range);
+        $values = $gresponse->getValues();
+        print_r($values);
 
     return $response;
 }) -> setName('core.admin.playground.web');
