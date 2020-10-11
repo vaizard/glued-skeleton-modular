@@ -285,7 +285,7 @@ class FinController extends AbstractTwigController
         $builder = new JsonResponseBuilder('fin.accounts', 1);
         $req = $request->getParsedBody();
 
-        if (array_key_exists('config', $req)) {
+        if (array_key_exists('config', $req) and ($req['config'] != "")) {
           $config = json_decode(trim($req['config']), true);
           if (json_last_error() !== 0) throw new HttpBadRequestException( $request, __('Config contains invalid json.'));
           $req['config'] = $config;
@@ -310,7 +310,7 @@ class FinController extends AbstractTwigController
         $schema = $loader->loadSchema("schema://fin/accounts.v1.schema");
         $result = $this->jsonvalidator->schemaValidation($req, $schema);
 
-        if ($result->isValid()) {   // TODO, tohle nejak nejede   or true
+        if ($result->isValid()) {
             $row = array (
                 'c_domain_id' => (int)$req->domain, 
                 'c_user_id' => (int)$req->user,
