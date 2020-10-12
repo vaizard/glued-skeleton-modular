@@ -391,7 +391,18 @@ class FinController extends AbstractTwigController
         }*/
     }
 
+    public function trx_patch(Request $request, Response $response, array $args = []): Response {
+        throw new HttpBadRequestException( $request, __('Editing transactions is not yet implemented. Ask your admin for a manual edit.'));
+        $builder = new JsonResponseBuilder('fin.trx', 1);
+        $payload = $builder->withData((array)$data)->withCode(200)->build();
+        return $response->withJson($payload, 200);
+    }
 
-
+    public function trx_delete(Request $request, Response $response, array $args = []): Response {
+        throw new HttpBadRequestException( $request, __('Deleting transactions is not yet implemented. Ask your admin for a manual delete.'));
+        $builder = new JsonResponseBuilder('fin.trx', 1);
+        $payload = $builder->withData((array)$data)->withCode(200)->build();
+        return $response->withJson($payload, 200);
+    }
 }
 

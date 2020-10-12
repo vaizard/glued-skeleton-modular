@@ -24,7 +24,7 @@
             <div class="form-group col-md-3">
               <label>{{ __('Volume') }}</label>
               <div class="input-group">
-                <input type="text" class="form-control" name="data[0][volume]" required placeholder="{{ __('-outbound +inbound') }}">
+                <input type="text" class="form-control" name="data[0][volume]" required placeholder="{{ __('-outbound +inbound') }}" id="{{ fin_trx_id }}_form_volume">
               </div>
             </div>
             <div class="form-group col-md-3">
@@ -38,7 +38,7 @@
             <div class="form-group col-md-3">
               <label>{{ __('Transfer date') }}*</label>
               <div class="input-group">
-                <input type="text" class="form-control datepicker" name="data[0][dt]" required placeholder="RRRR-MM-DD">
+                <input type="text" class="form-control datepicker" name="data[0][dt]" required placeholder="RRRR-MM-DD"id="{{ fin_trx_id }}_form_dt">
               </div>
             </div>  
           </div>   
@@ -47,17 +47,17 @@
             <div class="form-group col-md-6">
               <label>{{ __('Offset name') }}*</label>
               <div class="input-group">
-                <input type="text" class="form-control" name="data[0][offset_name]" required placeholder="{{ __('Name Surname, (Organization)') }}">
+                <input type="text" class="form-control" name="data[0][offset_name]" required placeholder="{{ __('Name Surname, (Organization)') }}" id="{{ fin_trx_id }}_form_offset_name">
               </div>
             </div>
             <div class="form-group col-md-3">
-              <label>{{ __('Offset ID') }}</label><br>
-              <input type="text" class="form-control" name="data[0][offset_id]">
+              <label>{{ __('Offset AID') }}</label><br>
+              <input type="text" class="form-control" name="data[0][offset_aid]" id="{{ fin_trx_id }}_form_offset_aid">
             </div>
             <div class="form-group col-md-3">
-              <label>{{ __('Offset ID-type') }}</label>
+              <label>{{ __('Offset AID-type') }}</label>
               <div class="input-group">
-                <select class="form-control select2" name="data[0][offset_id_type]" style="width: 100%">
+                <select class="form-control select2" name="data[0][offset_aid_type]" style="width: 100%" id="{{ fin_trx_id }}_form_offset_aid_type">
                    <option value="dob">{{ __('Date of birth') }}</option>
                    <option value="natid">{{ __('National identification number') }}</option>
                    <option value="regid">{{ __('Registration number') }}</option>
@@ -77,14 +77,14 @@
             </div>   
             <div class="form-group col-md-6">
               <label>{{ __('Freeform ref.') }}</label><br>
-              <input type="text" class="form-control" name="data[0][ref_freeform]">
+              <input type="text" class="form-control" name="data[0][ref_freeform]" id="{{ fin_trx_id }}_form_ref_freeform">
             </div>
         </div>
         <div class="form-row"> 
           <div class="form-group col-md-12">
             <label>{{ __('Message to offset (description)') }}*</label>
             <div class="input-group">
-              <input type="text" class="form-control" name="data[0][message]" required>
+              <input type="text" class="form-control" name="data[0][message]" required id="{{ fin_trx_id }}_form_message">
             </div>
           </div>   
         </div>    
@@ -92,7 +92,7 @@
           <div class="form-group col-md-12">
             <label>{{ __('Internal comment') }}</label>
             <div class="input-group">
-              <input type="text" class="form-control" name="data[0][comment]">
+              <input type="text" class="form-control" name="data[0][comment]" id="{{ fin_trx_id }}_form_comment">
             </div>
           </div>   
         </div>    
@@ -134,7 +134,7 @@
           <div class="form-group col-md-8">
             <label>{{ __('Authorized / declined note') }}</label>
             <div class="input-group">
-              <input type="text" class="form-control" name="data[0][auth_note]">
+              <input type="text" class="form-control" name="data[0][auth_note]" id="{{ fin_trx_id }}_form_auth_note">
             </div>
           </div>   
         </div>    

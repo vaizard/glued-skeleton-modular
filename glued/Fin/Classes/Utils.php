@@ -177,8 +177,8 @@ class Utils
             $helper['offset']['name'] = $trx['offset_name'];
             $helper['offset']['address'] = $trx['offset_address'];
             $helper['offset']['id'] = '';
-            $helper['offset']['aid'] = $trx['offset_id']; // assigned id
-            $helper['offset']['aid_type'] = $trx['offset_id_type'];
+            $helper['offset']['aid'] = $trx['offset_aid']; // assigned id
+            $helper['offset']['aid_type'] = $trx['offset_aid_type'];
 
 
             $helper['ref']['variable'] = '';

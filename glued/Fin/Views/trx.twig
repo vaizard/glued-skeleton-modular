@@ -17,12 +17,12 @@
             <table class="table table-hover" id="fin_trx">
               <thead>
                 <tr>
-                  <th class="">{{ __('ID') }}</th>
-                  <th class="">{{ __('Date') }}</th>
-                  <th class="col-sm-1 text-right">{{ __('Volume') }}</th>
-                  <th class="col-sm-2">{{ __('Offset') }}</th>
-                  <th class="col-sm-1">{{ __('Reference') }}</th>
-                  <th class="col-sm-4">{{ __('Description') }}</th>
+                  <th class="col-auto">{{ __('ID') }}</th>
+                  <th class="col-auto">{{ __('Date') }}</th>
+                  <th class="col-1 text-right">{{ __('Volume') }}</th>
+                  <th class="col-2">{{ __('Offset') }}</th>
+                  <th class="col-1">{{ __('Reference') }}</th>
+                  <th class="col-4">{{ __('Description') }}</th>
                   <th class="">{{ __('Manage') }}</th>
                 </tr>
               </thead>
@@ -33,16 +33,20 @@
                 {% verbatim %}
                 <script type="text/twig" id="fin_trx_obj_twig">
                 <tr id="fin_trx_object_{{ row.id }}">
-                  <td class="align-top"  style="border-left: 4px solid {{ row.account_color }};"><i class="fas fa-{{ row.account_icon }}" style="color: {{ row.account_color }}; padding-right: 0.5em;" title="{{ row.account_name }}"></i>{{ row.id }}
+                  <td class="align-top"  style="border-left: 4px solid {{ row.account_color }};"><i class="fas fa-{{ row.account_icon }}" style="color: {{ row.account_color }}; padding-right: 0.5em;" title="{{ row.account_name }}"></i><a href="#" class="text-dark" data-toggle="modal" data-target="#fin_trx_update_modal" data-id="{{ row.id }}" data-account_id="{{ row.account_id }}" data-dt="{{ row.dt }}" data-type_electronic="{{ row.type.electronic }}" data-volume="{{ row.volume }}" data-currency="{{ row.currency }}" data-offset_name="{{ row.offset.name }}" data-offset_aid="{{ row.offset.aid }}" data-offset_aid_type="{{ row.offset.aid_type }}" data-offset_address="{{ row.offset.address }}" data-ref_freeform="{{ row.ref.freeform }}" data-comment="{{ row.comment }}" data-message="{{ row.message }}" data_-tatus.aut="{{ row.status.aut }}" data-status.trx="{{ row.status.trx }}" data-status.aut="{{ row.status.aut }}" data-auth_note="{{ row.order.auth.note }}">{{ row.id }}</a>
                   <td class="align-top" title="{{ row.dt }}"><i class="fas fa-{% if row.type.card %}credit-card{% else %}{%if row.type.fee %}university{% else %}{% if row.type.electronic %}laptop{% else %}wallet{% endif %}{% endif%}{% endif%}" style="padding-right: 0.5em;"></i>{{ row.dt | slice(2, 8) }}</td>
                   <td class="align-top col-sm-1 text-right" style="color: {{ row.type.flow == 'i' ?  'green' : 'red'}}" title="Rate: {{ row.intl.rate }}">{{ row.volume  }}&nbsp;{{ row.currency }}{% if row.intl.volume %}<br>{{ row.intl.volume }}&nbsp;{{ row.intl.currency }} {% endif %}</td>
                   <td class="align-top col-sm-2"><b>{{ row.offset.name | default(row.offset.account_name)}}</b>{% if row.offset.name or row.offset.account_name %}<br>{% endif %}{{ row.offset.account_number }}{% if row.offset.account_number and row.offset.bank_code %} / {% endif %}{{ row.offset.bank_code }} {{ row.offset.account_iban }} {{ row.offset.aid_type }} {{ row.offset.aid }}</td>
                   <td class="align-top col-sm-1">{% if row.ref.variable %}VS {{ row.ref.variable }}<br>{% endif %}{% if row.ref.constant %}KS {{ row.ref.constant }}<br>{% endif %}{% if row.ref.specific %}SS {{ row.ref.specific }}<br>{% endif %}{{ row.ref.freeform }}</td>
                   <td class="align-top col-sm-4">{% if row.comment %}<i class="far fa-folder" style="padding-right: 1em"></i>{{ row.comment }}<br>{%endif%}{% if row.message %}<i class="far fa-paper-plane" style="padding-right: 1em"></i><i>{{ row.message }}</i>{%endif%}</td>
-                  <td class="align-top">
-                    <a href="#" data-toggle="modal" data-target="#fin_trx_update_modal" data-id="{{ row.id }}" data-account_id="{{ row.account_id }}" data_dt="{{ row.dt }}" data_type_electronic="{{ row.type.electronic }}" data_volume="{{ row.volume }}" data_currency="{{ row.currency }}" data_offset_name="{{ row.offset.name }}" data_offset_aid="{{ row.offset.aid }}" data_offset_aid_type="{{ row.offset.aid_type }}" data_offset_address="{{ row.offset.address }}" data_ref_freeform="{{ row.ref.freeform }}" data_comment="{{ row.comment }}" data_message="{{ row.message }}" data_status.aut="{{ row.status.aut }}" data_status.trx="{{ row.status.trx }}" data_status.aut="{{ row.status.aut }}" data_auth_note="{{ row.auth.note }}"><i class="far fa-edit"></i></a>
-
-                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_trx_delete_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }} data-currency="{{ row.currency }}"><i class="far fa-trash-alt"></i></button>
+                  <td class="align-text-top">
+                    <div class="custom-control custom-checkbox">
+                      <label class="custom-control-label" for="fin_trx_object_check_{{ row.id }}">
+                        <a href="#" data-toggle="modal" data-target="#fin_trx_delete_modal" data-id="{{ row.id }}" data-account_name="{{ row.account_name }}" data-volume="{{ row.volume }}" data-currency="{{ row.currency }}"><i class="far fa-trash-alt text-dark"></i></a>
+                      </label>
+                      <input type="checkbox" id="fin_trx_object_check_{{ row.id }}" value="{{ row.id }}" class="custom-control-input">
+                    </div>
+                      
                   </td>
                 </tr>
                 </script>
@@ -96,14 +100,14 @@
     modal.find('.modal-body #fin_trx_update_form_volume').val(e.data('volume'));
     modal.find('.modal-body #fin_trx_update_form_currency').val(e.data('currency')).trigger('change');
     modal.find('.modal-body #fin_trx_update_form_dt').val(e.data('dt'));
-    modal.find('.modal-body #fin_trx_update_offset_name').val(e.data('offset_name'));
-    modal.find('.modal-body #fin_trx_update_offset_id').val(e.data('offset_id'));
-    modal.find('.modal-body #fin_trx_update_form_offset_id_type').val(e.data('offset_id_type')).trigger('change');
-    modal.find('.modal-body #fin_trx_update_ref_freeform').val(e.data('ref_freeform'));
-    modal.find('.modal-body #fin_trx_update_freeform').val(e.data('message'));
-    modal.find('.modal-body #fin_trx_update_comment').val(e.data('comment'));
-    modal.find('.modal-body #fin_trx_update_offset_address').text(e.data('offset_address'));
-    modal.find('.modal-body #fin_trx_update_auth_note').val(e.data('auth_note'));
+    modal.find('.modal-body #fin_trx_update_form_offset_name').val(e.data('offset_name'));
+    modal.find('.modal-body #fin_trx_update_form_offset_aid').val(e.data('offset_aid'));
+    modal.find('.modal-body #fin_trx_update_form_form_offset_aid_type').val(e.data('offset_aid_type')).trigger('change');
+    modal.find('.modal-body #fin_trx_update_form_ref_freeform').val(e.data('ref_freeform'));
+    modal.find('.modal-body #fin_trx_update_form_message').val(e.data('message'));
+    modal.find('.modal-body #fin_trx_update_form_comment').val(e.data('comment'));
+    modal.find('.modal-body #fin_trx_update_form_offset_address').text(e.data('offset_address'));
+    modal.find('.modal-body #fin_trx_update_form_auth_note').val(e.data('auth_note'));
     // TODO we miss the payed out and authorized radio setup
   });
 
@@ -118,7 +122,7 @@
     var e = $(event.relatedTarget) // event which triggered the modal
     modal.find('.modal-title').text('{{ __("Delete transaction") }} ' + e.data('id'));
     modal.find('.modal-dialog form').attr('action', '{{ url_for("fin.trx.api01") }}/' + e.data('id') );
-    modal.find('.modal-body').text('{{ __("Do you really want to delete the transaction:") }} ' + e.data('name') + ' (' + e.data('type') + ' ' + e.data('currency') + ')?');
+    modal.find('.modal-body').text('{{ __("Do you really want to delete the transaction:") }} ' + e.data('volume') + ' ' + e.data('currency') + ' {{ __("from account") }} ' + e.data('account_name') + '?');
   });
 
   //
