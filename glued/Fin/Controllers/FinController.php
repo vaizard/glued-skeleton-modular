@@ -260,7 +260,7 @@ class FinController extends AbstractTwigController
           if (json_last_error() !== 0) throw new HttpBadRequestException( $request, __('Config contains invalid json.'));
           $doc->config = (object)$config;
         } else { $doc->config = new \stdClass(); }
-        if (!array_key_exists('currency', $req)) { $doc->currency = ''; }
+        if (!array_key_exists('currency', $req)) { $doc->currency = ''; } else {  $doc->currency = $req['currency']; }
 
         // TODO if $doc->domain is patched here, you have to first test, if user has access to the domain
 
