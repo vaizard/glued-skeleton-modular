@@ -15,7 +15,7 @@
           <div class="form-row"> 
             <div class="form-group col-md-3">
               <label>{{ __('Account') }}*</label><br>
-              <select class="form-control select2" name="data[0][account_id]" id="{{ fin_trx_id }}_form_account" required style="width: 100%">
+              <select class="form-control select2" name="data[0][account_id]" id="{{ fin_trx_id }}_form_account_id" required style="width: 100%">
               {% for account in accounts %}
                 <option value="{{ account.id }}">{{ account.name }}</option>
               {% endfor %}
