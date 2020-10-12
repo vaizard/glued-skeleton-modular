@@ -190,6 +190,40 @@ $app->get ('/core/admin/playground', function(Request $request, Response $respon
         $values = $gresponse->getValues();
         print_r($values);
 
+        // https://drive.google.com/file/d/1pPezoLPc2s8BIuIXl3l24PDhrViLjRdU/view?usp=sharing
+        $client->addScope(\Google_Service_Drive::DRIVE);
+        $service = new Google_Service_Drive($client);
+        $fileId = "1pPezoLPc2s8BIuIXl3l24PDhrViLjRdU"; // Google File ID
+
+        // Retrieve filename.
+        $file = $service->files->get($fileId);
+        $fileName = $file->getName();
+
+        // Download a file.
+        $content = $service->files->get($fileId, array("alt" => "media"));
+        $handle = fopen(__ROOT__ . '/private/cache/'.$fileName, "w+"); // Modified
+        while (!$content->getBody()->eof()) { // Modified
+            fwrite($handle, $content->getBody()->read(1024)); // Modified
+        }
+        fclose($handle);
+        echo "success";
+
+        // List files
+        echo "<br>folder view (add id to code):";
+        $folderId = "1cw3a9jhPmJUbmU7-cp7j0y1h54eK6VY5";
+        if ($folderId != "") {
+            $parameters = array(
+            'pageSize' => 100,
+                  'q' => "'".$folderId."' in parents"
+                );
+            $results = $service->files->listFiles($parameters);
+            echo '<table>';
+            foreach($results as $file){
+                print("<pre>".print_r($file,true)."</pre>");
+                echo '<tr><td>ico <img src="'. $file->iconLink .'"/> file ' . $file->name . ' ' . $file->id . ' ' . $file->mimeType . ' ' . $file->md5Checksum . ' ' . $file->size. ' ' . $file->parents . '</td></tr>';
+            }
+            echo '</table>';
+        }
     return $response;
 }) -> setName('core.admin.playground.web');
 
