@@ -18,17 +18,35 @@ This skeleton application was built for [Composer](https://getcomposer.org/).
 
 ## Installation
 
-### From github (on apache or nginx)
+### Quickstart with Docker
+
+Fastest way to start glued is using a docker. There is no prebuilt image (yet), 
+but you can easily use our example docker-compose.yml to get yourself a running instance in a seconds (you need to have Docker and docker-compose installed):
+
+```
+git clone https://github.com/vaizard/glued-skeleton && cd glued-skeleton
+docker-compose up --build
+```
+
+Glued is now running on localhost:8080
+
+> Note: Due to #88, Glued may fail to start on first attempt. Second and consecutive attempt should be fine.
+
+### Manual instalation
+
+#### From github (on apache or nginx)
 
 * Run `git clone https://github.com/vaizard/glued-skeleton` in `/var/www/html`
 * Point your virtual host document root to `/var/www/html/glued-skeleton/public`
 * Run `composer update`
+* Update your webserver configuration (see [Configuring the webserver](#Configuring the webserver))
 
-### With composer
+#### With composer
 
 * Run `composer create-project vaizard/glued-skeleton [my-app-name]`
 * Point your virtual host document root to your new application's `public/` directory.
 * Ensure `public/cache/` and `private/cache/*` is web writable.
+* Update your webserver configuration (see [Configuring the webserver](#Configuring the webserver))
 
 ### Configuring the webserver
 
