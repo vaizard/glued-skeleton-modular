@@ -30,7 +30,9 @@ docker-compose up --build
 
 Glued is now running on localhost:8080
 
-> Note: Due to #88, Glued may fail to start on first attempt. Second and consecutive attempt should be fine.
+> Note: Due to [#88][bug88]), Glued may fail to start on first attempt. Second and consecutive attempt should be fine.
+
+[bug88]: https://github.com/vaizard/glued-skeleton/issues/88
 
 ### Manual instalation
 
@@ -39,14 +41,16 @@ Glued is now running on localhost:8080
 * Run `git clone https://github.com/vaizard/glued-skeleton` in `/var/www/html`
 * Point your virtual host document root to `/var/www/html/glued-skeleton/public`
 * Run `composer update`
-* Update your webserver configuration (see [Configuring the webserver](#Configuring the webserver))
+* Update your webserver configuration (see [Configuring the webserver][config-section])
 
 #### With composer
 
 * Run `composer create-project vaizard/glued-skeleton [my-app-name]`
 * Point your virtual host document root to your new application's `public/` directory.
 * Ensure `public/cache/` and `private/cache/*` is web writable.
-* Update your webserver configuration (see [Configuring the webserver](#Configuring the webserver))
+* Update your webserver configuration (see [Configuring the webserver][config-section])
+
+[config-section]: #Configuring-the-webserver
 
 ### Configuring the webserver
 
