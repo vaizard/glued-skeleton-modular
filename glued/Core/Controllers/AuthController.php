@@ -104,6 +104,47 @@ class AuthController extends AbstractTwigController
 
     public function auth_status_get($request, $response) {
 
+        $builder = new JsonResponseBuilder('auth-status', 1);
+        $options = [
+            "secure" => true,
+            "relaxed" => ["localhost", "127.0.0.1"],
+            "algorithm" => ["HS256", "HS512", "HS384"],
+            "header" => "Authorization",
+            "regexp" => "/Bearer\s+(.*)$/i",
+            "cookie" => "token",
+            "attribute" => "token",
+            "path" => "/",
+            "ignore" => null,
+            "before" => null,
+            "after" => null,
+            "error" => null
+        ];
+        $data = [
+            "has_header" => false,
+            "token" => false,
+            "decoded" => false
+        ];
+
+        $header = $request->getHeaderLine($options["header"]);
+        if (false === empty($header)) {
+            $data['has_header'] = true;
+            if (preg_match($options["regexp"], $header, $matches)) {
+                $data['token'] = $matches[1];
+                try {
+                    $data['decoded'] = JWT::decode(
+                        $data['token'],
+                        $this->settings['jwt']['secret'],
+                        (array) $options["algorithm"]
+                    );
+                    $data['decoded']->jti = "[scrambled]";
+                } catch (Exception $exception) {
+                    $data['error'] = $exception->getMessage();
+                }
+            }
+        }
+
+        $payload = $builder->withData($data)->withCode(200)->build();
+        return $response->withJson($payload);  
     }
 
     public function signin_post($request, $response)

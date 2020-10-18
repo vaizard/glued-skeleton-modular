@@ -41,6 +41,7 @@ $app->group('/core', function (RouteCollectorProxy $route) {
         $route->get ('/signin', AuthController::class . ':signin_get')->setName('core.signin.web')->add(RedirectAuthenticated::class);
         $route->post('/signin', AuthController::class . ':signin_post');
         $route->post('/api/signin', AuthController::class . ':jwt_signin_post');
+        $route->get ('/api/auth-status', AuthController::class . ':auth_status_get');
         $route->get ('/reset', AuthController::class . ':reset_get')->setName('core.reset.web')->add(RedirectAuthenticated::class);
         $route->post('/reset', AuthController::class . ':reset_post');
         $route->get ('/signup', AuthController::class . ':signup_get')->setName('core.signup.web')->add(RedirectAuthenticated::class);;
@@ -176,6 +177,51 @@ $app->get ('/core/admin/playground', function(Request $request, Response $respon
             });
         </script>
         ';
+
+
+        $settings['curl'] = [
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0',
+            CURLOPT_COOKIEJAR => __ROOT__.'/private/cache/cookies.txt',
+            CURLOPT_COOKIEFILE => __ROOT__.'/private/cache/cookies.txt',
+            CURLOPT_POST => 0,
+        ];
+
+
+        $curl_handle = curl_init();
+        $uri = 'http://10.146.149.150/core/signin';
+        $user = 'a@b.c';
+        $pass = $user;
+        $arr = [
+            CURLOPT_URL => $uri,
+            CURLOPT_COOKIESESSION => TRUE,
+            CURLOPT_POST => 1,
+            CURLOPT_POSTFIELDS => 'username='.$user.'&password='.$pass
+        ];
+
+
+        $curl_options = array_replace( $settings['curl'], $arr );
+        curl_setopt_array($curl_handle, $curl_options);
+        $data1 = curl_exec($curl_handle);
+
+        $uri = 'http://10.146.149.150/api/core/v1/test';
+        $arr = [
+            CURLOPT_URL => $uri,
+            CURLOPT_COOKIESESSION => FALSE,
+        ];
+        $curl_options = array_replace( $settings['curl'], $arr );
+        print_r($curl_options);
+        curl_setopt_array($curl_handle, $curl_options);
+        $data2 = curl_exec($curl_handle);
+
+//echo $data1;
+echo "<br>-----------------------------<br>";
+echo $data2;
+        curl_close($curl_handle);
+echo "<br>-----------------------------<br>";
+//https://ib.fio.cz/ib/wicket/resource/cz.fio.ib2.prehledy.web.pohyby.PohybDetailPage$1/potvrzeni?pohybId=22011239954&cisloUctu=2500781658
+
         // https://www.srijan.net/blog/integrating-google-sheets-with-php-is-this-easy-know-how
         $client = new \Google_Client();
         $client->setApplicationName('Google Sheets and PHP');
