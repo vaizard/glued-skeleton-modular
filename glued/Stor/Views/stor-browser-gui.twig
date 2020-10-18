@@ -38,7 +38,7 @@
 
 
 
-<div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" data-backdrop="false">
+<div class="modal fade" id="modal-delete-stor" tabindex="-1" role="dialog" data-backdrop="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -53,7 +53,7 @@
             </div>
             <div class="modal-footer">
                 <input type="hidden" id="delete_file_uid" value="" />
-                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="delete_stor_file_ajax();">Yes</button>
+                <button id="pop_stor_delete_button" type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
             </div>
         </div>
@@ -230,8 +230,18 @@
         });
     }
     
-    // funkce, kterou smazeme soubor ajaxem a obnovime vypis souboru podle zadaneho filtru
-    function delete_stor_file_ajax() {
+    // callback na otevreni modalu pro smazani souboru
+    $('#modal-delete-stor').on('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        var button = $(event.relatedTarget);
+        // Extract info from data-* attributes
+        var tmp_uid = button.data("uid");
+        // Update the modal's content.
+        $("#delete_file_uid").val(tmp_uid);
+    });
+    
+    // zavolani funkce na smazani souboru pres tlacitko
+    $("#pop_stor_delete_button").on('click', function() {
         var link_id = $("#delete_file_uid").val();
         $.ajax({
           url: "{{ url_for('stor.ajax.delete') }}",  
@@ -239,14 +249,15 @@
           dataType: "text",
           data: { link_id: link_id },
           success: function(data) {
-            // vyhodi nekde hlasku, todo
-            
+            // vyhodi nekde hlasku
+            console.log(data);
+            // obnovime vypis souboru podle zadaneho filtru
             filter_stor_files();
           }
         });
-    }
+    });
     
-    // callback pro otevreni modalu na zmenu jmena
+    // callback pro otevreni modalu na zmenu nazvu
     $('#modal-edit-stor').on('show.bs.modal', function (event) {
         // Button that triggered the modal
         var button = $(event.relatedTarget);

@@ -236,4 +236,112 @@ class Stor
         return $data;
     }
     
+    // interni php api funkce
+    
+    /*
+    vstup:
+    $newfile
+    
+    vystup
+    $file_object_data['sha512'] - hash, klic v objects tabulce
+    $file_object_data['new_id'] - klic v links tabulce
+    $file_object_data['insert'] - 0 uz byl v objects, 1 bylo vlozeno i do objects
+    $file_object_data['size'] - aktualni hodnota size v objects tabulce
+    $file_object_data['mime'] - aktualni hodnota mime v objects tabulce
+    */
+    
+    public function internal_create($tmp_path, $newfile, $user_id, $inherit_table, $inherit_object) {
+        // pripravime si hash
+        $sha512 = hash_file('sha512', $tmp_path);
+        
+        $atributes = array();
+        $atributes['filename'] = $newfile->getClientFilename();
+        $atributes['size'] = $newfile->getSize();
+        $atributes['mime'] = $newfile->getClientMediaType();
+        
+        // navratova data
+        $file_object_data = array();
+        $file_object_data['sha512'] = $sha512;
+        
+        // zjistime jestli soubor se stejnym hashem uz mame
+        $this->db->where("c_sha512", $sha512);
+        $file_object = $this->db->getOne('t_stor_objects');
+        if ($this->db->count == 0) {
+            
+            // vytvorime tomu adresar
+            $dir1 = substr($sha512, 0, 1);
+            $dir2 = substr($sha512, 1, 1);
+            $dir3 = substr($sha512, 2, 1);
+            $dir4 = substr($sha512, 3, 1);
+            
+            $cilovy_dir = __ROOT__.'/private/data/stor/'.$dir1.'/'.$dir2.'/'.$dir3.'/'.$dir4;
+            
+            if (!is_dir($cilovy_dir)) { mkdir($cilovy_dir, 0777, true); }
+            
+            // presuneme
+            $newfile->moveTo($cilovy_dir.'/'.$sha512);
+            
+            // pripravime c_json pro vlozeni
+            $new_file_array = array();
+            $new_file_array['_v'] = '1';
+            $new_file_array['sha512'] = $sha512;
+            $new_file_array['size'] = $atributes['size'];
+            $new_file_array['mime'] = $atributes['mime'];
+            $new_file_array['checked'] = false;
+            $new_file_array['ts_created'] = time();
+            $new_file_array['storage'] = array(array("driver" => "fs", "path" => $cilovy_dir));
+            
+            $new_data_array = array();
+            $new_data_array['data'] = $new_file_array;
+            
+            $json_string = json_encode($new_data_array);
+            
+            // pozor, spojit dve vkladani pres commit, TODO
+            
+            // vlozime do objects
+            $data = Array ("c_json" => $json_string);
+            $this->db->insert ('t_stor_objects', $data);
+            
+            // vlozime do links
+            $data = Array (
+            "c_sha512" => $sha512,
+            "c_user_id" => $user_id,
+            "c_filename" => $atributes['filename'],
+            "c_inherit_table" => $inherit_table,
+            "c_inherit_object" => $inherit_object
+            );
+            $new_id = $this->db->insert ('t_stor_links', $data);
+            
+            // navratova data
+            $file_object_data['new_id'] = $new_id;
+            $file_object_data['insert'] = 1;
+            $file_object_data['size'] = $atributes['size'];
+            $file_object_data['mime'] = $atributes['mime'];
+        }
+        else {
+            // soubor uz existuje v objects ale vlozime ho aspon do links
+            $data = Array (
+            "c_sha512" => $sha512,
+            "c_user_id" => $user_id,
+            "c_filename" => $atributes['filename'],
+            "c_inherit_table" => $inherit_table,
+            "c_inherit_object" => $inherit_object
+            );
+            $new_id = $this->db->insert ('t_stor_links', $data);
+            
+            // navratova data pouzijeme z nactenych dat
+            $file_data = json_decode($file_object['c_json'], true);
+            $file_object_data['new_id'] = $new_id;
+            $file_object_data['insert'] = 0;
+            $file_object_data['size'] = $file_data['data']['size'];
+            $file_object_data['mime'] = $file_data['data']['mime'];
+        }
+        
+        return $file_object_data;
+        
+    }
+    
+    
+    
+    
 }

@@ -23,6 +23,7 @@ class StorControllerApiV1 extends AbstractTwigController
     public function uploaderApiSave($request, $response)
     {
         $files = $request->getUploadedFiles();
+        
         if (!is_array($files['file'])) { throw new HttpBadRequestException($request,'POST request with files must contain an array. Forgotten brackets in file[]?'); }
         
         // promenne, ktere se budou vracet
@@ -53,7 +54,6 @@ class StorControllerApiV1 extends AbstractTwigController
             }
         }
         
-
         if (!empty($files['file']) and count($files['file']) > 0) {
             
             // pokud dir existuje v seznamu povolenych diru, uploadujem (ovsem je zadany timpadem i objekt)
@@ -77,91 +77,23 @@ class StorControllerApiV1 extends AbstractTwigController
                         $reflectionProperty->setAccessible(true);
                         $tmp_path = $reflectionProperty->getValue($stream);
                         
-                        $sha512 = hash_file('sha512', $tmp_path);
+                        // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
+                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $_SESSION['core_user_id'], $app_tables[$actual_dir], $actual_object);
                         
-                        // zjistime jestli soubor se stejnym hashem uz mame
-                        $this->db->where("c_sha512", $sha512);
-                        $file_object = $this->db->getOne('t_stor_objects');
-                        if ($this->db->count == 0) {
-                            
-                            // vytvorime tomu adresar
-                            $dir1 = substr($sha512, 0, 1);
-                            $dir2 = substr($sha512, 1, 1);
-                            $dir3 = substr($sha512, 2, 1);
-                            $dir4 = substr($sha512, 3, 1);
-                            
-                            $cilovy_dir = __ROOT__.'/private/data/stor/'.$dir1.'/'.$dir2.'/'.$dir3.'/'.$dir4;
-                            
-                            if (!is_dir($cilovy_dir)) { mkdir($cilovy_dir, 0777, true); }
-                            
-                            // presuneme
-                            $newfile->moveTo($cilovy_dir.'/'.$sha512);
-                            
-                            // pokud ne, vlozime
-                            $new_file_array = array();
-                            $new_file_array['_v'] = '1';
-                            $new_file_array['sha512'] = $sha512;
-                            $new_file_array['size'] = $newfile->getSize();
-                            $new_file_array['mime'] = $newfile->getClientMediaType();
-                            $new_file_array['checked'] = false;
-                            $new_file_array['ts_created'] = time();
-                            $new_file_array['storage'] = array(array("driver" => "fs", "path" => $cilovy_dir));
-                            
-                            $new_data_array = array();
-                            $new_data_array['data'] = $new_file_array;
-                            
-                            $json_string = json_encode($new_data_array);
-                            
-                            // pozor, spojit dve vkladani pres commit, TODO
-                            
-                            // vlozime do objects
-                            $data = Array ("c_json" => $json_string);
-                            $this->db->insert ('t_stor_objects', $data);
-                            
-                            // vlozime do links
-                            $data = Array (
-                            "c_sha512" => $sha512,
-                            "c_user_id" => $_SESSION['core_user_id'],
-                            "c_filename" => $filename,
-                            "c_inherit_table" => $app_tables[$actual_dir],
-                            "c_inherit_object" => $actual_object
-                            );
-                            $new_id = $this->db->insert ('t_stor_links', $data);
-                            
+                        // priprava navratovych dat
+                        $return_data[$file_index]['link-id'] = $file_object_data['new_id'];
+                        $return_data[$file_index]['name'] = $filename;
+                        $return_data[$file_index]['module-name'] = $actual_dir;
+                        $return_data[$file_index]['object-id'] = $file_object_data['sha512'];
+                        $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $file_object_data['new_id'], 'filename' => $filename]);
+                        $return_data[$file_index]['size'] = $file_object_data['size'];
+                        $return_data[$file_index]['mime-type'] = $file_object_data['mime'];
+                        
+                        if ($file_object_data['insert'] == 1) {
                             $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully.');
-                            
-                            // priprava navratovych dat
-                            $return_data[$file_index]['link-id'] = $new_id;
-                            $return_data[$file_index]['name'] = $filename;
-                            $return_data[$file_index]['module-name'] = $actual_dir;
-                            $return_data[$file_index]['object-id'] = $sha512;
-                            $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $new_id, 'filename' => $filename]);
-                            $return_data[$file_index]['size'] = $new_file_array['size'];
-                            $return_data[$file_index]['mime-type'] = $new_file_array['mime'];
                         }
                         else {
-                            // soubor uz existuje v objects ale vlozime ho aspon do links
-                            $data = Array (
-                            "c_sha512" => $sha512,
-                            "c_user_id" => $_SESSION['core_user_id'],
-                            "c_filename" => $filename,
-                            "c_inherit_table" => $app_tables[$actual_dir],
-                            "c_inherit_object" => $actual_object
-                            );
-                            $new_id = $this->db->insert ('t_stor_links', $data);
-                            
                             $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully as link. Its hash already exists in objects table.');
-                            
-                            // priprava navratovych dat
-                            $file_data = json_decode($file_object['c_json'], true);
-                            
-                            $return_data[$file_index]['link-id'] = $new_id;
-                            $return_data[$file_index]['name'] = $filename;
-                            $return_data[$file_index]['module-name'] = $actual_dir;
-                            $return_data[$file_index]['object-id'] = $sha512;
-                            $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $new_id, 'filename' => $filename]);
-                            $return_data[$file_index]['size'] = $file_data['data']['size'];
-                            $return_data[$file_index]['mime-type'] = $file_data['data']['mime'];
                         }
                         
                         $files_stored++;
@@ -558,7 +490,7 @@ class StorControllerApiV1 extends AbstractTwigController
                                             Actions
                                           </button>
                                           <div class="dropdown-menu dropleft" x-placement="left-start" style="background-color: #cdd3d8; font-size: 12px;">
-                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#confirm-modal" onclick="$(\'#delete_file_uid\').val('.$data['c_uid'].');"><i class="fa fa-trash-o "></i> Delete</button>
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-delete-stor" data-uid="'.$data['c_uid'].'"><i class="fa fa-trash-o "></i> Delete</button>
                                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-edit-stor" data-uid="'.$data['c_uid'].'" data-filename="'.htmlspecialchars($data['c_filename']).'"><i class="fa fa-pencil"></i> Edit</button>
                                                 <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-copy-move-stor" data-uid="'.$data['c_uid'].'"><i class="fa fa-files-o"></i> Copy/Move</button>
                                           </div>
