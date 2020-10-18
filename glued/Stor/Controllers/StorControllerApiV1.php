@@ -24,6 +24,8 @@ class StorControllerApiV1 extends AbstractTwigController
     {
         $files = $request->getUploadedFiles();
         
+        if (!is_array($files['file'])) { throw new HttpBadRequestException($request,'POST request with files must contain an array. Forgotten brackets in file[]?'); }
+        
         // promenne, ktere se budou vracet
         $return_code = 0;
         $return_data = array();
@@ -75,7 +77,7 @@ class StorControllerApiV1 extends AbstractTwigController
                         $reflectionProperty->setAccessible(true);
                         $tmp_path = $reflectionProperty->getValue($stream);
                         
-                        // zavolame funkci, ktera to vlozi. vysledek je id v tabulce links
+                        // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
                         $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $_SESSION['core_user_id'], $app_tables[$actual_dir], $actual_object);
                         
                         // priprava navratovych dat
