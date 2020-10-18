@@ -23,6 +23,7 @@ class StorControllerApiV1 extends AbstractTwigController
     public function uploaderApiSave($request, $response)
     {
         $files = $request->getUploadedFiles();
+        if (!is_array($files['file'])) { throw new HttpBadRequestException($request,'POST request with files must contain an array. Forgotten brackets in file[]?'); }
         
         // promenne, ktere se budou vracet
         $return_code = 0;
@@ -52,6 +53,7 @@ class StorControllerApiV1 extends AbstractTwigController
             }
         }
         
+
         if (!empty($files['file']) and count($files['file']) > 0) {
             
             // pokud dir existuje v seznamu povolenych diru, uploadujem (ovsem je zadany timpadem i objekt)
