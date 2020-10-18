@@ -77,17 +77,17 @@ class AuthController extends AbstractTwigController
 
     public function jwt_signin_post($request, $response)
     {
+        $builder = new JsonResponseBuilder('authentication', 1);
         $auth = $this->auth->jwt_attempt(
             $request->getParam('email'),
             $request->getParam('password')
         );
 
         if (!$auth) {
-            //$this->flash->addMessage('error', 'Could not sign you in with those details.');
-            //return $response->withRedirect($this->routerParser->urlFor('core.signin.web'));
-            // TODO return json ze blbe login
-            die('ble auth');
+            $payload = $builder->withMessage(__('Authentication failed.'))->withCode(403)->build();
+            return $response->withJson($payload);    
         }
+
         $now = new \DateTime();
         $future = new \DateTime('+1 week');
         $jti = uniqid();
@@ -99,10 +99,12 @@ class AuthController extends AbstractTwigController
             'sub' => $request->getParam('email'),
         ];
         $token = JWT::encode($payload, $this->settings['jwt']['secret'], $this->settings['jwt']['algorithm']);
-        //die($token);
         return $response->withJson(['status' => 'OK', 'token' => $token]);
     }
 
+    public function auth_status_get($request, $response) {
+
+    }
 
     public function signin_post($request, $response)
     {
@@ -165,6 +167,7 @@ class AuthController extends AbstractTwigController
         $this->flash->addMessage('info', 'Welcome back, you are signed in!');
         return $response->withRedirect($redirect);
     }
+
 
 
     public function signup_get($request, $response)
