@@ -83,7 +83,7 @@ class StorControllerApiV1 extends AbstractTwigController
                         $return_data[$file_index]['name'] = $filename;
                         $return_data[$file_index]['module-name'] = $actual_dir;
                         $return_data[$file_index]['object-id'] = $file_object_data['sha512'];
-                        $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $new_id, 'filename' => $filename]);
+                        $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $file_object_data['new_id'], 'filename' => $filename]);
                         $return_data[$file_index]['size'] = $file_object_data['size'];
                         $return_data[$file_index]['mime-type'] = $file_object_data['mime'];
                         
