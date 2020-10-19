@@ -45,8 +45,7 @@ class StorControllerApiV1 extends AbstractTwigController
             // TODO my_files path still valid in stor?
             // I think that if the upload button returns with #95,
             // this code branch will just break.
-        } 
-        else {
+        } else {
             $parts = explode('/', $raw_path);
             if (count($parts) > 1) {
                 $actual_dir = $parts[0];
@@ -128,7 +127,7 @@ class StorControllerApiV1 extends AbstractTwigController
         // vybuildime json response
         $builder = new JsonResponseBuilder('stor/upload', 1);
         $payload = $builder->withData($return_data)->withMessage($return_message)->withCode($return_code)->build();
-        return $response->withJson($payload);
+        return $response->withJson($payload, $return_code);
     }
     
     // funkce, ktera vraci prvni radek s dvojteckou, patri do browseru
