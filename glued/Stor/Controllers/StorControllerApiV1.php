@@ -18,31 +18,34 @@ use Spatie\Browsershot\Browsershot;
 
 class StorControllerApiV1 extends AbstractTwigController
 {
+
     
     // funkce co zpracuje poslany nahravany soubor jako api post request, vraci json
+    // Post request expects to have:
+    // - file[]
+    // - actual_dir
+    // - ??
     public function uploaderApiSave($request, $response)
     {
-        $files = $request->getUploadedFiles();
-        
-        if (!is_array($files['file'])) { throw new HttpBadRequestException($request,'POST request with files must contain an array. Forgotten brackets in file[]?'); }
-        
-        // promenne, ktere se budou vracet
+        // Initialize helper variables
         $return_code = 0;
         $return_data = array();
         $return_message = '';
         $files_stored = 0;
-        
-        // nacteme si to z containeru ktery to ma ze tridy
-        $app_dirs = $this->stor->app_dirs;
-        $app_tables = $this->stor->app_tables;
-        
+
+        // Get data
+        $files = $request->getUploadedFiles();
+        if (!is_array($files['file'])) { throw new HttpBadRequestException($request,'POST request with files must contain an array. Forgotten brackets in file[]?'); }
         $raw_path = $request->getParam('actual_dir');
         
         // vyjimka na my_files
         if ($raw_path == 'my_files') {
             $actual_dir = 'users';
             $actual_object = $_SESSION['core_user_id'];
-        }
+            // TODO my_files path still valid in stor?
+            // I think that if the upload button returns with #95,
+            // this code branch will just break.
+        } 
         else {
             $parts = explode('/', $raw_path);
             if (count($parts) > 1) {
@@ -57,7 +60,7 @@ class StorControllerApiV1 extends AbstractTwigController
         if (!empty($files['file']) and count($files['file']) > 0) {
             
             // pokud dir existuje v seznamu povolenych diru, uploadujem (ovsem je zadany timpadem i objekt)
-            if (isset($app_dirs[$actual_dir])) {
+            if (isset($this->stor->app_dirs[$actual_dir])) {
                 
                 // $files['file'] je pole, s idexy 0 1 2 ... 
                 // musime to projit vsechno
@@ -78,7 +81,7 @@ class StorControllerApiV1 extends AbstractTwigController
                         $tmp_path = $reflectionProperty->getValue($stream);
                         
                         // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
-                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $_SESSION['core_user_id'], $app_tables[$actual_dir], $actual_object);
+                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $_SESSION['core_user_id'], $this->stor->app_tables[$actual_dir], $actual_object);
                         
                         // priprava navratovych dat
                         $return_data[$file_index]['link-id'] = $file_object_data['new_id'];
@@ -563,7 +566,7 @@ class StorControllerApiV1 extends AbstractTwigController
         }
         
         // debug
-        $vystup .= 'filtrovaci json: '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page;
+        $vystup .= __('Filtrer json').': '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page;
         
         /*
         // textovy vystup ajaxu nejdriv vyrenderujeme pres view, aby se tam dosadilo csrf pres middleware
