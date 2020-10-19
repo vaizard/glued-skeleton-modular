@@ -1,100 +1,42 @@
 <?php
 
+declare(strict_types=1);
 namespace Glued\Stor\Classes;
 
-class Stor
+class Stor {
 
-{
-    protected $container;
-    
-    public $xyz = 'halo';
-    
-    public $app_dirs = array(
-           "my_files"    => 'My private files',
-           "my_owned"    => 'My owned files',
-           "core_profiles"    => 'Profiles',
-           "core_domains"    => 'Domains',
-           "store_items"    => 'Store Items',
-           "store_subscriptions"    => 'Store Subscriptions',
-           "store_tickets"    => 'Store Tickets',
-           "worklog"    => 'Worklog'
-        );
+    protected $db;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    public $app_dirs = [
+       "my_files"             => 'My private files',
+       "my_owned"             => 'My owned files',
+       "core_profiles"        => 'Profiles',
+       "core_domains"         => 'Domains',
+       "store_items"          => 'Store Items',
+       "store_subscriptions"  => 'Store Subscriptions',
+       "store_tickets"        => 'Store Tickets',
+       "worklog"              => 'Worklog'
+    ];
     
     // prevod path na tabulku, kvuli predzjisteni prav
     // pozor, kazda z techto tabulek musi mit id nazvane c_uid a virtualni sloupec stor_name
-    public $app_tables = array(
-           "core_profiles"    => 't_core_profiles',
-           "core_domains"    => 't_core_domains',
-           "store_items"    => 't_store_items',
-           "store_subscriptions"    => 't_store_subscriptions',
-           "store_tickets"    => 't_store_tickets',
-           "worklog"    => 't_worklog_items'
-        );
+    public $app_tables = [
+       "core_profiles"       => 't_core_profiles',
+       "core_domains"        => 't_core_domains',
+       "store_items"         => 't_store_items',
+       "store_subscriptions" => 't_store_subscriptions',
+       "store_tickets"       => 't_store_tickets',
+       "worklog"             => 't_worklog_items'
+    ];
     
-    
-    // konstruktor
-    public function __construct($db)
-    {
-        $this->db = $db;
-    }
-    
-    // cti tagy ke dvojici tabulka uid
-    public function read_tags($table, $uid) {
-        $pole_tagu = array();
-        
-        $this->container->db->where("c_table", $table);
-        $this->container->db->where("c_uid", $uid);
-        $bills = $this->container->db->get('t_tag_assignments');
-        if (count($bills) > 0) {
-            foreach ($bills as $data) {
-                $pole_tagu[] = array('name' => $data['c_tagname'], 'value' => $data['c_tagvalue']);
-            }
-        }
-        
-        return $pole_tagu;
-    }
-    
-    // cti hodnotu tagu
-    public function read_tag_value($table, $uid, $tagname) {
-        $this->container->db->where("c_table", $table);
-        $this->container->db->where("c_uid", $uid);
-        $this->container->db->where("c_tagname", $tagname);
-        $data = $this->container->db->getOne('t_tag_assignments');
-        
-        if (count($data) == 0) {
-            return false;
-        }
-        else {
-            return $data['c_tagvalue'];
-        }
-    }
-    
-    // vloz tag
-    public function insert_tag($table, $uid, $tagname, $tagvalue, $system = 0) {
-        if ($this->container->tags->read_tag_value($table, $uid, $tagname) !== false) {
-            $data = Array ("c_table" => $table, "c_uid" => $uid, "c_tagname" => $tagname, "c_tagvalue" => $tagvalue, "c_system" => $system);
-            $insert = $this->container->db->insert('t_tag_assignments', $data);
-            if ($insert) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-        else {
-            return false;
-        }
-    }
-    
-    // prevede mime na fontawesome ikonu
-    public function font_awesome_mime_icon( $mime_type ) {
-        // definice znamych typu
-      static $font_awesome_file_icon_classes = array(
-        // Images
+    public $mime_icons = [
+        // Media
         'image' => 'fa-file-image-o',
-        // Audio
         'audio' => 'fa-file-audio-o',
-        // Video
         'video' => 'fa-file-video-o',
         // Documents
         'application/pdf' => 'fa-file-pdf-o',
@@ -117,17 +59,66 @@ class Stor
         'application/x-zip-compressed' => 'fa-file-archive-o',
         // Misc
         'application/octet-stream' => 'fa-file-o',
-      );
-      
+      ];
+        
+    // cti tagy ke dvojici tabulka uid
+    public function read_tags($table, $uid) {
+        $pole_tagu = array();
+        
+        $this->db->where("c_table", $table);
+        $this->db->where("c_uid", $uid);
+        $bills = $this->db->get('t_tag_assignments');
+        if (count($bills) > 0) {
+            foreach ($bills as $data) {
+                $pole_tagu[] = array('name' => $data['c_tagname'], 'value' => $data['c_tagvalue']);
+            }
+        }
+        return $pole_tagu;
+    }
+    
+    // cti hodnotu tagu
+    public function read_tag_value($table, $uid, $tagname) {
+        $this->db->where("c_table", $table);
+        $this->db->where("c_uid", $uid);
+        $this->db->where("c_tagname", $tagname);
+        $data = $this->db->getOne('t_tag_assignments');
+        
+        if (count($data) == 0) {
+            return false;
+        }
+        else {
+            return $data['c_tagvalue'];
+        }
+    }
+    
+    // vloz tag
+    public function insert_tag($table, $uid, $tagname, $tagvalue, $system = 0) {
+        if ($this->read_tag_value($table, $uid, $tagname) !== false) {
+            $data = Array ("c_table" => $table, "c_uid" => $uid, "c_tagname" => $tagname, "c_tagvalue" => $tagvalue, "c_system" => $system);
+            $insert = $this->db->insert('t_tag_assignments', $data);
+            if ($insert) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+    
+    // prevede mime na fontawesome ikonu
+    public function get_mime_icon( $mime_type ) {
       // jestlize to tam mame cele
-      if (isset($font_awesome_file_icon_classes[ $mime_type ])) {
-        return $font_awesome_file_icon_classes[ $mime_type ];
+      if (isset($this->mime_icons[ $mime_type ])) {
+        return $this->mime_icons[ $mime_type ];
       }
       else {    // jinak se podivame jestli mame aspon prvni cast
           $mime_parts = explode('/', $mime_type, 2);
           $mime_group = $mime_parts[0];
-          if (isset($font_awesome_file_icon_classes[ $mime_group ])) {
-            return $font_awesome_file_icon_classes[ $mime_group ];
+          if (isset($this->mime_icons[ $mime_group ])) {
+            return $this->mime_icons[ $mime_group ];
           }
           else {
             return "fa-file-o"; // default na ktery spadne vse neurcene
@@ -151,13 +142,13 @@ class Stor
     public function read_stor_file_info($link_id) {
         
         // nacteme sha512
-        $this->container->db->where ("c_uid", $link_id);
-        $file_link = $this->container->db->getOne("t_stor_links");
+        $this->db->where ("c_uid", $link_id);
+        $file_link = $this->db->getOne("t_stor_links");
         
         // nacteme path
         $sloupce = array("doc->>'$.data.storage[0].path' as path");
-        $this->container->db->where("sha512", $file_link['c_sha512']);
-        $file_data = $this->container->db->getOne("t_stor_objects", $sloupce);
+        $this->db->where("sha512", $file_link['c_sha512']);
+        $file_data = $this->db->getOne("t_stor_objects", $sloupce);
         
         $fullpath = $file_data['path'].'/'.$file_link['c_sha512'];
         
@@ -340,8 +331,5 @@ class Stor
         return $file_object_data;
         
     }
-    
-    
-    
-    
+   
 }

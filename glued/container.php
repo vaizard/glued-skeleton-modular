@@ -5,7 +5,7 @@ use DI\Container;
 use Glued\Core\Classes\Auth\Auth;
 use Glued\Core\Classes\Utils\Utils;
 use Glued\Core\Middleware\TranslatorMiddleware;
-use Glued\Stor\Classes\Stor as StorMainClass;
+use Glued\Stor\Classes\Stor;
 use Goutte\Client;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -151,7 +151,7 @@ $container->set('utils', function (Container $c) {
 
 // stor trida
 $container->set('stor', function (Container $c) {
-    return new StorMainClass($c->get('db'));
+    return new Stor($c->get('db'));
 });
 
 

@@ -500,7 +500,7 @@ class StorControllerApiV1 extends AbstractTwigController
                             }
                             
                             // ulozene do budoucna, jak bylo drive mime souboru a creator name
-                            // <i class="fa '.$this->container->stor->font_awesome_mime_icon($data['mime']).' fa-2x"></i>
+                            // <i class="fa '.$this->container->stor->get_mime_icon($data['mime']).' fa-2x"></i>
                             // '.$this->container->auth->user_screenname($data['c_owner']).'
                             
                             if (in_array('read', $allowed_global_actions)) {
