@@ -224,6 +224,21 @@ Notes
 
 Remember that `var_dump($some_variable); die();` is your best friend. Also use the `Whoops` error middleware (see settings.php)
 
+### Api example
+```
+# SETUP
+HOST="https://example.com"
+EMAIL="a@b.c"
+PASS="a@b.c"
+# UNAUTHORIZED TEST
+curl -H 'Accept: application/json' ${HOST}/api/core/v1/auth-status -w "%{http_code}\n" --output -
+# AUTHORIZATION
+curl -XPOST ${HOST}/api/core/v1/signin -d "email=${EMAIL}&password=${PASS}" -w "%{http_code}\n"
+TOKEN=`curl -s -XPOST ${HOST}/api/core/v1/signin -d "email=${EMAIL}&password=${PASS}" | jq -r .token`
+# AUTHORIZED TEST
+curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/api/core/v1/auth-status
+curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/api/core/v1/profiles --output -
+```
 
 ### Developer tutorials
 
