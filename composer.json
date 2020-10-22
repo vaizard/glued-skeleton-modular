@@ -41,7 +41,7 @@
     "nyholm/psr7-server": "^0.4",
     "php-di/php-di": "^6",
     "robmorgan/phinx": ">0.12",
-    "thingengineer/mysqli-database-class": "dev-master",
+    "thingengineer/mysqli-database-class": "dev-master#42116651a88b57b03fd967bc57dd38f5094565d9",
     "monolog/monolog": "^2",
     "respect/validation": "^1.1",
     "opis/json-schema": "^1.0",
