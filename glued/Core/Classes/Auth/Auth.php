@@ -222,36 +222,7 @@ class Auth
     }
 
 
-    /**
-     *  attempt to sign in user, return true|false on success or failure   
-     */ 
-    public function jwt_attempt($email, $password) : ?array {
-        // TODO unify attempt() and jwt_attempt() here
-
-        $this->db->join("t_core_authn a", "a.c_user_uid=u.c_uid", "LEFT");
-        $this->db->where("u.c_email", $email);
-        $this->db->where("a.c_type", 0); // 0 = passwords, 1 = api keys,
-        $result = $this->db->get("t_core_users u", null);
-        
-        if ($this->db->count > 0) {
-            foreach ($result as $user) {
-                // TODO: test here if an disabled/old auth password/token are used
-                // If yes, then:
-                // - log the issue and notify user
-                // - ratelimit IP
-                if (password_verify($password, $user['c_hash'])) {
-                    $ret = $user;
-                    break;
-                }
-            }
-            return $ret;
-        }
-        return null;
-    }
-
-
-    public function signout() {
-
+    public function signout() : void {
         // Delete session server side and session cookie client side
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_unset();
@@ -270,12 +241,12 @@ class Auth
         $params = $this->settings['auth']['cookie'];
         $params['expires'] = time() - 40000;
         setcookie($this->settings['auth']['jwt']['cookie'], "", [
-            'expires' => time()-3600,
-            'path' => '/', // todo add to config
-            'domain' => $_SERVER['SERVER_NAME'],
-            'secure' => false,
-            'httponly' => false,
-            'samesite' => 'lax',
+            'expires' => time() - 40000,
+            'path' => $this->settings['auth']['cookie']['path'] ?? '/api',
+            'domain' => $this->settings['auth']['cookie']['domain'] ?? null,
+            'secure'   => $this->settings['auth']['cookie']['secure'],
+            'httponly' => $this->settings['auth']['cookie']['httponly'], //false
+            'samesite' => $this->settings['auth']['cookie']['samesite'] ?? 'lax',
         ]);
         // TODO add jwt token expiry here (iat, jti) and check against
         // a table of no longer active tokens that still have some time to live
