@@ -65,12 +65,12 @@ class FinController extends AbstractTwigController
 
 
       // Throttle in case of too many requests
-      $t1 = new \DateTime($account['synced']);
-      $t2 = new \Datetime();
-      $tdiff = ($t1)->diff($t2)->format('%s');
+      $t1 = Carbon::createFromFormat('Y-m-d H:i:s', $account['synced'], 'UTC'); // TODO: Replace hardcoded mysql timezone (UTC). See https://stackoverflow.com/questions/2934258/how-do-i-get-the-current-time-zone-of-mysql
+      $t2 = Carbon::now();
+      $tdiff = $t2->diffinSeconds($t1);
       if ($tdiff < 30) { 
         // TODO replace hard throttling with queuing
-        $payload = $builder->withMessage(__('Account synchronization throttled [t1 = '.(string)$t1.', t2 = '.(string)$t2.', tdiff = '.(string)$tdiff.']. Please retry in: ').(30 - $tdiff).' '.__('seconds').print_r($t1).' '.print_r($t2))->withCode(429)->build();
+        $payload = $builder->withMessage(__('Account synchronization throttled. Last sync '.$tdiff.' seconds ago, please retry in ').(30 - $tdiff).' '.__('seconds'))->withCode(429)->build();
         return $response->withJson($payload);
       }
 
