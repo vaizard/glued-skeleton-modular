@@ -28,13 +28,41 @@ return [
         'collation' => ' utf8mb4_unicode_ci'
     ],
 
-    // JWT
-    'jwt' => [
-        'secret' => 'ChangeMe!@#%', // todo - generate in installer some randomness for this
-        'path' => [ '/api/jwt' ],
-        'algorithm' => 'HS512',
-        'cookie' => 'token',
-        'secure' => true // if set to false, jwt will run over http and leave a nasty security gap
+    /**
+     * Session cookies configuration (consumed by the @see
+     * SessionMiddleware). Changing these defaults may compromise
+     * security (i.e. break CSRF protection). See 
+     * @link https://scotthelme.co.uk/csrf-is-really-dead/.
+     */
+    'auth' => [
+        'cookie' => [
+            // Common cookie config for both session and jwt cookies
+            'path'      => '/',
+            'domain'    => $_SERVER['SERVER_NAME'] ?? null,
+            'secure'    => true,
+            'httponly'  => true,
+            'samesite'  => 'Lax',
+        ],
+        'session' => [
+            // session params
+            'lifetime'  => 0,     // 0 = until browser is closed
+            // middleware params
+            'attribute' => 'auth_session',
+            'cookie'    => 'g_sid' // session cookie name
+        ],
+        'jwt' => [
+            // token params
+            'expiry'    => '15 minute',
+            'secret'    => 'ChangeMe!@#%', // todo - generate in installer some randomness for this
+            'algorithm' => 'HS512',
+            // middleware params
+            'path'      => [ '/api' ],
+            'ignore'    => [ '/api/core/v1/auth-status', '/api/core/v1/signin' ],
+            'attribute' => 'auth_jwt',
+            'secure'    => 'true', // require jwt over https (NOTE You can really screw up your security with this)
+            'relaxed'   => ["localhost", "127.0.0.1" ], // https not enforced for requests from relaxed whitelist (NOTE You can really screw up your security with this)
+            "cookie"    => 'g_tok', // jwt cookie name
+        ],
     ],
 
     // Geoip
@@ -91,16 +119,6 @@ return [
         CURLOPT_POST => 0,
     ],
 
-    /***********************************************************
-     * MODULE SPECIFIC CONFIGS
-     **********************************************************/
-
-    // Fin keys
-    'fin' => [
-        'api' => [
-            'fio.cz' => '== add key here ==',
-        ],
-    ],
 
     /***********************************************************
      * OPTIONS TO TWEAK ONLY IF YOU REALLY NEED TO / KNOW HOW TO
@@ -116,16 +134,6 @@ return [
             'time_cost' => 2 * PASSWORD_ARGON2_DEFAULT_TIME_COST,
             'threads' => PASSWORD_ARGON2_DEFAULT_THREADS 
         ],
-        /**
-         * Session cookies configuration (consumed by the @see
-         * SessionMiddleware). Changing these defaults may compromise
-         * security (i.e. break CSRF protection). See 
-         * @link https://scotthelme.co.uk/csrf-is-really-dead/.
-         */
-        'session_cookie_lifetime' => 0,
-        'session_cookie_secure' => true,
-        'session_cookie_httponly' => true,
-        'session_cookie_samesite' => 'Lax'
     ],
 
     'headers' => [

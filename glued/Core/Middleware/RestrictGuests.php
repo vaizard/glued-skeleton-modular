@@ -20,14 +20,17 @@ class RestrictGuests extends AbstractMiddleware
     {
         $nyholmFactory = new Psr17Factory();
         $decoratedResponseFactory = new DecoratedResponseFactory($nyholmFactory, $nyholmFactory);
-        if (!$this->auth->check()) {
+        $jwt_attr = $this->settings['auth']['jwt']['attribute'];
+        $ses_attr = $this->settings['auth']['session']['attribute'];
+
+        if ( (!$this->auth->check()) and (!$this->auth->check_jwt($request)) ) {
             $builder = new JsonResponseBuilder('core/auth', 1);
             $payload = $builder->withMessage('You must be signed in to be able to do this.')
                                ->withCode(403)
                                ->build();
             $response = $decoratedResponseFactory->createResponse(403, 'Unauthorized')->withJson($payload);
             return $response;
-        } 
+        }
         return $handler->handle($request);
     }
 }

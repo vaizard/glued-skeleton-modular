@@ -75,10 +75,14 @@ class AuthController extends AbstractTwigController
     }
 
 
+
+
+
     public function jwt_signin_post($request, $response)
     {
         $builder = new JsonResponseBuilder('authentication', 1);
-        $auth = $this->auth->jwt_attempt(
+
+        $auth = $this->auth->attempt(
             $request->getParam('email'),
             $request->getParam('password')
         );
@@ -87,64 +91,63 @@ class AuthController extends AbstractTwigController
             $payload = $builder->withMessage(__('Authentication failed.'))->withCode(403)->build();
             return $response->withJson($payload);    
         }
-
-        $now = new \DateTime();
-        $future = new \DateTime('+1 week');
-        $jti = uniqid();
-        $payload = [
-            'iss' => $_SERVER['SERVER_NAME'],
-            'iat' => $now->getTimeStamp(),
-            'exp' => $future->getTimeStamp(),
-            'jti' => $jti,
-            'sub' => $request->getParam('email'),
-        ];
-        $token = JWT::encode($payload, $this->settings['jwt']['secret'], $this->settings['jwt']['algorithm']);
-        return $response->withJson(['status' => 'OK', 'token' => $token]);
+        return $response->withJson(['status' => 'OK', 'token' => $auth]);
     }
 
     public function auth_status_get($request, $response) {
-
         $builder = new JsonResponseBuilder('auth-status', 1);
-        $options = [
-            "secure" => true,
-            "relaxed" => ["localhost", "127.0.0.1"],
-            "algorithm" => ["HS256", "HS512", "HS384"],
-            "header" => "Authorization",
-            "regexp" => "/Bearer\s+(.*)$/i",
-            "cookie" => "token",
-            "attribute" => "token",
-            "path" => "/",
-            "ignore" => null,
-            "before" => null,
-            "after" => null,
-            "error" => null
-        ];
-        $data = [
-            "has_header" => false,
-            "token" => false,
-            "decoded" => false
+        $header_match = "Authorization";
+        $regexp_match = "/Bearer\s+(.*)$/i";
+
+        // session response + jwt defaults
+        $payload = [
+            'jwt' => [
+                'in_header' => false,
+                'in_cookie' => false,
+                'authenticated' => false,
+                'raw' => '',
+
+            ],
+            'session' => [
+                'in_header' => false,
+                'in_cookie' => session_name(),
+                'authenticated' => $this->auth->check(),
+                'id' => session_id(),
+                'status' => session_status(),
+            ],
         ];
 
-        $header = $request->getHeaderLine($options["header"]);
+        // get token from cookie
+        $payload['jwt']['raw'] = $_COOKIE[$this->settings['auth']['jwt']['cookie']] ?? null;
+        if ($payload['jwt']['raw']) $payload['jwt']['in_cookie'] = $this->settings['auth']['jwt']['cookie'];
+
+        // get token from header
+        $header = $request->getHeaderLine($header_match);
         if (false === empty($header)) {
-            $data['has_header'] = true;
-            if (preg_match($options["regexp"], $header, $matches)) {
-                $data['token'] = $matches[1];
-                try {
-                    $data['decoded'] = JWT::decode(
-                        $data['token'],
-                        $this->settings['jwt']['secret'],
-                        (array) $options["algorithm"]
-                    );
-                    $data['decoded']->jti = "[scrambled]";
-                } catch (Exception $exception) {
-                    $data['error'] = $exception->getMessage();
-                }
+            $payload['jwt']['in_header'] = $header_match;
+            if (preg_match($regexp_match, $header, $matches)) {
+                $payload['jwt']['raw'] = $matches[1];
             }
         }
 
-        $payload = $builder->withData($data)->withCode(200)->build();
-        return $response->withJson($payload);  
+        // parse token
+        if ($payload['jwt']['raw']) {
+            try {
+                $decoded = (array)JWT::decode($payload['jwt']['raw'], $this->settings['auth']['jwt']['secret'], [ $this->settings['auth']['jwt']['algorithm'] ]);
+                $payload['jwt']['decoded']['___'] = "Most claims won't print here, sorry.";
+                if (($decoded['g_uid'] > 0) and ($decoded['g_aid'] > 0)) $payload['jwt']['authenticated'] = true;
+                $payload['jwt']['decoded']['iat'] = $decoded['iat'];
+                $payload['jwt']['decoded']['exp'] = $decoded['exp'];
+            } catch (Exception $exception) {
+                $payload['jwt']['error'] = $exception->getMessage();
+            }
+        }
+
+        $code = 401;
+        if ($payload['session']['authenticated']) $code = 200;
+        if ($payload['jwt']['authenticated']) $code = 200;
+        $payload = $builder->withData($payload)->withCode($code)->build();
+        return $response->withJson($payload, $code);  
     }
 
     public function signin_post($request, $response)
@@ -180,30 +183,6 @@ class AuthController extends AbstractTwigController
         } else {
             $redirect = $this->routerParser->urlFor('core.dashboard.web'); 
         }
-
-
-    /* START OF THE JWT BLOCK */
-        $now = new \DateTime();
-        $future = new \DateTime('+1 week');
-        $jti = uniqid();
-        $payload = [
-            'iss' => $_SERVER['SERVER_NAME'],
-            'iat' => $now->getTimeStamp(),
-            'exp' => $future->getTimeStamp(),
-            'jti' => $jti,
-            'sub' => $request->getParam('email'),
-        ];
-        $token = JWT::encode($payload, $this->settings['jwt']['secret'], $this->settings['jwt']['algorithm']);
-        setcookie($this->settings['jwt']['cookie'], $token, [
-            'expires' => $future->getTimeStamp(),
-            'path' => '/', // todo add to config
-            'domain' => $_SERVER['SERVER_NAME'],
-            'secure' => false,
-            'httponly' => false,
-            'samesite' => 'lax',
-        ]);
-        // todo: insteadl of false for secure and httponly use true true from config. also samesite needs to be gotten from config.
-    /* END OF THE JWT BLOCK */
 
         $this->flash->addMessage('info', 'Welcome back, you are signed in!');
         return $response->withRedirect($redirect);
@@ -307,7 +286,7 @@ class AuthController extends AbstractTwigController
             }
             
             // change the password, emit flash message and redirect
-            $update = $this->auth->update_password($user_id, $auth_id, $request->getParam('password'));
+            $update = $this->auth->cred_update($user_id, $auth_id, $request->getParam('password'));
             
             if (!$update) {
                 $this->logger->warn("Password change failed. DB error.");

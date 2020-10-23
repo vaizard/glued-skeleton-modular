@@ -15,18 +15,28 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Routing\RouteCollectorProxy;
 
 
-// Define the app routes.
+$app->get ('/rj/auth-status', AuthController::class . ':auth_status_get')->add(RestrictGuests::class)->add(new Tuupola\Middleware\JwtAuthentication($settings['auth']['jwt']));
+$app->get ('/jr/auth-status', AuthController::class . ':auth_status_get')->add(new Tuupola\Middleware\JwtAuthentication($settings['auth']['jwt']))->add(RestrictGuests::class);
+$app->get ('/j/auth-status', AuthController::class . ':auth_status_get')->add(new Tuupola\Middleware\JwtAuthentication($settings['auth']['jwt']));
+$app->get ('/r/auth-status', AuthController::class . ':auth_status_get')->add(RestrictGuests::class);
 
+
+// Homepage
 $app->get('/', Glued::class)->setName('core.web');
 
-/*$app->get ('/', function(Request $request, Response $response) { 
-    $myfile = fopen("/var/www/html/glued-skeleton/index.html", "r") or die("Unable to open file!");
-    echo fread($myfile,filesize("/var/www/html/glued-skeleton/index.html"));
-    fclose($myfile);
-    return $response;
-});*/
+
 
 $app->group('/core', function (RouteCollectorProxy $route) {
+    // Everyone or Guests-only
+    $route->group('', function ($route) {
+        $route->get ('/signin', AuthController::class . ':signin_get')->setName('core.signin.web')->add(RedirectAuthenticated::class);
+        $route->post('/signin', AuthController::class . ':signin_post');
+        $route->get ('/reset', AuthController::class . ':reset_get')->setName('core.reset.web')->add(RedirectAuthenticated::class);
+        $route->post('/reset', AuthController::class . ':reset_post');
+        $route->get ('/signup', AuthController::class . ':signup_get')->setName('core.signup.web')->add(RedirectAuthenticated::class);
+        // TODO consider killing the RedirectAuthenticated middleware. Just warn user instead?
+    });
+    // Authenticated-only
     $route->group('', function (RouteCollectorProxy $route) {
         $route->get('/dashboard', Glued::class)->setName('core.dashboard.web');
         $route->get('/profiles[/{uid}]', Profiles::class)->setName('core.profiles.list.web');
@@ -37,34 +47,32 @@ $app->group('/core', function (RouteCollectorProxy $route) {
         $route->get ('/admin/phpinfo', function(Request $request, Response $response) { phpinfo(); return $response; }) -> setName('core.admin.phpinfo.web');
         $route->get ('/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); return $response; }) -> setName('core.admin.phpconst.web');
     })->add(RedirectGuests::class);
-    $route->group('', function ($route) {
-        $route->get ('/signin', AuthController::class . ':signin_get')->setName('core.signin.web')->add(RedirectAuthenticated::class);
-        $route->post('/signin', AuthController::class . ':signin_post');
-        $route->post('/api/signin', AuthController::class . ':jwt_signin_post');
-        $route->get ('/api/auth-status', AuthController::class . ':auth_status_get');
-        $route->get ('/reset', AuthController::class . ':reset_get')->setName('core.reset.web')->add(RedirectAuthenticated::class);
-        $route->post('/reset', AuthController::class . ':reset_post');
-        $route->get ('/signup', AuthController::class . ':signup_get')->setName('core.signup.web')->add(RedirectAuthenticated::class);;
-    });
 });
+
 // We have to have $app->post('/core/signup') outside the RedirectAuthenticated, becuase user gets signed in upon signup.
 // Since the signup page submits data with ajax, the json response will get replaced with the redirect prematurely.
 $app->post('/core/signup', AuthController::class . ':signup_post'); 
 $app->get ('/core/signout', AuthController::class . ':signout_get')->setName('core.signout.web');
 
-
-
-
 $app->group('/api/core/v1', function (RouteCollectorProxy $route) {
-    $route->get ('/test', GluedApi::class) ->                        setName('core.api');
-    $route->post('/profiles', ProfilesApi::class . ':create') ->     setName('core.profiles.create.api01');
-    $route->get ('/profiles', ProfilesApi::class . ':list') ->       setName('core.profiles.list.api01');
-    $route->get ('/profiles/{uid:[0-9]+}', 'ApiProfiles:read') ->    setName('core.profiles.read.api01');
-    $route->put ('/profiles/{uid:[0-9]+}', 'ApiProfiles:update') ->  setName('core.profiles.update.api01');
-    $route->get ('/domains', Domains::class . ':list') ->            setName('core.domains.api01');
-    $route->post('/domains', Domains::class . ':create');
-})->add(RestrictGuests::class);
+    // Everyone or Guests-only
+    $route->group('', function (RouteCollectorProxy $route) {
+        $route->post('/signin', AuthController::class . ':jwt_signin_post');
+        $route->get ('/auth-status', AuthController::class . ':auth_status_get');
+    });
+    // Authenticated-only
+    $route->group('', function (RouteCollectorProxy $route) {
+        $route->get ('/test', GluedApi::class) ->                        setName('core.api');
+        $route->post('/profiles', ProfilesApi::class . ':create') ->     setName('core.profiles.create.api01');
+        $route->get ('/profiles', ProfilesApi::class . ':list') ->       setName('core.profiles.list.api01');
+        $route->get ('/profiles/{uid:[0-9]+}', 'ApiProfiles:read') ->    setName('core.profiles.read.api01');
+        $route->put ('/profiles/{uid:[0-9]+}', 'ApiProfiles:update') ->  setName('core.profiles.update.api01');
+        $route->get ('/domains', Domains::class . ':list') ->            setName('core.domains.api01');
+        $route->post('/domains', Domains::class . ':create');
+    })->add(RestrictGuests::class);
 
+
+});
 
 $app->get ('/core/admin/playground', function(Request $request, Response $response) { 
     $reader = new \GeoIp2\Database\Reader(__ROOT__ . '/private/data/core/maxmind-geolite2-city.mmdb');
@@ -178,6 +186,7 @@ $app->get ('/core/admin/playground', function(Request $request, Response $respon
         </script>
         ';
 
+print_r(session_get_cookie_params());
 
         $settings['curl'] = [
             CURLOPT_CONNECTTIMEOUT => 2,
