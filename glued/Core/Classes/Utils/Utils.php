@@ -30,9 +30,10 @@ class Utils
         return (int)$id;
     }
 
-    public function fetch_uri($uri) {
+    public function fetch_uri($uri, $extra_opts = []) {
         $curl_handle = curl_init();
-        $curl_options = array_replace( $this->settings['curl'], [ CURLOPT_URL => $uri ] );
+        $extra_opts[CURLOPT_URL] = $uri; 
+        $curl_options = array_replace( $this->settings['curl'], $extra_opts );
         curl_setopt_array($curl_handle, $curl_options);
         $data = curl_exec($curl_handle);
         curl_close($curl_handle);
