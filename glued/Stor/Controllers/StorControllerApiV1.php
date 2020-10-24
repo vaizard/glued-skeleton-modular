@@ -32,6 +32,7 @@ class StorControllerApiV1 extends AbstractTwigController
         $return_data = array();
         $return_message = '';
         $files_stored = 0;
+        $who = $_SESSION['core_user_id'] ?? $request->getAttribute( $this->settings['auth']['jwt']['attribute'] )['g_uid'];
 
         // Get data
         $files = $request->getUploadedFiles();
@@ -41,7 +42,7 @@ class StorControllerApiV1 extends AbstractTwigController
         // vyjimka na my_files
         if ($raw_path == 'my_files') {
             $actual_dir = 'users';
-            $actual_object = $_SESSION['core_user_id'];
+            $actual_object = $who;
             // TODO my_files path still valid in stor?
             // I think that if the upload button returns with #95,
             // this code branch will just break.
@@ -80,7 +81,7 @@ class StorControllerApiV1 extends AbstractTwigController
                         $tmp_path = $reflectionProperty->getValue($stream);
                         
                         // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
-                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $_SESSION['core_user_id'], $this->stor->app_tables[$actual_dir], $actual_object);
+                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $who, $this->stor->app_tables[$actual_dir], $actual_object);
                         
                         // priprava navratovych dat
                         $return_data[$file_index]['link-id'] = $file_object_data['new_id'];
@@ -544,7 +545,7 @@ class StorControllerApiV1 extends AbstractTwigController
             }
         }
         else {  // jsme v zakladnim vyberu my files a app
-            $your_user_id = $_SESSION['core_user_id'];
+            $your_user_id = $_SESSION['core_user_id'] ?? $request->getAttribute( $this->settings['auth']['jwt']['attribute'] )['g_uid'];
             //$your_screenname = $this->container->auth->user_screenname($your_user_id);
             $your_screenname = 'noob';
             
