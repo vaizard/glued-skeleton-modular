@@ -24,7 +24,7 @@
             <div class="card">
                 <div class="card-body">
                     <button id="stor-files-filter-button" class="btn btn-primary btn-lg" title="{{ __('Filter / Search') }}"><i class="fas fa-filter"></i></button>
-                    <button class="btn btn-success btn-lg" title="{{ __('Add files') }}"><i class="fas fa-upload"></i></button>
+                    <button id="stor_browser_upload_button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#storFileUpload" data-id="" data-module="" data-freload="filter_stor_files" title="{{ __('Add files') }}"><i class="fas fa-upload"></i></button>
                 </div>
             </div>
         </div>
@@ -32,6 +32,61 @@
     
     <div class="row">
         <div id="stor-files-output" class="col-12">
+            
+            <div class="card" id="helper_upload_data">
+                <div class="card-body">
+                    <div class="table-responsive" style="overflow-x: visible;">
+                        <table class="table table-sm table-hover" style="min-width: 400px;">
+                          <thead>
+                            <tr>
+                              <th class="col-sm-1">Type</th>
+                              <th class="col-sm-3">Name</th>
+                              <th class="col-sm-2">Size</th>
+                              <th class="col-sm-2">App</th>
+                              <th class="col-sm-2 d-none d-sm-table-cell">Uploaded</th>
+                              <th class="col-sm-2">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="stor_files_placeholder">
+            
+            {% verbatim %}
+            <script type="text/twig" id="stor_obj_twig">
+            <tr role="row" class="odd">
+            {% if row.type == 'file' %}
+                <td class="col-sm-1"><i class="fa fa-file"></i></td>
+                <td class="col-sm-3">
+                    {{ row.shortcut | raw }}
+                </td>
+                <td class="col-sm-2">{{ row.size }}</td>
+                <td class="col-sm-2">{{ row.path | raw }}</td>
+                <td class="col-sm-2 d-none d-sm-table-cell">{{ row.created }}</td>
+                <td class="col-sm-2">{{ row.action_buttons | raw }}</td>
+            {% else %}
+                <td class="col-sm-1"><i class="fa fa-folder"></i></td>
+                <td class="col-sm-3">
+                        <a href="" class="stor-shortcuts" data-id="{{ row.shortcut_id }}" data-text="{{ row.shortcut_text }}" data-upload_id="{{ row.upload_id }}" data-upload_module="{{ row.upload_module }}">
+                            <b class="item-title">{{ row.shortcut_title }}</b>
+                        </a>
+                </td>
+                <td class="col-sm-2"></td>
+                <td class="col-sm-2"></td>
+                <td class="col-sm-2 d-none d-sm-table-cell"></td>
+                <td class="col-sm-2"></td>
+            {% endif %}
+            </tr>
+            </script>
+            <script type="text/twig" id="stor_col_twig">
+            {% for row in data %}
+            {% include "stor_obj_twig" %}
+            {% endfor %}
+            </script>
+            {% endverbatim %}
+            
+                          </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             
         </div>
     </div>
@@ -169,13 +224,20 @@
         // ted to posleme jako zestringovany json
         
         $.ajax({
-          url: "{{ url_for('stor.api.filtered.files') }}",  
+          url: "{{ url_for('stor.api.filtered.files') }}",
           type: "GET",
-          dataType: "text",
+          dataType: "json",
+          contentType: "application/json",
           data: { filters: upraveno, orderby: orderby, direction: direction, page: page },
-          success: function(data) {
-            //alert(data);
-            $("#stor-files-output").html(data);
+          success: function(res) {
+            
+            // vypiseme nalezene radky pomoci js plneni twigu
+            $("#stor_files_placeholder").html(Twig.twig({ ref: "stor_col_twig" }).render({ data: res.data }));
+            
+            // doplnime upload_id a upload_module do upload buttonu. mame to v res.meta
+            $("#stor_browser_upload_button").data("id", res.meta.id);
+            $("#stor_browser_upload_button").data("module", res.meta.module);
+            console.log(res.meta);
             
             // musime znova inicializovat rozklikavaci ozubena kola na konci radku, coz se normalne dela v app.js pri nacteni stranky
             var $itemActions = $(".item-actions-dropdown");

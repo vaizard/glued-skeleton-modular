@@ -137,6 +137,12 @@ class JsonResponseBuilder {
         return $this->setProperty('links', $arr );
     }
 
+    public function withMeta(array $arr) {
+        //if ( (isset($this->payload['code']) and (($this->payload['code'] !== 200) or ($this->payload['code'] !== 201)) ) )  { throw new \ErrorException('Application tried to send meta data in an error state.', 500); }
+        return $this->setProperty('meta', $arr );
+    }
+    
+    
 }
 
 /** Examples

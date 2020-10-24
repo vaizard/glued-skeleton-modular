@@ -315,6 +315,8 @@ class StorControllerApiV1 extends AbstractTwigController
         $stor_rows = array();
         $uploader = '';
         $bude_uploader = false;
+        $upload_module = '';
+        $upload_id = '';
         
         // nacteme si to z containeru ktery to ma ze tridy
         $app_dirs = $this->stor->app_dirs;
@@ -402,7 +404,7 @@ class StorControllerApiV1 extends AbstractTwigController
                     );
                 }
             }
-            else if ($jsou_tam_objekty) {   // to znamena ze jsme v jedne app a vypisujeme jeji objekty
+            else if ($jsou_tam_objekty) {   // to znamena ze jsme v jedne app a vypisujeme jeji objekty. jen tady by mel byt aktivni upload button
                 // nejdriv zpet do app
                 $stor_rows[] = $this->firstRowUplinkBrowser('//', '//apps');
                 // nacteme idecka
@@ -428,7 +430,7 @@ class StorControllerApiV1 extends AbstractTwigController
                 $sloupce = array("lin.c_uid", "lin.c_user_id", "lin.c_filename", "lin.c_inherit_table", "lin.c_inherit_object", "lin.c_ts_created", "obj.c_sha512", "obj.c_json ->>'$.data.size' as size", "obj.c_json ->>'$.data.mime' as mime");
                 $this->db->join("t_stor_objects obj", "obj.c_sha512=lin.c_sha512", "LEFT");
                 if (count($pole_adresaru) > 0) {
-                    $casti = explode('/', $pole_adresaru[0]);
+                    $casti = explode('/', $pole_adresaru[0]);   // bereme do uvahy jen prvni adresar zatim
                     $inherit_table = $app_tables[$casti[1]];
                     $this->db->where("c_inherit_table", $inherit_table);
                     if (!empty($casti[2])) {
@@ -436,6 +438,12 @@ class StorControllerApiV1 extends AbstractTwigController
                         // je tam adresar i objekt, muzeme ukazat uploadovaci form
                         $bude_uploader = true;
                         $uploader_path = $casti[1].'/'.$casti[2];
+                        
+                        // pokud je tam jen jeden adresar a jeden objekt, muzeme uploadovat a nastavime si potrebne promenne
+                        if (count($pole_adresaru) == 1) {
+                            $upload_module = $casti[1];
+                            $upload_id = $casti[2];
+                        }
                     }
                     // jsme v lomitkovem filtru, takze mame nejakou app, pridame prvni radek ktery do ni povede zpet
                     $stor_rows[] = $this->firstRowUplinkBrowser('/'.$casti[1].'/', '/'.$casti[1].'/');
@@ -565,33 +573,15 @@ class StorControllerApiV1 extends AbstractTwigController
         }
         
         // debug
-        $vystup .= __('Filtrer json').': '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page;
+        //$vystup .= __('Filtrer json').': '.$raw_filters.', orderby: '.$orderby.', direction: '.$direction.', page: '.$page;
         
-        /*
-        // textovy vystup ajaxu nejdriv vyrenderujeme pres view, aby se tam dosadilo csrf pres middleware
-        if ($bude_uploader) {
-            return $this->render($response, 'Stor/Views/partials/filter-with-upload.twig',
-            array(
-                'vystup' => $vystup,
-                'uploader_path' => $uploader_path
-            ));
-        }
-        else {
-            return $this->render($response, 'Stor/Views/partials/filter-without-upload.twig',
-            array(
-                'vystup' => $vystup
-            ));
-        }
-        */
+        $meta_data = array();
+        $meta_data['module'] = $upload_module;
+        $meta_data['id'] = $upload_id;
         
-        // vratime to vzdy pres stor_rows
-        return $this->render($response, 'Stor/Views/partials/stor_rows.twig',
-        array(
-                'rows' => $stor_rows,
-                'debug_vystup' => $vystup
-            )
-        );
-        
+        $builder = new JsonResponseBuilder('stor.browser', 1);
+        $payload = $builder->withData($stor_rows)->withMeta($meta_data)->withCode(200)->build();
+        return $response->withJson($payload);
         
     }
     
