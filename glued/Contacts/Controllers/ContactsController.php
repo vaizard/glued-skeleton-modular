@@ -17,11 +17,124 @@ use Defr\Ares;
 use Phpfastcache\Helper\Psr16Adapter;
 use Phpfastcache\CacheManager;
 use Phpfastcache\Config\Config;
+use Glued\Contacts\Classes\CZ as CZ;
+use DragonBe\Vies\Vies;
+use DragonBe\Vies\ViesException;
+use DragonBe\Vies\ViesServiceException;
+
 // grabbing
 use Symfony\Component\DomCrawler\Crawler;
 
 class ContactsController extends AbstractTwigController
 {
+
+    // src = zdroj
+    // link = prilinkovany dokument
+    // ext = data ve spesl formatu
+    // -----------------
+    // kind
+    //   legal = 0/1
+    //   natural = 0/1
+    // -----------------
+    // fn
+    // n
+    //   prefix
+    //   given
+    //   family
+    //   maiden
+    //   suffix
+    //   prior[] (prior family names)
+    // nickname[]
+    // -------------------
+    // gender
+    // bday / birthday
+    // dday / deathday
+    // photo
+    // marital_status
+    // -------------------
+    // addr[]
+    //   kind=(main,billing,permanent,temporary,shipping)
+    //   label
+    //   unstructured
+    //   full (correctly structured)
+    //   street
+    //   locacity
+    //   zip
+    //   country
+    //   district
+    //   locacity
+    //   quarter
+    //   streetnumber
+    //   conscriptionnumber
+    //   doornumber
+    //   floor
+    //   pobox
+    //   ref['cz.ruian']
+    //  ------------------
+    // acc[]
+    //   bank_code
+    //   bank_bic
+    //   bank_name
+    //   bank_addr
+    //   account_number
+    //   account_iban
+    //   account_currency
+    //   account_holder
+    //   ref['source-name']
+    //  --------------------
+    // domicile // for taxation puroposses
+    // nat[] // nationality
+    //   country
+    //   regby
+    //   regdt
+    //   regid
+    //   vatid
+    //   natid
+    //   docid
+    //     kind={personal-id|passport|...}
+    //     docid
+    //     issby
+    //     issdt
+    //     expdt
+    // ---------------
+    // email
+    //   label
+    //   kind
+    //   valid
+    //   value
+    // tel
+    // uri
+    // social
+    // impp / Defines an instant messenger handle. This was added to the official vCard specification in version 4.0.
+    // ---------------
+    // language
+    // anniversary { labeel, date }
+    // expertise / A professional subject area that the person has knowledge of. (field|level[value=expert,assessed_by=who-says-contact-has-expert-level])
+    // hobby / A recreational activity that the person actively engages in.
+    // interest / A recreational activity that the person is interested in, but does not necessarily take part in.
+    // education
+    // licenses / Certifications and licences
+    // occupation
+    // ---------------
+    // rel: // relationships
+    //   kind: assistant, brother, child, domestic-partner, father, friend, manager, mother, business-partner, relative, sister, spouse, acquantance (personal)
+    //         employee, employer, board member, officer, volunteer (professional)
+    //         referred-by (other)
+    //   label: i.e. CEO
+    //         
+    //               
+    // street address
+
+
+
+
+    // source
+    // tz
+
+
+
+
+
     /**
      * @param Request  $request
      * @param Response $response
@@ -39,14 +152,13 @@ class ContactsController extends AbstractTwigController
       $data['city'] = $record->getTown();
       $data['id'] = $record->getCompanyId();
       $data['taxid'] = $record->getTaxId();
-      //$json = json_encode($data);
-      //print_r($json);
-      //return $response;
       $builder = new JsonResponseBuilder('contacts.search', 1);
       $payload = $builder->withData((array)$data)->withCode(200)->build();
       return $response->withJson($payload);
 
     }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function cz_names(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('contacts.search', 1);
@@ -64,22 +176,23 @@ class ContactsController extends AbstractTwigController
           $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
             $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
             $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
-            $r['adr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
+            $r['addr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
             $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
             $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
             $result[] = $r;
             //vatid
             //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
           });
-        
       $payload = $builder->withData((array)$result)->withCode(200)->build();
       return $response->withJson($payload);
-      //print("<pre>".print_r($result,true)."</pre>");
-      //return $response;
     }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     public function cz_ids(Request $request, Response $response, array $args = []): Response {
       $builder = new JsonResponseBuilder('contacts.search', 1);
+      $cz = new CZ($this->c);
       $id = $args['id'];
       if (strlen($id) != 8) {
          $payload = $builder->withMessage('Czech company IDs are 8 numbers in total.')->withCode(200)->build();
@@ -87,191 +200,65 @@ class ContactsController extends AbstractTwigController
       }
       $result = [];
 
-
-      //
       // JUSTICE
-      // 
-      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&ico='.$id.'&polozek=500';
-      $key = 'contacts.cz_ids.justice.'.md5($uri);
-      if ($this->fscache->has($key)) {
-          $result = $this->fscache->get($key);
+      $cnf = $cz->urikey('ids_justice', $id); $raw_result = null;
+      if ($this->fscache->has($cnf['key'].'e')) {
+          $new = $this->fscache->get($cnf['key']);
+          $result = array_replace_recursive($result, $new ?? []);
       } else {
-          $crawler = $this->goutte->request('GET', $uri);
-          $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result, &$id) {
-              $r['adr'][0]['type'] = 'main';
-              $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
-              $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
-              $r['adr'][0]['unstructured'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
-              $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
-
-              $m_in = [ 'ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince' ];
-              $m_out = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
-              $date = str_replace($m_in, $m_out, $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text());
-              $date = str_replace(".", "", $date);
-              $r['regdt'] = date("Ymd",strtotime($date));
-              $result[] = $r;
-          });
-          $this->fscache->set($key, $result, 3600); // 60 minutes
+          $new = $cz->ids_justice($id, $raw_result);
+          $result = array_replace_recursive($result, $new ?? []);
+          if (!is_null($new)) $this->fscache->set($cnf['key'], $result, 3600); // 60 minutes
       }
+      if (is_null($new)) { $query['ids_justice']['status'] = 'Error'; } else { $query['ids_justice']['status'] = 'OK'; }
 
 
-      //
       // ADISRWS
-      // 
-      $uri = 'http://adisrws.mfcr.cz/adistc/axis2/services/rozhraniCRPDPH.rozhraniCRPDPHSOAP?wsdl';
-      $key = 'contacts.cz_ids.afisrws.'.md5($uri."&getStatusNespolehlivyPlatceRozsireny&".$id);
-      if ($this->fscache->has($key)) {
-          $arr = $this->fscache->get($key);
-          echo "get from cache";
-          print_r($arr);
+      $cnf = $cz->urikey('ids_adisrws', $id); $raw_result = null;
+      if ($this->fscache->has($cnf['key'])) {
+          $new = $cz->ids_adisrws($id, $raw_result);
+          $result = array_replace_recursive($result, $new ?? []);
       } else {
-          try {
-              ini_set("default_socket_timeout", "1");  // TODO improve timeouting here
-              $soap = new \SoapClient($uri, array('trace' => true));
-              $data = $soap->__call("getStatusNespolehlivyPlatceRozsireny", array(0 => array($id)));
-              $arr = json_decode(json_encode($data), true);
-          } catch (\SoapFault $e) { 
-              $arr['status']['statusCode'] = 500; 
-          }
-          //echo "arr zde" ; print_r($arr);die();
-          echo is_soap_fault($soap);
-          if (($arr['status']['statusCode'] === 0) and strcasecmp($arr['statusPlatceDPH']['nazevSubjektu'], $result[0]['org'])) { 
-              $this->fscache->set($key, $arr, 3600); // 60 minutes
-              $r['adr'][0]['street'] = $arr['statusPlatceDPH']['adresa']['uliceCislo'];
-              $r['adr'][0]['locacity'] = $arr['statusPlatceDPH']['adresa']['mesto'];
-              $r['adr'][0]['zip'] = $arr['statusPlatceDPH']['adresa']['psc'];
-              $r['adr'][0]['country'] = $arr['statusPlatceDPH']['adresa']['stat'];
-              // TODO - add $arr['statusPlatceDPH']['nespolehlivyPlatce'];
-              $i = 0;            
-              foreach ($arr['statusPlatceDPH']['zverejneneUcty']['ucet'] as $ucet) {
-                  $acc[$i]['number'] = $ucet['standardniUcet']['cislo'];
-                  $acc[$i]['bank-code'] = $ucet['standardniUcet']['kodBanky'];
-                  $acc[$i]['country'] = 'CZ';
-                  $acc[$i]['meta'][0]['source'] = 'adisrws.mfcr.cz';
-                  $acc[$i]['meta'][0]['date-published'] = $ucet['datumZverejneni'];
-                  $i++;
-              }
-              $result[0]['acc'] = $acc;
-              print_r($acc);die();
-          }
+          $new = $cz->ids_adisrws($id, $raw_result);
+          $result = array_replace_recursive($result, $new ?? []);
+          if (!is_null($new)) $this->fscache->set($cnf['key'], $new, 3600); // 60 minutes
       }
+      if (is_null($new)) { $query['ids_adisrws'] = [ 'status' => 'Error', 'message' => $raw_result ]; } else { $query['ids_adisrws']['status'] = 'OK'; }
 
 
-
-      //
       // VREO
-      // 
-      $url = "https://wwwinfo.mfcr.cz/cgi-bin/ares/darv_vreo.cgi?ico=".$id."&jazyk=cz";
-      $key = 'contacts.cz_ids.vreo.'.md5($uri);
-      if ($this->fscache->has($key)) {
-          $data = $this->fscache->get($key);
+      $cnf = $cz->urikey('ids_vreo', $id); $raw_result = null;
+      if ($this->fscache->has($cnf['key'])) {
+          $raw_result = $this->fscache->get($cnf['key']);
+          $new = $cz->ids_vreo($id, $raw_result) ?? [];
+          $result = array_replace_recursive($result, $new ?? []);
       } else {
-          $curl_handle = curl_init();
-          curl_setopt($curl_handle, CURLOPT_URL, $url);
-          curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
-          curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
-          curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0');
-          $data = curl_exec($curl_handle);
-          curl_close($curl_handle);
-          $this->fscache->set($key, $data, 3600); // 60 minutes
+          $new = $cz->ids_vreo($id, $raw_result) ?? [];
+          $result = array_replace_recursive($result, $new ?? []);
+          if (!is_null($new)) $this->fscache->set($cnf['key'], $raw_result, 3600); // 60 minutes
       }
-     
-      $xml = new \SimpleXMLElement($data);
-      $ns = $xml->getNamespaces(true);
-      $are = $xml->children($ns['are']);
-       //print("<pre>".print_r($are,true)."</pre>"); 
-      // spojena adresa = label
-      $zu = json_decode(json_encode($are->Odpoved->Vypis_VREO->Zakladni_udaje), true);
-      $vreo['ico'] = $zu['ICO'];
-      $vreo['adr'][0]['type'] = 'main';
-      $vreo['adr'][0]['country'] = 'Czech republic';
-      $vreo['adr'][0]['zip'] = $zu['Sidlo']['psc'];
-      //$vreo['address']['region'] = 'kraj';
-      $vreo['adr'][0]['district'] = $zu['Sidlo']['okres'];
-      $vreo['adr'][0]['locacity'] = $zu['Sidlo']['obec'];
-      $vreo['adr'][0]['quarter'] = $zu['Sidlo']['castObce'];
-      $vreo['adr'][0]['street'] = $zu['Sidlo']['ulice'];
-      $vreo['adr'][0]['streetnumber'] = $zu['Sidlo']['cisloOr'];
-      $vreo['adr'][0]['conscriptionnumber'] = $zu['Sidlo']['cisloPop'];
-      //$vreo['adr'][0]['housenumber'] = $zu['Sidlo']['cislo'];
-      $vreo['adr'][0]['full'] = $vreo['adr'][0]['street'] . ' ' . $vreo['adr'][0]['streetnumber'] . '/' . $vreo['adr'][0]['conscriptionnumber'] . ', ' . $vreo['adr'][0]['locacity'] . ', ' . $vreo['adr'][0]['zip'] . ', '. $vreo['adr'][0]['country'];
-      $vreo['adr'][0]['ref:cz.ruian'] = $zu['Sidlo']['ruianKod'];
+      if (is_null($new)) { $query['ids_vreo']['status'] = 'Error'; } else { $query['ids_vreo']['status'] = 'OK'; }
 
-      $i = 0;
-      foreach ($are->Odpoved->Vypis_VREO->Statutarni_organ->Clen as $key => $item) {
-         $vreo['statuotory'][$i] = json_decode(json_encode($item), true);
-         $i++;
+      // VIES
+      $cnf = $cz->urikey('vies', $id); $raw_result = null;
+      if ($this->fscache->has($cnf['key'])) {
+          $raw_result = $this->fscache->get($cnf['key']);
+          $new = $cz->vies($id, $raw_result) ?? [];
+          $result = array_replace_recursive($result, $new ?? []);
+      } else {
+          $new = $cz->vies($id, $raw_result) ?? [];
+          if (!is_null($new) and ($result['fn'] != $new['fn'])) unset($new['nat'][0]['vatid']);
+          $result = array_replace_recursive($result, $new ?? []);
+          if (!is_null($new)) $this->fscache->set($cnf['key'], $raw_result, 3600); // 60 minutes
       }
-      
+      if (is_null($new)) { $query['vies']['status'] = 'Error'; } else { $query['vies']['status'] = 'OK'; }
 
-
-      print("<pre>".print_r($vreo,true)."</pre>"); 
-      die();
-
-
-      //
       // RESULT
-      // 
-
+      $result['query'] = $query;
       $payload = $builder->withData((array)$result)->withCode(200)->build();
-      print_r($payload);
-      //die();
-      //return $response->withJson($payload);
-      //print("<pre>".print_r($result,true)."</pre>");
-      //return $response;
+      return $response->withJson($payload);
     }
 
-
-
-    public function cz_ares_names2(Request $request, Response $response, array $args = []): Response {
-      $name = $args['name'];
-      $builder = new JsonResponseBuilder('contacts.search', 1);
-
-      if (strlen($name) < 3) {
-         $payload = $builder->withMessage('Please use at least 3 characters for your search.')->withCode(200)->build();
-         return $response->withJson($payload);
-      }
-
-      $uri = 'http://wwwinfo.mfcr.cz/cgi-bin/ares/ares_es.cgi?obch_jm='.urlencode($name).'&filtr=0';
-      $file = @file_get_contents($uri);
-      if($file) {
-          $xml = @simplexml_load_string($file);
-      }
-       
-      if($xml) {
-          $ns = $xml->getDocNamespaces();
-          $data = $xml->children($ns['are']);
-          $dtt = $data->children($ns['dtt'])->V;
-      }
-      else {
-          $ares_stav_fin  = __('The Czech ARES database is offline');
-      }
-
-      //$records = json_decode(json_encode($dtt))->S;
-      $records = json_decode(json_encode($dtt));
-      $i = 0;
-      print_r($records);
-      return $response;
-
-      foreach ($records as $record) {
-        $out[$i]['id'] = $record->ico;
-        $out[$i]['name'] = $record->ojm;
-        $out[$i]['address'] = $record->jmn;
-        $i++;
-      }
-      print_r($out);
-      return $response;
-      //die();
-      //$json = json_encode($out);
-      //print_r($json);
-      //print("<pre>".print_r($out,true)."</pre>");
-      //return $response;
-      //$newresponse = $response->withJson($out)->withHeader('Content-type', 'application/json');
-      //return $newresponse;
-        //$builder = new JsonResponseBuilder('contacts.search', 1);
-        //$payload = $builder->withData((array)$out)->withCode(200)->build();
-        //return $response->withJson($payload);
-  }
 
     public function collection_ui(Request $request, Response $response, array $args = []): Response
     {
