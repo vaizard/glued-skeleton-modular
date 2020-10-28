@@ -62,6 +62,18 @@ return [
             'secure'    => 'true', // require jwt over https (NOTE You can really screw up your security with this)
             'relaxed'   => ["localhost", "127.0.0.1" ], // https not enforced for requests from relaxed whitelist (NOTE You can really screw up your security with this)
             "cookie"    => 'g_tok', // jwt cookie name
+            "error" => function ($response, $arguments) {
+                $data['api'] =  'core/auth/jwt';
+                $data['version'] = '1';
+                $data['response_ts'] = time();
+                $data['response_id'] = uniqid();
+                $data['status'] = 'Forbidden';
+                $data['message'] = 'You must be signed in to do this, please provide a valid token.';
+                $data['code'] = 403;
+                $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                return $response->withHeader("Content-Type", "application/json");
+            },
+
         ],
     ],
 
