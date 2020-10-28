@@ -9,6 +9,13 @@
 <div class="section-body">
 
 
+
+
+{% for x in range('2015-10-01'|date('U'), '2015-11-01'|date('U'), 86400 ) %}
+  {{ x|date('m/d') }} <br>
+{% endfor %} 
+
+
   <div class="row">
     <div class="col-12">
       <div class="card">
@@ -17,13 +24,13 @@
             <table class="table table-striped" id="calendar_events">
               <thead>
                 <tr>
-                  <th class="">{{ __('ID') }}</th>
-                  <th class="">{{ __('Date') }}</th>
-                  <th class="col-sm-1 text-right">{{ __('Volume') }}</th>
-                  <th class="col-sm-2">{{ __('Offset') }}</th>
+                  <th class="col-sm-1">{{ __('ID') }}</th>
+                  <th class="col-sm-3">{{ __('Date from / to') }}</th>
+                  <th class="col-sm-4">{{ __('Event') }}</th>
+                  <th class="col-sm-1">{{ __('Offset') }}</th>
                   <th class="col-sm-1">{{ __('Reference') }}</th>
-                  <th class="col-sm-4">{{ __('Description') }}</th>
-                  <th class="">{{ __('Manage') }}</th>
+                  <th class="col-sm-1">{{ __('Description') }}</th>
+                  <th class="col-sm-1">{{ __('Manage') }}</th>
                 </tr>
               </thead>
               <tbody id="calendar_events_placeholder">
@@ -33,12 +40,12 @@
                 {% verbatim %}
                 <script type="text/twig" id="calendar_events_obj_twig">
                 <tr id="calendar_events_object_{{ row.id }}">
-                  <td class=""><i class="fas fa-{{ row.account_icon }}" style="color: {{ row.account_color }}; padding-right: 0.5em;" title="{{ row.account_name }}"></i>{{ row.id }}
-                  <td class="" title="{{ row.dt }}"><i class="fas fa-{% if row.type.card %}credit-card{% else %}{%if row.type.fee %}university{% else %}{% if row.type.electronic %}laptop{% else %}wallet{% endif %}{% endif%}{% endif%}" style="padding-right: 0.5em;"></i>{{ row.dt | slice(2, 8) }}</td>
-                  <td class="col-sm-1 text-right" style="color: {{ row.type.flow == 'i' ?  'green' : 'red'}}" title="Rate: {{ row.intl.rate }}">{{ row.volume  }}&nbsp;{{ row.currency }}{% if row.intl.volume %}<br>{{ row.intl.volume }}&nbsp;{{ row.intl.currency }} {% endif %}</td>
-                  <td class="col-sm-2"><b>{{ row.offset.name | default(row.offset.account_name)}}</b>{% if row.offset.name or row.offset.account_name %}<br>{% endif %}{{ row.offset.account_number }}{% if row.offset.account_number and row.offset.bank_code %} / {% endif %}{{ row.offset.bank_code }} {{ row.offset.account_iban }}</td>
-                  <td class="col-sm-1">{% if row.ref.variable %}VS {{ row.ref.variable }}<br>{% endif %}{% if row.ref.constant %}KS {{ row.ref.constant }}<br>{% endif %}{% if row.ref.specific %}SS {{ row.ref.specific }}<br>{% endif %}{{ row.ref.internal }}</td>
-                  <td class="col-sm-4">{% if row.comment %}<i class="far fa-folder" style="padding-right: 1em"></i>{{ row.comment }}{%endif%}{% if row.message %}<br><i class="far fa-paper-plane" style="padding-right: 1em"></i><i>{{ row.message }}</i>{%endif%}</td>
+                  <td class="">{{ row.id }}</td>
+                  <td class="">{{ row.dtstart | slice(2,6) }} {{ row.dtstart | slice(9,4) }}<br>{{ row.dtend | slice(2,6) }} {{ row.dtend | slice(9,4) }}</td>
+                  <td class=""><b>{{ row.summary }}</b><br>{{ row.description }}</td>
+                  <td class=""></td>
+                  <td class=""></td>
+                  <td class=""></td>
                   <td class="">
                     <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#calendar_events_update_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-currency="{{ row.currency }}" data-description="{{ row.description }}" data-config="{{ row.config }}"><i class="far fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#calendar_events_delete_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }} data-currency="{{ row.currency }}"><i class="far fa-trash-alt"></i></button>
                   </td>
