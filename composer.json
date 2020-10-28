@@ -59,7 +59,7 @@
     "middlewares/trailing-slash": "^1.1",
     "granam/czech-vocative": "^2.0",
     "dfridrich/ares": "dev-master",
-    "spatie/browsershot": "^3.33",
+    "spatie/browsershot": "^3.4",
     "google/apiclient": "^2.4",
     "php-imap/php-imap": "^3.0",
     "tuupola/cors-middleware": "^1.1",
@@ -76,7 +76,8 @@
     "spatie/dropbox-api": "^1.15",
     "globalcitizen/php-iban": "^4.0",
     "alcohol/iso4217": "^3.1",
-    "league/omnipay": "^3.0"
+    "league/omnipay": "^3.0",
+    "dragonbe/vies": "^2.1"
   },
   "repositories": [
     {
