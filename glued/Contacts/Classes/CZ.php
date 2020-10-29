@@ -49,6 +49,10 @@ class CZ
                 'uri' => ($uri = 'https://wwwinfo.mfcr.cz/cgi-bin/ares/darv_vreo.cgi?ico='.$id.'&jazyk=cz'),
                 'key' => 'contacts.cz_ids.vreo.'.md5($uri),
             ],
+            'ids_rzp' => [
+                'uri' => ($uri = 'https://wwwinfo.mfcr.cz/cgi-bin/ares/darv_rzp.cgi?ico='.$id.'&xml=0&rozsah=2'),
+                'key' => 'contacts.cz_ids.rzp.'.md5($uri),
+            ],
             'vies' => [
                 'uri' => null,
                 'key' => 'contacts.cz_vies'.md5('CZ'.$id),
@@ -145,6 +149,55 @@ class CZ
             }
             $result = $r;
             $result['acc'] = $acc;
+        }
+        return $result;
+    }
+
+    public function ids_rzp(string $id, &$result_raw = null) :? array {
+        $result = null;
+        $uri = $this->urikey(__FUNCTION__, $id)['uri'];
+        try {
+            $data = $this->utils->fetch_uri($uri);
+        } catch (\Exception $e) {
+            $result_raw = $e->getMessage();
+            return $result;
+        }
+        $result_raw = $data;
+        //print_r($result_raw);
+        $xml = new \SimpleXMLElement($data);
+        $ns = $xml->getDocNamespaces();
+        //print_r($ns);
+        //$are = $xml->children($ns['are'])->children;
+        $data = $xml->children($ns['are']);
+        $zu = $data->children($ns['D'])->Vypis_RZP;
+        $zu = json_decode(json_encode($zu), true);
+        if (!is_null($zu)) {
+            $rzp['nat'][0]['country'] = 'CZ';
+            $rzp['nat'][0]['regid'] = $zu['ZAU']['ICO'];
+            $rzp['fn'] = $zu['ZAU']['OF'];
+            $rzp['addr'][0]['kind']['main'] = 1;
+            $rzp['addr'][0]['kind']['billing'] = 1;
+            $rzp['addr'][0]['country'] = 'Czech republic';
+            $rzp['addr'][0]['zip'] = $zu['Adresy']['A']['PSC'];
+            $rzp['addr'][0]['region'] = null;
+            $rzp['addr'][0]['district'] = null;
+            $rzp['addr'][0]['locacity'] = $zu['Adresy']['A']['N'] ?? null;
+            $rzp['addr'][0]['quarter'] = $zu['Adresy']['A']['NCO'] ?? null;
+            $rzp['addr'][0]['street'] = $zu['Adresy']['A']['NU'] ?? null;
+            $rzp['addr'][0]['streetnumber'] = $zu['Adresy']['A']['CO'] ?? null;
+            $rzp['addr'][0]['conscriptionnumber'] = $zu['Adresy']['A']['CD'];
+            $vreo['addr'][0]['doornumber'] = null;
+            $vreo['addr'][0]['floor'] = null;
+            $nr = implode('/', array_filter([ $rzp['addr'][0]['streetnumber'], $rzp['addr'][0]['conscriptionnumber'] ]));
+            $ql = implode('-', array_filter([ $rzp['addr'][0]['locacity'], $rzp['addr'][0]['quarter'] ]));
+            if (!is_null($rzp['addr'][0]['street'])) {
+                $st = implode(' ', [ $rzp['addr'][0]['street'], $nr ]);
+            } else {
+                $st = implode(' ', [ $rzp['addr'][0]['quarter'], $nr ]);
+                $ql = $rzp['addr'][0]['locacity'];
+            }
+            $rzp['addr'][0]['full'] = implode(', ', [ $st , $ql , $rzp['addr'][0]['zip'] , $rzp['addr'][0]['country'] ]);
+            $result = $rzp;
         }
         return $result;
     }

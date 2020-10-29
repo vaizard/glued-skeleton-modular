@@ -168,24 +168,62 @@ class ContactsController extends AbstractTwigController
          $payload = $builder->withMessage('Please use at least 3 characters for your search.')->withCode(200)->build();
          return $response->withJson($payload);
       }
-        
-        $result = [];
-        
-          $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&nazev='.$search_string.'&polozek=500';
-          $crawler = $this->goutte->request('GET', $uri);
-          $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
-            $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
-            $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
-            $r['addr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
-            $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
-            $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
-            $result[] = $r;
-            //vatid
-            //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
-          });
+      $result_justice = [];
+      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&nazev='.$search_string.'&polozek=500';
+      $crawler = $this->goutte->request('GET', $uri);
+      $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result_justice) {
+          $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
+          $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
+          $r['addr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
+          $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
+          $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
+          $result_justice[$r['regid']] = $r;
+          //vatid
+          //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
+      });
+
+      $result = [];
+      $uri = 'http://www.rzp.cz/cgi-bin/aps_cacheWEB.sh?VSS_SERV=ZVWSBJFND&Action=Search&PRESVYBER=0&PODLE=subjekt&ICO=&OBCHJM='.$search_string.'&VYPIS=1';
+      $crawler = $this->goutte->request('GET', $uri);
+      $crawler->filter('div#obsah > div.blok.data.subjekt')->each(function (Crawler $table) use (&$result) {
+          $r['org'] = $table->filter('h3')->text();
+          $r['org'] = preg_replace('/^[0-9]{1,2}. /', "", $r['org']);
+          $r['addr'] = $table->filter('dd:nth-child(4)')->text();
+          $r['regid'] = $table->filter('dd:nth-child(8)')->text();
+          $result[$r['regid']] = $r;
+      });
+
+      $result = array_replace($result, $result_justice);
+      
       $payload = $builder->withData((array)$result)->withCode(200)->build();
       return $response->withJson($payload);
     }
+
+
+    public function cz_names_rzp(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('contacts.search', 1);
+        $search_string = $args['name'];
+        
+      if (strlen($search_string) < 3) {
+         $payload = $builder->withMessage('Please use at least 3 characters for your search.')->withCode(200)->build();
+         return $response->withJson($payload);
+      }
+      $result = [];
+      $uri = 'http://www.rzp.cz/cgi-bin/aps_cacheWEB.sh?VSS_SERV=ZVWSBJFND&Action=Search&PRESVYBER=0&PODLE=subjekt&ICO=&OBCHJM='.$search_string.'&VYPIS=1';
+      $crawler = $this->goutte->request('GET', $uri);
+      $crawler->filter('div#obsah > div.blok.data.subjekt')->each(function (Crawler $table) use (&$result) {
+          $r['org'] = $table->filter('h3')->text();
+          $r['org'] = preg_replace('/^[0-9]{1,2}. /', "", $r['org']);
+          $r['addr'] = $table->filter('dd:nth-child(4)')->text();
+          $r['regid'] = $table->filter('dd:nth-child(8)')->text();
+          $result[] = $r;
+      });
+      $payload = $builder->withData((array)$result)->withCode(200)->build();
+      return $response->withJson($payload);
+    }
+
+
+    
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -239,6 +277,20 @@ class ContactsController extends AbstractTwigController
       }
       if (is_null($new)) { $query['ids_vreo']['status'] = 'Error'; } else { $query['ids_vreo']['status'] = 'OK'; }
 
+
+      // RZP
+      $cnf = $cz->urikey('ids_rzp', $id); $raw_result = null;
+      if ($this->fscache->has($cnf['key'])) {
+          $raw_result = $this->fscache->get($cnf['key']);
+          $new = $cz->ids_rzp($id, $raw_result) ?? [];
+          $result = array_replace_recursive($result, $new ?? []);
+      } else {
+          $new = $cz->ids_rzp($id, $raw_result) ?? [];
+          $result = array_replace_recursive($result, $new ?? []);
+          if (!is_null($new)) $this->fscache->set($cnf['key'], $raw_result, 3600); // 60 minutes
+      }
+      if (is_null($new)) { $query['ids_rzp']['status'] = 'Error'; } else { $query['ids_rzp']['status'] = 'OK'; }
+
       // VIES
       $cnf = $cz->urikey('vies', $id); $raw_result = null;
       if ($this->fscache->has($cnf['key'])) {
@@ -247,7 +299,7 @@ class ContactsController extends AbstractTwigController
           $result = array_replace_recursive($result, $new ?? []);
       } else {
           $new = $cz->vies($id, $raw_result) ?? [];
-          if (!is_null($new) and ($result['fn'] != $new['fn'])) unset($new['nat'][0]['vatid']);
+          //if (!is_null($new) and ($result['fn'] != $new['fn'] ?? null)) unset($new['nat'][0]['vatid']);
           $result = array_replace_recursive($result, $new ?? []);
           if (!is_null($new)) $this->fscache->set($cnf['key'], $raw_result, 3600); // 60 minutes
       }

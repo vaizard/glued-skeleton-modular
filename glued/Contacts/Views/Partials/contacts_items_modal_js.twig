@@ -33,7 +33,7 @@ $.typeahead({
             template: function (query, item) {
                 return '<span>' +
                     '<span class="username">{{org}} <small>({{regid}})</small></span>' +
-                    '<span class="id">({{adr}})</span>' +
+                    '<span class="id">({{addr}})</span>' +
                 "</span>";
             }
             {% endverbatim %}
@@ -52,7 +52,7 @@ $.typeahead({
             template: function (query, item) {
                 return '<span class="row">' +
                     '<span class="username">{{org}} <small><b>({{regid}})</b></small></span>' +
-                    '<span class="id">({{adr}})</span>' +
+                    '<span class="id">({{addr}})</span>' +
                 "</span>";
             }
             {% endverbatim %}
@@ -61,7 +61,7 @@ $.typeahead({
     callback: {
         onClickAfter: function (node, a, item, event) {
             $("#contacts_items_org").val(item.org);
-            $("#contacts_items_adr").val(item.adr);
+            $("#contacts_items_addr").val(item.addr);
             $("#contacts_items_regid").val(item.regid);
             $("#contacts_items_regby").val(item.regby);
         }
