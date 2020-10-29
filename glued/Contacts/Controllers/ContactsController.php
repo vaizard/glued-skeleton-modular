@@ -198,31 +198,6 @@ class ContactsController extends AbstractTwigController
       $payload = $builder->withData((array)$result)->withCode(200)->build();
       return $response->withJson($payload);
     }
-
-
-    public function cz_names_rzp(Request $request, Response $response, array $args = []): Response {
-        $builder = new JsonResponseBuilder('contacts.search', 1);
-        $search_string = $args['name'];
-        
-      if (strlen($search_string) < 3) {
-         $payload = $builder->withMessage('Please use at least 3 characters for your search.')->withCode(200)->build();
-         return $response->withJson($payload);
-      }
-      $result = [];
-      $uri = 'http://www.rzp.cz/cgi-bin/aps_cacheWEB.sh?VSS_SERV=ZVWSBJFND&Action=Search&PRESVYBER=0&PODLE=subjekt&ICO=&OBCHJM='.$search_string.'&VYPIS=1';
-      $crawler = $this->goutte->request('GET', $uri);
-      $crawler->filter('div#obsah > div.blok.data.subjekt')->each(function (Crawler $table) use (&$result) {
-          $r['org'] = $table->filter('h3')->text();
-          $r['org'] = preg_replace('/^[0-9]{1,2}. /', "", $r['org']);
-          $r['addr'] = $table->filter('dd:nth-child(4)')->text();
-          $r['regid'] = $table->filter('dd:nth-child(8)')->text();
-          $result[] = $r;
-      });
-      $payload = $builder->withData((array)$result)->withCode(200)->build();
-      return $response->withJson($payload);
-    }
-
-
     
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
