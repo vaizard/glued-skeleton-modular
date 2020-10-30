@@ -17,10 +17,15 @@ $app->group('/api/fin/v1', function (RouteCollectorProxy $group) {
     $group->post ('/trx[/{uid:[0-9]+}]', FinController::class . ':trx_post');
     $group->patch('/trx[/{uid:[0-9]+}]', FinController::class . ':trx_patch');
     $group->delete('/trx[/{uid:[0-9]+}]', FinController::class . ':trx_delete');
+    $group->get ('/costs[/{uid:[0-9]+}]', FinController::class . ':costs_list')->setName('fin.costs.api01'); 
+    $group->post ('/costs[/{uid:[0-9]+}]', FinController::class . ':costs_post');
+    $group->patch('/costs[/{uid:[0-9]+}]', FinController::class . ':costs_patch');
+    $group->delete('/costs[/{uid:[0-9]+}]', FinController::class . ':costs_delete');
 })->add(RestrictGuests::class);
 
 $app->group('/fin', function (RouteCollectorProxy $group) {
     $group->get ('/trx', FinController::class . ':trx_list_ui')->setName('fin.trx'); 
     $group->get ('/accounts', FinController::class . ':accounts_list_ui')->setName('fin.accounts'); 
+    $group->get ('/costs', FinController::class . ':costs_list_ui')->setName('fin.costs'); 
 })->add(RedirectGuests::class);
 
