@@ -163,8 +163,8 @@ class ContactsController extends AbstractTwigController
         $req['user'] = (int)$_SESSION['core_user_id'];
         $req['id'] = 0;
         $builder = new JsonResponseBuilder('contacts', 1);
-        print_r($req);
-        die();
+        //print_r($req);
+        //die();
         $payload = $builder->withData((array)$data)->withCode(200)->build();
         return $response->withJson($payload);
     }
@@ -346,11 +346,15 @@ class ContactsController extends AbstractTwigController
         // TODO add default domain for each user - maybe base this on some stats?
         return $this->render($response, 'Contacts/Views/collection.twig', [
             //'domains' => $domains
+
+        ]);
+        
+        /*
             'json_schema_output' => $jsf_schema,
             'json_uischema_output' => $jsf_uischema,
             'json_formdata_output' => $jsf_formdata,
             'json_onsubmit_output' => $jsf_onsubmit
-        ]);
+        */
     }
 
 
