@@ -1,0 +1,229 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Opportunities') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-id="" data-currency="" data-name="" data-domain="" data-config="" data-description="" data-target="#enterprise_opportunities_create_modal">{{ __('New opportunity') }}</button>
+</div>
+
+<div class="section-body">
+
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover" id="enterprise_opportunities">
+              <thead>
+                <tr>
+                  <th class="col-auto">{{ __('ID') }}</th>
+                  <th class="col-auto">{{ __('Date') }}</th>
+                  <th class="col-1 text-right">{{ __('Volume') }}</th>
+                  <th class="col-2">{{ __('Offset') }}</th>
+                  <th class="col-1">{{ __('Reference') }}</th>
+                  <th class="col-4">{{ __('Description') }}</th>
+                  <th class="">{{ __('Manage') }}</th>
+                </tr>
+              </thead>
+              <tbody id="enterprise_opportunities_placeholder">
+
+
+
+                {% verbatim %}
+                <script type="text/twig" id="enterprise_opportunities_obj_twig">
+                <tr id="enterprise_opportunities_object_{{ row.id }}">
+                  <td class="align-top"  style="border-left: 4px solid {{ row.account_color }};"><i class="fas fa-{{ row.account_icon }}" style="color: {{ row.account_color }}; padding-right: 0.5em;" title="{{ row.account_name }}"></i><a href="#" class="text-dark" data-toggle="modal" data-target="#enterprise_opportunities_update_modal" data-id="{{ row.id }}" data-account_id="{{ row.account_id }}" data-dt="{{ row.dt }}" data-type_electronic="{{ row.type.electronic }}" data-volume="{{ row.volume }}" data-currency="{{ row.currency }}" data-offset_name="{{ row.offset.name }}" data-offset_aid="{{ row.offset.aid }}" data-offset_aid_type="{{ row.offset.aid_type }}" data-offset_addr_unstructured="{{ row.offset.addr.unstructured }}" data-ref_freeform="{{ row.ref.freeform }}" data-comment="{{ row.comment }}" data-message="{{ row.message }}" data_-tatus.aut="{{ row.status.aut }}" data-status.trx="{{ row.status.trx }}" data-status.aut="{{ row.status.aut }}" data-auth_note="{{ row.order.auth.note }}">{{ row.id }}</a>
+                  <td class="align-top" title="{{ row.dt }}"><i class="fas fa-{% if row.type.card %}credit-card{% else %}{%if row.type.fee %}university{% else %}{% if row.type.electronic %}laptop{% else %}wallet{% endif %}{% endif%}{% endif%}" style="padding-right: 0.5em;"></i>{{ row.dt | slice(2, 8) }}</td>
+                  <td class="align-top col-sm-1 text-right" style="color: {{ row.type.flow == 'i' ?  'green' : 'red'}}" title="Rate: {{ row.intl.rate }}">{{ row.volume  }}&nbsp;{{ row.currency }}{% if row.intl.volume %}<br>{{ row.intl.volume }}&nbsp;{{ row.intl.currency }} {% endif %}</td>
+                  <td class="align-top col-sm-2"><b>{{ row.offset.name | default(row.offset.account_name)}}</b>{% if row.offset.name or row.offset.account_name %}<br>{% endif %}{{ row.offset.account_number }}{% if row.offset.account_number and row.offset.bank_code %} / {% endif %}{{ row.offset.bank_code }} {{ row.offset.account_iban }} {{ row.offset.aid_type }} {{ row.offset.aid }}</td>
+                  <td class="align-top col-sm-1">{% if row.ref.variable %}VS {{ row.ref.variable }}<br>{% endif %}{% if row.ref.constant %}KS {{ row.ref.constant }}<br>{% endif %}{% if row.ref.specific %}SS {{ row.ref.specific }}<br>{% endif %}{{ row.ref.freeform }}</td>
+                  <td class="align-top col-sm-4">{% if row.comment %}<i class="far fa-folder" style="padding-right: 1em"></i>{{ row.comment }}<br>{%endif%}{% if row.message %}<i class="far fa-paper-plane" style="padding-right: 1em"></i><i>{{ row.message }}</i>{%endif%}</td>
+                  <td class="align-text-top">
+                    <div class="custom-control custom-checkbox">
+                      <label class="custom-control-label" for="enterprise_opportunities_object_check_{{ row.id }}">
+                        <a href="#" data-toggle="modal" data-target="#enterprise_opportunities_delete_modal" data-id="{{ row.id }}" data-account_name="{{ row.account_name }}" data-volume="{{ row.volume }}" data-currency="{{ row.currency }}"><i class="far fa-trash-alt text-dark"></i></a>
+                      </label>
+                      <input type="checkbox" id="enterprise_opportunities_object_check_{{ row.id }}" value="{{ row.id }}" class="custom-control-input">
+                    </div>
+                      
+                  </td>
+                </tr>
+                </script>
+                <script type="text/twig" id="enterprise_opportunities_col_twig">
+                {% for row in data %}
+                {% include "enterprise_opportunities_obj_twig" %}
+                {% endfor %}
+                </script>
+                {% endverbatim %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include '/Enterprise/Views/Partials/enterprise_opportunities_modal.twig' with {'enterprise_opportunities_id': 'enterprise_opportunities_create'} %}
+{% include '/Enterprise/Views/Partials/enterprise_opportunities_modal.twig' with {'enterprise_opportunities_id': 'enterprise_opportunities_update'} %}
+{% include '/Enterprise/Views/Partials/enterprise_opportunities_delete_modal.twig' with {'enterprise_opportunities_id': 'enterprise_opportunities_delete'} %}
+{% endblock %}
+
+
+{% block additionaljs %}
+{# twig.js initialized in public/assets/js/glued.js #}
+<script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+
+  //
+  // Onload ajax to fetch transaction data
+  // 
+  $.ajax({
+    url: "{{ url_for('enterprise.opportunities.api01') }}",
+    contentType: "application/json",
+    dataType: 'json',
+    success: function(res) {
+      $( document ).ready(function() {
+        $("#enterprise_opportunities_placeholder").append(Twig.twig({ ref: "enterprise_opportunities_col_twig" }).render({ data: res.data }))
+      })
+    }
+  });
+  
+  //
+  // Create + Update + Delete modals
+  // 
+  $('#enterprise_opportunities_update_modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    var e = $(event.relatedTarget) // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("Edit transaction") }} ' + e.data('id'));
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("enterprise.opportunities.api01") }}/' + e.data('id') );
+    modal.find('.modal-body #enterprise_opportunities_update_form_account_id').val(e.data('account_id')).trigger('change');
+    modal.find('.modal-body #enterprise_opportunities_update_form_volume').val(e.data('volume'));
+    modal.find('.modal-body #enterprise_opportunities_update_form_currency').val(e.data('currency')).trigger('change');
+    modal.find('.modal-body #enterprise_opportunities_update_form_dt').val(e.data('dt'));
+    modal.find('.modal-body #enterprise_opportunities_update_form_offset_name').val(e.data('offset_name'));
+    modal.find('.modal-body #enterprise_opportunities_update_form_offset_aid').val(e.data('offset_aid'));
+    modal.find('.modal-body #enterprise_opportunities_update_form_form_offset_aid_type').val(e.data('offset_aid_type')).trigger('change');
+    modal.find('.modal-body #enterprise_opportunities_update_form_ref_freeform').val(e.data('ref_freeform'));
+    modal.find('.modal-body #enterprise_opportunities_update_form_message').val(e.data('message'));
+    modal.find('.modal-body #enterprise_opportunities_update_form_comment').val(e.data('comment'));
+    modal.find('.modal-body #enterprise_opportunities_update_form_offset_addr_unstructured').text(e.data('offset_addr_unstructured'));
+    modal.find('.modal-body #enterprise_opportunities_update_form_auth_note').val(e.data('auth_note'));
+    // TODO we miss the payed out and authorized radio setup
+  });
+
+  $('#enterprise_opportunities_create_modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    var e = $(event.relatedTarget) // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("New transaction") }}');
+  });
+
+  $('#enterprise_opportunities_delete_modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    var e = $(event.relatedTarget) // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("Delete transaction") }} ' + e.data('id'));
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("enterprise.opportunities.api01") }}/' + e.data('id') );
+    modal.find('.modal-body').text('{{ __("Do you really want to delete the transaction:") }} ' + e.data('volume') + ' ' + e.data('currency') + ' {{ __("from account") }} ' + e.data('account_name') + '?');
+  });
+
+  //
+  // Create handle
+  // 
+  $("#enterprise_opportunities_create_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    success: function(res) {
+      var idtwig = 'enterprise_opportunities_obj_twig';
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'enterprise_opportunities_obj_twig' }).render({ row: res.data })).prependTo("#enterprise_opportunities > tbody");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+      $('#enterprise_opportunities_create_modal').modal('toggle');
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+
+  //
+  // Update handle
+  // 
+  $("#enterprise_opportunities_update_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    headers: {
+      "X-Http-Method-Override": "PATCH"
+    },
+    success: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Entry updated.") }}' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+      $('#enterprise_opportunities_update_modal').modal('toggle');
+      $('#enterprise_opportunities_placeholder').empty();
+      $.ajax({
+        url: "{{ url_for('enterprise.opportunities.api01') }}",
+        contentType: "application/json",
+        dataType: 'json',
+        success: function(res) {
+          $("#enterprise_opportunities_placeholder").append(Twig.twig({ ref: "enterprise_opportunities_col_twig" }).render({ data: res.data }))
+        }
+      })
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+  //
+  // Delete handle
+  // 
+  $("#enterprise_opportunities_delete_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    headers: {
+      "X-Http-Method-Override": "DELETE"
+    },
+    success: function(res) {
+      var idtwig = 'enterprise_opportunities_obj_twig';
+      $('#toast-placeholder').empty();
+      $('#enterprise_opportunities > tbody > #enterprise_opportunities_object_' + res.data.id).remove();
+      $('#enterprise_opportunities_delete_modal').modal('toggle'); 
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Removed source ") }}' + res.data.id + '.' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+  // NOTE: Make sure, that json data uses double quotes, not single quotes
+  $('#enterprise_opportunities_form_type').change(function() {
+    if ($(this).val() !== 'cash') {
+      $('#enterprise_opportunities_form_currency').attr('disabled', 'disabled');
+      if ($(this).val() === 'fio_cz') {
+        $('#enterprise_opportunities_form_config').removeAttr('disabled').val('{\n  "token": "enter-token-here"\n}');
+      }
+      else if ($(this).val() === 'transferwise_com') {
+        $('#enterprise_opportunities_form_config').removeAttr('disabled').val('{\n  "token_full": "enter-token-here",\n  "token_readonly": "enter-token-here",\n  "profile_id_personal": "enter-id-here",\n  "profile_id_business": "enter-id-here",\n  "priv_pem": "enter-private-key-here"\n}"');
+      }
+      else {
+        $('#enterprise_opportunities_form_config').removeAttr('disabled').val('');
+      }
+    } else {
+      $('#enterprise_opportunities_form_currency').removeAttr('disabled');
+      $('#enterprise_opportunities_form_config').val('').attr('disabled', 'disabled');
+    }
+  }).trigger('change');
+
+  $('.datepicker').daterangepicker( { singleDatePicker: true, startDate: today, } );
+  </script>
+  {% endblock %}

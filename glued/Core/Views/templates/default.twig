@@ -125,6 +125,13 @@
               </ul>
             </li>
             <li class="dropdown">
+              <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-project-diagram"></i> <span>{{ __('Enterprise') }}</span></a>
+              <ul class="dropdown-menu">
+                <li><a class="nav-link" href="{{ url_for('enterprise.projects') }}">{{ __('Projects') }}</a></li>
+                <li><a class="nav-link" href="{{ url_for('enterprise.opportunities') }}">{{ __('Opportunities') }}</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
               <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-calendar"></i> <span>{{ __('Calendar') }}</span></a>
               <ul class="dropdown-menu">
                 <li><a class="nav-link" href="{{ url_for('calendar.events') }}">{{ __('Events') }}</a></li>
