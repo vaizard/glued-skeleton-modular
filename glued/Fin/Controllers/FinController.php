@@ -170,6 +170,29 @@ class FinController extends AbstractTwigController
         ]);
     }
 
+
+    // ==========================================================
+    // COSTS UI
+    // ==========================================================
+
+    public function costs_list_ui(Request $request, Response $response, array $args = []): Response {
+        // Since we don't have RBAC implemented yet, we're passing all domains
+        // to the view. The view uses them in the form which adds/modifies a view.
+        // 
+        // TODO - write a core function that will get only the domains for a given user
+        // so that we dont copy paste tons of code around and we don't present sources out of RBAC
+        // scope of a user.
+        // 
+        // TODO - preseed domains on installation with at least one domain
+        $domains = $this->db->get('t_core_domains');
+        return $this->render($response, 'Fin/Views/costs.twig', [
+            'domains' => $domains,
+            'currencies' => $this->iso4217->getAll()
+        ]);
+    }
+
+
+
     // ==========================================================
     // ACCOUNTS UI
     // ==========================================================
@@ -189,6 +212,7 @@ class FinController extends AbstractTwigController
             'currencies' => $this->iso4217->getAll()
         ]);
     }
+
 
     // ==========================================================
     // ACCOUNTS API
