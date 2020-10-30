@@ -1,0 +1,150 @@
+<div class="modal fade" tabindex="-1" role="dialog" id="{{ fin_trx_id }}_modal" data-backdrop="false">
+  <div class="modal-dialog modal-lg" role="document">
+    <form action="{{ url_for('fin.trx.api01') }}" method="post" autocomplete="off" id="{{ fin_trx_id }}_form">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ __('Transaction') }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+
+
+          <div class="form-row"> 
+            <div class="form-group col-md-3">
+              <label>{{ __('Account') }}*</label><br>
+              <select class="form-control select2" name="data[0][account_id]" id="{{ fin_trx_id }}_form_account_id" required style="width: 100%">
+              {% for account in accounts %}
+                <option value="{{ account.id }}">{{ account.name }}</option>
+              {% endfor %}
+              </select>
+            </div>
+            <div class="form-group col-md-3">
+              <label>{{ __('Volume') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="data[0][volume]" required placeholder="{{ __('-outbound +inbound') }}" id="{{ fin_trx_id }}_form_volume">
+              </div>
+            </div>
+            <div class="form-group col-md-3">
+              <label>{{ __('Currency') }}</label>
+              <select class="form-control select2" name="data[0][currency]" required style="width: 100%" id="{{ fin_trx_id }}_form_currency">
+                {% for cur in currencies %}
+                <option value="{{ cur.alpha3 }}" {% if cur.alpha3 == 'CZK' %}selected{% endif %}>{{ cur.alpha3 }} / {{ cur.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group col-md-3">
+              <label>{{ __('Transfer date') }}*</label>
+              <div class="input-group">
+                <input type="text" class="form-control datepicker" name="data[0][dt]" required placeholder="RRRR-MM-DD"id="{{ fin_trx_id }}_form_dt">
+              </div>
+            </div>  
+          </div>   
+
+          <div class="form-row"> 
+            <div class="form-group col-md-6">
+              <label>{{ __('Offset name') }}*</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="data[0][offset_name]" required placeholder="{{ __('Name Surname, (Organization)') }}" id="{{ fin_trx_id }}_form_offset_name">
+              </div>
+            </div>
+            <div class="form-group col-md-3">
+              <label>{{ __('Offset AID') }}</label><br>
+              <input type="text" class="form-control" name="data[0][offset_aid]" id="{{ fin_trx_id }}_form_offset_aid">
+            </div>
+            <div class="form-group col-md-3">
+              <label>{{ __('Offset AID-type') }}</label>
+              <div class="input-group">
+                <select class="form-control select2" name="data[0][offset_aid_type]" style="width: 100%" id="{{ fin_trx_id }}_form_offset_aid_type">
+                   <option value="dob">{{ __('Date of birth') }}</option>
+                   <option value="natid">{{ __('National identification number') }}</option>
+                   <option value="regid">{{ __('Registration number') }}</option>
+                   <option value="vatid">{{ __('VAT-ID') }}</option>
+                   <option value="passport_nr">{{ __('Passport number') }}</option>
+                   <option value="personalid_nr">{{ __('Personal ID number') }}</option>
+                </select>
+              </div>
+            </div>   
+        </div>
+        <div class="form-row"> 
+            <div class="form-group col-md-6">
+              <label>{{ __('Linked docs') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="data[0][links]" disabled>
+              </div>
+            </div>   
+            <div class="form-group col-md-6">
+              <label>{{ __('Freeform ref.') }}</label><br>
+              <input type="text" class="form-control" name="data[0][ref_freeform]" id="{{ fin_trx_id }}_form_ref_freeform">
+            </div>
+        </div>
+        <div class="form-row"> 
+          <div class="form-group col-md-12">
+            <label>{{ __('Message to offset (description)') }}*</label>
+            <div class="input-group">
+              <input type="text" class="form-control" name="data[0][message]" required id="{{ fin_trx_id }}_form_message">
+            </div>
+          </div>   
+        </div>    
+        <div class="form-row"> 
+          <div class="form-group col-md-12">
+            <label>{{ __('Internal comment') }}</label>
+            <div class="input-group">
+              <input type="text" class="form-control" name="data[0][comment]" id="{{ fin_trx_id }}_form_comment">
+            </div>
+          </div>   
+        </div>    
+        <div class="form-row">
+          <div class="form-group col-md-12">
+            <label>{{ __('Offset address') }}</label><br>
+            <div class="input-group">
+              <textarea class="col-md-12" name="data[0][offset_addr_unstructured]" id="{{ fin_trx_id }}_form_offset_addr_unstructured" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-row"> 
+          <div class="form-group col-2">
+            <label class="form-label">{{ __('Paid out') }}</label>
+            <div class="input-group selectgroup mt-1">
+              <label class="selectgroup-item">
+                <input type="radio" name="data[0][paid_status]" value="true" class="selectgroup-input" checked="">
+                <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-check"></i></span>
+              </label>
+              <label class="selectgroup-item">
+                <input type="radio" name="data[0][paid_status]" value="false" class="selectgroup-input">
+                <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-times"></i></span>
+              </label>
+              </div>
+          </div>
+          <div class="form-group col-2">
+            <label class="form-label">{{ __('Authorized') }}</label>
+            <div class="input-group selectgroup mt-1">
+              <label class="selectgroup-item">
+                <input type="radio" name="data[0][auth_status]" value="true" class="selectgroup-input" checked="">
+                <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-check"></i></span>
+              </label>
+              <label class="selectgroup-item">
+                <input type="radio" name="data[0][auth_status]" value="false" class="selectgroup-input">
+                <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-times"></i></span>
+              </label>
+              </div>
+          </div>
+          <div class="form-group col-md-8">
+            <label>{{ __('Authorized / declined note') }}</label>
+            <div class="input-group">
+              <input type="text" class="form-control" name="data[0][auth_note]" id="{{ fin_trx_id }}_form_auth_note">
+            </div>
+          </div>   
+        </div>    
+      </div>
+      <div class="modal-footer bg-whitesmoke br">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close' ) }}</button>
+        <button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
+      </div>
+    </div>
+  </form>
+</div>
+</div>
+
