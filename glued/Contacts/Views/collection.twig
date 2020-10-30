@@ -29,7 +29,7 @@
                 {% verbatim %}
                 <script type="text/twig" id="contacts_items_obj_twig">
                 <tr id="contacts_items_object_{{ row.id }}">
-                  <td class="col-sm-1">{{ row.id }} <a href="{{ url_for('calendar.sources.sync.api01') }}"><i class="fas fa-sync"></a></i></td>
+                  <td class="col-sm-1">{{ row.id }} <a href="{{ url_for('contacts.items.sync.api01') }}"><i class="fas fa-sync"></a></i></td>
                   <td class="col-sm-2">{{ row.domain_name }} ({{ row.domain }})</td>
                   <td class="col-sm-1">{{ row.driver }}</td>
                   <td class="col-sm-3">{{ row.name }}</td>
@@ -139,8 +139,8 @@
     var modal = $(this)
     var e = $(event.relatedTarget) // event which triggered the modal
     modal.find('.modal-title').text('{{ __("Delete contact") }} ' + e.data('id'));
-    modal.find('.modal-dialog form').attr('action', '{{ url_for("calendar.sources.api01") }}/' + e.data('id') );
-    modal.find('.modal-body').text('{{ __("Do you really want to delete the calendar:") }} ' + e.data('name') + ' (' + e.data('uri') + ')?');
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("contacts.items.api01") }}/' + e.data('id') );
+    modal.find('.modal-body').text('{{ __("Do you really want to delete the contact:") }} ' + e.data('name') + ' (' + e.data('uri') + ')?');
   });
 
   //
@@ -183,7 +183,7 @@
       $('#contacts_items_update_modal').modal('toggle');
       $('#contacts_items_placeholder').empty();
       $.ajax({
-        url: "{{ url_for('calendar.sources.api01') }}",
+        url: "{{ url_for('contacts.items.api01') }}",
         contentType: "application/json",
         dataType: 'json',
         success: function(res) {

@@ -53,6 +53,14 @@ class CZ
                 'uri' => ($uri = 'https://wwwinfo.mfcr.cz/cgi-bin/ares/darv_rzp.cgi?ico='.$id.'&xml=0&rozsah=2'),
                 'key' => 'contacts.cz_ids.rzp.'.md5($uri),
             ],
+            'names_justice' => [
+                'uri' => ($uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&nazev='.$id.'&polozek=500'),
+                'key' => 'contacts.cz_names.justice.'.md5($uri),
+            ],
+            'names_rzp' => [
+                'uri' => ($uri = 'http://www.rzp.cz/cgi-bin/aps_cacheWEB.sh?VSS_SERV=ZVWSBJFND&Action=Search&PRESVYBER=0&PODLE=subjekt&ICO=&OBCHJM='.$id.'&VYPIS=1'),
+                'key' => 'contacts.cz_names.rzp.'.md5($uri),
+            ],
             'vies' => [
                 'uri' => null,
                 'key' => 'contacts.cz_vies'.md5('CZ'.$id),
@@ -60,6 +68,42 @@ class CZ
         ];
         return ($pairs[$what] ?: null);
     }
+
+
+
+    public function names_justice(string $id, &$result_raw = null) :? array {
+      $result = null;
+      $uri = $this->urikey(__FUNCTION__, $id)['uri'];
+      $crawler = $this->goutte->request('GET', $uri);
+      $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
+          $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
+          $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
+          $r['addr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
+          $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
+          $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
+          $result[$r['regid']] = $r;
+      });
+      $result_raw = $this->goutte->getResponse()->getContent() ?? null;
+      return $result;
+    }
+
+    public function names_rzp(string $id, &$result_raw = null) :? array {
+      $result = null;
+      $uri = $this->urikey(__FUNCTION__, $id)['uri'];
+      $crawler = $this->goutte->request('GET', $uri);
+      $crawler->filter('div#obsah > div.blok.data.subjekt')->each(function (Crawler $table) use (&$result) {
+          $r['org'] = $table->filter('h3')->text();
+          $r['org'] = preg_replace('/^[0-9]{1,2}. /', "", $r['org']);
+          $r['addr'] = $table->filter('dd:nth-child(4)')->text();
+          $r['regid'] = $table->filter('dd:nth-child(8)')->text();
+          $r['regby'] = "";
+          $r['regdt'] = "";
+          $result[$r['regid']] = $r;
+      });
+      $result_raw = $this->goutte->getResponse()->getContent() ?? null;
+      return $result;
+    }
+
 
     public function vies(string $id, &$result_raw = null) :? array {
         $result = null;

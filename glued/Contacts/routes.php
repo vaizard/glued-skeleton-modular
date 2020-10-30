@@ -8,11 +8,11 @@ use Slim\Routing\RouteCollectorProxy;
 
 // Define the app routes.
 $app->group('/api/contacts/v1', function (RouteCollectorProxy $group) {
-    $group->get ('/', ContactsController::class . ':list')->setName('contacts.items.api01'); 
-    $group->post('/', ContactsController::class . ':create');
-    $group->get ('/{uid:[0-9]+}', ContactsController::class . ':read');//->setName('contacts.object.api01'); 
-    $group->put ('/{uid:[0-9]+}', ContactsController::class . ':update');
-    $group->delete('/{uid:[0-9]+}', ContactsController::class . ':delete');
+    $group->get ('[/{uid:[0-9]+}]', ContactsController::class . ':list')->setName('contacts.items.api01'); 
+    $group->post('[/{uid:[0-9]+}]', ContactsController::class . ':create');
+    //$group->get ('/{uid:[0-9]+}', ContactsController::class . ':read');//->setName('contacts.object.api01'); 
+    //$group->put ('/{uid:[0-9]+}', ContactsController::class . ':update');
+    //$group->delete('/{uid:[0-9]+}', ContactsController::class . ':delete');
 })->add(RestrictGuests::class);
 
 $app->group('/api/contacts/search/v1', function (RouteCollectorProxy $group) {

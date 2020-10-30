@@ -155,55 +155,78 @@ class ContactsController extends AbstractTwigController
       $builder = new JsonResponseBuilder('contacts.search', 1);
       $payload = $builder->withData((array)$data)->withCode(200)->build();
       return $response->withJson($payload);
-
     }
+
+
+    public function create(Request $request, Response $response, array $args = []): Response {
+        $req = $request->getParsedBody();
+        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['id'] = 0;
+        $builder = new JsonResponseBuilder('contacts', 1);
+        print_r($req);
+        die();
+        $payload = $builder->withData((array)$data)->withCode(200)->build();
+        return $response->withJson($payload);
+    }
+
+    public function list(Request $request, Response $response, array $args = []): Response {
+      $builder = new JsonResponseBuilder('contacts', 1);
+      $r = $request->getParsedBody();
+      print_r($r);
+      die();
+      $payload = $builder->withData((array)$data)->withCode(200)->build();
+      return $response->withJson($payload);
+    }
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function cz_names(Request $request, Response $response, array $args = []): Response {
+        $cz = new CZ($this->c);
         $builder = new JsonResponseBuilder('contacts.search', 1);
         $search_string = $args['name'];
+        $result = [];
         
       if (strlen($search_string) < 3) {
          $payload = $builder->withMessage('Please use at least 3 characters for your search.')->withCode(200)->build();
          return $response->withJson($payload);
       }
-      $result_justice = [];
-      $uri = 'https://or.justice.cz/ias/ui/rejstrik-$firma?jenPlatne=PLATNE&nazev='.$search_string.'&polozek=500';
-      $crawler = $this->goutte->request('GET', $uri);
-      $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result_justice) {
-          $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
-          $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
-          $r['addr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
-          $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
-          $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
-          $result_justice[$r['regid']] = $r;
-          //vatid
-          //https://adisreg.mfcr.cz/adistc/DphReg?id=1&pocet=1&fu=&OK=+Search+&ZPRAC=RDPHI1&dic=29228107
-      });
 
-      $result = [];
-      $uri = 'http://www.rzp.cz/cgi-bin/aps_cacheWEB.sh?VSS_SERV=ZVWSBJFND&Action=Search&PRESVYBER=0&PODLE=subjekt&ICO=&OBCHJM='.$search_string.'&VYPIS=1';
-      $crawler = $this->goutte->request('GET', $uri);
-      $crawler->filter('div#obsah > div.blok.data.subjekt')->each(function (Crawler $table) use (&$result) {
-          $r['org'] = $table->filter('h3')->text();
-          $r['org'] = preg_replace('/^[0-9]{1,2}. /', "", $r['org']);
-          $r['addr'] = $table->filter('dd:nth-child(4)')->text();
-          $r['regid'] = $table->filter('dd:nth-child(8)')->text();
-          $result[$r['regid']] = $r;
-      });
+      $cnf = $cz->urikey('names_justice', $search_string); $raw_result = null;
+      if ($this->fscache->has($cnf['key'])) {
+          $new = $this->fscache->get($cnf['key']);
+          $result = array_replace_recursive($result, $new ?? []);
+      } else {
+          $new = $cz->names_justice($search_string, $raw_result);
+          $result = array_replace_recursive($result, $new ?? []);
+          if (!is_null($new)) $this->fscache->set($cnf['key'], $result, 3600); // 60 minutes
+      }
 
-      $result = array_replace($result, $result_justice);
+      $cnf = $cz->urikey('names_rzp', $search_string); $raw_result = null;
+      if ($this->fscache->has($cnf['key'])) {
+          $new = $this->fscache->get($cnf['key']);
+          $result = array_replace_recursive($result, $new ?? []);
+      } else {
+          $new = $cz->names_rzp($search_string, $raw_result);
+          $result = array_replace_recursive($result, $new ?? []);
+          if (!is_null($new)) $this->fscache->set($cnf['key'], $result, 3600); // 60 minutes
+      }
+
+      $final = [];
+      foreach ($result as $item) $final[] = $item;
       
-      $payload = $builder->withData((array)$result)->withCode(200)->build();
+      $payload = $builder->withData((array)$final)->withCode(200)->build();
       return $response->withJson($payload);
     }
     
+    // TODO: search by reg-id (ičo) fails because cz_ids gives now data in quite a different format to that of cz_names
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     public function cz_ids(Request $request, Response $response, array $args = []): Response {
+      // TODO this function is pretty slow. look where we loose speed.
       $builder = new JsonResponseBuilder('contacts.search', 1);
       $cz = new CZ($this->c);
       $id = $args['id'];
@@ -215,7 +238,7 @@ class ContactsController extends AbstractTwigController
 
       // JUSTICE
       $cnf = $cz->urikey('ids_justice', $id); $raw_result = null;
-      if ($this->fscache->has($cnf['key'].'e')) {
+      if ($this->fscache->has($cnf['key'])) {
           $new = $this->fscache->get($cnf['key']);
           $result = array_replace_recursive($result, $new ?? []);
       } else {
