@@ -1,6 +1,6 @@
 
 <div class="modal fade" tabindex="-1" role="dialog" id="{{ contacts_items_id }}_modal" data-backdrop="false">
-  <div class="modal-dialog modal-xl" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">{{ __('New contact') }}</h5>
@@ -22,41 +22,41 @@
                 </div>
             </div>
         </div>
- <form action="{{ url_for('contacts.items.api01') }}" method="post" autocomplete="off" id="{{ contact_items_id }}_form">     
-        <div class="form-row"> 
-          <div class="form-group col-md-6">
-            <label>{{ __('Company') }}*</label>
-            <div class="input-group">
-              <input type="text" id="contacts_items_org" class="form-control" value="">
+        <form action="{{ url_for('contacts.items.api01') }}" method="post" autocomplete="off" id="{{ contacts_items_id }}_form">     
+          <div class="form-row"> 
+            <div class="form-group col-md-6">
+              <label>{{ __('Company') }}*</label>
+              <div class="input-group">
+                <input type="text" id="contacts_items_org" name="contacts_items_org" class="form-control" value="">
+              </div>
             </div>
+            <div class="form-group col-md-6">
+              <label>{{ __('Address') }}</label>
+              <div class="input-group">
+                <input type="text" id="contacts_items_addr" name="contacts_items_addr" class="form-control" value="">
+              </div>
+            </div>   
           </div>
-          <div class="form-group col-md-6">
-            <label>{{ __('Address') }}</label>
-            <div class="input-group">
-              <input type="text" id="contacts_items_addr" class="form-control" value="">
+          <div class="form-row"> 
+            <div class="form-group col-md-6">
+              <label>{{ __('Registered by') }}*</label>
+              <div class="input-group">
+                <input type="text" id="contacts_items_regby" name="contacts_items_regby" class="form-control" value="">
+              </div>
             </div>
-          </div>   
-        </div>
-        <div class="form-row"> 
-          <div class="form-group col-md-6">
-            <label>{{ __('Registered by') }}*</label>
-            <div class="input-group">
-              <input type="text" id="contacts_items_regby" class="form-control" value="">
-            </div>
+            <div class="form-group col-md-6">
+              <label>{{ __('Registration ID') }}</label>
+              <div class="input-group">
+                <input type="text" id="contacts_items_regid" name="contacts_items_regid" class="form-control" value="">
+              </div>
+            </div>   
           </div>
-          <div class="form-group col-md-6">
-            <label>{{ __('Registration ID') }}</label>
-            <div class="input-group">
-              <input type="text" id="contacts_items_regid" class="form-control" value="">
-            </div>
-          </div>   
-        </div>
-      </div>
-      <div class="modal-footer bg-whitesmoke br">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Save changes</button>
+          <div class="modal-footer bg-whitesmoke br">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
       </div>
     </div>
-  </form>  
   </div>
 </div>
