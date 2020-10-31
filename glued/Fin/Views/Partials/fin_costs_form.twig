@@ -1,0 +1,70 @@
+<form action="{{ url_for('fin.costs.api01') }}" method="post" autocomplete="off" id="{{ fin_costs_id }}_form">
+  <div class="form-row">
+    <div class="form-group col-md-3">
+      <label>{{ __('Offset') }}* <a href="#"><i class="far fa-plus-square text-dark"></i></a></label>
+      <div class="input-group">
+        <input type="text" class="form-control" name="data[0][offset]" required placeholder="{{ __('Person / Organization') }}" id="{{ fin_costs_id }}_form_offset_name">
+      </div>
+    </div> 
+    <div class="form-group col-md-2">
+      <label>{{ __('Issue date') }}*</label>
+      <div class="input-group">
+        <input type="text" class="form-control datepicker" name="data[0][dt]" required placeholder="RRRR-MM-DD"id="{{ fin_costs_id }}_form_issue_dt">
+      </div>
+    </div>
+
+    <div class="form-group col-md-2">
+      <label>{{ __('Var. ref. / Invoice #') }}*</label>
+      <div class="input-group">
+        <input type="text" class="form-control datepicker" name="data[0][dt]" required placeholder="RRRR-MM-DD"id="{{ fin_costs_id }}_form_issue_dt">
+      </div>
+    </div>
+    <div class="form-group col-md-2">
+      <label>{{ __('Volume excl. VAT') }}</label>
+      <div class="input-group">
+        <input type="text" class="form-control" name="data[0][volume_exvat]" required placeholder="{{ __('12345.67') }}" id="{{ fin_costs_id }}_form_volume_exvat">
+      </div>
+    </div>
+    <div class="form-group col-md-2">
+      <label>{{ __('Volume incl. VAT') }}</label>
+      <div class="input-group">
+        <input type="text" class="form-control" name="data[0][volume_invat]" required placeholder="{{ __('12345.67') }}" id="{{ fin_costs_id }}_form_volume_invat">
+      </div>
+    </div>
+    <div class="form-group col-md-1">
+      <label>{{ __('Currency') }}</label>
+      <select class="form-control select2" name="data[0][currency]" required style="width: 100%" id="{{ fin_costs_id }}_form_currency">
+        {% for cur in currencies %}
+        <option value="{{ cur.alpha3 }}" {% if cur.alpha3 == 'CZK' %}selected{% endif %}>{{ cur.alpha3 }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  <div class="form-row"> 
+    <div class="form-group col-md-4">
+      <label>{{ __('Cost types') }}</label>
+      <select class="form-control select2"  multiple="" name="data[0][currency]" required style="width: 100%" id="{{ fin_costs_id }}_form_currency">
+              {% for k,v in cost_types %}
+                <option value="{{ k }}">{{ v }}</option>
+              {% endfor %}
+      </select>
+    </div>
+    <div class="form-group col-md-3">
+      <label>{{ __('Freeform ref.') }}</label><br>
+      <input type="text" class="form-control" name="data[0][ref_freeform]" id="{{ fin_costs_id }}_form_ref_freeform">
+    </div>
+    <div class="form-group col-md-3">
+      <label>{{ __('Internal comment') }}</label>
+      <div class="input-group">
+        <input type="text" class="form-control" name="data[0][comment]" id="{{ fin_costs_id }}_form_comment">
+      </div>
+    </div>   
+    <div class="form-group col-md-2">
+      <label>{{ __('Project') }}* <a href="#"><i class="far fa-plus-square text-dark"></i></a></label>
+      <div class="input-group">
+        <input type="text" class="form-control" name="data[0][offset]" required placeholder="{{ __('Name Surname, (Organization)') }}" id="{{ fin_costs_id }}_form_offset_name">
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
+  </div>
+</form>
