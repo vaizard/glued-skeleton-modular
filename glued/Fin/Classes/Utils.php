@@ -175,7 +175,7 @@ class Utils
             $helper['currency'] = $trx['currency'];
 
             $helper['offset']['name'] = $trx['offset_name'];
-            $helper['offset']['address'] = $trx['offset_address'];
+            $helper['offset']['addr']['unstructured'] = $trx['offset_addr_unstructured'];
             $helper['offset']['id'] = '';
             $helper['offset']['aid'] = $trx['offset_aid']; // assigned id
             $helper['offset']['aid_type'] = $trx['offset_aid_type'];
@@ -253,12 +253,12 @@ class Utils
                 }
             } else {
                 $helper['offset']['name'] = '';
-                $helper['offset']['address'] = '';
+                $helper['offset']['addr']['unstructured'] = '';
                 $helper['offset']['id'] = '';
                 $helper['offset']['aid'] = '';
                 $helper['offset']['aid_type'] = '';
                 $helper['offset']['bank_name'] = $trx['column12']['value'] ?? '';
-                $helper['offset']['bank_address'] = '';
+                $helper['offset']['bank_addr'] = '';
                 $helper['offset']['bank_code'] = $trx['column3']['value'] ?? '';
                 $helper['offset']['bank_bic'] = $trx['column26']['value'] ?? '';
                 $helper['offset']['account_number'] = $trx['column2']['value'] ?? '';
