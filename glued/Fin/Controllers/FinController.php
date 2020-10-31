@@ -377,7 +377,8 @@ class FinController extends AbstractTwigController
     public function trx_post(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('fin.accounts', 1);
         $req = $request->getParsedBody();
-
+        $files = $request->getUploadedFiles();
+        
         $meta['user_id'] = (int)$_SESSION['core_user_id'];
         $fin = new FinUtils();
         $data = $fin->cash($req['data'], [ 'user_id' => (int)$_SESSION['core_user_id'] ], $req);
@@ -400,9 +401,27 @@ class FinController extends AbstractTwigController
                 'c_user_id' => (int)$meta['user_id'],
                 'c_json' => json_encode($data[0]),
             );
-            try { $this->utils->sql_insert_with_json('t_fin_trx', $row); } catch (Exception $e) { 
+            try { $new_trx_id = $this->utils->sql_insert_with_json('t_fin_trx', $row); } catch (Exception $e) { 
                 throw new HttpInternalServerErrorException($request, $e->getMessage());  
             }
+            
+            // pokud jsou files, nahrajeme je storem k $new_trx_id a tabulce t_fin_trx
+            if (!empty($files['file']) and count($files['file']) > 0) {
+                foreach ($files['file'] as $file_index => $newfile) {
+                    if ($newfile->getError() === UPLOAD_ERR_OK) {
+                        $filename = $newfile->getClientFilename();
+                        // ziskame tmp path ktere je privatni vlastnost $newfile, jeste zanorene v Stream, takze nejde normalne precist
+                        // vypichneme si stream a pouzijeme na to reflection
+                        $stream = $newfile->getStream();
+                        $reflectionProperty = new \ReflectionProperty(\Nyholm\Psr7\Stream::class, 'uri');
+                        $reflectionProperty->setAccessible(true);
+                        $tmp_path = $reflectionProperty->getValue($stream);
+                        // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
+                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $_SESSION['core_user_id'], $this->stor->app_tables['fin_trx'], $new_trx_id);
+                    }
+                }
+            }
+            
             $payload = $builder->withData((array)$req)->withCode(200)->build();
             return $response->withJson($payload, 200);
        /* } else {

@@ -128,6 +128,38 @@
   //
   // Create handle
   // 
+  
+  $('#fin_trx_create_form #trx-ajax-create').on('click', function (event) {
+        // button ktery to zmackl ma na sobe data
+        var button = $(this);
+        
+        // insert complete form into FormData object
+        var formData = new FormData(document.getElementById("fin_trx_create_form"));
+        
+        $.ajax({
+               url : '{{ url_for("fin.trx.api01") }}',
+               type : 'POST',
+               data : formData,
+               processData: false,  // tell jQuery not to process the data
+               contentType: false,  // tell jQuery not to set contentType
+               success : function(res) {
+                  var idtwig = 'fin_trx_obj_twig';
+                  $('#toast-placeholder').empty();
+                  $(Twig.twig({ ref: 'fin_trx_obj_twig' }).render({ row: res.data })).prependTo("#fin_trx > tbody");
+                  $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+                  $('.toast').toast('show');
+                  $('#fin_trx_create_modal').modal('toggle');
+               },
+               error: function(res) {
+                  $('#toast-placeholder').empty();
+                  $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+                  $('.toast').toast('show');
+               }
+        });
+        
+  });
+  
+  /*
   $("#fin_trx_create_form").ajaxSubmit({
     data: function() {
       return $(this).serialize();
@@ -146,7 +178,7 @@
       $('.toast').toast('show');
     }
   });
-
+  */
 
   //
   // Update handle
