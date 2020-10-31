@@ -1,7 +1,7 @@
 <form action="{{ url_for('fin.costs.api01') }}" method="post" autocomplete="off" id="{{ fin_costs_id }}_form">
   <div class="form-row">
     <div class="form-group col-md-3">
-      <label>{{ __('Offset') }}* <a href="#"><i class="far fa-plus-square text-dark"></i></a></label>
+      <label>{{ __('Offset') }}* <a href="#" data-toggle="modal" data-id="" data-uri="" data-name="" data-domain="" data-driver="" data-target="#contacts_items_create_modal"><i class="far fa-plus-square text-dark"></i></a></label>
       <div class="input-group">
         <input type="text" class="form-control" name="data[0][offset]" required placeholder="{{ __('Person / Organization') }}" id="{{ fin_costs_id }}_form_offset_name">
       </div>
@@ -68,3 +68,5 @@
     <button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
   </div>
 </form>
+
+{% include '/Contacts/Views/Partials/contacts_items_modal.twig' with {'contacts_items_id': 'contacts_items_create'} %}
