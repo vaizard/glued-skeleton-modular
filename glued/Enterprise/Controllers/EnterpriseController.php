@@ -148,7 +148,10 @@ class EnterpriseController extends AbstractTwigController
         $req['id'] = 0;
         $req['_v'] = (int) 1;
         $req['_s'] = 'enterprise.projects';
-
+        
+        $parent = (int) $req['parent'];
+        unset($req['parent']);  // protoze neni ve schematu
+        
         // convert body to object
         $req = json_decode(json_encode((object)$req));
   
@@ -166,6 +169,16 @@ class EnterpriseController extends AbstractTwigController
             try { $req->id = $this->utils->sql_insert_with_json('t_enterprise_projects', $row); } catch (Exception $e) { 
                 throw new HttpInternalServerErrorException($request, $e->getMessage());  
             }
+            
+            // pokud je nastaveny parent > 0, vlozime
+            if ($parent > 0) {
+                $data = Array (
+                "c_parent" => $parent,
+                "c_child" => $req->id
+                );
+                $this->db->insert ('t_enterprise_projects_tree', $data);
+            }
+            
             $payload = $builder->withData((array)$req)->withCode(200)->build();
             return $response->withJson($payload, 200);
         } else {
