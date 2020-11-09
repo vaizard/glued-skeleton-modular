@@ -37,8 +37,10 @@ class EnterpriseController extends AbstractTwigController
         // 
         // TODO - preseed domains on installation with at least one domain
         $domains = $this->db->get('t_core_domains');
+        $projects = $this->db->get('t_enterprise_projects', null, ['c_uid as id', 'c_json->>"$.name" as name', 'c_json->>"$.description" as description']);
         return $this->render($response, 'Enterprise/Views/projects.twig', [
             'domains' => $domains,
+            'projects' => $projects
         ]);
     }
 
@@ -66,24 +68,12 @@ class EnterpriseController extends AbstractTwigController
     private function sql_projects_list() {
         $data = $this->db->rawQuery("
             SELECT
-                c_domain_id as 'domain',
-                t_enterprise_projects.c_user_id as 'user',
-                t_core_users.c_name as 'user_name',
-                t_core_domains.c_name as 'domain_name',
                 t_enterprise_projects.c_uid as 'id',
                 t_enterprise_projects.c_json->>'$._s' as '_s',
                 t_enterprise_projects.c_json->>'$._v' as '_v',
-                t_enterprise_projects.c_json->>'$.type' as 'type',
-                t_enterprise_projects.c_json->>'$.currency' as 'currency',
                 t_enterprise_projects.c_json->>'$.name' as 'name',
-                t_enterprise_projects.c_json->>'$.color' as 'color',
-                t_enterprise_projects.c_json->>'$.icon' as 'icon',
-                t_enterprise_projects.c_json->>'$.description' as 'description',
-                t_enterprise_projects.c_json->>'$.config' as 'config',
-                t_enterprise_projects.c_ts_synced as 'ts_synced'
+                t_enterprise_projects.c_json->>'$.description' as 'description'
             FROM `t_enterprise_projects` 
-            LEFT JOIN t_core_users ON t_enterprise_projects.c_user_id = t_core_users.c_uid
-            LEFT JOIN t_core_domains ON t_enterprise_projects.c_domain_id = t_core_domains.c_uid
         ");
         return $data;
     }
@@ -154,41 +144,41 @@ class EnterpriseController extends AbstractTwigController
         $builder = new JsonResponseBuilder('enterprise.projects', 1);
         $req = $request->getParsedBody();
 
-        if (array_key_exists('config', $req) and ($req['config'] != "")) {
-          $config = json_decode(trim($req['config']), true);
-          if (json_last_error() !== 0) throw new HttpBadRequestException( $request, __('Config contains invalid json.'));
-          $req['config'] = $config;
-        } else { $req['config'] = new \stdClass(); }
-        if (!array_key_exists('currency', $req)) { $req['currency'] = ''; }
-
         $req['user'] = (int)$_SESSION['core_user_id'];
         $req['id'] = 0;
         $req['_v'] = (int) 1;
         $req['_s'] = 'enterprise.projects';
-
-        // TODO check again if user is member of a domain that was submitted
-        if ( isset($req['domain']) ) { $req['domain'] = (int) $req['domain']; }
-
+        
+        $parent = (int) $req['parent'];
+        unset($req['parent']);  // protoze neni ve schematu
+        
         // convert body to object
         $req = json_decode(json_encode((object)$req));
   
         // TODO replace manual coercion above with a function to recursively cast types of object values according to the json schema object (see below)       
     
         // load the json schema and validate data against it
-        $loader = new JSL("schema://fin/", [ __ROOT__ . "/glued/Fin/Controllers/Schemas/" ]);
-        $schema = $loader->loadSchema("schema://fin/projects.v1.schema");
+        $loader = new JSL("schema://enterprise/", [ __ROOT__ . "/glued/Enterprise/Controllers/Schemas/" ]);
+        $schema = $loader->loadSchema("schema://enterprise/projects.v1.schema");
         $result = $this->jsonvalidator->schemaValidation($req, $schema);
 
         if ($result->isValid()) {
             $row = array (
-                'c_domain_id' => (int)$req->domain, 
-                'c_user_id' => (int)$req->user,
-                'c_json' => json_encode($req),
-                'c_attr' => '{}'
+                'c_json' => json_encode($req)
             );
             try { $req->id = $this->utils->sql_insert_with_json('t_enterprise_projects', $row); } catch (Exception $e) { 
                 throw new HttpInternalServerErrorException($request, $e->getMessage());  
             }
+            
+            // pokud je nastaveny parent > 0, vlozime
+            if ($parent > 0) {
+                $data = Array (
+                "c_parent" => $parent,
+                "c_child" => $req->id
+                );
+                $this->db->insert ('t_enterprise_projects_tree', $data);
+            }
+            
             $payload = $builder->withData((array)$req)->withCode(200)->build();
             return $response->withJson($payload, 200);
         } else {
