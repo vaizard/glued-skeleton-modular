@@ -78,23 +78,26 @@ class AuthController extends AbstractTwigController
 
 
 
-    public function jwt_signin_post($request, $response)
+    public function api_signout_get($request, $response)
     {
         $builder = new JsonResponseBuilder('authentication', 1);
+        $this->auth->signout();
+        return $response->withJson(['status' => 'OK', 'message' => 'Signed out.']);
 
-        $auth = $this->auth->attempt(
-            $request->getParam('email'),
-            $request->getParam('password')
-        );
-
-        if (!$auth) {
-            $payload = $builder->withMessage(__('Authentication failed.'))->withCode(403)->build();
-            return $response->withJson($payload);    
-        }
-        return $response->withJson(['status' => 'OK', 'token' => $auth]);
     }
 
-    public function auth_status_get($request, $response) {
+    public function api_extend_get($request, $response) {
+        $builder = new JsonResponseBuilder('authentication', 1);
+        $auth = $this->auth->check();
+        if (!$auth) {
+            $payload = $builder->withMessage(__('Authentication failed.'))->withCode(403)->build();
+            return $response->withJson($payload, 403);    
+        }
+        $token = $this->auth->jwt_extend($GLOBALS['_JWT']);
+        return $response->withJson(['status' => 'OK', 'message' => 'Extended.', 'token' => $token]);
+    }
+
+    public function api_status_get($request, $response) {
         $builder = new JsonResponseBuilder('auth-status', 1);
         $header_match = "Authorization";
         $regexp_match = "/Bearer\s+(.*)$/i";
@@ -150,13 +153,28 @@ class AuthController extends AbstractTwigController
         return $response->withJson($payload, $code);  
     }
 
+    public function api_signin_post($request, $response)
+    {
+        $builder = new JsonResponseBuilder('authentication', 1);
+        $auth = $this->auth->attempt(
+            $request->getParam('email'),
+            $request->getParam('password')
+        );
+
+        if (!$auth) {
+            $payload = $builder->withMessage(__('Authentication failed.'))->withCode(403)->build();
+            return $response->withJson($payload, 403);    
+        }
+        return $response->withJson(['status' => 'OK', 'message' => 'Signed in.', 'token' => $auth]);
+    }
+
     public function signin_post($request, $response)
     {
         $auth = $this->auth->attempt(
             $request->getParam('email'),
             $request->getParam('password')
         );
-
+                    
         if (!$auth) {
             $this->flash->addMessage('error', 'Could not sign you in with those details.');
             return $response->withRedirect($this->routerParser->urlFor('core.signin.web'));
@@ -183,7 +201,6 @@ class AuthController extends AbstractTwigController
         } else {
             $redirect = $this->routerParser->urlFor('core.dashboard.web'); 
         }
-
         $this->flash->addMessage('info', 'Welcome back, you are signed in!');
         return $response->withRedirect($redirect);
     }
@@ -262,8 +279,8 @@ class AuthController extends AbstractTwigController
     // password, redirects him to different locations based on success|failure.
     public function change_password($request, $response)
     {
-        $user_id = $_SESSION['core_user_id'] ?? false;
-        $auth_id = $_SESSION['core_auth_id'] ?? false;
+        $user_id = $GLOBALS['_GLUED']['authn']['user_id'] ?? false;
+        $auth_id = $GLOBALS['_GLUED']['authn']['auth_id'] ?? false;
         
         if ($user_id and $auth_id) {
             

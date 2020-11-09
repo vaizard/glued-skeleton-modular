@@ -240,6 +240,35 @@ curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/a
 curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/api/core/v1/profiles --output -
 ```
 
+### Global variables and passing around data
+
+To pass around data between middlewares and the app, or the app and the twig views, uses:
+
+`$request->getAttribute()` to pass the
+
+- auth_jwt
+- locale
+
+keys, `$this->view->getEnvironment()->addGlobal()` to add the
+
+- authn
+- authz
+- validation_errors
+- validation_reseed
+- csp_nonce
+- flash
+
+keys, and the `$GLOBALS` to have
+
+- _JWT
+- _GLUED
+  - authn
+  - authz
+
+keys accessible easily everywhere.
+
+
+
 ### Developer tutorials
 
 Glued comes with two modules aimed at getting you up to speed quickly.

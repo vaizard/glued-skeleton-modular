@@ -76,7 +76,6 @@ $app->add(new Tuupola\Middleware\CorsMiddleware); // TODO add sane defaults to C
 $app->add(new HeadersMiddleware($settings));
 $app->add(new \Glued\Core\Middleware\AuthorizationMiddleware($container));
 $app->add(new SessionMiddleware($settings));
-
 $app->add(new Tuupola\Middleware\JwtAuthentication($settings['auth']['jwt']));
 
 

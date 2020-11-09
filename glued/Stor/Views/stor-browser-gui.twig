@@ -160,7 +160,7 @@
                     <div>owner of final copied or moved file</div>
                     <div><select name="set_new_owner">
                         <option value="1" selected>let system select</option>
-                        {% if auth.root %}
+                        {% if authz.root %}
                             <option value="2">set me as owner</option>
                             <option value="3">do not change owner</option>
                         {% endif %}

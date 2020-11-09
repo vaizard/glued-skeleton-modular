@@ -36,6 +36,7 @@ $container->set('settings', function() {
 });
 
 $container->set('logger', function (Container $c) {
+    define('ACT_AUTH_ATTEMPT', 1);
     $settings = $c->get('settings')['logger'];
     $logger = new Logger($settings['name']);
     $processor = new UidProcessor();
@@ -142,7 +143,7 @@ $container->set('validator', function (Container $c) {
 
 
 $container->set('auth', function (Container $c) {
-    return new Auth($c->get('db'), $c->get('settings'));
+    return new Auth($c->get('settings'), $c->get('db'), $c->get('logger'));
 });
 
 $container->set('utils', function (Container $c) {

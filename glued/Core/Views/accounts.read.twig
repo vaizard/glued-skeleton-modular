@@ -47,7 +47,7 @@
           <div class="card-body pb-0">
             <div class="form-group {{ validation_errors.name ? ' has-error' : ''}}">
               <label for="name">{{ __('Screen name') }}</label>
-              <input type="text" name="name" id="name" class="form-control{{ validation_errors.name ? ' is-invalid' : validation_reseed.name ? ' is-valid' : '' }}" value="{{ auth.u_name }}">
+              <input type="text" name="name" id="name" class="form-control{{ validation_errors.name ? ' is-invalid' : validation_reseed.name ? ' is-valid' : '' }}" value="{{ authn.u_name }}">
               <input type="hidden" name="_METHOD" value="PATCH">
               {% if validation_errors.name %}
               <span class="invalid-feedback">{{ validation_errors.name | first }}</span>
@@ -55,14 +55,14 @@
             </div>
             <div class="form-group">
               <label for="email">{{ __('E-mail') }}</label>
-              <input type="text" name="email" id="email" class="form-control{{ validation_errors.email ? ' is-invalid' : '' }}" value="{{ auth.u_email }}">
+              <input type="text" name="email" id="email" class="form-control{{ validation_errors.email ? ' is-invalid' : '' }}" value="{{ authn.u_email }}">
               {% if validation_errors.email %}
               <span class="invalid-feedback">{{ validation_errors.email | first }}</span>
               {% endif %}
             </div>
             <div class="form-group">
               <label for="lang">{{ __('Preffered language') }}</label>
-              <input type="select" name="lang" id="lang" class="form-control{{ validation_errors.lang ? ' is-invalid' : '' }}" value="{{ auth.u_lang }}">
+              <input type="select" name="lang" id="lang" class="form-control{{ validation_errors.lang ? ' is-invalid' : '' }}" value="{{ authn.u_lang }}">
               {% if validation_errors.lang %}
               <span class="invalid-feedback">{{ validation_errors.lang | first }}</span>
               {% endif %}

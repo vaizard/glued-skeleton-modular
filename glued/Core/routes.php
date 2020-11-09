@@ -1,5 +1,6 @@
 <?php
 use Geocoder\geocode;
+use Glued\Core\Classes\Utils\Utils;
 use Glued\Core\Controllers\Accounts;
 use Glued\Core\Controllers\AuthController;
 use Glued\Core\Controllers\DomainsController as Domains;
@@ -13,12 +14,7 @@ use Glued\Core\Middleware\RestrictGuests;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Routing\RouteCollectorProxy;
-
-
-$app->get ('/rj/auth-status', AuthController::class . ':auth_status_get')->add(RestrictGuests::class)->add(new Tuupola\Middleware\JwtAuthentication($settings['auth']['jwt']));
-$app->get ('/jr/auth-status', AuthController::class . ':auth_status_get')->add(new Tuupola\Middleware\JwtAuthentication($settings['auth']['jwt']))->add(RestrictGuests::class);
-$app->get ('/j/auth-status', AuthController::class . ':auth_status_get')->add(new Tuupola\Middleware\JwtAuthentication($settings['auth']['jwt']));
-$app->get ('/r/auth-status', AuthController::class . ':auth_status_get')->add(RestrictGuests::class);
+use Symfony\Component\DomCrawler\Crawler;
 
 
 // Homepage
@@ -57,8 +53,10 @@ $app->get ('/core/signout', AuthController::class . ':signout_get')->setName('co
 $app->group('/api/core/v1', function (RouteCollectorProxy $route) {
     // Everyone or Guests-only
     $route->group('', function (RouteCollectorProxy $route) {
-        $route->post('/signin', AuthController::class . ':jwt_signin_post');
-        $route->get ('/auth-status', AuthController::class . ':auth_status_get');
+        $route->get ('/auth/extend', AuthController::class . ':api_extend_get')->setName('core.auth.extend.api');
+        $route->get ('/auth/status', AuthController::class . ':api_status_get')->setName('core.auth.status.api');
+        $route->post('/auth/signin', AuthController::class . ':api_signin_post')->setName('core.auth.signin.api');
+        $route->get ('/auth/signout', AuthController::class . ':api_signout_get')->setName('core.auth.signout.api');
     });
     // Authenticated-only
     $route->group('', function (RouteCollectorProxy $route) {
@@ -81,8 +79,22 @@ $app->get ('/core/admin/playground', function(Request $request, Response $respon
 
     $results = $provider->geocodeQuery(Geocoder\Query\GeocodeQuery::create('74.200.247.59'))->first()->getCountry()->getCode();
     print("<pre>".print_r($results,true)."</pre>");
-
-
+    
+    print_r(array_keys((array)$GLOBALS));// die();
+    print_r(array_keys((array)$GLOBALS['G-BEF']['d']));// die();
+    //print_r(array_keys((array)$GLOBALS['g1']));// die();
+    //print_r(array_keys((array)$GLOBALS['g2']));// die();
+    //print_r(array_keys((array)$GLOBALS['g3']));// die();
+    //print_r(array_keys((array)$GLOBALS['_JWT']));// die();
+    echo "<br>app: ";
+    //print_r($GLOBALS['app']);
+    echo "<br>container: ";
+    //print_r($GLOBALS['container']);
+   /* echo "<br>_iban_registry: ";
+    print_r($GLOBALS['_iban_registry']);
+    echo "<br>settings: ";
+    print_r($GLOBALS['settings']);
+*/
     $key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES); // 256 bit
     
     echo sodium_bin2base64(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES), SODIUM_BASE64_VARIANT_URLSAFE);
@@ -186,7 +198,6 @@ $app->get ('/core/admin/playground', function(Request $request, Response $respon
         </script>
         ';
 
-print_r(session_get_cookie_params());
 
         $settings['curl'] = [
             CURLOPT_CONNECTTIMEOUT => 2,
@@ -199,14 +210,15 @@ print_r(session_get_cookie_params());
 
 
         $curl_handle = curl_init();
-        $uri = 'http://10.146.149.150/core/signin';
+        $uri = 'https://japex01.vaizard.xyz/core/signin';
         $user = 'a@b.c';
         $pass = $user;
         $arr = [
             CURLOPT_URL => $uri,
             CURLOPT_COOKIESESSION => TRUE,
             CURLOPT_POST => 1,
-            CURLOPT_POSTFIELDS => 'username='.$user.'&password='.$pass
+            CURLOPT_POSTFIELDS => 'email='.$user.'&password='.$pass,
+            CURLOPT_FOLLOWLOCATION => true,
         ];
 
 
@@ -214,7 +226,7 @@ print_r(session_get_cookie_params());
         curl_setopt_array($curl_handle, $curl_options);
         $data1 = curl_exec($curl_handle);
 
-        $uri = 'http://10.146.149.150/api/core/v1/test';
+        $uri = 'https://japex01.vaizard.xyz/api/core/v1/test';
         $arr = [
             CURLOPT_URL => $uri,
             CURLOPT_COOKIESESSION => FALSE,
@@ -224,12 +236,47 @@ print_r(session_get_cookie_params());
         curl_setopt_array($curl_handle, $curl_options);
         $data2 = curl_exec($curl_handle);
 
+
+
 //echo $data1;
 echo "<br>-----------------------------<br>";
 echo $data2;
         curl_close($curl_handle);
 echo "<br>-----------------------------<br>";
 //https://ib.fio.cz/ib/wicket/resource/cz.fio.ib2.prehledy.web.pohyby.PohybDetailPage$1/potvrzeni?pohybId=22011239954&cisloUctu=2500781658
+
+//$u = new Utils($this->db, $this->settings);
+//$data = $u->fetch_uri('https://ib.fio.cz/ib/login?l=CZECH');
+//$c = new Crawler($data);
+//$final = $c->filter('form .horizontal');
+//echo $final;
+
+
+
+//id36d6b105e9971ab1a_hf_0=&clientTimeDelta=677&psd2paymentId=&username=killua&passwordHidden=kikLam3upl%21tric81237siud19&p%3A%3Asubmit=
+
+
+        //$curl_handle = curl_init();
+        $uri = 'https://ib.fio.cz/ib/login?-1.IFormSubmitListener-loginForm';
+        $user = 'killua';
+        $pass = 'kikLam3upl!tric81237siud19';
+        $arr = [
+            CURLOPT_URL => $uri,
+            CURLOPT_COOKIESESSION => TRUE,
+            CURLOPT_POST => 1,
+            CURLOPT_POSTFIELDS => 'email='.$user.'&password='.$pass,
+            CURLOPT_FOLLOWLOCATION => true,
+        ];
+
+
+
+
+
+
+
+
+
+
 
         // https://www.srijan.net/blog/integrating-google-sheets-with-php-is-this-easy-know-how
         $client = new \Google_Client();

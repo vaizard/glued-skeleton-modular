@@ -17,6 +17,7 @@
     '@public/assets/node_modules/bootstrap-daterangepicker/daterangepicker.css',
     '@public/assets/css/glued.css',
     ], name: 'styles'}) }}
+
 </head>
 
 <body>
@@ -47,7 +48,7 @@
           </div>
         </form>
         
-        {% if auth.check %}
+        {% if authn.success %}
         {% include '/Core/Views/templates/partials/menu-authenticated.twig' %}
         {% else %}
         {% include '/Core/Views/templates/partials/menu-anonymous.twig' %}
@@ -61,7 +62,7 @@
           <div class="sidebar-brand sidebar-brand-sm">
             <a href="/">Gl</a>
           </div>
-          {% if auth.check %}
+          {% if authn.success %}
           <ul class="sidebar-menu">
             <li class="menu-header">{{ __('System') }}</li>
             <li class="active">
@@ -71,7 +72,7 @@
               <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-user"></i> <span>{{ __('Account') }}</span></a>
               <ul class="dropdown-menu">
                 <li><a class="nav-link" href="{{ url_for('core.profiles.list.web') }}/self">{{ __('My profile') }}</a></li>
-                <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}/{{ auth.u_uid }}">{{ __('My account') }}</a></li>
+                <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}/{{ authn.u_uid }}">{{ __('My account') }}</a></li>
                 <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}">{{ __('Manage accounts') }}</a></li>
                 <li><a class="nav-link" href="{{ url_for('core.domains') }}">{{ __('Manage domains') }}</a></li>
               </ul>
@@ -169,6 +170,7 @@
         {% include '/Stor/Views/fileupload.twig' %}
         
       </section>
+      <iframe src="{{ url_for('core.auth.extend.api') }}" width="0" height="0" loading="eager" allowfullscreen="false" style="display: none"></iframe>
       </div>
       <footer class="main-footer">
         <div class="footer-left">

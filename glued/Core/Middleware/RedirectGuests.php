@@ -18,7 +18,6 @@ class RedirectGuests extends AbstractMiddleware
     public function __invoke(Request $request, Handler $handler)
     {
         $response = $handler->handle($request);
-        
         if (!$this->auth->check()) {
             $crypto = new Crypto;
             $en = $crypto->encrypt( $request->getUri()->getPath() , $this->settings['crypto']['reqparams'] );
