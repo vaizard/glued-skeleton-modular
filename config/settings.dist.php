@@ -37,6 +37,7 @@ return [
     'auth' => [
         'cookie' => [
             // Common cookie config for both session and jwt cookies
+            'lifetime'  => 0,     // 0 = until browser is closed
             'path'      => '/',
             'domain'    => $_SERVER['SERVER_NAME'] ?? null,
             'secure'    => true,
@@ -44,11 +45,9 @@ return [
             'samesite'  => 'Lax',
         ],
         'session' => [
-            // session params
-            'lifetime'  => 0,     // 0 = until browser is closed
             // middleware params
-            'attribute' => 'auth_session',
-            'cookie'    => 'g_sid' // session cookie name
+            'cookie'    => 'g_sid', // session cookie name
+            'callback'  => function () {},
         ],
         'jwt' => [
             // token params
@@ -62,6 +61,8 @@ return [
             'secure'    => 'true', // require jwt over https (NOTE You can really screw up your security with this)
             'relaxed'   => ["localhost", "127.0.0.1" ], // https not enforced for requests from relaxed whitelist (NOTE You can really screw up your security with this)
             "cookie"    => 'g_tok', // jwt cookie name
+            "before" => function ($response, $params) use (&$decoded, &$token) {},
+            "after" => function ($response, $params) use (&$decoded, &$token) {},
             "error" => function ($response, $arguments) {
                 $data['api'] =  'core/auth/jwt';
                 $data['version'] = '1';
