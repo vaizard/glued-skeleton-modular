@@ -176,7 +176,7 @@ class EnterpriseController extends AbstractTwigController
                 "c_parent" => $parent,
                 "c_child" => $req->id
                 );
-                $this->db->insert ('t_enterprise_projects_tree', $data);
+                $this->db->insert ('t_enterprise_projects_rels', $data);
             }
             
             $payload = $builder->withData((array)$req)->withCode(200)->build();
