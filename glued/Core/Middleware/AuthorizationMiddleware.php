@@ -34,8 +34,8 @@ final class AuthorizationMiddleware extends AbstractMiddleware implements Middle
             $auth_id = $ses['core_auth_id'] ?? null;
         }
         if (is_array($jwt) and is_array($ses)) {
-            if ($ses['core_user_id'] !== $jwt['g_uid']) $user_id = null; 
-            if ($ses['core_auth_id'] !== $jwt['g_uid']) $user_id = null;
+            if (($ses['core_user_id'] ?? null) !== ($jwt['g_uid'] ?? null)) $user_id = null; 
+            if (($ses['core_auth_id'] ?? null) !== ($jwt['g_uid'] ?? null)) $user_id = null;
         }
 
         if (!(v::intVal()->positive()->between(1, 4294967295)->validate($user_id))) $isvalid = false;
