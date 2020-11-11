@@ -75,6 +75,21 @@ class EnterpriseController extends AbstractTwigController
                 t_enterprise_projects.c_json->>'$.description' as 'description'
             FROM `t_enterprise_projects` 
         ");
+        if (count($data) > 0) {
+            foreach ($data as $ind => $pro) {
+                // podivame se, jestli ma nejakeho parenta v tabulce t_enterprise_projects_rels
+                $this->db->where('c_child', $pro['id']);
+                $parent_data = $this->db->getOne('t_enterprise_projects_rels');
+                if ($this->db->count == 0) { $data[$ind]['parent'] = ''; }
+                else {
+                    // nacteme nazev parentu
+                    $this->db->where('c_uid', $parent_data['c_parent']);
+                    $parent_project_data = $this->db->getOne('t_enterprise_projects', ['c_uid as id', 'c_json->>"$.name" as name']);
+                    $data[$ind]['parent'] = $parent_project_data['name'];
+                }
+            }
+        }
+        
         return $data;
     }
 
