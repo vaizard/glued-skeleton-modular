@@ -17,6 +17,7 @@
                 <tr>
                   <th class="col-sm-1">{{ __('ID') }}</th>
                   <th class="col-sm-2">{{ __('Name') }}</th>
+                  <th class="col-sm-2">{{ __('Parent') }}</th>
                   <th class="col-sm-4">{{ __('Description') }}</th>
                   <th class="col-sm-1">{{ __('Manage') }}</th>
                 </tr>
@@ -27,6 +28,7 @@
                 <tr id="enterprise_projects_object_{{ row.id }}">
                   <td class="col-sm-1">{{ row.id }} <a href="#{{ row.id }}"><i class="fas fa-sync"></i></a></td>
                   <td class="col-sm-2">{{ row.name }}</td>
+                  <td class="col-sm-2">{{ row.parent }}</td>
                   <td class="col-sm-4">{{ row.description }}</td>
                   <td class="col-sm-1">
                     <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_accounts_update_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-currency="{{ row.currency }}" data-description="{{ row.description }}" data-config="{{ row.config }}" data-icon="{{ row.icon }}" data-color="{{ row.color }}"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_accounts_delete_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }}" data-currency="{{ row.currency }}"><i class="fas fa-trash"></i></button>
