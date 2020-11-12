@@ -65,7 +65,7 @@ class EnterpriseController extends AbstractTwigController
         $project_id = (int)$args['uid'];
         $this->db->where('c_uid', $project_id);
         $data = $this->db->getOne('t_enterprise_projects', ['c_uid as id', 'c_json->>"$.name" as name', 'c_json->>"$.description" as description']);
-        return $this->render($response, 'Enterprise/Views/project-detail.twig', [
+        return $this->render($response, 'Enterprise/Views/projects.object.twig', [
             'data' => $data,
         ]);
     }
@@ -89,7 +89,7 @@ class EnterpriseController extends AbstractTwigController
         if (count($data) > 0) {
             foreach ($data as $ind => $pro) {
                 // doplnime url na detail, protoze v te sablone nefunguje url_for
-                $data[$ind]['detail_url'] = $this->routerParser->urlFor('enterprise.project.detail', array('uid' => $pro['id']));
+                //$data[$ind]['detail_url'] = $this->routerParser->urlFor('enterprise.project.detail', array('uid' => $pro['id']));
                 // podivame se, jestli ma nejakeho parenta v tabulce t_enterprise_projects_rels
                 $this->db->where('c_child', $pro['id']);
                 $parent_data = $this->db->getOne('t_enterprise_projects_rels');

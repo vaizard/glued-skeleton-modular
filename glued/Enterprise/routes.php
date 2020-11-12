@@ -22,6 +22,6 @@ $app->group('/api/enterprise/v1', function (RouteCollectorProxy $group) {
 $app->group('/enterprise', function (RouteCollectorProxy $group) {
     $group->get ('/opportunities', EnterpriseController::class . ':opportunities_list_ui')->setName('enterprise.opportunities'); 
     $group->get ('/projects', EnterpriseController::class . ':projects_list_ui')->setName('enterprise.projects'); 
-    $group->get ('/project/{uid:[0-9]}', EnterpriseController::class . ':project_detail_ui')->setName('enterprise.project.detail'); 
+    $group->get ('/projects/{uid:[0-9]}', EnterpriseController::class . ':project_detail_ui')->setName('enterprise.projects.object'); 
 })->add(RedirectGuests::class);
 
