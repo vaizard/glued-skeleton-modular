@@ -1,0 +1,23 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Project') }} {{ data.name }} #{{data.id}}</h1>
+</div>
+
+<div class="section-body">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+            <div>{{ __('ID') }}: {{ data.id }}</div>
+            <div>{{ __('Name') }}: {{ data.name }}</div>
+            <div>{{ __('Description') }}: {{ data.description }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

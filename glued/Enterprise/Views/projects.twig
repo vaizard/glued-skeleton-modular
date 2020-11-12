@@ -27,7 +27,7 @@
                 <script type="text/twig" id="enterprise_projects_obj_twig">
                 <tr id="enterprise_projects_object_{{ row.id }}">
                   <td class="col-sm-1">{{ row.id }} <a href="#{{ row.id }}"><i class="fas fa-sync"></i></a></td>
-                  <td class="col-sm-2">{{ row.name }}</td>
+                  <td class="col-sm-2"><a href="{{ row.detail_url }}">{{ row.name }}</a></td>
                   <td class="col-sm-2">{{ row.parent }}</td>
                   <td class="col-sm-4">{{ row.description }}</td>
                   <td class="col-sm-1">
