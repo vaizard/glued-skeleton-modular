@@ -29,10 +29,10 @@
                 {% verbatim %}
                 <script type="text/twig" id="contacts_items_obj_twig">
                 <tr id="contacts_items_object_{{ row.id }}">
-                  <td class="col-sm-1">{{ row.id }} <a href="{{ url_for('contacts.items.sync.api01') }}"><i class="fas fa-sync"></a></i></td>
-                  <td class="col-sm-2">{{ row.domain_name }} ({{ row.domain }})</td>
-                  <td class="col-sm-1">{{ row.driver }}</td>
-                  <td class="col-sm-3">{{ row.name }}</td>
+                  <td class="col-sm-1">{{ row.id }} <a href=""><i class="fas fa-sync"></a></i></td>
+                  <td class="col-sm-2">{{ row.fn }} ({{ row.domain }})</td>
+                  <td class="col-sm-1">{{ row.addr.0.unstructured }}</td>
+                  <td class="col-sm-3">{{ row.nat.0.vatid | default('') }}</td>
                   <td class="col-sm-3"><a href="{{ row.uri }}">{{ row.uri }}</a></td>
                   <td class="col-sm-1">
                     <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#contacts_items_update_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-driver="{{ row.driver }}"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#contacts_items_delete_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}"><i class="fas fa-trash"></i></button>
@@ -47,53 +47,12 @@
                 {% endverbatim %}
               </tbody>
             </table>
-<!--
-            <form action="{{ url_for('contacts.items.api01') }}" method="post" autocomplete="off" id="{{ contact_items_id }}_form_">
-                <div class="typeahead__container">
-                    <div class="typeahead__field">
-                        <div class="typeahead__query">
-                            <input class="typeahead_new_contact" name="contact_items[query]" placeholder="{{__('Search ...')}}" autocomplete="off">
-                        </div>
-                        <div class="typeahead__button">
-                            <button type="submit">
-                                <i class="typeahead__search-icon"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
--->
-
           </div>
         </div>
       </div>
     </div>
   </div>
   
-<!--  
-  <div class="row">
-    <div class="col-12">
-      <div class="card card-secondary">
-        <form action="" method="post" autocomplete="off">
-          <div class="card-header"><h4>Contact from search</h4></div>
-          <div class="card-body pb-0">
-            <div class="form-group ">
-              <label for="name">Name</label>
-              <input type="text" name="name" id="new_contact_name" class="form-control" value="">
-            </div>
-            <div class="form-group">
-              <label for="email">IC</label>
-              <input type="text" name="ic" id="new_contact_ic" class="form-control" value="">
-            </div>
-          </div>
-          <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
--->  
 </div>
 {% include '/Contacts/Views/Partials/contacts_items_modal.twig' with {'contacts_items_id': 'contacts_items_create'} %}
 {% include '/Contacts/Views/Partials/contacts_items_modal.twig' with {'contacts_items_id': 'contacts_items_update'} %}

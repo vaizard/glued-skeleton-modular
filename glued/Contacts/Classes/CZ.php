@@ -61,6 +61,14 @@ class CZ
                 'uri' => ($uri = 'http://www.rzp.cz/cgi-bin/aps_cacheWEB.sh?VSS_SERV=ZVWSBJFND&Action=Search&PRESVYBER=0&PODLE=subjekt&ICO=&OBCHJM='.$id.'&VYPIS=1'),
                 'key' => 'contacts.cz_names.rzp.'.md5($uri),
             ],
+            'names_ares' => [
+                'uri' => ($uri = 'http://wwwinfo.mfcr.cz/cgi-bin/ares/ares_es.cgi?obch_jm='.urlencode($id)),
+                'key' => 'contacts.cz_names.ares.'.md5($uri),
+            ],
+            'ids_ares' => [
+                'uri' => ($uri = 'http://wwwinfo.mfcr.cz/cgi-bin/ares/ares_es.cgi?ico='.$id),
+                'key' => 'contacts.cz_ids.ares.'.md5($uri),
+            ],
             'vies' => [
                 'uri' => null,
                 'key' => 'contacts.cz_vies'.md5('CZ'.$id),
@@ -70,18 +78,110 @@ class CZ
     }
 
 
+    public function names_ares(string $id, &$result_raw = null) :? array {
+        $result = null;
+        $uri = $this->urikey(__FUNCTION__, $id)['uri'];
+
+        try {
+            $data = $this->utils->fetch_uri($uri);
+        } catch (\Exception $e) {
+            $result_raw = $e->getMessage();
+            return $result;
+        }
+        $result_raw = $data;
+
+        $xml = new \SimpleXMLElement($data);
+        $ns = $xml->getDocNamespaces();
+        $data = $xml->children($ns['are']);
+        $all = $data->children($ns['dtt'])->V;
+        $all = json_decode(json_encode($all), true);
+
+        if (is_array($all['S'])) $all = $all['S'];
+        if (is_array($all)) {
+
+            $zu = $all;
+            if ($zu['ojm'] ?? null != null) {
+                $rzp['fn'] = $zu['ojm'];
+                $rzp['nat'][0]['regid'] = $zu['ico'];
+                $rzp['nat'][0]['vatid'] = str_replace('dic=', 'CZ', $zu['p_dph'] ?? '') ?? null;
+                $rzp['addr'][0]['unstructured'] = $zu['jmn'];
+                $rzp['nat'][0]['country'] = 'CZ';
+                $result[] = $rzp;
+            } else {
+                foreach ($all as $zu) {
+                    if ($zu['ojm'] ?? null != null) {
+                        $rzp['fn'] = $zu['ojm'];
+                        $rzp['nat'][0]['regid'] = $zu['ico'];
+                        $rzp['nat'][0]['vatid'] = str_replace('dic=', 'CZ', $zu['p_dph'] ?? '') ?? null;
+                        $rzp['addr'][0]['unstructured'] = $zu['jmn'];
+                        $rzp['nat'][0]['country'] = 'CZ';
+                        $result[] = $rzp;
+                    }
+                }
+            }
+        }
+        return $result;
+    }
+
+    public function ids_ares(string $id, &$result_raw = null) :? array {
+        $result = null;
+        $uri = $this->urikey(__FUNCTION__, $id)['uri'];
+
+        try {
+            $data = $this->utils->fetch_uri($uri);
+        } catch (\Exception $e) {
+            $result_raw = $e->getMessage();
+            return $result;
+        }
+        $result_raw = $data;
+
+        $xml = new \SimpleXMLElement($data);
+        $ns = $xml->getDocNamespaces();
+        $data = $xml->children($ns['are']);
+        $all = $data->children($ns['dtt'])->V;
+        $all = json_decode(json_encode($all), true);
+        if (is_array($all['S'])) $all = $all['S'];
+        if (is_array($all)) {
+            $zu = $all;
+            if ($zu['ojm'] ?? null != null) {
+                $rzp['fn'] = $zu['ojm'];
+                $rzp['nat'][0]['country'] = 'CZ';
+                $rzp['nat'][0]['regid'] = $zu['ico'];
+                $rzp['nat'][0]['vatid'] = str_replace('dic=', 'CZ', $zu['p_dph'] ?? '') ?? null;
+                $rzp['addr'][0]['kind']['main'] = 1;
+                $rzp['addr'][0]['kind']['billing'] = 1;
+                $rzp['addr'][0]['unstructured'] = $zu['jmn'];
+                $result[] = $rzp;
+            } else {
+                foreach ($all as $zu) {
+                    if ($zu[0]['ojm'] ?? null != null) {
+                        $rzp['fn'] = $zu['ojm'] ?? null;
+                        $rzp['nat'][0]['country'] = 'CZ';
+                        $rzp['nat'][0]['regid'] = $zu['ico'] ?? null;
+                        $rzp['nat'][0]['vatid'] = str_replace('dic=', 'CZ', $zu['p_dph'] ?? '') ?? null;
+                        $rzp['addr'][0]['kind']['main'] = 1;
+                        $rzp['addr'][0]['kind']['billing'] = 1;
+                        $rzp['addr'][0]['unstructured'] = $zu['jmn'] ?? null;
+                        $result[] = $rzp;
+                    }
+                }
+            }
+        }
+        return $result;
+    }
 
     public function names_justice(string $id, &$result_raw = null) :? array {
       $result = null;
       $uri = $this->urikey(__FUNCTION__, $id)['uri'];
       $crawler = $this->goutte->request('GET', $uri);
       $crawler->filter('div.search-results > ol > li.result')->each(function (Crawler $table) use (&$result) {
-          $r['org'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
-          $r['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
-          $r['addr'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
-          $r['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
-          $r['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
-          $result[$r['regid']] = $r;
+          $r['fn'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong')->text();
+          $r['nat'][0]['regid'] = $table->filter('div > table > tbody > tr:nth-child(1) > td:nth-child(4) > strong')->text();
+          $r['addr'][0]['unstructured'] = $table->filter('div > table > tbody > tr:nth-child(3) > td:nth-child(2)')->text();
+          $r['nat'][0]['regby'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(2)')->text();
+          $r['nat'][0]['regdt'] = $table->filter('div > table > tbody > tr:nth-child(2) > td:nth-child(4)')->text();
+          $r['nat'][0]['country'] = 'CZ';
+          $result[$r['nat'][0]['regid']] = $r;
       });
       $result_raw = $this->goutte->getResponse()->getContent() ?? null;
       return $result;
@@ -92,13 +192,15 @@ class CZ
       $uri = $this->urikey(__FUNCTION__, $id)['uri'];
       $crawler = $this->goutte->request('GET', $uri);
       $crawler->filter('div#obsah > div.blok.data.subjekt')->each(function (Crawler $table) use (&$result) {
-          $r['org'] = $table->filter('h3')->text();
-          $r['org'] = preg_replace('/^[0-9]{1,2}. /', "", $r['org']);
-          $r['addr'] = $table->filter('dd:nth-child(4)')->text();
-          $r['regid'] = $table->filter('dd:nth-child(8)')->text();
-          $r['regby'] = "";
-          $r['regdt'] = "";
-          $result[$r['regid']] = $r;
+          $r['fn'] = $table->filter('h3')->text();
+          $r['fn'] = preg_replace('/^[0-9]{1,2}. /', "", $r['fn']);
+          if ($table->filter('dd:nth-child(2)')->text() == 'Fyzická osoba') $r['type'] = 'n';
+          if ($table->filter('dd:nth-child(2)')->text() == 'Právnická osoba') $r['type'] = 'l';
+          $r['addr'][0]['unstructured'] = $table->filter('dd:nth-child(4)')->text();
+          $r['nat'][0]['regid'] = $table->filter('dd:nth-child(8)')->text();
+          $r['nat'][0]['country'] = 'CZ';
+          $result[ $r['nat'][0]['regid'] ] = $r;
+
       });
       $result_raw = $this->goutte->getResponse()->getContent() ?? null;
       return $result;
@@ -210,8 +312,6 @@ class CZ
         //print_r($result_raw);
         $xml = new \SimpleXMLElement($data);
         $ns = $xml->getDocNamespaces();
-        //print_r($ns);
-        //$are = $xml->children($ns['are'])->children;
         $data = $xml->children($ns['are']);
         $zu = $data->children($ns['D'])->Vypis_RZP;
         $zu = json_decode(json_encode($zu), true);
@@ -309,7 +409,7 @@ class CZ
                             $helper['n']['prefix'] = $person['fosoba']['titulPred'] ?? null;
                             $helper['n']['suffix'] = $person['fosoba']['titulZa'] ?? null;
                             $helper['fn'] = trim($helper['n']['prefix'] .' '.$helper['n']['given'] .' '.$helper['n']['family'].' '.$helper['n']['suffix']);
-                            if ($person['fosoba']['adresa']['stat'] == 203) { $person['fosoba']['adresa']['stat'] = 'Czech republic'; }
+                            if ($person['fosoba']['adresa']['stat'] ?? null == 203) { $person['fosoba']['adresa']['stat'] = 'Czech republic'; }
                             $helper['addr'][0] = [
                                 'ext' => [ 'cz.ruian' => $person['fosoba']['adresa']['ruianKod'] ?? null ],
                                 'country' => $person['fosoba']['adresa']['stat'] ?? null,
