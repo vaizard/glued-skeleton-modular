@@ -268,7 +268,7 @@ class CalendarController extends AbstractTwigController
 
         // Get patch data
         $req = $request->getParsedBody();
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = (int)$args['uid'];
         
         // Get old data
@@ -308,7 +308,7 @@ class CalendarController extends AbstractTwigController
     public function sources_post(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('calendar.sources', 1);
         $req = $request->getParsedBody();
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = 0;
          
         // TODO check again if user is member of a domain that was submitted
@@ -355,7 +355,7 @@ class CalendarController extends AbstractTwigController
         }
         $builder = new JsonResponseBuilder('calendar.sources', 1);
         $req = $request->getParsedBody();
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = (int)$args['uid'];
         $payload = $builder->withData((array)$req)->withCode(200)->build();
         return $response->withJson($payload, 200);

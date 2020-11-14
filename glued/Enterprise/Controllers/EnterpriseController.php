@@ -123,7 +123,7 @@ class EnterpriseController extends AbstractTwigController
 
         // Get patch data
         $req = $request->getParsedBody();
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = (int)$args['uid'];
 
         // Get old data
@@ -172,7 +172,7 @@ class EnterpriseController extends AbstractTwigController
         $builder = new JsonResponseBuilder('enterprise.projects', 1);
         $req = $request->getParsedBody();
 
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = 0;
         $req['_v'] = (int) 1;
         $req['_s'] = 'enterprise.projects';
@@ -229,7 +229,7 @@ class EnterpriseController extends AbstractTwigController
         }
         $builder = new JsonResponseBuilder('enterprise.projects', 1);
         $req = $request->getParsedBody();
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = (int)$args['uid'];
         $payload = $builder->withData((array)$req)->withCode(200)->build();
         return $response->withJson($payload, 200);

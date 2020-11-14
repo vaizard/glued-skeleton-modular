@@ -89,7 +89,7 @@ class WorklogController extends AbstractTwigController
     public function me_get(Request $request, Response $response, array $args = []): Response
     {
         $builder = new JsonResponseBuilder('worklog/work', 1);
-        $id = (int)($_SESSION['core_user_id'] ?? 0);
+        $id = (int)($GLOBALS['_GLUED']['authn']['user_id'] ?? 0);
         if ($id === 0) { throw new HttpForbiddenException( $request, 'Please log in.' );  }
         $workobj = $this->db->where('c_user_id', $id);
         $workobj = $this->db->orderBy('j_date', 'DESC');
@@ -144,7 +144,7 @@ class WorklogController extends AbstractTwigController
 
         // Get patch data
         $req = $request->getParsedBody();
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = (int)$args['uid'];
 
         // Get old data
@@ -188,7 +188,7 @@ class WorklogController extends AbstractTwigController
         $builder = new JsonResponseBuilder('worklog/work', 1);
         // start off with the request body & add data
         $req = $request->getParsedBody();
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         // TODO document that the validator will set default data if defaults in the schema
         // coerce types
         

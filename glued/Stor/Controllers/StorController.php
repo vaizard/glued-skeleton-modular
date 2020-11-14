@@ -48,7 +48,7 @@ class StorController extends AbstractTwigController
         // vyjimka na my_files
         if ($raw_path == 'my_files') {
             $actual_dir = 'users';
-            $actual_object = $_SESSION['core_user_id'];
+            $actual_object = $GLOBALS['_GLUED']['authn']['user_id'];
         }
         else {
             $parts = explode('/', $raw_path);
@@ -111,7 +111,7 @@ class StorController extends AbstractTwigController
                     // vlozime do links
                     $data = Array (
                     "c_sha512" => $sha512,
-                    "c_user_id" => $_SESSION['core_user_id'],
+                    "c_user_id" => $GLOBALS['_GLUED']['authn']['user_id'],
                     "c_filename" => $filename,
                     "c_inherit_table" => $app_tables[$actual_dir],
                     "c_inherit_object" => $actual_object
@@ -124,7 +124,7 @@ class StorController extends AbstractTwigController
                     // soubor uz existuje v objects ale vlozime ho aspon do links
                     $data = Array (
                     "c_sha512" => $sha512,
-                    "c_user_id" => $_SESSION['core_user_id'],
+                    "c_user_id" => $GLOBALS['_GLUED']['authn']['user_id'],
                     "c_filename" => $filename,
                     "c_inherit_table" => $app_tables[$actual_dir],
                     "c_inherit_object" => $actual_object
@@ -258,10 +258,10 @@ class StorController extends AbstractTwigController
                     $new_owner = $target_object_id;
                 }
                 else {  // pokud je cil nejaky modul, tak u copy bych mel byt owner ja, a u move bud nemenit nebo ja
-                    $new_owner = $_SESSION['core_user_id'];
+                    $new_owner = $GLOBALS['_GLUED']['authn']['user_id'];
                 }
             }
-            else if ($set_new_owner == 2) { $new_owner = $_SESSION['core_user_id']; }    // vzdy ja
+            else if ($set_new_owner == 2) { $new_owner = $GLOBALS['_GLUED']['authn']['user_id']; }    // vzdy ja
             else if ($set_new_owner == 3) { $new_owner = $link_data['c_user_id']; }   // nemenit
             
             if ($action_type == 'copy') {

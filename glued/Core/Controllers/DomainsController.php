@@ -28,7 +28,7 @@ class DomainsController extends AbstractTwigController
 
         // TODO consider making domain names unique (duplicate domains will fuck up teams etc.) - probably just add an additional unique nonce
         // TODO do propper validation here
-        if (!isset($_SESSION['core_user_id'])) { die('login first'); }
+        if (!isset($GLOBALS['_GLUED']['authn']['user_id'])) { die('login first'); }
 
         if ($validation->failed()) {
             $reseed = $this->validator->reseed($request, [ 'name' ]);
@@ -43,7 +43,7 @@ class DomainsController extends AbstractTwigController
             $json = json_encode($json);
             $row = [
                 'c_name' => $request->getParam('name'),
-                'c_user_id' => $_SESSION['core_user_id'],
+                'c_user_id' => $GLOBALS['_GLUED']['authn']['user_id'],
                 'c_json' => $json
             ];
             print_r($row);

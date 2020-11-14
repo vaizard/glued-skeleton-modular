@@ -342,7 +342,7 @@ class FinController extends AbstractTwigController
 
         // Get patch data
         $req = $request->getParsedBody();
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = (int)$args['uid'];
 
         // Get old data
@@ -398,7 +398,7 @@ class FinController extends AbstractTwigController
         } else { $req['config'] = new \stdClass(); }
         if (!array_key_exists('currency', $req)) { $req['currency'] = ''; }
 
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = $GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = 0;
         $req['_v'] = (int) 1;
         $req['_s'] = 'fin.accounts';
@@ -448,7 +448,7 @@ class FinController extends AbstractTwigController
         }
         $builder = new JsonResponseBuilder('fin.accounts', 1);
         $req = $request->getParsedBody();
-        $req['user'] = (int)$_SESSION['core_user_id'];
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = (int)$args['uid'];
         $payload = $builder->withData((array)$req)->withCode(200)->build();
         return $response->withJson($payload, 200);
@@ -461,9 +461,9 @@ class FinController extends AbstractTwigController
         $req = $request->getParsedBody();
         $files = $request->getUploadedFiles();
         
-        $meta['user_id'] = (int)$_SESSION['core_user_id'];
+        $meta['user_id'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $fin = new FinUtils();
-        $data = $fin->cash($req['data'], [ 'user_id' => (int)$_SESSION['core_user_id'] ], $req);
+        $data = $fin->cash($req['data'], [ 'user_id' => (int)$GLOBALS['_GLUED']['authn']['user_id'] ], $req);
         // convert body to object
         //$req = json_decode(json_encode((object)$req));
   
@@ -499,7 +499,7 @@ class FinController extends AbstractTwigController
                         $reflectionProperty->setAccessible(true);
                         $tmp_path = $reflectionProperty->getValue($stream);
                         // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
-                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $_SESSION['core_user_id'], $this->stor->app_tables['fin_trx'], $new_trx_id);
+                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $GLOBALS['_GLUED']['authn']['user_id'], $this->stor->app_tables['fin_trx'], $new_trx_id);
                     }
                 }
             }

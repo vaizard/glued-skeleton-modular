@@ -32,7 +32,7 @@ class StorControllerApiV1 extends AbstractTwigController
         $return_data = array();
         $return_message = '';
         $files_stored = 0;
-        $who = $_SESSION['core_user_id'] ?? $request->getAttribute( $this->settings['auth']['jwt']['attribute'] )['g_uid'];
+        $who = $GLOBALS['_GLUED']['authn']['user_id'];
 
         // Get data
         $files = $request->getUploadedFiles();
@@ -553,7 +553,7 @@ class StorControllerApiV1 extends AbstractTwigController
             }
         }
         else {  // jsme v zakladnim vyberu my files a app
-            $your_user_id = $_SESSION['core_user_id'] ?? $request->getAttribute( $this->settings['auth']['jwt']['attribute'] )['g_uid'];
+            $your_user_id = $GLOBALS['_GLUED']['authn']['user_id'];
             //$your_screenname = $this->container->auth->user_screenname($your_user_id);
             $your_screenname = 'noob';
             
