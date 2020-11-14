@@ -6,9 +6,13 @@ use Respect\Validation\Exceptions\ValidationException;
 
 class MatchesPasswordException extends ValidationException
 {
-    public static $defaultTemplates = [
-        self::MODE_DEFAULT => [
-            self::STANDARD => __('Password does not match.'),
-        ],
-    ];
+    public static $defaultTemplates;
+
+    public function __construct() {
+        self::$defaultTemplates = [
+            self::MODE_DEFAULT => [
+                self::STANDARD => __('Password does not match.'),
+            ],
+        ];
+    }
 }

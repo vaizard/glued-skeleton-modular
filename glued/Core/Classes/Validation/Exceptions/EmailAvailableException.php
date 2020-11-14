@@ -6,9 +6,13 @@ use Respect\Validation\Exceptions\ValidationException;
 
 class EmailAvailableException extends ValidationException
 {
-    public static $defaultTemplates = [
-        self::MODE_DEFAULT => [
-            self::STANDARD => __('Email is already taken.'),
-        ],
-    ];
+    public static $defaultTemplates;
+
+    public function __construct() {
+        self::$defaultTemplates = [
+            self::MODE_DEFAULT => [
+                self::STANDARD => __('Email is already taken.'),
+            ],
+        ];
+    }
 }
