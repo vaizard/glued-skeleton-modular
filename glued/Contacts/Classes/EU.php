@@ -11,6 +11,7 @@ use DragonBe\Vies\ViesServiceException;
 class EU
 {
 
+
     protected $c;
 
 
@@ -35,11 +36,13 @@ class EU
         return ($pairs[$what] ?: null);
     }
 
+
     public function validate_vat($id) : bool {
         $vieshandle = new Vies();
         $split = $vieshandle->splitVatId($id);
         return $vieshandle->validateVatSum($split['country'], $split['id']);
     }
+
 
     public function vies(string $id, &$result_raw = null) :? array {
         $result = null;
@@ -59,5 +62,6 @@ class EU
         }
         return $result;
     }
+
 
 }
