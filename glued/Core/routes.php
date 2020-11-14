@@ -80,21 +80,14 @@ $app->get ('/core/admin/playground', function(Request $request, Response $respon
     $results = $provider->geocodeQuery(Geocoder\Query\GeocodeQuery::create('74.200.247.59'))->first()->getCountry()->getCode();
     print("<pre>".print_r($results,true)."</pre>");
     
-    print_r(array_keys((array)$GLOBALS));// die();
-    print_r(array_keys((array)$GLOBALS['G-BEF']['d']));// die();
-    //print_r(array_keys((array)$GLOBALS['g1']));// die();
-    //print_r(array_keys((array)$GLOBALS['g2']));// die();
-    //print_r(array_keys((array)$GLOBALS['g3']));// die();
-    //print_r(array_keys((array)$GLOBALS['_JWT']));// die();
-    echo "<br>app: ";
-    //print_r($GLOBALS['app']);
-    echo "<br>container: ";
-    //print_r($GLOBALS['container']);
-   /* echo "<br>_iban_registry: ";
-    print_r($GLOBALS['_iban_registry']);
-    echo "<br>settings: ";
-    print_r($GLOBALS['settings']);
-*/
+    $pass = 'pwpw';
+    $hash = sodium_crypto_pwhash_str($pass, SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE, SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE);
+    echo '<br>sodium_crypto_pwhash_str ' . $hash;
+
+    
+    //echo '<br>sodium_crypto_pwhash ' . sodium_crypto_pwhash($pass);
+    echo '<br>';
+
     $key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES); // 256 bit
     
     echo sodium_bin2base64(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES), SODIUM_BASE64_VARIANT_URLSAFE);

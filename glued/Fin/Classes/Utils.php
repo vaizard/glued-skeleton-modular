@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Glued\Fin\Classes;
 
+use Glued\Core\Classes\Crypto\Crypto;
+
 class Utils
 {
 
@@ -139,6 +141,7 @@ class Utils
      * @return array             Properly structured data
      */
     public function cash($data, $meta, $local_trxs) {
+        $crypto = new Crypto;
         foreach ($data as $trx) {
             $helper = [];
             $helper['_v'] = '1';
@@ -150,8 +153,8 @@ class Utils
             $helper['status']['aud'] = 0;
             if ($trx['paid_status'] == true) $helper['status']['trx'] = 1;
 
-            $helper['uuid'] = sodium_bin2base64(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES), SODIUM_BASE64_VARIANT_URLSAFE);
-            $helper['order']['uuid'] = sodium_bin2base64(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES), SODIUM_BASE64_VARIANT_URLSAFE);
+            $helper['uuid'] = $crypto->genkey_base64();
+            $helper['order']['uuid'] = $crypto->genkey_base64();
             $helper['order']['req']['by_name'] = '';
             $helper['order']['req']['by_id'] = $meta['user_id'];
             $helper['order']['req']['dt'] = (new \DateTime($trx['dt']))->format(DATE_W3C);
@@ -216,6 +219,7 @@ class Utils
      * @return array             New (locally unknown) transactions
      */
     public function fio_cz($data, $meta, $local_trxs) {
+        $crypto = new Crypto;
         foreach ($data as $trx) {
             $trx = (array)$trx;
             $helper = [];
@@ -225,8 +229,8 @@ class Utils
             $helper['status']['aut'] = 1;
             $helper['status']['trx'] = 1;
             $helper['status']['aud'] = 0;
-            $helper['uuid'] = sodium_bin2base64(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES), SODIUM_BASE64_VARIANT_URLSAFE);
-            $helper['order']['uuid'] = sodium_bin2base64(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES), SODIUM_BASE64_VARIANT_URLSAFE);
+            $helper['uuid'] = $crypto->genkey_base64();
+            $helper['order']['uuid'] = $crypto->genkey_base64();
             $helper['order']['req']['by_name'] = $trx['column9']['value'] ?? '';
             $helper['order']['req']['by_id'] = "";
             $helper['order']['req']['dt'] = "";
