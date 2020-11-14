@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Glued\Core\Controllers;
 
-use Glued\Core\Classes\Auth\Auth;
+//use Glued\Core\Classes\Auth\Auth;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException as BadRequest;
@@ -14,11 +14,9 @@ use Throwable;
 class Accounts extends AbstractTwigController
 {
   
-    public function read(Request $request, Response $response, array $args = []): Response
-    {
-        $auth = new Auth($this->db, $this->settings);
+    public function read(Request $request, Response $response, array $args = []): Response {
         try {
-            $users = $auth->user_read($args['uid']);
+            $users = $this->auth->user_read($args['uid']);
         } catch (Throwable $e) {
             if ($e->getCode() == 450) { throw new NotFound($request, 'User not found.'); }
             if ($e->getCode() == 550) { throw new BadRequest($request, 'Wrong user id.'); }
@@ -26,7 +24,6 @@ class Accounts extends AbstractTwigController
         }
         
         // TODO DO RBAC HERE
-
         return $this->render($response, 'Core/Views/accounts.read.twig', [
             'pageTitle' => 'Accounts',
             'users' => $users
@@ -34,19 +31,14 @@ class Accounts extends AbstractTwigController
     }
 
 
-    public function list(Request $request, Response $response, array $args = []): Response
-    {
+    public function list(Request $request, Response $response, array $args = []): Response {
         // DO RBAC HERE
-        $auth = new Auth($this->db, $this->settings);
-        $users = $auth->user_list();
+        $users = $this->auth->user_list();
         return $this->render($response, 'Core/Views/accounts.list.twig', [
             'pageTitle' => 'Accounts',
             'users' => $users
         ]);
     }
-
-
-
 
 }
 
