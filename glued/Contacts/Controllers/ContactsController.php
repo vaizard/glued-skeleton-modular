@@ -397,6 +397,7 @@ class ContactsController extends AbstractTwigController
       $nested[0] = $result;
       $payload = $builder->withData((array)$nested)->withCode(200)->build();
       return $response->withJson($payload);
+      
     }
 
 
