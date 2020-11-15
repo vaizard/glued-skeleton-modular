@@ -17,9 +17,10 @@ $.typeahead({
     maxItemPerGroup: 10,
     emptyTemplate: '{{__("No result for")}} "{% verbatim %}{{query}}{% endverbatim %}" ',
     source: {
+        
         // searching by names
         "CZ name registers": {
-            display: "org",
+            display: "fn",
             ajax: function (query) {
                 return {
                     url: "/api/contacts/search/v1/cz/names/" + query,
@@ -30,15 +31,16 @@ $.typeahead({
             {% verbatim %}
             template: function (query, item) {
                 return '<span>' +
-                    '{{fn}} <mark>{{nat.0.regid}}</mark>' +
+                    '{{fn}} <mark>{{nat.0.vatid}}</mark>' +
                     ' {{addr.0.unstructured}}' +
                 "</span>";
             }
             {% endverbatim %}
         },
+        
         // searching by company ids
         "CZ RegID registers": {
-            display: "orgids",
+            display: "fn",
             ajax: function (query) {
                 return {
                     url: "/api/contacts/search/v1/cz/ids/" + query,
@@ -49,12 +51,13 @@ $.typeahead({
             {% verbatim %}
             template: function (query, item) {
                 return '<span>' +
-                    '{{fn}} <mark>{{nat.0.regid}}</mark>' +
+                    '{{fn}} <mark>{{nat.0.vatid}}</mark>' +
                     ' {{addr.0.unstructured}}' +
                 "</span>";
             }
             {% endverbatim %}
         },
+        
         // searching by EU vatids
         "EU VATID register (VIES)": {
             display: "fn",
@@ -74,16 +77,18 @@ $.typeahead({
             }
             {% endverbatim %}
         },
+        
     },
     callback: {
         onClickAfter: function (node, a, item, event) {
+            console.log(item);
             $("#contacts_items_create_l_name").val(item.fn).attr("readonly",1);
             $("#contacts_items_create_l_addr").val(item.addr[0].unstructured).attr("readonly",1);
-            $("#contacts_items_create_l_vatid").val(item.nat[0].vatid).attr("readonly",1);
-            $("#contacts_items_create_l_regid").val(item.nat[0].regid).attr("readonly",1);
-            $("#contacts_items_create_l_regby").val(item.nat[0].regby).attr("readonly",1);
-            $("#contacts_items_create_l_nat").val(item.nat[0].country).attr("readonly",1);
-            $("#contacts_items_create_l_type").val(item.type).attr("readonly",1);
+            //$("#contacts_items_create_l_vatid").val(item.nat[0].vatid).attr("readonly",1);
+            //$("#contacts_items_create_l_regid").val(item.nat[0].regid).attr("readonly",1);
+            //$("#contacts_items_create_l_regby").val(item.nat[0].regby).attr("readonly",1);
+            //$("#contacts_items_create_l_nat").val(item.nat[0].country).attr("readonly",1);
+            //$("#contacts_items_create_l_type").val(item.type).attr("readonly",1);
         }
     }
 });
