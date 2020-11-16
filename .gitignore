@@ -3,7 +3,7 @@
 .tmp
 composer.lock
 coverage
-config/settings.php
+config/config.d/**
 public/assets/node_modules/**
 public/assets/cache/**
 phinx.yml

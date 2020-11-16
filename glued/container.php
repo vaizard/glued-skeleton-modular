@@ -32,7 +32,11 @@ use voku\helper\AntiXSS;
 
 
 $container->set('settings', function() {
-    return require_once(__ROOT__ . '/config/settings.php');
+    $ret = require_once(__ROOT__ . '/config/defaults.php');
+    foreach (glob(__ROOT__ . '/config/config.d/*.php') as $configfile) {
+        $ret = array_replace_recursive($ret, require_once($configfile));
+    }
+    return $ret;
 });
 
 $container->set('logger', function (Container $c) {

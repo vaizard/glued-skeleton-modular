@@ -51,7 +51,7 @@ return [
         ],
         'jwt' => [
             // token params
-            'expiry'    => '15 minute',
+            'expiry'    => '30 minute',
             'secret'    => 'ChangeMe!@#%', // todo - generate in installer some randomness for this
             'algorithm' => 'HS512',
             // middleware params
@@ -68,20 +68,19 @@ return [
                 $data['version'] = '1';
                 $data['response_ts'] = time();
                 $data['response_id'] = uniqid();
-                $data['status'] = 'Forbidden';
+                $data['status'] = 'Forbidden.';
                 $data['message'] = 'You must be signed in to do this, please provide a valid token.';
                 $data['code'] = 403;
                 $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
                 return $response->withHeader("Content-Type", "application/json");
             },
-
         ],
     ],
 
     // Geoip
     'geoip' => [
-        'geoip_engine' => 'maxmind',
-        'maxmind_licence_key' => '' // Maxmind GeoLite2 Licence key (its free, you just need to sign up for an account)
+        'geoip_engine' => false,    // Providers: [ false, 'maxmind']. Override to 'maxmind' when maxmind license key is set.
+        'maxmind_licence_key' => '' // Maxmind GeoLite2 Licence key (its free, you just need to sign up for an account).
     ],
 
     // Monolog
@@ -183,7 +182,7 @@ return [
         'content-type-options' => 'nosniff',
         // TODO remove unsafe-eval once odan/twig-assets works with csp
         'csp' => [
-            'script-src' => [ 'self' => true, 'allow' => [ $_SERVER['SERVER_NAME'] ?? 'cli-run-or-unsupported-webserver'], 'strict-dynamic' => true, 'unsafe-eval' => true ],
+            'script-src' => [ 'self' => true, 'allow' => [  'https://' . ( $_SERVER['SERVER_NAME'] ?? 'cli-run-or-unsupported-webserver' ) ], 'strict-dynamic' => true, 'unsafe-eval' => true ],
             'object-src' => [ 'default-src' => 'false' ],
             'frame-ancestors' => [ 'self' => true, 'allow' => [ 'https://' . ( $_SERVER['SERVER_NAME'] ?? 'cli-run-or-unsupported-webserver' ) ] ],
             'base-uri' => 'self',
