@@ -81,14 +81,13 @@ $.typeahead({
     },
     callback: {
         onClickAfter: function (node, a, item, event) {
-            console.log(item);
             $("#contacts_items_create_l_name").val(item.fn).attr("readonly",1);
             $("#contacts_items_create_l_addr").val(item.addr[0].unstructured).attr("readonly",1);
-            //$("#contacts_items_create_l_vatid").val(item.nat[0].vatid).attr("readonly",1);
-            //$("#contacts_items_create_l_regid").val(item.nat[0].regid).attr("readonly",1);
-            //$("#contacts_items_create_l_regby").val(item.nat[0].regby).attr("readonly",1);
-            //$("#contacts_items_create_l_nat").val(item.nat[0].country).attr("readonly",1);
-            //$("#contacts_items_create_l_type").val(item.type).attr("readonly",1);
+            $("#contacts_items_create_l_vatid").val(item.nat[0].vatid).attr("readonly",1);
+            $("#contacts_items_create_l_regid").val(item.nat[0].regid).attr("readonly",1);
+            $("#contacts_items_create_l_regby").val(item.nat[0].regby).attr("readonly",1);
+            $("#contacts_items_create_l_nat").val(item.nat[0].country).attr("readonly",1);
+            $("#contacts_items_create_l_type").val(item.type).attr("readonly",1);
         }
     }
 });
