@@ -52,7 +52,7 @@ return [
         'jwt' => [
             // token params
             'expiry'    => '30 minute',
-            'secret'    => 'ChangeMe!@#%', // todo - generate in installer some randomness for this
+            'secret'    => 'some-secret', // a config.d fragment file will be generated with a correct key
             'algorithm' => 'HS512',
             // middleware params
             'path'      => [ '/api' ],
