@@ -5,7 +5,7 @@ return [
 
     // Encryption/decryption key
     'crypto' => [
-        'reqparams' => 'crypto-key-here'
+        'reqparams' => 'secret-key-here'
     ],
 
 ];

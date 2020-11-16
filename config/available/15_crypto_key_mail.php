@@ -5,7 +5,7 @@ return [
 
     // Encryption/decryption key
     'crypto' => [
-        'mail' => 'crypto-key-here',
+        'mail' => 'secret-key-here',
     ],
 
 ];
