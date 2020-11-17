@@ -80,48 +80,68 @@ final class AuthorizationMiddleware extends AbstractMiddleware implements Middle
             }
         }
 
-        $db = $this->settings['db'];
 
-        $config = [
-            'type'     => 'mysql',
-            'hostname' => $db['host'],
-            'database' => $db['database'],
-            'username' => $db['username'],
-            'password' => $db['password'],
-            'hostport' => '3306',
-        ];
-        
-        $model = __ROOT__ . '/glued/Core/Includes/Casbin/default.model';
-        $adapter = DatabaseAdapter::newAdapter($config);
-        $adapter = __ROOT__ . '/private/cache/casbin.csv';
-        $e = new Enforcer($model, $adapter);
-      
-        // TODO: we should support auth_id in the enforcing so that users can fine tune access control for different credentials
-        $sub = $GLOBALS['_GLUED']['authn']['user_id']; // the user that wants to access a resource.
-        $obj = "data1"; // the resource that is going to be accessed.
-        $act = "read"; // the operation that the user performs on the resource.
+        if ($this->auth->check() === true) {
 
-        //r = sub, dom, obj, act
-        $rule = [ 'sub', 'domain', 'obj', 'read' ];
-        $m = $e->getModel();
-        if (!$m->hasPolicy('p', 'p', $rule)) {
-            $m->addPolicy('p', 'p', $rule);  
-            $e->savePolicy();
+            $db = $this->settings['db'];
+
+            $config = [
+                'type'     => 'mysql',
+                'hostname' => $db['host'],
+                'database' => $db['database'],
+                'username' => $db['username'],
+                'password' => $db['password'],
+                'hostport' => '3306',
+            ];
+            
+
+            $model = __ROOT__ . '/glued/Core/Includes/Casbin/default.model';
+            $adapter = DatabaseAdapter::newAdapter($config);
+            $adapter = __ROOT__ . '/private/cache/casbin.csv';
+            $e = new Enforcer($model, $adapter);
+            $m = $e->getModel();
+
+            // TODO: we should support auth_id in the enforcing so that users can fine tune access control for different credentials
+            $sub = $GLOBALS['_GLUED']['authn']['user_id']; // the user that wants to access a resource.
+            $obj = "data1"; // the resource that is going to be accessed.
+            $act = "read"; // the operation that the user performs on the resource.
+
+
+            // assign permission to do action {act} to subject (user or role) {sub} in domain {dom} on data {obj}
+            // r = sub, dom, obj, act
+            $rule = [ 'sub', 'domain', 'obj', 'read' ];
+            if (!$m->hasPolicy('p', 'p', $rule)) {
+                $m->addPolicy('p', 'p', $rule);  
+                $e->savePolicy();
+            }
+
+            // assign user {user} to have a specific role {role} in domain {dom}
+            // g = user, role, dom
+            $rule = [ 'user', 'role', 'domain' ];
+            if (!$m->hasPolicy('g', 'g', $rule)) {
+                $m->addPolicy('g', 'g', $rule);  
+                $e->savePolicy();
+            }
+
+            // assign domain relationships
+            // g2 = parent_dom, child_dom
+            // https://github.com/php-casbin/php-casbin/issues/59
+            /*
+            $rule = [ 'domain', 'subdomain' ];
+            if (!$m->hasPolicy('g2', 'g2', $rule)) {
+                $m->addPolicy('g2', 'g2', $rule);  
+                $e->savePolicy();
+            }
+            */
+
+            // $e->name, or $m->name?
+            //print_r( $m->getPolicy(1,1,'all','read') ) ;
+            //$e->addRoleForUser('alice', 'admin'); 
+            //$e->addPermissionForUser('member', '/foo', 'GET');
+            //$e->addPolicy('eve', 'data3', 'read');
+            //$e->getRolesForUser('alice');
+
         }
-         
-        $rule = [ 'sub', 'role', 'domain' ];
-        if (!$m->hasPolicy('g', 'g', $rule)) {
-            $m->addPolicy('g', 'g', $rule);  
-            $e->savePolicy();
-        }
-
-        // $e->name, or $m->name?
-        //print_r( $m->getPolicy(1,1,'all','read') ) ;
-        //$e->addRoleForUser('alice', 'admin'); 
-        //$e->addPermissionForUser('member', '/foo', 'GET');
-        //$e->addPolicy('eve', 'data3', 'read');
-        //$e->getRolesForUser('alice');
-
         return $handler->handle($request);
     }
 }
