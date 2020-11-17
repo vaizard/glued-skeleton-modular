@@ -116,6 +116,7 @@
       "chmod 777 -R private/cache",
       "chmod 777 private/data",
       "chmod 777 private/locale",
+      "chmod 777 config/config.d",
       "test -n \"$GLUED_IN_DOCKER\" || composer configure < /dev/tty"
     ],
     "post-install-cmd": [
@@ -128,7 +129,7 @@
       "chmod 777 private/cache",
       "chmod 777 private/data",
       "chmod 777 private/locale",
-      "chmod 777 private/locale"
+      "chmod 777 config/config.d"
     ]
   },
   "extra": {
