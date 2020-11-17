@@ -108,7 +108,13 @@ final class AuthorizationMiddleware extends AbstractMiddleware implements Middle
             $m->addPolicy('p', 'p', $rule);  
             $e->savePolicy();
         }
-                
+         
+        $rule = [ 'sub', 'role', 'domain' ];
+        if (!$m->hasPolicy('g', 'g', $rule)) {
+            $m->addPolicy('g', 'g', $rule);  
+            $e->savePolicy();
+        }
+
         // $e->name, or $m->name?
         //print_r( $m->getPolicy(1,1,'all','read') ) ;
         //$e->addRoleForUser('alice', 'admin'); 
