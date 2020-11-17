@@ -378,20 +378,6 @@ class ContactsController extends AbstractTwigController
       }
       if (is_null($new)) { $query['ids_rzp']['status'] = 'Error'; } else { $query['ids_rzp']['status'] = 'OK'; }
 
-      // VIES
-      $cnf = $cz->urikey('vies', $id); $raw_result = null;
-      if ($this->fscache->has($cnf['key'])) {
-          $raw_result = $this->fscache->get($cnf['key']);
-          $new = $cz->vies($id, $raw_result) ?? [];
-          $result = array_replace_recursive($result, $new ?? []);
-      } else {
-          $new = $cz->vies($id, $raw_result) ?? [];
-          //if (!is_null($new) and ($result['fn'] != $new['fn'] ?? null)) unset($new['nat'][0]['vatid']);
-          $result = array_replace_recursive($result, $new ?? []);
-          if (!is_null($new)) $this->fscache->set($cnf['key'], $raw_result, 3600); // 60 minutes
-      }
-      if (is_null($new)) { $query['vies']['status'] = 'Error'; } else { $query['vies']['status'] = 'OK'; }
-
       // RESULT
       $result['query'] = $query;
       $nested[0] = $result;
@@ -417,7 +403,7 @@ class ContactsController extends AbstractTwigController
       $result = [];
       
       $cnf = $eu->urikey('vies', $id); $raw_result = null;
-      if ($this->fscache->has($cnf['key'])) {
+      if ($this->fscache->has($cnf['key'].'d')) {
           $new = $this->fscache->get($cnf['key']);
           $result = array_replace_recursive($result, $new ?? []);
       } else {

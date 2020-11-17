@@ -4,9 +4,6 @@ declare(strict_types=1);
 namespace Glued\Contacts\Classes;
 use Symfony\Component\DomCrawler\Crawler;
 use Glued\Fin\Classes\Utils as FinUtils;
-use DragonBe\Vies\Vies;
-use DragonBe\Vies\ViesException;
-use DragonBe\Vies\ViesServiceException;
 
 class CZ
 {
@@ -68,10 +65,6 @@ class CZ
             'ids_ares' => [
                 'uri' => ($uri = 'http://wwwinfo.mfcr.cz/cgi-bin/ares/ares_es.cgi?ico='.$id),
                 'key' => 'contacts.cz_ids.ares.'.md5($uri),
-            ],
-            'vies' => [
-                'uri' => null,
-                'key' => 'contacts.cz_vies'.md5('CZ'.$id),
             ],
         ];
         return ($pairs[$what] ?: null);
@@ -205,26 +198,6 @@ class CZ
       $result_raw = $this->goutte->getResponse()->getContent() ?? null;
       return $result;
     }
-
-
-    public function vies(string $id, &$result_raw = null) :? array {
-        $result = null;
-        $vieshandle = new Vies();
-        if (false === $vieshandle->getHeartBeat()->isAlive()) {
-            $result_raw = 'VIES service is temporarily unaccessible.';
-        } else {
-            $vatResult = $vieshandle->validateVat('CZ', $id);
-            if ($vatResult->isValid()) {
-                $vies['nat'][0]['country'] = 'CZ';
-                $vies['nat'][0]['vatid'] = 'CZ'.$id;
-                $vies['fn'] = (string)$vatResult->getName();
-                $vies['addr'][0]['unstructured'] = (string)trim($vatResult->getAddress());
-                $result = $vies;
-            }
-        }
-        return $result;
-    }
-
 
     public function ids_justice(string $id, &$result_raw = null) :? array {
         $result = null;

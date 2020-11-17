@@ -31,7 +31,7 @@ $.typeahead({
             {% verbatim %}
             template: function (query, item) {
                 return '<span>' +
-                    '{{fn}} <mark>{{nat.0.vatid}}</mark>' +
+                    '{{fn}} <mark>{{nat.0.regid}}</mark>' +
                     ' {{addr.0.unstructured}}' +
                 "</span>";
             }
@@ -51,7 +51,7 @@ $.typeahead({
             {% verbatim %}
             template: function (query, item) {
                 return '<span>' +
-                    '{{fn}} <mark>{{nat.0.vatid}}</mark>' +
+                    '{{fn}} <mark>{{nat.0.regid}}</mark>' +
                     ' {{addr.0.unstructured}}' +
                 "</span>";
             }

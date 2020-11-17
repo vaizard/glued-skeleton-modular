@@ -56,7 +56,7 @@ class EU
                 $vies['nat'][0]['country'] = $split['country'];
                 $vies['nat'][0]['vatid'] = $id;
                 $vies['fn'] = (string)$vatResult->getName();
-                $vies['addr'][0]['unstructured'] = (string)trim($vatResult->getAddress());
+                $vies['addr'][0]['unstructured'] = preg_replace ( '#\n#' , ', ' , (string)trim($vatResult->getAddress()) );
                 $result = $vies;
             }
         }
