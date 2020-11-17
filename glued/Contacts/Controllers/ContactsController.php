@@ -315,70 +315,39 @@ class ContactsController extends AbstractTwigController
 
 
     public function cz_ids(Request $request, Response $response, array $args = []): Response {
-      // TODO this function is pretty slow. look where we loose speed.
+
       $builder = new JsonResponseBuilder('contacts.search', 1);
       $cz = new CZ($this->c);
       $id = $args['id'];
+      $result = [];
+      $services = [ 'ids_ares', 'ids_justice', 'ids_adisrws', 'ids_vreo', 'ids_rzp' ];
+
       if (strlen($id) != 8) {
          $payload = $builder->withMessage('Czech company IDs are 8 numbers in total.')->withCode(200)->build();
          return $response->withJson($payload);
       }
-      $result = [];
 
-      // JUSTICE
-      $cnf = $cz->urikey('ids_justice', $id); $raw_result = null;
-      if ($this->fscache->has($cnf['key'])) {
-          $new = $this->fscache->get($cnf['key']);
-          $result = array_replace_recursive($result, $new ?? []);
-      } else {
-          $new = $cz->ids_justice($id, $raw_result);
-          $result = array_replace_recursive($result, $new ?? []);
-          if (!is_null($new)) $this->fscache->set($cnf['key'], $result, 3600); // 60 minutes
+      foreach ($services as $svc) {
+
+          $cnf = $cz->urikey($svc, $id); $raw_result = null;
+          if ($this->fscache->has($cnf['key'])) {
+              $new = $this->fscache->get($cnf['key']);
+              $result = array_replace_recursive($result, $new ?? []);            
+          } else {
+              $new = $cz->$svc($id, $raw_result);
+              $result = array_replace_recursive($result, $new ?? []);
+              if (!is_null($new)) $this->fscache->set($cnf['key'], $new, 3600); // 60 minutes
+          }
+
+          if (is_null($new)) { 
+              if ($svc == 'ids_adisrws') { $msg = $raw_result; } else { $msg = ''; }
+              $query[$svc] = [ 'status' => 'Error', 'message' => $msg ]; 
+            } else { 
+              $query[$svc]['status'] = 'OK'; 
+            }
+
       }
-      if (is_null($new)) { $query['ids_justice']['status'] = 'Error'; } else { $query['ids_justice']['status'] = 'OK'; }
 
-
-      // ADISRWS
-      $cnf = $cz->urikey('ids_adisrws', $id); $raw_result = null;
-      if ($this->fscache->has($cnf['key'])) {
-          $new = $cz->ids_adisrws($id, $raw_result);
-          $result = array_replace_recursive($result, $new ?? []);
-      } else {
-          $new = $cz->ids_adisrws($id, $raw_result);
-          $result = array_replace_recursive($result, $new ?? []);
-          if (!is_null($new)) $this->fscache->set($cnf['key'], $new, 3600); // 60 minutes
-      }
-      if (is_null($new)) { $query['ids_adisrws'] = [ 'status' => 'Error', 'message' => $raw_result ]; } else { $query['ids_adisrws']['status'] = 'OK'; }
-
-
-      // VREO
-      $cnf = $cz->urikey('ids_vreo', $id); $raw_result = null;
-      if ($this->fscache->has($cnf['key'])) {
-          $raw_result = $this->fscache->get($cnf['key']);
-          $new = $cz->ids_vreo($id, $raw_result) ?? [];
-          $result = array_replace_recursive($result, $new ?? []);
-      } else {
-          $new = $cz->ids_vreo($id, $raw_result) ?? [];
-          $result = array_replace_recursive($result, $new ?? []);
-          if (!is_null($new)) $this->fscache->set($cnf['key'], $raw_result, 3600); // 60 minutes
-      }
-      if (is_null($new)) { $query['ids_vreo']['status'] = 'Error'; } else { $query['ids_vreo']['status'] = 'OK'; }
-
-
-      // RZP
-      $cnf = $cz->urikey('ids_rzp', $id); $raw_result = null;
-      if ($this->fscache->has($cnf['key'])) {
-          $raw_result = $this->fscache->get($cnf['key']);
-          $new = $cz->ids_rzp($id, $raw_result) ?? [];
-          $result = array_replace_recursive($result, $new ?? []);
-      } else {
-          $new = $cz->ids_rzp($id, $raw_result) ?? [];
-          $result = array_replace_recursive($result, $new ?? []);
-          if (!is_null($new)) $this->fscache->set($cnf['key'], $raw_result, 3600); // 60 minutes
-      }
-      if (is_null($new)) { $query['ids_rzp']['status'] = 'Error'; } else { $query['ids_rzp']['status'] = 'OK'; }
-
-      // RESULT
       $result['query'] = $query;
       $nested[0] = $result;
       $payload = $builder->withData((array)$nested)->withCode(200)->build();
@@ -426,7 +395,6 @@ class ContactsController extends AbstractTwigController
 
       $jsf_schema   = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.v1.schema');
       $jsf_uischema = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.v1.formui');
-      #$jsf_uischema = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/test.v1.formui');
       $jsf_formdata = '{"data":{"ts_created":"'.time().'","ts_updated":"'.time().'"}}';
       $jsf_onsubmit = '
         $.ajax({
@@ -463,13 +431,7 @@ class ContactsController extends AbstractTwigController
 
 
         ]);
-        
-        /*
-            'json_schema_output' => $jsf_schema,
-            'json_uischema_output' => $jsf_uischema,
-            'json_formdata_output' => $jsf_formdata,
-            'json_onsubmit_output' => $jsf_onsubmit
-        */
+
     }
 
 

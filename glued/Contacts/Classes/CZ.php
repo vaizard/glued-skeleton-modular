@@ -141,24 +141,11 @@ class CZ
                 $rzp['nat'][0]['country'] = 'CZ';
                 $rzp['nat'][0]['regid'] = $zu['ico'];
                 $rzp['nat'][0]['vatid'] = str_replace('dic=', 'CZ', $zu['p_dph'] ?? '') ?? null;
-                $rzp['addr'][0]['kind']['main'] = 1;
-                $rzp['addr'][0]['kind']['billing'] = 1;
-                $rzp['addr'][0]['unstructured'] = $zu['jmn'];
-                $result[] = $rzp;
-            } else {
-                foreach ($all as $zu) {
-                    if ($zu[0]['ojm'] ?? null != null) {
-                        $rzp['fn'] = $zu['ojm'] ?? null;
-                        $rzp['nat'][0]['country'] = 'CZ';
-                        $rzp['nat'][0]['regid'] = $zu['ico'] ?? null;
-                        $rzp['nat'][0]['vatid'] = str_replace('dic=', 'CZ', $zu['p_dph'] ?? '') ?? null;
-                        $rzp['addr'][0]['kind']['main'] = 1;
-                        $rzp['addr'][0]['kind']['billing'] = 1;
-                        $rzp['addr'][0]['unstructured'] = $zu['jmn'] ?? null;
-                        $result[] = $rzp;
-                    }
-                }
-            }
+                $rzp['addr']['kind']['main'] = 1;
+                $rzp['addr']['kind']['billing'] = 1;
+                $rzp['addr']['unstructured'] = $zu['jmn'];
+                $result = $rzp;
+            } 
         }
         return $result;
     }
