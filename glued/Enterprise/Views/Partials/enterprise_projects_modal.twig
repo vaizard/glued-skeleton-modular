@@ -26,11 +26,68 @@
               </select>
             </div>
           </div>
-          <div class="form-row"> 
+          <div class="form-row">
             <div class="form-group col-md-12">
               <label>{{ __('Description') }}</label>
               <div class="input-group">
                 <input type="text" class="form-control" name="description">
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+              <div class="form-group col-2">
+                <label class="form-label">{{ __('Order') }}</label>
+                <div class="input-group selectgroup mt-1">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="flags[order]" value="true" class="selectgroup-input" checked="">
+                    <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-check"></i></span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="flags[order]" value="false" class="selectgroup-input">
+                    <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-times"></i></span>
+                  </label>
+                  </div>
+              </div>
+              <div class="form-group col-2">
+                <label class="form-label">{{ __('Task') }}</label>
+                <div class="input-group selectgroup mt-1">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="flags[task]" value="true" class="selectgroup-input" checked="">
+                    <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-check"></i></span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="flags[task]" value="false" class="selectgroup-input">
+                    <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-times"></i></span>
+                  </label>
+                  </div>
+              </div>
+              <div class="form-group col-2">
+                <label class="form-label">{{ __('Event') }}</label>
+                <div class="input-group selectgroup mt-1">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="flags[event]" value="true" class="selectgroup-input" checked="">
+                    <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-check"></i></span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="flags[event]" value="false" class="selectgroup-input">
+                    <span class="selectgroup-button selectgroup-button-icon"><i class="fas fa-times"></i></span>
+                  </label>
+                  </div>
+              </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label>{{ __('Order') }} (json)</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="order">
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label>{{ __('Budget') }} (json)</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="budget">
               </div>
             </div>
           </div>
