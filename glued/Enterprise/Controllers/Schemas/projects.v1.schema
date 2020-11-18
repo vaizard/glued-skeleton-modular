@@ -69,6 +69,40 @@
       "examples": [
         "Max 10 items cash desk."
       ]
+    },
+    "flags": {
+        "$id": "#/properties/flags",
+        "title":"Flags",
+        "type":"object",
+        "properties":{
+            "order":{
+                "$id": "#/properties/flags/properties/order",
+                "type":"boolean",
+                "title":"Order"
+            },
+            "task":{
+                "$id": "#/properties/flags/properties/task",
+                "type":"boolean",
+                "title":"Task"
+            },
+            "event":{
+                "$id": "#/properties/flags/properties/event",
+                "type":"boolean",
+                "title":"Event"
+            }
+        }
+    },
+    "order": {
+      "$id": "#/properties/order",
+      "type": "string",
+      "title": "Order json string",
+      "default": ""
+    },
+    "budget": {
+      "$id": "#/properties/budget",
+      "type": "string",
+      "title": "Budget json string",
+      "default": ""
     }
   }
 }

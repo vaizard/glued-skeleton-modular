@@ -64,7 +64,7 @@ class EnterpriseController extends AbstractTwigController
     public function project_detail_ui(Request $request, Response $response, array $args = []): Response {
         $project_id = (int)$args['uid'];
         $this->db->where('c_uid', $project_id);
-        $data = $this->db->getOne('t_enterprise_projects', ['c_uid as id', 'c_json->>"$.name" as name', 'c_json->>"$.description" as description']);
+        $data = $this->db->getOne('t_enterprise_projects', ['c_uid as id', 'c_json->>"$.name" as name', 'c_json->>"$.description" as description', 'c_json->>"$.flags" as flags']);
         return $this->render($response, 'Enterprise/Views/projects.object.twig', [
             'data' => $data,
         ]);
@@ -171,7 +171,9 @@ class EnterpriseController extends AbstractTwigController
     public function projects_post(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('enterprise.projects', 1);
         $req = $request->getParsedBody();
-
+        
+        $puvodni_data = $req;
+        
         $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = 0;
         $req['_v'] = (int) 1;
@@ -180,9 +182,37 @@ class EnterpriseController extends AbstractTwigController
         $parent = (int) $req['parent'];
         unset($req['parent']);  // protoze neni ve schematu
         
+        // flags zbooleanujeme
+        $req['flags']['order'] = $req['flags']['order'] == 'true'?true:false;
+        $req['flags']['task'] = $req['flags']['task'] == 'true'?true:false;
+        $req['flags']['event'] = $req['flags']['event'] == 'true'?true:false;
+        
+        // v order je zapsany primo json
+        /*
+        if (!empty($req['order'])) {
+            $req['order'] = json_decode($req['order'], true);
+        }
+        else {
+            unset($req['order']);
+        }
+        */
+        unset($req['order']);
+        
+        // v budget je zapsany primo json
+        /*
+        if (!empty($req['budget'])) {
+            $req['budget'] = json_decode($req['budget'], true);
+        }
+        else {
+            unset($req['budget']);
+        }
+        */
+        unset($req['budget']);
+        
         // convert body to object
+        $puvodni_json = json_encode((object)$req);
         $req = json_decode(json_encode((object)$req));
-  
+        
         // TODO replace manual coercion above with a function to recursively cast types of object values according to the json schema object (see below)       
     
         // load the json schema and validate data against it
@@ -210,8 +240,12 @@ class EnterpriseController extends AbstractTwigController
             $payload = $builder->withData((array)$req)->withCode(200)->build();
             return $response->withJson($payload, 200);
         } else {
+            $struktura_dat = array();
+            $struktura_dat['puvodni'] = print_r($puvodni_data, true);
+            $struktura_dat['json'] = $puvodni_json;
             $reseed = $request->getParsedBody();
-            $payload = $builder->withValidationReseed($reseed)
+            $payload = $builder->withData($struktura_dat)
+                                ->withValidationReseed($reseed)
                                ->withValidationError($result->getErrors())
                                ->withCode(400)
                                ->build();
