@@ -11,12 +11,16 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: Validate composer.json and composer.lock
+      env:
+        GLUED_IN_DOCKER: true
       run: composer validate
 
     # TODO look into rewriting composer.json so that phinx migrations
     # and other postinstall magic don't interfere with the code below
     #
     - name: Install dependencies
+      env:
+        GLUED_IN_DOCKER: true
       run: composer install --prefer-dist --no-progress --no-suggest
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
