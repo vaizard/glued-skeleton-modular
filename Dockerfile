@@ -21,9 +21,9 @@ COPY composer.json package.json /var/www/glued/
 RUN cd /var/www/glued && \
     composer update
 
-
 COPY docker/apache-config.conf /etc/apache2/sites-available/glued.conf
 COPY docker/phinx.docker.yml /var/www/glued/phinx.yml
+COPY docker/10_db.php /var/www/glued/config/config.d/10_db.php
 
 RUN rm /etc/apache2/sites-enabled/* && \
     ln -s /etc/apache2/sites-available/glued.conf /etc/apache2/sites-enabled/glued.conf && \

@@ -20,10 +20,10 @@ return [
 
     // Database
     'db' => [
-        'host' => 'db_host',
-        'database' => 'db_name',
-        'username' => 'db_user',
-        'password' => 'db_pass',
+        'host' => $_ENV['MYSQL_HOST'] || 'db_host',
+        'database' => $_ENV['MYSQL_DATABASE'] || 'db_name',
+        'username' => $_ENV['MYSQL_USERNAME'] || 'db_user',
+        'password' => $_ENV['MYSQL_PASSWORD'] || 'db_pass',
         'charset' => ' utf8mb4',
         'collation' => ' utf8mb4_unicode_ci'
     ],
