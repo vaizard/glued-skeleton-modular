@@ -3,7 +3,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "http://example.com/root.json",
   "type": "object",
-  "title": "Accounts (baking, cash) schema",
+  "title": "Enterprise project schema",
   "required": [
     "_s",
     "_v",
@@ -36,7 +36,7 @@
     "id": {
       "$id": "#/properties/id",
       "type": "integer",
-      "title": "ID of the calendar source",
+      "title": "ID of the project source",
       "default": 0,
       "examples": [
         1
@@ -54,7 +54,7 @@
       "$id": "#/properties/name",
       "type": "string",
       "title": "The name schema",
-      "description": "Account name.",
+      "description": "Project name.",
       "default": "",
       "examples": [
         "Cash desk 1"
@@ -64,7 +64,7 @@
       "$id": "#/properties/description",
       "type": "string",
       "title": "The description schema",
-      "description": "An additional description of the account.",
+      "description": "An additional description of the project.",
       "default": "",
       "examples": [
         "Max 10 items cash desk."

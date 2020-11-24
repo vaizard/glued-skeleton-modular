@@ -64,9 +64,41 @@ class EnterpriseController extends AbstractTwigController
     public function project_detail_ui(Request $request, Response $response, array $args = []): Response {
         $project_id = (int)$args['uid'];
         $this->db->where('c_uid', $project_id);
-        $data = $this->db->getOne('t_enterprise_projects', ['c_uid as id', 'c_json->>"$.name" as name', 'c_json->>"$.description" as description', 'c_json->>"$.flags" as flags']);
+        $data = $this->db->getOne('t_enterprise_projects', ['c_uid as id', 'c_json as json', 'c_json->>"$.name" as name', 'c_json->>"$.description" as description', 'c_json->>"$.flags" as flags']);
+        
+      $jsf_schema   = file_get_contents(__ROOT__.'/glued/Enterprise/Controllers/Schemas/projects.v1.schema');
+      $jsf_uischema = file_get_contents(__ROOT__.'/glued/Enterprise/Controllers/Schemas/projects.v1.formui');
+      $jsf_formdata = $data['json'];
+      $cilova_adresa = $this->routerParser->urlFor('enterprise.projects.api01', ['uid' => $project_id]);//'https://japex01.vaizard.xyz'.
+      $navratova_adresa = $this->routerParser->urlFor('enterprise.projects.object', ['uid' => $project_id]);//'https://japex01.vaizard.xyz'.
+      $jsf_onsubmit = '
+        $.ajax({
+          url: "'.$cilova_adresa.'",
+          dataType: "text",
+          type: "PATCH",
+          data: "stockdata=" + JSON.stringify(formData.formData),
+          success: function(data) {
+            // diky replacu nezustava puvodni adresa v historii, takze se to vice blizi redirectu
+            // presmerovani na editacni stranku se vraci z toho ajaxu
+            window.location.replace("'.$navratova_adresa.'");
+            /*
+            ReactDOM.render((<div><h1>Thank you</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre></div>), 
+                     document.getElementById("main"));
+            */
+          },
+          error: function(xhr, status, err) {
+            ReactDOM.render((<div><h1>Something goes wrong ! not saving.</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre></div>), 
+                     document.getElementById("main"));
+          }
+        });
+      ';
+        
         return $this->render($response, 'Enterprise/Views/projects.object.twig', [
             'data' => $data,
+            'json_schema_output' => $jsf_schema,
+            'json_uischema_output' => $jsf_uischema,
+            'json_formdata_output' => $jsf_formdata,
+            'json_onsubmit_output' => $jsf_onsubmit
         ]);
     }
 
@@ -125,7 +157,9 @@ class EnterpriseController extends AbstractTwigController
         $req = $request->getParsedBody();
         $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = (int)$args['uid'];
-
+        $req['patched'] = 1;
+        
+        /*
         // Get old data
         $this->db->where('c_uid', $req['id']);
         $doc = $this->db->getOne('t_enterprise_projects', ['c_json'])['c_json'];
@@ -161,7 +195,12 @@ class EnterpriseController extends AbstractTwigController
             $id = $this->db->update('t_enterprise_projects', $row);
             if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating of the account failed.')); }
         } else { throw new HttpBadRequestException( $request, __('Invalid account data.')); }
-
+        
+        */
+        
+        // nejaka flash message
+        $this->flash->addMessage('info', 'tak sme to updatovali');
+        
         // Success
         $payload = $builder->withData((array)$req)->withCode(200)->build();
         return $response->withJson($payload, 200);  
@@ -186,28 +225,6 @@ class EnterpriseController extends AbstractTwigController
         $req['flags']['order'] = $req['flags']['order'] == 'true'?true:false;
         $req['flags']['task'] = $req['flags']['task'] == 'true'?true:false;
         $req['flags']['event'] = $req['flags']['event'] == 'true'?true:false;
-        
-        // v order je zapsany primo json
-        /*
-        if (!empty($req['order'])) {
-            $req['order'] = json_decode($req['order'], true);
-        }
-        else {
-            unset($req['order']);
-        }
-        */
-        unset($req['order']);
-        
-        // v budget je zapsany primo json
-        /*
-        if (!empty($req['budget'])) {
-            $req['budget'] = json_decode($req['budget'], true);
-        }
-        else {
-            unset($req['budget']);
-        }
-        */
-        unset($req['budget']);
         
         // convert body to object
         $puvodni_json = json_encode((object)$req);
