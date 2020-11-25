@@ -3,3 +3,20 @@
 label {
     margin-bottom: 0.2rem;
 }
+
+.glyphicon {
+    display: inline-block;
+    font-family: 'Font Awesome 5 Free';
+    font-style: normal;
+    font-weight: 400;
+    font-display: auto;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.glyphicon-remove:before {
+    font-family: "Font Awesome 5 Free";
+    content: "\f068";
+}
