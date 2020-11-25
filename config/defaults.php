@@ -20,10 +20,10 @@ return [
 
     // Database
     'db' => [
-        'host' => 'db_host',
-        'database' => 'db_name',
-        'username' => 'db_user',
-        'password' => 'db_pass',
+        'host' => $_ENV['MYSQL_HOST'] ?? 'db_host',
+        'database' => $_ENV['MYSQL_DATABASE'] ?? 'db_name',
+        'username' => $_ENV['MYSQL_USERNAME'] ?? 'db_user',
+        'password' => $_ENV['MYSQL_PASSWORD'] ?? 'db_pass',
         'charset' => ' utf8mb4',
         'collation' => ' utf8mb4_unicode_ci'
     ],
@@ -52,7 +52,7 @@ return [
         'jwt' => [
             // token params
             'expiry'    => '30 minute',
-            'secret'    => 'some-secret', // a config.d fragment file will be generated with a correct key
+            'secret'    => $_ENV['SECRET_JWT'] ?? 'some-secret', // a config.d fragment file will be generated with a correct key
             'algorithm' => 'HS512',
             // middleware params
             'path'      => [ '/api' ],
@@ -80,7 +80,7 @@ return [
     // Geoip
     'geoip' => [
         'geoip_engine' => false,    // Providers: [ false, 'maxmind']. Override to 'maxmind' when maxmind license key is set.
-        'maxmind_licence_key' => '' // Maxmind GeoLite2 Licence key (its free, you just need to sign up for an account).
+        'maxmind_licence_key' => $_ENV['SECRET_MAXMIND'] ?? '' // Maxmind GeoLite2 Licence key (its free, you just need to sign up for an account).
     ],
 
     // Monolog
@@ -105,15 +105,15 @@ return [
 
     // Cryptography keys
     'crypto' => [
-        'mail' => 'mail-encryption-key',
-        'reqparams' => 'reqparams-encryption-key'
+        'mail' => $_ENV['SECRET_CRYPTO_MAIL'] ?? 'mail-encryption-key',
+        'reqparams' => $_ENV['SECRET_CRYPTO_REQPARAMS'] ?? 'reqparams-encryption-key'
     ],
 
     // Api keys
     // TODO: get this out of the config
     // see https://www.codementor.io/@ccornutt/keeping-credentials-secure-in-php-kvcbrk55z
     'apis' => [
-        'google' => '',
+        'google' => $_ENV['SECRET_GOOGLE'] ?? '',
         'facebook' => '',
         'aliexpress' => '',
         'matrix' => '',
