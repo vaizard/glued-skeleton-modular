@@ -4,8 +4,8 @@
     "url": "git://github.com/vaizard/glued-skeleton.git"
   },
   "dependencies": {
-    "@babel/core": "^7.10",
-    "@babel/standalone": "^7.10",
+    "@babel/core": "^7.12",
+    "@babel/standalone": "^7.12",
     "@claviska/jquery-ajax-submit": "latest",
     "@rjsf/bootstrap-4": "2.4.0",
     "@rjsf/core": "2.4.0",
@@ -21,7 +21,7 @@
     "moment": "^2.29.1",
     "popper.js": "^1.16.1",
     "react": "^16",
-    "react-bootstrap": "^1.0.1",
+    "react-bootstrap": "^1.4.0",
     "react-dom": "^16",
     "stisla": "latest",
     "twig": "^1.15"
