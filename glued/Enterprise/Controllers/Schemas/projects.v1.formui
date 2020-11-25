@@ -10,11 +10,5 @@
   },
   "user": {
     "ui:widget": "hidden"
-  },
-  "ts_created": {
-    "ui:widget": "hidden"
-  },
-  "ts_updated": {
-    "ui:widget": "hidden"
   }
 }
