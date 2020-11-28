@@ -152,12 +152,29 @@ class EnterpriseController extends AbstractTwigController
 
     public function projects_patch(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('enterprise.projects', 1);
-
+        
+        // id z adresy
+        $project_id = (int)$args['uid'];
+        
         // Get patch data
-        $req = $request->getParsedBody();
-        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
-        $req['id'] = (int)$args['uid'];
-        $req['patched'] = 1;
+        $patch_data = $request->getParsedBody();
+        $req = $patch_data['stockdata'];
+        
+        //$req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
+        //$req['id'] = (int)$args['uid'];
+        // user a id se nemeni pri updatu. ale pridame patched
+        //$req['patched'] = 1;
+        
+        // flags zbooleanujeme
+        /*
+        $req['flags']['order'] = $req['flags']['order'] == 'true'?true:false;
+        $req['flags']['task'] = $req['flags']['task'] == 'true'?true:false;
+        $req['flags']['event'] = $req['flags']['event'] == 'true'?true:false;
+        */
+        
+        // convert body to object
+        //$doc = json_decode(json_encode((object)$req));
+        $doc = json_decode($req);
         
         /*
         // Get old data
@@ -184,26 +201,24 @@ class EnterpriseController extends AbstractTwigController
         if (!array_key_exists('currency', $req)) { $doc->currency = ''; } else {  $doc->currency = $req['currency']; }
 
         // TODO if $doc->domain is patched here, you have to first test, if user has access to the domain
-
+        */
         // load the json schema and validate data against it
-        $loader = new JSL("schema://fin/", [ __ROOT__ . "/glued/Fin/Controllers/Schemas/" ]);
-        $schema = $loader->loadSchema("schema://fin/projects.v1.schema");
+        $loader = new JSL("schema://enterprise/", [ __ROOT__ . "/glued/Enterprise/Controllers/Schemas/" ]);
+        $schema = $loader->loadSchema("schema://enterprise/projects.v1.schema");
         $result = $this->jsonvalidator->schemaValidation($doc, $schema);
         if ($result->isValid()) {
             $row = [ 'c_json' => json_encode($doc) ];
-            $this->db->where('c_uid', $req['id']);
+            $this->db->where('c_uid', $project_id);
             $id = $this->db->update('t_enterprise_projects', $row);
             if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating of the account failed.')); }
         } else { throw new HttpBadRequestException( $request, __('Invalid account data.')); }
-        
-        */
         
         // nejaka flash message
         $this->flash->addMessage('info', 'tak sme to updatovali');
         
         // Success
-        $payload = $builder->withData((array)$req)->withCode(200)->build();
-        return $response->withJson($payload, 200);  
+        $payload = $builder->withData((array)$doc)->withCode(200)->build();
+        return $response->withJson($payload, 200);
     }
 
 
@@ -231,7 +246,7 @@ class EnterpriseController extends AbstractTwigController
         $req = json_decode(json_encode((object)$req));
         
         // TODO replace manual coercion above with a function to recursively cast types of object values according to the json schema object (see below)       
-    
+        
         // load the json schema and validate data against it
         $loader = new JSL("schema://enterprise/", [ __ROOT__ . "/glued/Enterprise/Controllers/Schemas/" ]);
         $schema = $loader->loadSchema("schema://enterprise/projects.v1.schema");
@@ -245,6 +260,9 @@ class EnterpriseController extends AbstractTwigController
                 throw new HttpInternalServerErrorException($request, $e->getMessage());  
             }
             
+            // meli bysme prenastavit id v ulozenych datech
+            // ale asi uz to tam je z sql_insert_with_json somehow
+            
             // pokud je nastaveny parent > 0, vlozime
             if ($parent > 0) {
                 $data = Array (
@@ -256,7 +274,8 @@ class EnterpriseController extends AbstractTwigController
             
             $payload = $builder->withData((array)$req)->withCode(200)->build();
             return $response->withJson($payload, 200);
-        } else {
+        }
+        else {
             $struktura_dat = array();
             $struktura_dat['puvodni'] = print_r($puvodni_data, true);
             $struktura_dat['json'] = $puvodni_json;

@@ -1,5 +1,6 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://example.com/root.json",
     "type": "object",
     "title": "Enterprise project schema",
@@ -29,7 +30,6 @@
             "$id": "#/properties/id",
             "type": "integer",
             "title": "ID of the project source",
-            "description": "An explanation about the purpose of this instance.",
             "default": 0
         },
         "user": {
@@ -41,7 +41,6 @@
             "$id": "#/properties/name",
             "type": "string",
             "title": "Project name",
-            "description": "An explanation about the purpose of this instance.",
             "default": "",
             "examples": [
                 "nazev projektu"
@@ -51,7 +50,6 @@
             "$id": "#/properties/description",
             "type": "string",
             "title": "The description schema",
-            "description": "An explanation about the purpose of this instance.",
             "default": "",
             "examples": [
                 "popis projektu"
@@ -60,263 +58,115 @@
         "rels": {
             "$id": "#/properties/rels",
             "type": "object",
-            "title": "The rels schema",
-            "description": "An explanation about the purpose of this instance.",
+            "title": "The rels",
             "properties": {
                 "parents": {
                     "$id": "#/properties/rels/properties/parents",
                     "type": "array",
-                    "title": "The parents schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "additionalItems": true,
+                    "title": "The rels.parents",
                     "items": {
                         "$id": "#/properties/rels/properties/parents/items",
-                        "anyOf": [
-                            {
-                                "$id": "#/properties/rels/properties/parents/items/anyOf/0",
-                                "type": "integer",
-                                "title": "The first anyOf schema",
-                                "description": "An explanation about the purpose of this instance."
-                            }
-                        ]
+                        "type": "integer"
                     }
                 },
                 "children": {
                     "$id": "#/properties/rels/properties/children",
                     "type": "array",
-                    "title": "The children schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "additionalItems": true,
+                    "title": "The rels.children",
                     "items": {
                         "$id": "#/properties/rels/properties/children/items",
-                        "anyOf": [
-                            {
-                                "$id": "#/properties/rels/properties/children/items/anyOf/0",
-                                "type": "integer",
-                                "title": "The first anyOf schema",
-                                "description": "An explanation about the purpose of this instance."
-                            }
-                        ]
+                        "type": "integer"
                     }
                 }
-            },
-            "additionalProperties": true
+            }
         },
         "flags": {
             "$id": "#/properties/flags",
             "type": "object",
             "title": "The flags schema",
-            "description": "An explanation about the purpose of this instance.",
             "properties": {
                 "order": {
                     "$id": "#/properties/flags/properties/order",
-                    "type": "integer",
+                    "type": "boolean",
                     "title": "The order schema",
-                    "description": "An explanation about the purpose of this instance.",
                     "default": 0
                 },
                 "task": {
                     "$id": "#/properties/flags/properties/task",
-                    "type": "integer",
+                    "type": "boolean",
                     "title": "The task schema",
-                    "description": "An explanation about the purpose of this instance.",
                     "default": 0
                 },
                 "event": {
                     "$id": "#/properties/flags/properties/event",
-                    "type": "integer",
+                    "type": "boolean",
                     "title": "The event schema",
-                    "description": "An explanation about the purpose of this instance.",
                     "default": 0
                 }
-            },
-            "additionalProperties": true
+            }
         },
         "offset": {
             "$id": "#/properties/offset",
             "type": "object",
             "title": "The offset schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": {},
-            "examples": [
-                {
-                    "uid": 434,
-                    "name": "Magistrát mìsta NEW YORK",
-                    "ref": {
-                        "id": "VO1220800",
-                        "name": "INDUSTRA LABS 2020",
-                        "jiny-freeform-klic": "jina-freeform-hodnota",
-                        "cislo-jednaci": "232-22KV",
-                        "cislo-smlouvy": "009447222",
-                        "spisova-znacka": "prc-bum33"
-                    }
-                }
-            ],
-            "required": [
-                "uid",
-                "name",
-                "ref"
-            ],
             "properties": {
                 "uid": {
                     "$id": "#/properties/offset/properties/uid",
                     "type": "integer",
-                    "title": "The uid schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "default": 0,
-                    "examples": [
-                        434
-                    ]
+                    "title": "The offset uid schema",
+                    "default": 0
                 },
                 "name": {
                     "$id": "#/properties/offset/properties/name",
                     "type": "string",
-                    "title": "The name schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "default": "",
-                    "examples": [
-                        "Magistrát mìsta NEW YORK"
-                    ]
+                    "title": "The offset name schema",
+                    "default": ""
                 },
                 "ref": {
                     "$id": "#/properties/offset/properties/ref",
                     "type": "object",
-                    "title": "The ref schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "default": {},
-                    "examples": [
-                        {
-                            "id": "VO1220800",
-                            "name": "INDUSTRA LABS 2020",
-                            "jiny-freeform-klic": "jina-freeform-hodnota",
-                            "cislo-jednaci": "232-22KV",
-                            "cislo-smlouvy": "009447222",
-                            "spisova-znacka": "prc-bum33"
-                        }
-                    ],
-                    "required": [
-                        "id",
-                        "name",
-                        "jiny-freeform-klic",
-                        "cislo-jednaci",
-                        "cislo-smlouvy",
-                        "spisova-znacka"
-                    ],
+                    "title": "The offset ref schema",
                     "properties": {
                         "id": {
                             "$id": "#/properties/offset/properties/ref/properties/id",
                             "type": "string",
                             "title": "The id schema",
-                            "description": "An explanation about the purpose of this instance.",
-                            "default": "",
-                            "examples": [
-                                "VO1220800"
-                            ]
+                            "default": ""
                         },
                         "name": {
                             "$id": "#/properties/offset/properties/ref/properties/name",
                             "type": "string",
                             "title": "The name schema",
-                            "description": "An explanation about the purpose of this instance.",
-                            "default": "",
-                            "examples": [
-                                "INDUSTRA LABS 2020"
-                            ]
-                        },
-                        "jiny-freeform-klic": {
-                            "$id": "#/properties/offset/properties/ref/properties/jiny-freeform-klic",
-                            "type": "string",
-                            "title": "The jiny-freeform-klic schema",
-                            "description": "An explanation about the purpose of this instance.",
-                            "default": "",
-                            "examples": [
-                                "jina-freeform-hodnota"
-                            ]
-                        },
-                        "cislo-jednaci": {
-                            "$id": "#/properties/offset/properties/ref/properties/cislo-jednaci",
-                            "type": "string",
-                            "title": "The cislo-jednaci schema",
-                            "description": "An explanation about the purpose of this instance.",
-                            "default": "",
-                            "examples": [
-                                "232-22KV"
-                            ]
-                        },
-                        "cislo-smlouvy": {
-                            "$id": "#/properties/offset/properties/ref/properties/cislo-smlouvy",
-                            "type": "string",
-                            "title": "The cislo-smlouvy schema",
-                            "description": "An explanation about the purpose of this instance.",
-                            "default": "",
-                            "examples": [
-                                "009447222"
-                            ]
-                        },
-                        "spisova-znacka": {
-                            "$id": "#/properties/offset/properties/ref/properties/spisova-znacka",
-                            "type": "string",
-                            "title": "The spisova-znacka schema",
-                            "description": "An explanation about the purpose of this instance.",
-                            "default": "",
-                            "examples": [
-                                "prc-bum33"
-                            ]
+                            "default": ""
                         }
                     },
                     "additionalProperties": true
                 }
-            },
-            "additionalProperties": true
+            }
         },
         "ext": {
             "$id": "#/properties/ext",
             "type": "object",
             "title": "The ext schema",
-            "description": "An explanation about the purpose of this instance.",
             "default": {},
-            "examples": [
-                {
-                    "nazevklice": "hodnota, priklad viz niz",
-                    "deef.rok": "2020",
-                    "deef.zakazka": "3"
-                }
-            ],
-            "required": [
-                "nazevklice",
-                "deef.rok",
-                "deef.zakazka"
-            ],
             "properties": {
                 "nazevklice": {
                     "$id": "#/properties/ext/properties/nazevklice",
                     "type": "string",
                     "title": "The nazevklice schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "default": "",
-                    "examples": [
-                        "hodnota, priklad viz niz"
-                    ]
+                    "default": ""
                 },
                 "deef.rok": {
                     "$id": "#/properties/ext/properties/deef.rok",
                     "type": "string",
                     "title": "The deef.rok schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "default": "",
-                    "examples": [
-                        "2020"
-                    ]
+                    "default": ""
                 },
                 "deef.zakazka": {
                     "$id": "#/properties/ext/properties/deef.zakazka",
                     "type": "string",
                     "title": "The deef.zakazka schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "default": "",
-                    "examples": [
-                        "3"
-                    ]
+                    "default": ""
                 }
             },
             "additionalProperties": true
@@ -325,320 +175,68 @@
             "$id": "#/properties/budget",
             "type": "object",
             "title": "The budget schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": {},
-            "examples": [
-                {
-                    "total": {
-                        "min": 700000,
-                        "max": 1000000
-                    },
-                    "analytics": [
-                        {
-                            "sub": "materiál",
-                            "acc": [
-                                "518.001",
-                                "^519"
-                            ],
-                            "min": "0",
-                            "max": "60000"
-                        },
-                        {
-                            "sub": "spoje",
-                            "acc": [
-                                "525.002"
-                            ],
-                            "min": "0",
-                            "monthly": {
-                                "max": "1000"
-                            }
-                        },
-                        {
-                            "sub": "mzdy",
-                            "acc": [
-                                "^542"
-                            ],
-                            "min": "100000",
-                            "max": "100000"
-                        }
-                    ]
-                }
-            ],
-            "required": [
-                "total",
-                "analytics"
-            ],
             "properties": {
                 "total": {
                     "$id": "#/properties/budget/properties/total",
                     "type": "object",
                     "title": "The total schema",
-                    "description": "An explanation about the purpose of this instance.",
                     "default": {},
-                    "examples": [
-                        {
-                            "min": 700000,
-                            "max": 1000000
-                        }
-                    ],
-                    "required": [
-                        "min",
-                        "max"
-                    ],
                     "properties": {
                         "min": {
                             "$id": "#/properties/budget/properties/total/properties/min",
                             "type": "integer",
                             "title": "The min schema",
-                            "description": "An explanation about the purpose of this instance.",
-                            "default": 0,
-                            "examples": [
-                                700000
-                            ]
+                            "default": 0
                         },
                         "max": {
                             "$id": "#/properties/budget/properties/total/properties/max",
                             "type": "integer",
                             "title": "The max schema",
-                            "description": "An explanation about the purpose of this instance.",
-                            "default": 0,
-                            "examples": [
-                                1000000
-                            ]
+                            "default": 0
                         }
-                    },
-                    "additionalProperties": true
+                    }
                 },
                 "analytics": {
                     "$id": "#/properties/budget/properties/analytics",
                     "type": "array",
                     "title": "The analytics schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "default": [],
-                    "examples": [
-                        [
-                            {
-                                "sub": "materiál",
-                                "acc": [
-                                    "518.001",
-                                    "^519"
-                                ],
-                                "min": "0",
-                                "max": "60000"
-                            },
-                            {
-                                "sub": "spoje",
-                                "acc": [
-                                    "525.002"
-                                ],
-                                "min": "0",
-                                "monthly": {
-                                    "max": "1000"
-                                }
-                            }
-                        ]
-                    ],
-                    "additionalItems": true,
                     "items": {
                         "$id": "#/properties/budget/properties/analytics/items",
-                        "anyOf": [
-                            {
-                                "$id": "#/properties/budget/properties/analytics/items/anyOf/0",
-                                "type": "object",
-                                "title": "The first anyOf schema",
-                                "description": "An explanation about the purpose of this instance.",
-                                "default": {},
-                                "examples": [
-                                    {
-                                        "sub": "materiál",
-                                        "acc": [
-                                            "518.001",
-                                            "^519"
-                                        ],
-                                        "min": "0",
-                                        "max": "60000"
-                                    }
-                                ],
-                                "required": [
-                                    "sub",
-                                    "acc",
-                                    "min",
-                                    "max"
-                                ],
-                                "properties": {
-                                    "sub": {
-                                        "$id": "#/properties/budget/properties/analytics/items/anyOf/0/properties/sub",
-                                        "type": "string",
-                                        "title": "The sub schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "default": "",
-                                        "examples": [
-                                            "materiál"
-                                        ]
-                                    },
-                                    "acc": {
-                                        "$id": "#/properties/budget/properties/analytics/items/anyOf/0/properties/acc",
-                                        "type": "array",
-                                        "title": "The acc schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "default": [],
-                                        "examples": [
-                                            [
-                                                "518.001",
-                                                "^519"
-                                            ]
-                                        ],
-                                        "additionalItems": true,
-                                        "items": {
-                                            "$id": "#/properties/budget/properties/analytics/items/anyOf/0/properties/acc/items",
-                                            "anyOf": [
-                                                {
-                                                    "$id": "#/properties/budget/properties/analytics/items/anyOf/0/properties/acc/items/anyOf/0",
-                                                    "type": "string",
-                                                    "title": "The first anyOf schema",
-                                                    "description": "An explanation about the purpose of this instance.",
-                                                    "default": "",
-                                                    "examples": [
-                                                        "518.001",
-                                                        "^519"
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    "min": {
-                                        "$id": "#/properties/budget/properties/analytics/items/anyOf/0/properties/min",
-                                        "type": "string",
-                                        "title": "The min schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "default": "",
-                                        "examples": [
-                                            "0"
-                                        ]
-                                    },
-                                    "max": {
-                                        "$id": "#/properties/budget/properties/analytics/items/anyOf/0/properties/max",
-                                        "type": "string",
-                                        "title": "The max schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "default": "",
-                                        "examples": [
-                                            "60000"
-                                        ]
-                                    }
-                                },
-                                "additionalProperties": true
+                        "type": "object",
+                        "properties": {
+                            "sub": {
+                                "$id": "#/properties/budget/properties/analytics/items/properties/sub",
+                                "type": "string",
+                                "title": "The sub schema",
+                                "default": ""
                             },
-                            {
-                                "$id": "#/properties/budget/properties/analytics/items/anyOf/1",
-                                "type": "object",
-                                "title": "The second anyOf schema",
-                                "description": "An explanation about the purpose of this instance.",
-                                "default": {},
-                                "examples": [
-                                    {
-                                        "sub": "spoje",
-                                        "acc": [
-                                            "525.002"
-                                        ],
-                                        "min": "0",
-                                        "monthly": {
-                                            "max": "1000"
-                                        }
-                                    }
-                                ],
-                                "required": [
-                                    "sub",
-                                    "acc",
-                                    "min",
-                                    "monthly"
-                                ],
-                                "properties": {
-                                    "sub": {
-                                        "$id": "#/properties/budget/properties/analytics/items/anyOf/1/properties/sub",
-                                        "type": "string",
-                                        "title": "The sub schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "default": "",
-                                        "examples": [
-                                            "spoje"
-                                        ]
-                                    },
-                                    "acc": {
-                                        "$id": "#/properties/budget/properties/analytics/items/anyOf/1/properties/acc",
-                                        "type": "array",
-                                        "title": "The acc schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "default": [],
-                                        "examples": [
-                                            [
-                                                "525.002"
-                                            ]
-                                        ],
-                                        "additionalItems": true,
-                                        "items": {
-                                            "$id": "#/properties/budget/properties/analytics/items/anyOf/1/properties/acc/items",
-                                            "anyOf": [
-                                                {
-                                                    "$id": "#/properties/budget/properties/analytics/items/anyOf/1/properties/acc/items/anyOf/0",
-                                                    "type": "string",
-                                                    "title": "The first anyOf schema",
-                                                    "description": "An explanation about the purpose of this instance.",
-                                                    "default": "",
-                                                    "examples": [
-                                                        "525.002"
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    "min": {
-                                        "$id": "#/properties/budget/properties/analytics/items/anyOf/1/properties/min",
-                                        "type": "string",
-                                        "title": "The min schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "default": "",
-                                        "examples": [
-                                            "0"
-                                        ]
-                                    },
-                                    "monthly": {
-                                        "$id": "#/properties/budget/properties/analytics/items/anyOf/1/properties/monthly",
-                                        "type": "object",
-                                        "title": "The monthly schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "default": {},
-                                        "examples": [
-                                            {
-                                                "max": "1000"
-                                            }
-                                        ],
-                                        "required": [
-                                            "max"
-                                        ],
-                                        "properties": {
-                                            "max": {
-                                                "$id": "#/properties/budget/properties/analytics/items/anyOf/1/properties/monthly/properties/max",
-                                                "type": "string",
-                                                "title": "The max schema",
-                                                "description": "An explanation about the purpose of this instance.",
-                                                "default": "",
-                                                "examples": [
-                                                    "1000"
-                                                ]
-                                            }
-                                        },
-                                        "additionalProperties": true
-                                    }
-                                },
-                                "additionalProperties": true
+                            "acc": {
+                                "$id": "#/properties/budget/properties/analytics/items/properties/acc",
+                                "type": "array",
+                                "title": "The acc schema",
+                                "default": [],
+                                "items": {
+                                    "$id": "#/properties/budget/properties/analytics/items/properties/acc/items",
+                                    "type": "string"
+                                }
+                            },
+                            "min": {
+                                "$id": "#/properties/budget/properties/analytics/items/properties/min",
+                                "type": "integer",
+                                "title": "The min schema",
+                                "default": ""
+                            },
+                            "max": {
+                                "$id": "#/properties/budget/properties/analytics/items/properties/max",
+                                "type": "integer",
+                                "title": "The max schema",
+                                "default": ""
                             }
-                        ]
+                        },
+                        "additionalProperties": true
                     }
                 }
-            },
-            "additionalProperties": true
+            }
         }
-    },
-    "additionalProperties": true
+    }
 }

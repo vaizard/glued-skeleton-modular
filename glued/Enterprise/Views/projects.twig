@@ -125,9 +125,9 @@
       $('#enterprise_projects_create_modal').modal('toggle');
     },
     error: function(res) {
+      console.log(res);
       $('#toast-placeholder').empty();
-      //$(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Enterprise projects") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Enterprise projects") }}' , msg: '{{ __("Error: ") }} zpracovane na json: ' + res.data.json + ' a tady je konec' })).appendTo("#toast-placeholder");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Enterprise projects") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
       $('.toast').toast({delay: 10000});
       $('.toast').toast('show');
     }
