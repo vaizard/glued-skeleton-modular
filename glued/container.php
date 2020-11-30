@@ -1,6 +1,8 @@
 <?php
 
 use Alcohol\ISO4217;
+use CasbinAdapter\Database\Adapter as DatabaseAdapter;
+use Casbin\Enforcer;
 use DI\Container;
 use Glued\Core\Classes\Auth\Auth;
 use Glued\Core\Classes\Utils\Utils;
@@ -17,6 +19,7 @@ use Phpfastcache\CacheManager;
 use Phpfastcache\Config\Config;
 use Phpfastcache\Helper\Psr16Adapter;
 use Psr\Log\LoggerInterface;
+use Sabre\Event\Emitter;
 use Slim\App;
 use Slim\Factory\AppFactory;
 use Slim\Flash\Messages;
@@ -28,8 +31,12 @@ use Symfony\Component\Translation\Loader\MoFileLoader;
 use Symfony\Component\Translation\Translator;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFilter;
+use Twig\TwigFunction;
 use voku\helper\AntiXSS;
 
+$container->set('events', function () {
+    return new Emitter();
+});
 
 $container->set('settings', function() {
     $ret = require_once(__ROOT__ . '/config/defaults.php');
@@ -50,7 +57,6 @@ $container->set('logger', function (Container $c) {
     return $logger;
 });
 
-
 $container->set('mysqli', function (Container $c) {
     $db = $c->get('settings')['db'];
     $mysqli = new mysqli($db['host'], $db['username'], $db['password'], $db['database']);
@@ -58,7 +64,6 @@ $container->set('mysqli', function (Container $c) {
     $mysqli->query("SET collation_connection = ".$db['collation']);
     return $mysqli;
 });
-
 
 $container->set('db', function (Container $c) {
     $mysqli = $c->get('mysqli');
@@ -79,6 +84,7 @@ $container->set('antixss', function () {
 });
 
 
+
 $container->set('goutte', function () {
     return new Goutte\Client();
 });
@@ -89,11 +95,27 @@ $container->set('flash', function () {
 
 $container->set('jsonvalidator', function () {
     return new \Opis\JsonSchema\Validator;
-
 });
 
 $container->set('routerParser', $app->getRouteCollector()->getRouteParser());
 
+/**
+ * Casbin enforcer
+ */
+$container->set('enforcer', function (Container $c) {
+    $s = $c->get('settings');
+    $adapter = __ROOT__ . '/private/cache/casbin.csv';
+    if ($s['casbin']['adapter'] == 'database')
+        $adapter = DatabaseAdapter::newAdapter([
+            'type'     => 'mysql',
+            'hostname' => $s['db']['host'],
+            'database' => $s['db']['database'],
+            'username' => $s['db']['username'],
+            'password' => $s['db']['password'],
+            'hostport' => '3306',
+        ]);
+    return new Enforcer($s['casbin']['modelconf'], $adapter);
+});
 
 $container->set('view', function (Container $c) {
     $twig = Twig::create(__ROOT__ . '/glued/', $c->get('settings')['twig']);
@@ -109,7 +131,6 @@ $container->set('view', function (Container $c) {
     return $twig;
 });
 
-
 $container->set(Translator::class, static function (Container $container) {
     $settings = $container->get('settings')['locale'];
     $translator = new Translator(
@@ -122,7 +143,6 @@ $container->set(Translator::class, static function (Container $container) {
     return $translator;
 });
 
-
 $container->set(TranslatorMiddleware::class, static function (Container $container) {
     $settings = $container->get('settings')['locale'];
     $localPath = $settings['path'];
@@ -130,10 +150,10 @@ $container->set(TranslatorMiddleware::class, static function (Container $contain
     return new TranslatorMiddleware($translator, $localPath);
 });
 
-
 $container->set('iso4217', function() {
     return new Alcohol\ISO4217();
 });
+
 
 // *************************************************
 // GLUED CLASSES ***********************************
@@ -145,9 +165,8 @@ $container->set('validator', function (Container $c) {
    return new Glued\Core\Classes\Validation\Validator;
 });
 
-
 $container->set('auth', function (Container $c) {
-    return new Auth($c->get('settings'), $c->get('db'), $c->get('logger'));
+    return new Auth($c->get('settings'), $c->get('db'), $c->get('logger'), $c->get('events'));
 });
 
 $container->set('utils', function (Container $c) {
