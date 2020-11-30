@@ -71,10 +71,10 @@
             <li class="dropdown">
               <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-user"></i> <span>{{ __('Account') }}</span></a>
               <ul class="dropdown-menu">
-                <li><a class="nav-link" href="{{ url_for('core.profiles.list.web') }}/self">{{ __('My profile') }}</a></li>
-                <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}/{{ authn.u_uid }}">{{ __('My account') }}</a></li>
-                <li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}">{{ __('Manage accounts') }}</a></li>
-                <li><a class="nav-link" href="{{ url_for('core.domains') }}">{{ __('Manage domains') }}</a></li>
+                {% if enforce('/ui/core/profiles/self') %}<li><a class="nav-link" href="{{ url_for('core.profiles.list.web') }}/self">{{ __('My profile') }}</a></li>{% endif %}
+                {% if enforce('/ui/core/accounts/self') %}<li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}/{{ authn.u_uid }}">{{ __('My account') }}</a></li>{% endif %}
+                {% if enforce('/ui/core/accounts') %}<li><a class="nav-link" href="{{ url_for('core.accounts.list.web') }}">{{ __('Manage accounts') }}</a></li>{% endif %}
+                {% if enforce('/ui/core/domains') %}<li><a class="nav-link" href="{{ url_for('core.domains') }}">{{ __('Manage domains') }}</a></li>{% endif %}
               </ul>
             </li>
             <li class="dropdown">
@@ -164,7 +164,6 @@
       <!-- Main Content -->
       <div class="main-content">
       <section class="section">
-        
         {% block content %}{% endblock %}
         
         {% include '/Stor/Views/fileupload.twig' %}
