@@ -1,19 +1,20 @@
 <?php
-
+declare(strict_types=1); 
 namespace Glued\Core\Middleware;
 
+use Casbin\Enforcer;
+use Casbin\Util\Log;
 use Glued\Core\Middleware\AbstractMiddleware;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Slim\Views\Twig;
 use Respect\Validation\Validator as v;
+use Slim\Views\Twig;
+use Symfony\Contracts\EventDispatcher\Event;
+use Twig\TwigFunction;
 
-use Casbin\Enforcer;
-use Casbin\Util\Log;
-use CasbinAdapter\Database\Adapter as DatabaseAdapter;
 
 /**
  * Deals with RBAC/ABAC
@@ -61,6 +62,7 @@ final class AuthorizationMiddleware extends AbstractMiddleware implements Middle
     {
         // Set global variables used everywhere
         $this->merge_authn($request);
+        $e = null;
 
         if ($this->auth->check() === true) {
             $user_authn = $this->auth->fetch();
@@ -69,70 +71,41 @@ final class AuthorizationMiddleware extends AbstractMiddleware implements Middle
                 $GLOBALS['_GLUED']['authn']['object']  = $user_authn;
                 $user_authn['success'] = true;
                 $this->view->getEnvironment()->addGlobal('authn', $user_authn);
-            }
-
-            $user_authz = $this->auth->get_allowed_actions();
-            if ($user_authz) {
-                // TODO remove the line below and relevant twig entries once propper authz is in place
-                if ($GLOBALS['_GLUED']['authn']['user_id'] == 1) $user_authz['root'] = true;
-                $GLOBALS['_GLUED']['authz'] = $user_authz;
-                $this->view->getEnvironment()->addGlobal('authz', $user_authz);
+                $e = $this->enforcer;
             }
         }
 
+        $this->view->getEnvironment()->addFunction(new TwigFunction('enforce', function ($obj, $dom = "0", $sub = null, $act = "r") use ($e) {
+            if (is_null($e)) return false;
+            $sub = $GLOBALS['_GLUED']['authn']['user_id'] ?? null;
+            $m = $e->getModel();
+            $r = $e->enforce((string)$sub, (string)$dom, (string)$obj, (string)$act); 
+            return $r;
+        }));
 
         if ($this->auth->check() === true) {
+            // AUTHORIZATION
+            // TODO Uncommenting the stuff below is viable once problems with casbin are resolved
 
-            $db = $this->settings['db'];
-
-            $config = [
-                'type'     => 'mysql',
-                'hostname' => $db['host'],
-                'database' => $db['database'],
-                'username' => $db['username'],
-                'password' => $db['password'],
-                'hostport' => '3306',
-            ];
-            
-
-            $model = __ROOT__ . '/glued/Core/Includes/Casbin/default.model';
-            $adapter = DatabaseAdapter::newAdapter($config);
-            $adapter = __ROOT__ . '/private/cache/casbin.csv';
-            $e = new Enforcer($model, $adapter);
-            $m = $e->getModel();
+            //$e = $this->enforcer;
+            //$m = $e->getModel();
+            //$f = $m::loadFunctionMap(); // ok
+            //$f = $e->getRoleManager(); // ok
+            //$f = $e->getPolicy();
+            //$f = $e->getFilteredPolicy(0, '1'); 
+            //$f = $e->getFilteredPolicy(1, '0');
+            //$f = $e->getFilteredPolicy(2, '/ui/stor');
+            //$f = $m->getFilteredPolicy('p','p',2, '/ui/stor');
+            //$f = $e->getFilteredGroupingPolicy(0, '1');
+            //$f = $e->getRolesForUser('2');
+            //$f = $e->getRolesForUser('2');
+            // print("<pre>".print_r($f,true)."</pre>");
 
             // TODO: we should support auth_id in the enforcing so that users can fine tune access control for different credentials
-            $sub = $GLOBALS['_GLUED']['authn']['user_id']; // the user that wants to access a resource.
-            $obj = "data1"; // the resource that is going to be accessed.
-            $act = "read"; // the operation that the user performs on the resource.
-
-
-            // assign permission to do action {act} to subject (user or role) {sub} in domain {dom} on data {obj}
-            // r = sub, dom, obj, act
-            $rule = [ 'sub', 'domain', 'obj', 'read' ];
-            if (!$m->hasPolicy('p', 'p', $rule)) {
-                $m->addPolicy('p', 'p', $rule);  
-                $e->savePolicy();
-            }
-
-            // assign user {user} to have a specific role {role} in domain {dom}
-            // g = user, role, dom
-            $rule = [ 'user', 'role', 'domain' ];
-            if (!$m->hasPolicy('g', 'g', $rule)) {
-                $m->addPolicy('g', 'g', $rule);  
-                $e->savePolicy();
-            }
-
-            // assign domain relationships
-            // g2 = parent_dom, child_dom
-            // https://github.com/php-casbin/php-casbin/issues/59
-            /*
-            $rule = [ 'domain', 'subdomain' ];
-            if (!$m->hasPolicy('g2', 'g2', $rule)) {
-                $m->addPolicy('g2', 'g2', $rule);  
-                $e->savePolicy();
-            }
-            */
+            //$sub = $GLOBALS['_GLUED']['authn']['user_id']; // the user that wants to access a resource.
+            //$obj = "data1"; // the resource that is going to be accessed.
+            //$act = "read"; // the operation that the user performs on the resource.
+            //$e->enforce($u, '0', 'add-correct-route-here', 'r');  
 
             // $e->name, or $m->name?
             //print_r( $m->getPolicy(1,1,'all','read') ) ;
