@@ -151,102 +151,133 @@ class ContactsController extends AbstractTwigController
     }
 
     public function create(Request $request, Response $response, array $args = []): Response {
-        $req = (array)$request->getParsedBody();
-        //$req = json_decode(json_encode((object)$req));
+        // Init stuff
         $builder = new JsonResponseBuilder('contacts', 1);
-
+        $req = (array)$request->getParsedBody();
+        $do = [ 'fn' => false, 'fl' => false ];
         $defs['user'] = $GLOBALS['_GLUED']['authn']['user_id'];
         $defs['id'] = 0;
         $defs['_v'] = (int) 1;
         $defs['_s'] = 'contacts';
-        $l = $defs;
-        $n = $defs;
-        $do = [ 'n' => false, 'l' => false ];
+        $type = 0;
+        $row = array (
+            'c_domain_id' => 7, // TODO change to domain (int)$req['domain'], 
+            'c_user_id' => (int)$GLOBALS['_GLUED']['authn']['user_id'],
+            'c_attr' => '{}'
+        );
 
-        $rel = $req['contacts_items_create_n_role'] ?? '';
-
+        // Get form data (natural person)
         if (($req['contacts_items_create_n_given'] ?? false) or ($req['contacts_items_create_n_family'] ?? false) or ($req['contacts_items_create_n_email'] ?? false) or ($req['contacts_items_create_n_phone'] ?? false)) {
-            $n['n']['prefix'] = $req['contacts_items_create_n_prefix'];
-            $n['n']['given'] = $req['contacts_items_create_n_given'];
-            $n['n']['family'] = $req['contacts_items_create_n_family'];
-            $n['n']['suffix'] = $req['contacts_items_create_n_suffix'];
-            $n['fn'] = $this->concat([ $n['n']['prefix'],$n['n']['given'],$n['n']['family'],$n['n']['suffix'] ]);
-            $n['email'] = $req['contacts_items_create_n_email'];
-            $n['phone'] = $req['contacts_items_create_n_phone'];
-            $n['addr']['unstructured'] = $req['contacts_items_create_n_addr'];
-            $n['dob'] = $req['contacts_items_create_n_dob'];
-            $n['note'] = $req['contacts_items_create_n_note'];
-            $do['n'] = true;
+            $fn['n']['prefix'] = $req['contacts_items_create_n_prefix'];
+            $fn['n']['given'] = $req['contacts_items_create_n_given'];
+            $fn['n']['family'] = $req['contacts_items_create_n_family'];
+            $fn['n']['suffix'] = $req['contacts_items_create_n_suffix'];
+            $fn['fn'] = $this->concat([ $fn['n']['prefix'],$fn['n']['given'],$fn['n']['family'],$fn['n']['suffix'] ]);
+            $fn['email'] = $req['contacts_items_create_n_email'];
+            $fn['phone'] = $req['contacts_items_create_n_phone'];
+            $fn['addr']['unstructured'] = $req['contacts_items_create_n_addr'];
+            $fn['dob'] = $req['contacts_items_create_n_dob'];
+            $fn['note'] = $req['contacts_items_create_n_note'];
+            $fn['role'][0]['name'] = $req['contacts_items_create_n_role'] ?? '';
+            $fn['role'][0]['dt_from'] = '';
+            $do['fn'] = true;
         }
-    
+
+        // Get form data (legal person / company)
         if ($req['contacts_items_create_l_name'] ?? false) {
-          $l['fn'] = $req['contacts_items_create_l_name'];
-          $l['addr']['unstructured'] = $req['contacts_items_create_l_addr'];
-          $l['nat'][0]['coutnry'] = $req['contacts_items_create_l_nat'];
-          $l['nat'][0]['regid'] = $req['contacts_items_create_l_regid'];
-          $l['nat'][0]['vatid'] = $req['contacts_items_create_l_vatid'];
-          $l['nat'][0]['regby'] = $req['contacts_items_create_l_regby'];
-          $l['note'] = $req['contacts_items_create_l_note'];
-          $do['l'] = true;
+            $fl['fn'] = $req['contacts_items_create_l_name'];
+            $fl['addr']['unstructured'] = $req['contacts_items_create_l_addr'];
+            $fl['nat'][0]['country'] = $req['contacts_items_create_l_nat'];
+            $fl['nat'][0]['regid'] = $req['contacts_items_create_l_regid'];
+            $fl['nat'][0]['vatid'] = $req['contacts_items_create_l_vatid'];
+            $fl['nat'][0]['regby'] = $req['contacts_items_create_l_regby'];
+            $fl['note'] = $req['contacts_items_create_l_note'];
+            $do['fl'] = true;
         }
 
-        // TODO replace true with validation check against schema ($result->isValid())
-        if (true) {
-            if ($do['l']) {
-              $row = array (
-                  'c_domain_id' => 7,//(int)$req['domain'], 
-                  'c_user_id' => (int)$GLOBALS['_GLUED']['authn']['user_id'],
-                  'c_json' => json_encode($l),
-                  'c_attr' => '{}'
-              );
-              try { $l_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); } catch (Exception $e) { 
-                  throw new HttpInternalServerErrorException($request, $e->getMessage());  
-              }
-            }
-            if ($do['n']) {
-              $row = array (
-                  'c_domain_id' => 7,//(int)$req->domain, 
-                  'c_user_id' => (int)$GLOBALS['_GLUED']['authn'],
-                  'c_json' => json_encode($n),
-                  'c_attr' => '{}'
-              );
-              try { $n_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); } catch (Exception $e) { 
-                  throw new HttpInternalServerErrorException($request, $e->getMessage());  
-              }
-            }
-            if ($do['n'] and $do['l']) {
-              $type = 0;
-              $row = [
-                  "contact_id_1" => $l_req['id'],
-                  "contact_id_2" => $n_req['id'],
-                  "type" => $type,
-                  "label" => $rel
-              ];
-              try { $this->db->insert('t_contacts_rels',$row); } catch (Exception $e) { 
-                  throw new HttpInternalServerErrorException($request, $e->getMessage());  
-              }
+        // Get additional data about the legal person
+        if ($do['fl']) {
 
-              $row = [
-                  "contact_id_2" => $l_req['id'],
-                  "contact_id_1" => $n_req['id'],
-                  "type" => -$type,
-                  "label" => $rel
-              ];
-              try { $this->db->insert('t_contacts_rels',$row); } catch (Exception $e) { 
-                  throw new HttpInternalServerErrorException($request, $e->getMessage());  
-              }
+            // Czech registers
+            if ($fl['nat'][0]['country'] == 'CZ') {
+                // If submitted company data doesn't have a regid, guess it
+                if ($fl['nat'][0]['regid']=='') $fl['nat'][0]['regid'] = substr($fl['nat'][0]['vatid'], 2);
+                // Get data from registers according to regid ()
+                $cz = new CZ($this->c);
+                $full = $cz->ids($fl['nat'][0]['regid']);
+                if ($full['fn'] == $fl['fn']) {
+                    // If {submitted company name} == {company name in registers}
+                    // Override submitted form data with data from registers
+                    $l = $full;
+                    $n = $full['people'];
+                    if ($do['fn']) $n[] = $fn;
+                    if (is_array($n)) $do['fn'] = true;
+                    unset($l['people']);
+                } else {
+                    $l = $fl;
+                    if ($do['fn']) $n[0] = $fn;
+                }
             }
 
+        // No company data, only natural person
+        } else {
+            if ($do['fn']) $n[0] = $fn;          
+        }
+
+
+      try { 
+          if (true) { // TODO replace true with validation check against schema ($result->isValid())
+              if ($do['fl']) {
+                $row['c_json'] = json_encode($l);
+                $l_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); 
+              }
+
+              if ($do['fn']) {
+                print("<pre>".print_r($n,true)."</pre>");
+                die();
+                foreach ($n as $person) {
+                  $row['c_json'] = json_encode($person);
+                  $n_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); 
+
+                  if ($do['fn'] and $do['fl']) {
+//SELECT JSON_ARRAYAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from)) from t_contacts_rels where c_uid1 = 29;
+//SELECT c_uid2, JSON_arrayAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from)) from t_contacts_rels where c_uid1 = 29 GROUP BY c_uid2;
+//SELECT JSON_OBJECT( c_uid2, JSON_ARRAYAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from))) from t_contacts_rels where c_uid1 = 29 GROUP BY c_uid2;
+                      $rrow = [
+                          "c_uid1" => $l_req['id'],
+                          "c_uid2" => $n_req['id'],
+                          "c_type" => $type,
+                          "c_label" => $person['role']['name'] ?? null,
+                          "c_dt_from" => $person['role']['dt_from'] ?? null,
+                          "c_dt_till" => $person['role']['dt_till'] ?? null
+                      ];
+                      $this->db->insert('t_contacts_rels',$rrow);
+
+                      $rrow = [
+                          "c_uid1" => $n_req['id'],
+                          "c_uid2" => $l_req['id'],
+                          "c_type" => -$type,
+                          "c_label" => $person['role']['name'] ?? null,
+                          "c_dt_from" => $person['role']['dt_from'] ?? null,
+                          "c_dt_till" => $person['role']['dt_till'] ?? null
+                      ];
+                      $this->db->insert('t_contacts_rels',$rrow); 
+                  }
+                }
+              }
             $payload = $builder->withData((array)$req)->withCode(200)->build();
             return $response->withJson($payload, 200);
-        } else {
-            $reseed = $request->getParsedBody();
-            $payload = $builder->withValidationReseed($reseed)
-                               ->withValidationError($result->getErrors())
-                               ->withCode(400)
-                               ->build();
-            return $response->withJson($payload, 400);
-        }
+            } else {
+                $reseed = $request->getParsedBody();
+                $payload = $builder->withValidationReseed($reseed)
+                                   ->withValidationError($result->getErrors())
+                                   ->withCode(400)
+                                   ->build();
+                return $response->withJson($payload, 400);
+            }
+      } catch (Exception $e) { 
+          throw new HttpInternalServerErrorException($request, $e->getMessage());  
+      }        
     }
 
 
@@ -319,38 +350,14 @@ class ContactsController extends AbstractTwigController
       $builder = new JsonResponseBuilder('contacts.search', 1);
       $cz = new CZ($this->c);
       $id = $args['id'];
-      $result = [];
-      $services = [ 'ids_ares', 'ids_justice', 'ids_adisrws', 'ids_vreo', 'ids_rzp' ];
 
       if (strlen($id) != 8) {
          $payload = $builder->withMessage('Czech company IDs are 8 numbers in total.')->withCode(200)->build();
          return $response->withJson($payload);
       }
 
-      foreach ($services as $svc) {
-
-          $cnf = $cz->urikey($svc, $id); $raw_result = null;
-          if ($this->fscache->has($cnf['key'])) {
-              $new = $this->fscache->get($cnf['key']);
-              $result = array_replace_recursive($result, $new ?? []);            
-          } else {
-              $new = $cz->$svc($id, $raw_result);
-              $result = array_replace_recursive($result, $new ?? []);
-              if (!is_null($new)) $this->fscache->set($cnf['key'], $new, 3600); // 60 minutes
-          }
-
-          if (is_null($new)) { 
-              if ($svc == 'ids_adisrws') { $msg = $raw_result; } else { $msg = ''; }
-              $query[$svc] = [ 'status' => 'Error', 'message' => $msg ]; 
-            } else { 
-              $query[$svc]['status'] = 'OK'; 
-            }
-
-      }
-
-      $result['query'] = $query;
-      $nested[0] = $result;
-      $payload = $builder->withData((array)$nested)->withCode(200)->build();
+      $result[0] = $cz->ids($id);
+      $payload = $builder->withData((array)$result)->withCode(200)->build();
       return $response->withJson($payload);
       
     }
@@ -361,9 +368,6 @@ class ContactsController extends AbstractTwigController
       $builder = new JsonResponseBuilder('contacts.search', 1);
       $eu = new EU($this->c);
       $id = mb_strtoupper($args['id']);
-
-
-
 
       if ((strlen($id) < 6) or ($eu->validate_vat($id) === false)) {
          $payload = $builder->withMessage('Not a valid EU VAT-ID.')->withCode(200)->build();

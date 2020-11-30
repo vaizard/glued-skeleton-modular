@@ -23,15 +23,6 @@ class CZ
     }
 
 
-    private function date_to_english(string $date) : string {
-        $m_in = [ 'ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince' ];
-        $m_out = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
-        $date = str_replace($m_in, $m_out, $date);
-        $date = str_replace(".", "", $date);
-        return $date;
-    }
-
-
     public function urikey(string $what, string $id) :? array {
         $pairs = [
             'ids_justice' => [
@@ -70,6 +61,22 @@ class CZ
         return ($pairs[$what] ?: null);
     }
 
+
+    //////////////////////////////////////////////////////////////////
+    // HELPERS ///////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
+
+    private function date_to_english(string $date) : string {
+        $m_in = [ 'ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince' ];
+        $m_out = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
+        $date = str_replace($m_in, $m_out, $date);
+        $date = str_replace(".", "", $date);
+        return $date;
+    }
+
+    //////////////////////////////////////////////////////////////////
+    // NAMES /////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
 
     public function names_ares(string $id, &$result_raw = null) :? array {
         $result = null;
@@ -116,39 +123,6 @@ class CZ
         return $result;
     }
 
-    public function ids_ares(string $id, &$result_raw = null) :? array {
-        $result = null;
-        $uri = $this->urikey(__FUNCTION__, $id)['uri'];
-
-        try {
-            $data = $this->utils->fetch_uri($uri);
-        } catch (\Exception $e) {
-            $result_raw = $e->getMessage();
-            return $result;
-        }
-        $result_raw = $data;
-
-        $xml = new \SimpleXMLElement($data);
-        $ns = $xml->getDocNamespaces();
-        $data = $xml->children($ns['are']);
-        $all = $data->children($ns['dtt'])->V;
-        $all = json_decode(json_encode($all), true);
-        if (is_array($all['S'])) $all = $all['S'];
-        if (is_array($all)) {
-            $zu = $all;
-            if ($zu['ojm'] ?? null != null) {
-                $rzp['fn'] = $zu['ojm'];
-                $rzp['nat'][0]['country'] = 'CZ';
-                $rzp['nat'][0]['regid'] = $zu['ico'];
-                $rzp['nat'][0]['vatid'] = str_replace('dic=', 'CZ', $zu['p_dph'] ?? '') ?? null;
-                $rzp['addr']['kind']['main'] = 1;
-                $rzp['addr']['kind']['billing'] = 1;
-                $rzp['addr']['unstructured'] = $zu['jmn'];
-                $result = $rzp;
-            } 
-        }
-        return $result;
-    }
 
     public function names_justice(string $id, &$result_raw = null) :? array {
       $result = null;
@@ -166,6 +140,7 @@ class CZ
       $result_raw = $this->goutte->getResponse()->getContent() ?? null;
       return $result;
     }
+
 
     public function names_rzp(string $id, &$result_raw = null) :? array {
       $result = null;
@@ -185,6 +160,11 @@ class CZ
       $result_raw = $this->goutte->getResponse()->getContent() ?? null;
       return $result;
     }
+
+
+    //////////////////////////////////////////////////////////////////
+    // IDS ///////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
 
     public function ids_justice(string $id, &$result_raw = null) :? array {
         $result = null;
@@ -518,5 +498,68 @@ class CZ
         return $result;
     }
 
+    public function ids_ares(string $id, &$result_raw = null) :? array {
+        $result = null;
+        $uri = $this->urikey(__FUNCTION__, $id)['uri'];
+
+        try {
+            $data = $this->utils->fetch_uri($uri);
+        } catch (\Exception $e) {
+            $result_raw = $e->getMessage();
+            return $result;
+        }
+        $result_raw = $data;
+
+        $xml = new \SimpleXMLElement($data);
+        $ns = $xml->getDocNamespaces();
+        $data = $xml->children($ns['are']);
+        $all = $data->children($ns['dtt'])->V;
+        $all = json_decode(json_encode($all), true);
+        if (is_array($all['S'])) $all = $all['S'];
+        if (is_array($all)) {
+            $zu = $all;
+            if ($zu['ojm'] ?? null != null) {
+                $rzp['fn'] = $zu['ojm'];
+                $rzp['nat'][0]['country'] = 'CZ';
+                $rzp['nat'][0]['regid'] = $zu['ico'];
+                $rzp['nat'][0]['vatid'] = str_replace('dic=', 'CZ', $zu['p_dph'] ?? '') ?? null;
+                $rzp['addr']['kind']['main'] = 1;
+                $rzp['addr']['kind']['billing'] = 1;
+                $rzp['addr']['unstructured'] = $zu['jmn'];
+                $result = $rzp;
+            } 
+        }
+        return $result;
+    }
+
+
+    public function ids(string $id) :? array {
+
+      $result = [];
+      $services = [ 'ids_ares', 'ids_justice', 'ids_adisrws', 'ids_vreo', 'ids_rzp' ];
+      foreach ($services as $svc) {
+
+          $cnf = $this->urikey($svc, $id); $raw_result = null;
+          if ($this->fscache->has($cnf['key'])) {
+              $new = $this->fscache->get($cnf['key']);
+              $result = array_replace_recursive($result, $new ?? []);            
+          } else {
+              $new = $this->$svc($id, $raw_result);
+              $result = array_replace_recursive($result, $new ?? []);
+              if (!is_null($new)) $this->fscache->set($cnf['key'], $new, 3600); // 60 minutes
+          }
+
+          if (is_null($new)) { 
+              if ($svc == 'ids_adisrws') { $msg = $raw_result; } else { $msg = ''; }
+              $query[$svc] = [ 'status' => 'Error', 'message' => $msg ]; 
+            } else { 
+              $query[$svc]['status'] = 'OK'; 
+            }
+
+      }
+      // Debug
+      // $result['query'] = $query;
+      return $result;
+    }
 
 }
