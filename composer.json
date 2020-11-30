@@ -78,7 +78,8 @@
     "alcohol/iso4217": "^3.1",
     "league/omnipay": "^3.0",
     "dragonbe/vies": "^2.1",
-    "itsgoingd/clockwork": "v5.*@beta"
+    "itsgoingd/clockwork": "v5.*@beta",
+    "sabre/event": "^5.1",
   },
   "repositories": [
     {

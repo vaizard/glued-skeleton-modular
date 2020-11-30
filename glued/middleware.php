@@ -71,7 +71,6 @@ $nonce['script_src'] = $csp->nonce('script-src');
 $nonce['style_src'] = $csp->nonce('style-src');
 $app->add(new Middlewares\Csp($csp));
 $app->add(new \Glued\Core\Middleware\TwigCspMiddleware($nonce, $container));
-
 $app->add(new Tuupola\Middleware\CorsMiddleware); // TODO add sane defaults to CorsMiddleware
 $app->add(new HeadersMiddleware($settings));
 $app->add(new \Glued\Core\Middleware\AuthorizationMiddleware($container));
