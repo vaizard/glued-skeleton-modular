@@ -4,6 +4,8 @@
 
 <div class="section-header">
   <h1>{{ __('Project') }} {{ data.name }} #{{data.id}}</h1>
+  <button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-id="" data-name="" data-target="#enterprise_projects_create_order_modal">{{ __('New order') }}</button>
+  <button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-id="" data-name="" data-target="#enterprise_projects_create_budget_modal">{{ __('New budget') }}</button>
 </div>
 
 <div class="section-body">
@@ -19,6 +21,17 @@
       </div>
     </div>
   </div>
+  
+  <div class="row">
+    <div class="col-12">
+        {% include '/Core/Views/templates/partials/flash.twig' %}
+      <div id="rjsf"></div>
+    </div>
+  </div>
 </div>
+
+{% include '/Enterprise/Views/Partials/enterprise_project_order_modal.twig' with {'enterprise_projects_id': 'enterprise_projects_create'} %}
+{% include '/Enterprise/Views/Partials/enterprise_project_budget_modal.twig' with {'enterprise_projects_id': 'enterprise_projects_create'} %}
+
 {% endblock %}
 
