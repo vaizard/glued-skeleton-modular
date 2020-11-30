@@ -1,0 +1,129 @@
+<div class="modal fade" tabindex="-1" role="dialog" id="{{ store_sellers_id }}_modal" data-backdrop="false">
+  <div class="modal-dialog modal-lg" role="document">
+    <form action="{{ url_for('store.sellers.api01') }}" method="post" autocomplete="off" id="{{ store_sellers_id }}_form">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ __('Seller') }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <div class="form-row"> 
+            <div class="form-group col-md-3">
+              <label>{{ __('Business name') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="business_name" id="{{ store_sellers_id }}_form_business_name" required>
+              </div>
+            </div>
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Business Reg-ID') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="business_regid" id="{{ store_sellers_id }}_form_business_regid" required>
+              </div>
+            </div>
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Business VAT-ID') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="business_vatid" id="{{ store_sellers_id }}_form_business_vatid" required>
+              </div>
+            </div>
+
+          <div class="form-group col-md-3">
+            <div class="control-label">{{ __('VAT payer status') }}</div>
+            <label class="custom-switch mt-3">
+              <input type="checkbox" name="business_vatpayer" class="custom-switch-input" id="{{ store_sellers_id }}_form_vatpayer">
+              <span class="custom-switch-indicator"></span>
+              <span class="custom-switch-description"></span>
+            </label>
+          </div>
+
+        </div>
+        <div class="form-row"> 
+
+            <div class="form-group col-md-6">
+              <label>{{ __('Business address') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="business_addr" id="{{ store_sellers_id }}_form_business_addr" required>
+              </div>
+            </div>
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Template') }}*</label><br>
+              <select class="form-control select2" name="template" id="{{ store_sellers_id }}_form_template" required style="width: 100%">
+                <option value="default">{{ __('Default') }}</option>
+              </select>
+            </div>
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Base URI') }}*</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="uri" id="{{ store_sellers_id }}_form_uri" required>
+              </div>
+            </div>
+
+        </div>
+
+
+        <div class="form-row"> 
+          <div class="form-group col-md-12">
+            <label>{{ __('Contacts') }}*</label>
+            <div class="input-group">
+              <textarea class="col-md-12" name="contacts" required id="{{ store_sellers_id }}_form_contacts"></textarea>
+            </div>
+          </div>   
+        </div>    
+
+        <div class="form-row"> 
+
+          <div class="form-group col-md-6">
+            <label>{{ __('Terms & conditions') }}</label>
+            <div class="input-group">
+              <input type="file" id="{{ store_sellers_id }}_form_tc" class="form-control" name="file">
+            </div>
+          </div>
+
+          <div class="form-group col-md-6">
+            <label>{{ __('Privacy policy') }}</label>
+            <div class="input-group">
+              <input type="file" id="{{ store_sellers_id }}_form_pp" class="form-control" name="file">
+            </div>
+          </div>   
+
+        </div>
+        <div class="form-row"> 
+
+          <div class="form-group col-md-6">
+            <label>{{ __('Claims & returns') }}</label>
+            <div class="input-group">
+              <input type="file" id="{{ store_sellers_id }}_form_crs" class="form-control" name="file">
+            </div>
+          </div>   
+
+            <div class="form-group col-md-6">
+              <label>{{ __('Domain') }}*</label><br>
+              <select class="form-control select2" name="domain" required style="width: 100%" id="{{ store_sellers_id }}_form_domain" >
+                 {% for domain in domains %}
+                 <option value="{{ domain.c_uid }}">{{ domain.c_name }}</option>
+                 {% endfor %}
+               </select>
+            </div>
+
+        </div>
+
+
+
+
+      </div>
+      <div class="modal-footer bg-whitesmoke br">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close' ) }}</button>
+        <button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
+      </div>
+    </div>
+  </form>
+</div>
+</div>
+

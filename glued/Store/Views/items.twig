@@ -1,0 +1,216 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Accounts') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-id="" data-currency="" data-name="" data-domain="" data-config="" data-description="" data-target="#fin_accounts_create_modal">{{ __('New account') }}</button>
+</div>
+
+<div class="section-body">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped" id="fin_accounts">
+              <thead>
+                <tr>
+                  <th class="col-sm-1">{{ __('ID') }}</th>
+                  <th class="col-sm-1">{{ __('Team') }}</th>
+                  <th class="col-sm-1">{{ __('Type') }}</th>
+                  <th class="col-sm-2">{{ __('Name') }}</th>
+                  <th class="col-sm-1">{{ __('Currency') }}</th>
+                  <th class="col-sm-4">{{ __('Description') }}</th>
+                  <th class="col-sm-1">{{ __('Manage') }}</th>
+                </tr>
+              </thead>
+              <tbody id="fin_accounts_placeholder">
+                {% verbatim %}
+                <script type="text/twig" id="fin_accounts_obj_twig">
+                <tr id="fin_accounts_object_{{ row.id }}">
+                  <td class="col-sm-1">{{ row.id }} <a href="{% endverbatim %}{{ url_for('fin.accounts.sync.api01') }}{% verbatim %}/{{ row.id }}"><i class="fas fa-sync"></i></a></td>
+                  <td class="col-sm-1">{{ row.domain_name }} ({{ row.domain }})</td>
+                  <td class="col-sm-1">{{ row.type }}</td>
+                  <td class="col-sm-2"><i class="fas fa-{{ row.icon }}" style="color: {{ row.color }}; padding-right: 1em;"></i>{{ row.name }}</td>
+                  <td class="col-sm-1">{{ row.currency }}</td>
+                  <td class="col-sm-4">{{ row.description }}</td>
+                  <td class="col-sm-1">
+                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_accounts_update_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-currency="{{ row.currency }}" data-description="{{ row.description }}" data-config="{{ row.config }}" data-icon="{{ row.icon }}" data-color="{{ row.color }}"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_accounts_delete_modal" data-id="{{ row.id }}" data-type="{{ row.type }}" data-name="{{ row.name }}" data-currency="{{ row.currency }}"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                </script>
+                <script type="text/twig" id="fin_accounts_col_twig">
+                {% for row in data %}
+                {% include "fin_accounts_obj_twig" %}
+                {% endfor %}
+                </script>
+                {% endverbatim %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include '/Fin/Views/Partials/fin_accounts_modal.twig' with {'fin_accounts_id': 'fin_accounts_create'} %}
+{% include '/Fin/Views/Partials/fin_accounts_modal.twig' with {'fin_accounts_id': 'fin_accounts_update'} %}
+{% include '/Fin/Views/Partials/fin_accounts_delete_modal.twig' with {'fin_accounts_id': 'fin_accounts_delete'} %}
+{% endblock %}
+
+
+{% block additionaljs %}
+{# twig.js initialized in public/assets/js/glued.js #}
+<script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+
+  $(".colorpickerinput").colorpicker({
+    format: 'hex',
+    component: '.input-group-append',
+  });
+
+  //
+  // Onload ajax to fetch account data
+  // 
+  $( document ).ready(function() {
+    $.ajax({
+      url: "{{ url_for('fin.accounts.api01') }}",
+      contentType: "application/json",
+      dataType: 'json',
+      success: function(res) {
+        $("#fin_accounts_placeholder").append(Twig.twig({ ref: "fin_accounts_col_twig" }).render({ data: res.data }))
+      }
+    })
+  });
+  
+  //
+  // Create + Update + Delete modals
+  // 
+  $('#fin_accounts_update_modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    var e = $(event.relatedTarget) // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("Edit account") }} ' + e.data('id'));
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("fin.accounts.api01") }}/' + e.data('id') );
+    modal.find('.modal-body input[name="name"]').val(e.data('name'));
+    modal.find('.modal-body #fin_accounts_update_form_type').val(e.data('type')).trigger('change');
+    modal.find('.modal-body #fin_accounts_update_form_icon').val(e.data('icon')).trigger('change');
+    modal.find('.modal-body input[name="color"]').val(e.data('color'));
+    modal.find('.modal-body input[name="description"]').val(e.data('description'));
+    modal.find('.modal-body #fin_accounts_update_form_currency').val(e.data('currency')).trigger('change');
+    modal.find('.modal-body #fin_accounts_update_form_config').text(JSON.stringify(e.data('config')));
+  });
+
+  $('#fin_accounts_create_modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    var e = $(event.relatedTarget) // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("New account") }}');
+  });
+
+  $('#fin_accounts_delete_modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    var e = $(event.relatedTarget) // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("Delete account") }} ' + e.data('id'));
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("fin.accounts.api01") }}/' + e.data('id') );
+    modal.find('.modal-body').text('{{ __("Do you really want to delete the account:") }} ' + e.data('name') + ' (' + e.data('type') + ' ' + e.data('currency') + ')?');
+  });
+
+  //
+  // Create handle
+  // 
+  $("#fin_accounts_create_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    success: function(res) {
+      var idtwig = 'fin_accounts_obj_twig';
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'fin_accounts_obj_twig' }).render({ row: res.data })).prependTo("#fin_accounts > tbody");
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+      $('#fin_accounts_create_modal').modal('toggle');
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+
+  //
+  // Update handle
+  // 
+  $("#fin_accounts_update_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    headers: {
+      "X-Http-Method-Override": "PATCH"
+    },
+    success: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Entry updated.") }}' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+      $('#fin_accounts_update_modal').modal('toggle');
+      $('#fin_accounts_placeholder').empty();
+      $.ajax({
+        url: "{{ url_for('fin.accounts.api01') }}",
+        contentType: "application/json",
+        dataType: 'json',
+        success: function(res) {
+          $("#fin_accounts_placeholder").append(Twig.twig({ ref: "fin_accounts_col_twig" }).render({ data: res.data }))
+        }
+      })
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+  //
+  // Delete handle
+  // 
+  $("#fin_accounts_delete_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    headers: {
+      "X-Http-Method-Override": "DELETE"
+    },
+    success: function(res) {
+      var idtwig = 'fin_accounts_obj_twig';
+      $('#toast-placeholder').empty();
+      $('#fin_accounts > tbody > #fin_accounts_object_' + res.data.id).remove();
+      $('#fin_accounts_delete_modal').modal('toggle'); 
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Removed source ") }}' + res.data.id + '.' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+  // NOTE: Make sure, that json data uses double quotes, not single quotes
+  $('#fin_accounts_form_type').change(function() {
+    if ($(this).val() !== 'cash') {
+      $('#fin_accounts_form_currency').attr('disabled', 'disabled');
+      if ($(this).val() === 'fio_cz') {
+        $('#fin_accounts_form_config').removeAttr('disabled').val('{\n  "token": "enter-token-here"\n}');
+      }
+      else if ($(this).val() === 'transferwise_com') {
+        $('#fin_accounts_form_config').removeAttr('disabled').val('{\n  "token_full": "enter-token-here",\n  "token_readonly": "enter-token-here",\n  "profile_id_personal": "enter-id-here",\n  "profile_id_business": "enter-id-here",\n  "priv_pem": "enter-private-key-here"\n}"');
+      }
+      else {
+        $('#fin_accounts_form_config').removeAttr('disabled').val('');
+      }
+    } else {
+      $('#fin_accounts_form_currency').removeAttr('disabled');
+      $('#fin_accounts_form_config').val('').attr('disabled', 'disabled');
+    }
+  }).trigger('change');
+
+  </script>
+  {% endblock %}
