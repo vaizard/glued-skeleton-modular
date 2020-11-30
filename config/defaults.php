@@ -131,6 +131,48 @@ return [
         CURLOPT_POST => 0,
     ],
 
+    'casbin' => [
+        'model' => ($model = 'default'),
+        'modelconf' => __ROOT__ . '/glued/Core/Includes/Casbin/'.$model.'.model',
+        //'adapter' => 'database',
+        'adapter' => 'file',
+    ],
+
+    'policies' => [
+        'default' => [
+            // The `p` permission policy assigns an {action} to a user or role
+            // {subject}, in {domain} on a data {object}. Per model definition,
+            // `p = subect, domain, object, action`, with wildcards supported
+            // on the {object} - for example, '/data/:object/3/*' would evaluate
+            // to `/data/[at-least-one-character]/3/[anything-or-nothing]`
+            'p' => [ 
+                // admininstration role
+                [ 'admin', '0', '*', 'c' ],
+                [ 'admin', '0', '*', 'r' ],
+                [ 'admin', '0', '*', 'u' ],
+                [ 'admin', '0', '*', 'd' ],
+                // usage role
+                [ 'usage', '0', '/ui/worklog', 'r' ],
+                [ 'usage', '0', '/ui/core/accounts/self', 'r' ],
+                [ 'usage', '0', '/ui/core/profiles/self', 'r' ],
+                [ 'usage', '0', '/ui/stor', 'r' ],
+            ],
+            // The `g` policy assigns a {role} in {domain} to a {user}
+            // Per model definition, `g = user, role, domain`.
+            'g' => [
+                [ '1', 'admin', '0' ],
+            ],
+            // The `g2` policy creates relations between a domain and its
+            // subdomain. Per model definition, `g2 = domain, subdomain`.
+            // We will use a special domain 0 as the root domain containg
+            // all other subdomains. Hence, every domain will need a 
+            // `['0', $domain]` relationship set up upon the creation of
+            // the $domain. This can't be preconfigured here.
+            'g2' => [ 
+                ['0', '1'],
+            ],
+        ],
+    ],
 
     /***********************************************************
      * OPTIONS TO TWEAK ONLY IF YOU REALLY NEED TO / KNOW HOW TO

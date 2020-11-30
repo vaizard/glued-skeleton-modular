@@ -235,7 +235,8 @@ class AuthController extends AbstractTwigController
                                ->build();
             return $response->withJson($payload, 400);
         } else {
-            $this->auth->user_create($request->getParam('email'), $request->getParam('name'), $request->getParam('password'));
+            $auth_id = $this->auth->user_create($request->getParam('email'), $request->getParam('name'), $request->getParam('password'));
+            if ($auth_id) $this->events->emit('core.auth.user.create', [$auth_id]);
             $this->auth->attempt($request->getParam('email'), $request->getParam('password')); // auto sign-in after account creation
 
             $flash = [
