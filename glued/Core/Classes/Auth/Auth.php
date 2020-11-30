@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Glued\Core\Classes\Auth;
 use ErrorException;
 use Firebase\JWT\JWT;
-use Respect\Validation\Validator as v;
-use UnexpectedValueException;
-use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Respect\Validation\Validator as v;
+use Sabre\Event\emit;
+use UnexpectedValueException;
 
 /**
  * Authentication
@@ -53,11 +54,13 @@ class Auth
     protected $settings;
     protected $db;
     protected $logger;
+    protected $events;
 
-    public function __construct($settings, $db, $logger) {
+    public function __construct($settings, $db, $logger, $events) {
         $this->db = $db;
         $this->settings = $settings;
         $this->logger = $logger;
+        $this->events = $events;
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -172,24 +175,14 @@ class Auth
         print_r($list);
     }
 
-    public function get_allowed_actions(array $context = []) :? array {
-        $auth_id = $GLOBALS['_GLUED']['authn']['auth_id'] ?? null;
-        $auth_id = null;
-        $rules = [
-            0 => [
-                'rule' => 'deny',
-                'res' => 'calendar',
-                'ifaidnot' => [ 1, 3 ],
-            ]
-        ];
-        $out = [];
-        foreach ($rules as $r) {
-            if (in_array($auth_id, $r['ifaidnot'], true)) {} else {
-                $out[ $r['rule'] ][] = $r['res'];
-            }
+    public function safeAddPolicy(object $e, object $m, string $section, string $type, array $rule) {
+        if (!$m->hasPolicy($section, $type, $rule)) {
+            $m->addPolicy($section, $type, $rule);  
+            $e->savePolicy();
         }
-        return $out;
     }
+
+    
 
     //////////////////////////////////////////////////////////////////////////
     // AUTHENTICATION ACTIONS ////////////////////////////////////////////////
@@ -210,7 +203,6 @@ class Auth
             'result' => 0,
             'params' => [ 'email' => $email ],
         ];
-
         $this->db->join("t_core_authn a", "a.c_user_uid=u.c_uid", "LEFT");
         $this->db->where("u.c_email", $email);
         $this->db->where("a.c_type", 0); // [ 0 => 'passwords', 1 => 'api keys' ]
@@ -398,6 +390,12 @@ class Auth
         if (!$update) { return false; } else { return true; }
     }
 
+    public function cred_list() :? array {
+        // replace with attribute filtering
+        // $this->db->where("c_uid", $user_id); 
+        return $this->db->get("t_core_authn");
+    }
+
 
     //////////////////////////////////////////////////////////////////////////
     // USERS CRUD ////////////////////////////////////////////////////////////
@@ -410,25 +408,32 @@ class Auth
      * @param  [type] $password [description]
      * @return [type]           [description]
      */
-    public function user_create($email, $name, $password) : bool {
+    public function user_create($email, $name, $password) :? int {
         $trx_error = false;
         $this->db->startTransaction();
-        $data = array (
+        $data = [
             'c_email' => $email,
             'c_name'  => $name,
-        );
-        if (!$this->db->insert ('t_core_users', $data)) { $trx_error = true; }
+        ];
+
+        $i1 = $this->db->insert('t_core_users', $data);
+        if (!$i1) $trx_error = true;
+
         $subq = $this->db->subQuery()->where('c_email', $email)->getOne('t_core_users', 'c_uid');
-        $data = array (
+        $data = [
             'c_type' => 0,
             'c_user_uid' => $subq,
             'c_hash' => password_hash($password, $this->settings['php']['password_hash_algo'], $this->settings['php']['password_hash_opts']),
-        );
-        if (!$this->db->insert ('t_core_authn', $data)) { $trx_error = true; }
-        if ($trx_error === true) { $this->db->rollback(); return false; } 
-        else { 
-            if (!$this->db->commit()) { return true; } else { return false; }
-        }
+        ];
+        $i2 = $this->db->insert('t_core_authn', $data);
+        if (!$i2) $trx_error = true;
+
+        if ($trx_error === true) { 
+            $this->db->rollback(); 
+            return null; 
+        } 
+        if (!$this->db->commit()) return null;
+        return $i2;
     } 
 
     /**
@@ -469,6 +474,8 @@ class Auth
         // $this->db->where("c_uid", $user_id); 
         return $this->db->get("t_core_users");
     }
+
+
 
 
 }
