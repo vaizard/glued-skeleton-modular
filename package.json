@@ -9,7 +9,6 @@
     "@claviska/jquery-ajax-submit": "latest",
     "@rjsf/bootstrap-4": "2.4.0",
     "@rjsf/core": "2.4.0",
-    "@neos21/bootstrap3-glyphicons": "^1.0.6",
     "bootstrap": "^4.5.3",
     "core-js": "^3.6.5",
     "dayjs": "^1.8.0",

@@ -16,7 +16,12 @@ label {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.glyphicon-plus:before {
+    font-family: "Font Awesome 5 Free";
+    content: "\f0fe";
+}
+
 .glyphicon-remove:before {
     font-family: "Font Awesome 5 Free";
-    content: "\002d";
+    content: "\f146";
 }
