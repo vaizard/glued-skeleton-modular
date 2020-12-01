@@ -17,7 +17,7 @@ use Respect\Validation\Validator as v;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
-//use Glued\Fin\Classes\Utils as FinUtils;
+use Glued\Store\Classes\Utils as StoreUtils;
 
 
 class StoreController extends AbstractTwigController
@@ -312,20 +312,31 @@ SELECT c_uid2, JSON_OBJECT( 'uid', c_uid2, 'rel', JSON_ARRAYAGG(JSON_OBJECT('lab
 
 
 
-    public function store_post(Request $request, Response $response, array $args = []): Response {
+    public function sellers_post(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('fin.accounts', 1);
         $req = $request->getParsedBody();
         $files = $request->getUploadedFiles();
         
-        $meta['user_id'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
-        $store = new StoreUtils();
-        $data = $store->seller($req['data'], [ 'user_id' => (int)$GLOBALS['_GLUED']['authn']['user_id'] ], $req);
-        // convert body to object
-        //$req = json_decode(json_encode((object)$req));
-  
-        // TODO replace manual coercion above with a function to recursively cast types of object values according to the json schema object (see below)       
+        $data['_s'] = 'store/sellers';
+        $data['_v'] = '1';
+        $data['user_id'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
+        $data['domain'] = $req['domain'];
+
+        $data['business']['name'] = $req['business_name'];
+        $data['business']['regid'] = $req['business_regid'];
+        $data['business']['vatid'] = $req['business_vatid'];
+        $data['business']['vatpayer'] = $req['business_vatpayer'] ?? 0 ? 1 : 0;
+        $data['business']['addr'] = $req['business_addr'];
+
+        $data['contacts'] = $req['contacts'];
+        $data['template'] = $req['template'];
+        $data['uri'] = $req['uri'];
+
+print_r($data);
+print_r($files);
+die();
     
-        // load the json schema and validate data against it
+        // TODO load the json schema and validate data against it
         /*
         $loader = new JSL("schema://fin/", [ __ROOT__ . "/glued/Fin/Controllers/Schemas/" ]);
         $schema = $loader->loadSchema("schema://fin/accounts.v1.schema");
@@ -334,16 +345,15 @@ SELECT c_uid2, JSON_OBJECT( 'uid', c_uid2, 'rel', JSON_ARRAYAGG(JSON_OBJECT('lab
         if ($result->isValid()) {
           */
             $row = array (
-                //'c_domain_id' => (int)$req->domain, 
-                'c_account_id' => (int)$data[0]['account_id'],
+                'c_domain_id' => (int)$data['domain'],
                 'c_user_id' => (int)$meta['user_id'],
-                'c_json' => json_encode($data[0]),
+                'c_json' => json_encode($data),
             );
-            try { $new_trx_id = $this->utils->sql_insert_with_json('t_fin_trx', $row); } catch (Exception $e) { 
+            try { $new_seller_id = $this->utils->sql_insert_with_json('t_store_sellers', $row); } catch (Exception $e) { 
                 throw new HttpInternalServerErrorException($request, $e->getMessage());  
             }
             
-            // pokud jsou files, nahrajeme je storem k $new_trx_id a tabulce t_fin_trx
+            // pokud jsou files, nahrajeme je storem k $new_seller_id a tabulce t_store_sellers
             if (!empty($files['file']) and count($files['file']) > 0) {
                 foreach ($files['file'] as $file_index => $newfile) {
                     if ($newfile->getError() === UPLOAD_ERR_OK) {

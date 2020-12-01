@@ -8,11 +8,10 @@ use Slim\Routing\RouteCollectorProxy;
 
 // Define the app routes.
 $app->group('/api/store/v1', function (RouteCollectorProxy $group) {
-    $group->get ('/accounts[/{uid:[0-9]+}]', StoreController::class . ':sellers_list')->setName('store.sellers.api01'); 
+    $group->get ('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_list')->setName('store.sellers.api01'); 
     $group->post('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_post');
     $group->patch('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_patch');
     $group->delete('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_delete');
-    $group->get ('/sellers/sync[/{uid:[0-9]+}[/{from:[12]\d{3}\-\d{2}\-\d{2}}[/{to:[12]\d{3}\-\d{2}\-\d{2}}]]]', StoreController::class . ':sellers_sync')->setName('store.accounts.sync.api01');
     $group->get ('/trx[/{uid:[0-9]+}]', StoreController::class . ':trx_list')->setName('store.trx.api01'); 
     $group->post ('/trx[/{uid:[0-9]+}]', StoreController::class . ':trx_post');
     $group->patch('/trx[/{uid:[0-9]+}]', StoreController::class . ':trx_patch');
