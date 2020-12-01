@@ -116,6 +116,41 @@
   //
   // Create handle
   // 
+  
+  $('#store_sellers_create_form_submit').on('click', function (event) {
+      var button = $(this);           // button ktery to zmackl ma na sobe data
+      event.preventDefault();
+      var formData = new FormData(document.getElementById("store_sellers_create_form"));         // insert complete form into FormData object
+      
+      $.ajax({
+             url : '{{ url_for("store.sellers.api01") }}',
+             type : 'POST',
+             data : formData,
+             processData: false,  // tell jQuery not to process the data
+             contentType: false,  // tell jQuery not to set contentType
+             success : function(res) {
+                var idtwig = 'store_sellers_obj_twig';
+                $('#toast-placeholder').empty();
+                $(Twig.twig({ ref: 'store_sellers_obj_twig' }).render({ row: res.data })).prependTo("#store_sellers > tbody");
+                $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Store sellers") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+                $('.toast').toast('show');
+                $('#store_sellers_create_modal').modal('toggle');
+             },
+             error: function(res) {
+                $('#toast-placeholder').empty();
+                if (res.error !== undefined) { 
+                  $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Store sellers") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+                } else {
+                  $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Store sellers") }}' , msg: '{{ __("Internetz gone?") }}' })).appendTo("#toast-placeholder");
+                }
+                $('.toast').toast('show');
+             }
+        });
+  });
+
+  //
+  // Create handle
+  // 
   $("#store_sellers_create_form").ajaxSubmit({
     data: function() {
       return $(this).serialize();

@@ -313,11 +313,11 @@ SELECT c_uid2, JSON_OBJECT( 'uid', c_uid2, 'rel', JSON_ARRAYAGG(JSON_OBJECT('lab
 
 
     public function sellers_post(Request $request, Response $response, array $args = []): Response {
-        $builder = new JsonResponseBuilder('fin.accounts', 1);
+        $builder = new JsonResponseBuilder('store.sellers', 1);
         $req = $request->getParsedBody();
         $files = $request->getUploadedFiles();
         
-        $data['_s'] = 'store/sellers';
+        $data['_s'] = 'store.sellers';
         $data['_v'] = '1';
         $data['user_id'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
         $data['domain'] = $req['domain'];
