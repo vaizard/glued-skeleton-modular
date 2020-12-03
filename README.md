@@ -231,13 +231,13 @@ HOST="https://example.com"
 EMAIL="a@b.c"
 PASS="a@b.c"
 # UNAUTHORIZED TEST
-curl -H 'Accept: application/json' ${HOST}/api/core/v1/auth-status -w "%{http_code}\n" --output -
+curl -H 'Accept: application/json' ${HOST}/api/core/v1/auth/whoami -w "%{http_code}\n" -k --output -
 # AUTHORIZATION
-curl -XPOST ${HOST}/api/core/v1/signin -d "email=${EMAIL}&password=${PASS}" -w "%{http_code}\n"
-TOKEN=`curl -s -XPOST ${HOST}/api/core/v1/signin -d "email=${EMAIL}&password=${PASS}" | jq -r .token`
+curl -XPOST ${HOST}/api/core/v1/auth/signin -d "email=${EMAIL}&password=${PASS}" -k -w "%{http_code}\n"
+TOKEN=`curl -s -XPOST ${HOST}/api/core/v1/auth/signin -d "email=${EMAIL}&password=${PASS}" -k | jq -r .token`
 # AUTHORIZED TEST
-curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/api/core/v1/auth-status
-curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/api/core/v1/profiles --output -
+curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/api/core/v1/auth/whoami -k
+curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/api/core/v1/profiles -k --output -
 ```
 
 ### Global variables and passing around data
