@@ -31,8 +31,9 @@ class Stor {
        "store_items"         => 't_store_items',
        "store_subscriptions" => 't_store_subscriptions',
        "store_tickets"       => 't_store_tickets',
+       "store_sellers"       => 't_store_sellers',
        "worklog"             => 't_worklog_items',
-       "fin_trx"         => 't_fin_trx',
+       "fin_trx"             => 't_fin_trx',
     ];
     
     public $mime_icons = [
@@ -331,7 +332,24 @@ class Stor {
         }
         
         return $file_object_data;
-        
     }
-   
+
+   public function internal_upload($newfile, $object_table, $object_id) {
+
+        if ($newfile->getError() === UPLOAD_ERR_OK) {
+            $filename = $newfile->getClientFilename();
+            // ziskame tmp path ktere je privatni vlastnost $newfile, jeste zanorene v Stream, takze nejde normalne precist
+            // vypichneme si stream a pouzijeme na to reflection
+            $stream = $newfile->getStream();
+            $reflectionProperty = new \ReflectionProperty(\Nyholm\Psr7\Stream::class, 'uri');
+            $reflectionProperty->setAccessible(true);
+            $tmp_path = $reflectionProperty->getValue($stream);
+            // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
+            $file_object_data = $this->internal_create($tmp_path, $newfile, $GLOBALS['_GLUED']['authn']['user_id'], $this->app_tables[$object_table], $object_id);
+            return $file_object_data;
+        }
+
+   }
+
+  
 }
