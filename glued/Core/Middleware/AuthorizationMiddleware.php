@@ -89,6 +89,10 @@ final class AuthorizationMiddleware extends AbstractMiddleware implements Middle
 
             //$e = $this->enforcer;
             //$m = $e->getModel();
+            //getPolicy(string $sec, string $ptype):
+            //print_r($m->getPolicy('g','g'));
+            //print_r($m->getFilteredPolicy('g','g',1,'admin'));
+            //die();
             //$f = $m::loadFunctionMap(); // ok
             //$f = $e->getRoleManager(); // ok
             //$f = $e->getPolicy();
