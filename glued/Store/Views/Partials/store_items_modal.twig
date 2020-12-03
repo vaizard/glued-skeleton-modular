@@ -1,0 +1,185 @@
+<div class="modal fade" tabindex="-1" role="dialog" id="{{ store_items_id }}_modal" data-backdrop="false">
+  <div class="modal-dialog modal-lg" role="document">
+    <form action="{{ url_for('store.items.api01') }}" method="post" autocomplete="off" id="{{ store_items_id }}_form">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ __('Item') }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+
+          <div class="form-row"> 
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Language 1') }}*</label><br>
+              <select class="form-control select2" name="info[0][lang]" id="{{ store_items_id }}_form_lang_0" required style="width: 100%">
+                <option value="default" selected>CS</option>
+                <option value="default">EN</option>
+              </select>
+            </div>
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Name (lang 1)') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="info[0][name]" id="{{ store_items_id }}_form_name_0" required>
+              </div>
+            </div>
+
+            <div class="form-group col-md-3">
+            <label>{{ __('Language 2') }}*</label><br>
+              <select class="form-control select2" name="info[1][lang]" id="{{ store_items_id }}_form_lang_1" required style="width: 100%">
+                <option value="default">CS</option>
+                <option value="default" selected>EN</option>
+              </select>
+            </div>
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Name (lang 2)') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="info[1][name]" id="{{ store_items_id }}_form_name_1" required>
+              </div>
+            </div>
+            <div class="form-group col-md-12">
+              <label>{{ __('Item description (lang 1)') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="info[0][dscr]" id="{{ store_items_id }}_form_descr_0" required>
+              </div>
+            </div>
+
+            <div class="form-group col-md-12">
+              <label>{{ __('Item description (lang 2)') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="info[1][dscr]" id="{{ store_items_id }}_form_desc_1" required>
+              </div>
+            </div>
+
+
+        </div>
+        <div class="form-row"> 
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Buy price') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="buy[price][amount]" id="{{ store_items_id }}_form_buy_price" required>
+              </div>
+            </div>
+
+            <div class="form-group col-md-3">
+            <label>{{ __('Buy curr') }}*</label><br>
+              <select class="form-control select2" name="buy[price][curr]" id="{{ store_items_id }}_form_buy_curr" required style="width: 100%">
+                {% for cur in currencies %}
+                <option value="{{ cur.alpha3 }}" {% if cur.alpha3 == 'CZK' %}selected{% endif %}>{{ cur.alpha3 }} / {{ cur.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Buy shipping') }}</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="buy[price][shipping]" id="{{ store_items_id }}_form_buy_shipping" required>
+              </div>
+            </div>
+
+            <div class="form-group col-md-3">
+            <label>{{ __('Buy tax') }}*</label><br>
+                <input type="text" class="form-control" name="buy[price][tax]" id="{{ store_items_id }}_form_buy_tax" required>
+            </div>
+
+        </div>
+        <div class="form-row"> 
+
+
+          <div class="form-group col-md-6">
+            <label>{{ __('Photos') }}</label>
+            <div class="input-group">
+              <input type="file" id="{{ store_items_id }}_form_p" class="form-control" name="filep[]" multiple>
+            </div>
+          </div>
+
+          <div class="form-group col-md-6">
+            <label>{{ __('Tech data') }}</label>
+            <div class="input-group">
+              <input type="file" id="{{ store_items_id }}_form_t" class="form-control" name="filet[]" multiple>
+            </div>
+          </div>   
+
+        </div>
+        <div class="form-row"> 
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Sell price (w/o VAT)') }} 1</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="sell[price][0][amount]" id="{{ store_items_id }}_form_sell_price_0" required>
+              </div>
+            </div>
+
+            <div class="form-group col-md-3">
+            <label>{{ __('Sell curr') }} 1*</label><br>
+              <select class="form-control select2" name="sell[price][0][curr]" id="{{ store_items_id }}_form_sell_curr_0" required style="width: 100%">
+                {% for cur in currencies %}
+                <option value="{{ cur.alpha3 }}" {% if cur.alpha3 == 'CZK' %}selected{% endif %}>{{ cur.alpha3 }} / {{ cur.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Sell price (w/o VAT)') }} 2</label>
+              <div class="input-group">
+                <input type="text" class="form-control" name="sell[price][1][value]" id="{{ store_items_id }}_form_sell_price_1" required>
+              </div>
+            </div>
+
+            <div class="form-group col-md-3">
+            <label>{{ __('Sell curr') }} 2*</label><br>
+              <select class="form-control select2" name="sell[price][1][curr]" id="{{ store_items_id }}_form_sell_curr_1" required style="width: 100%">
+                {% for cur in currencies %}
+                <option value="{{ cur.alpha3 }}" {% if cur.alpha3 == 'EUR' %}selected{% endif %}>{{ cur.alpha3 }} / {{ cur.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+
+
+        </div>
+        <div class="form-row"> 
+
+            <div class="form-group col-md-3">
+            <label>{{ __('Sell tax') }}*</label><br>
+                <input type="text" class="form-control" name="sell[tax]" id="{{ store_items_id }}_form_sell_tax" required>
+            </div>
+
+            <div class="form-group col-md-3">
+            <label>{{ __('Own item no.') }}*</label><br>
+                <input type="text" class="form-control" name="refs[artid]" id="{{ store_items_id }}_form_own_itemnr" required>
+            </div>
+
+            <div class="form-group col-md-3">
+            <label>{{ __('Exchange rate') }}*</label><br>
+                <input type="text" class="form-control" name="buy[price][exrate]" id="{{ store_items_id }}_form_exchange_rate" required>
+            </div>
+
+
+            <div class="form-group col-md-3">
+              <label>{{ __('Seller/shop') }}*</label><br>
+              <select class="form-control select2" name="seller" required style="width: 100%" id="{{ store_items_id }}_seller" >
+                 {% for seller in sellers %}
+                 <option value="{{ seller.id }}">{{ seller.name | default(seller.id)}}</option>
+                 {% endfor %}
+               </select>
+            </div>
+
+        </div>
+
+      </div>
+      <div class="modal-footer bg-whitesmoke br">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close' ) }}</button>
+        <button type="submit" id="{{ store_items_id }}_form_submit" class="btn btn-primary">{{ __('Save') }}</button>
+      </div>
+    </div>
+  </form>
+</div>
+</div>
+

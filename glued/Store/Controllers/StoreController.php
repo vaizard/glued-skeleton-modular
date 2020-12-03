@@ -22,133 +22,281 @@ use Glued\Store\Classes\Utils as StoreUtils;
 
 class StoreController extends AbstractTwigController
 {
+
+    // ==========================================================
+    // SELLERS
+    // ==========================================================
+
+    private function sellers_get_sql(array $args = []): array {
+      $uid = $args['uid'] ?? null;
+      $data = [];
+
+      // Merge the t_store_sellers.c_json with a json object computed
+      // out of files marked in t_stor_links as belonging to each of
+      // t_store_sellers rows.
+      $merge_files =  "JSON_MERGE( 
+                  t_store_sellers.c_json, 
+                  JSON_OBJECT( 
+                    'files', 
+                    JSON_ARRAYAGG(  
+                      JSON_OBJECT( 'name', t_stor_links.c_filename, 'uri', CONCAT('/stor/get/', t_stor_links.c_uid ) )
+                    )
+                  )
+                )";
+
+      // If $args['uid'] is set, select only this one row. Furhter on,
+      // the single row branch of the code is prepended by if ($uid).
+      $cond = ($uid > 0) ? "AND t_store_sellers.c_uid = ?" : "";
+
+      // TODO add `WHERE t_store_sellers.c_uid IN (<domains-accessed-by-user>)
+      $query = "
+        SELECT $merge_files FROM t_store_sellers LEFT JOIN t_stor_links
+        ON (t_store_sellers.c_uid = t_stor_links.c_inherit_object)
+        WHERE (t_stor_links.c_inherit_object IS NOT NULL $cond)
+        GROUP BY t_store_sellers.c_uid
+        UNION
+        SELECT t_store_sellers.c_json FROM t_store_sellers LEFT JOIN t_stor_links
+        ON (t_store_sellers.c_uid = t_stor_links.c_inherit_object)
+        WHERE (t_stor_links.c_inherit_object IS NULL)";
+        
+      if ($uid) $result = $this->db->rawQuery($query, [(int)$uid]);
+      else $result = $this->db->rawQuery($query);
+
+      // Rename $key to integers
+      $key = array_keys($result[0])[0];
+      foreach ($result as $obj) $data[] = json_decode($obj[$key]);
+      
+      // Unnest if returning only a single line
+      if ($uid) $data = (array)$data[0];
+      return $data;
+    }
+
     /**
+     * gets the whole collection or a single object defined by $args['uid']
      * @param Request  $request
      * @param Response $response
      * @param array    $args
-     *
      * @return Response
      */
 
-
-
-
-
-    public function trx_list(Request $request, Response $response, array $args = []): Response {
-      $builder = new JsonResponseBuilder('fin.trx', 1);
-
-      if (array_key_exists('uid', $args)) {
-        $trx_uid = (int)$args['uid'];
-        //$this->db->where('c_account_id', $account_uid);
-        // TODO get access from rbac middleware here
-      } else {
-        // TODO get allowed IDs from rbac middleware here and construct $this->db->where() accordingly
-      }
-      
-      // TODO seriously perf optimize the shit out of this
-      //      - drop the JSON_MERGE and add the c_uid on insert
-      //      - drop the json_decode and withJson, just add a json output to the JsonResponseBuilder and use relevant headers
-      //      
-      // SELECT JSON_ARRAYAGG(JSON_MERGE(t_fin_trx.c_json,JSON_OBJECT('id',t_fin_trx.c_uid),JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'),JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'),JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon'))) FROM t_fin_trx LEFT JOIN t_fin_accounts ON t_fin_trx.c_account_id = t_fin_accounts.c_uid ORDER BY c_trx_dt DESC, c_ext_trx_id DESC 
-/*
-SELECT c_uid2, c_label, c_dt_from from t_contacts_rels where c_uid1 = 29;
-SELECT c_uid2, JSON_OBJECT('label', c_label, 'dt_from', c_dt_from) from t_contacts_rels where c_uid1 = 29;
-SELECT JSON_OBJECT( c_uid2, JSON_OBJECT('label', c_label, 'dt_from', c_dt_from)) from t_contacts_rels where c_uid1 = 29;
-SELECT JSON_OBJECT( c_uid2, JSON_ARRAYAGG(JSON_OBJECT('label', c_label, 'dt_from', c_dt_from))) as relations from t_contacts_rels where t_contacts_rels.c_uid1 = 29 GROUP BY t_contacts_rels.c_uid2 ;
-
-SELECT JSON_OBJECTAGG(t.c_uid2, t.relations)
-FROM 
-(
-    SELECT t_contacts_rels.c_uid2, JSON_ARRAYAGG(JSON_OBJECT('label', c_label, 'dt_from', c_dt_from)) as relations 
-    from t_contacts_rels 
-    where t_contacts_rels.c_uid1 = 29 
-    GROUP BY t_contacts_rels.c_uid2
-) AS t;
-
-
-SELECT c_uid2, JSON_OBJECT( 'uid', c_uid2, 'rel', JSON_ARRAYAGG(JSON_OBJECT('label', c_label, 'dt_from', c_dt_from))) as relations from t_contacts_rels where t_contacts_rels.c_uid1 = 29 GROUP BY t_contacts_rels.c_uid2 ;
-
-
-
-
-
- */
-      $this->db->orderBy('t_fin_trx.c_trx_dt', 'Desc');
-      $this->db->orderBy('t_fin_trx.c_ext_trx_id', 'Desc');
-      $this->db->join('t_fin_accounts', 't_fin_trx.c_account_id = t_fin_accounts.c_uid', 'LEFT');
-      $json = "JSON_MERGE(t_fin_trx.c_json, JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'), JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'), JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon'))";
-      $result = $this->db->get('t_fin_trx', null, [ $json ]);
-      $key = array_keys($result[0])[0];
-      $data = [];
-      foreach ($result as $obj) {
-        $data[] = json_decode($obj[$key]);
-      }
+    public function sellers_get_api(Request $request, Response $response, array $args = []): Response {
+      $data = $this->sellers_get_sql($args);
+      $builder = new JsonResponseBuilder('store.sellers', 1);
       $payload = $builder->withData($data)->withCode(200)->build();
       return $response->withJson($payload);
     }
 
 
-    public function trx_list_ui(Request $request, Response $response, array $args = []): Response {
-        // Since we don't have RBAC implemented yet, we're passing all domains
-        // to the view. The view uses them in the form which adds/modifies a view.
-        // 
-        // TODO - write a core function that will get only the domains for a given user
-        // so that we dont copy paste tons of code around and we don't present sources out of RBAC
-        // scope of a user.
-        // 
-        // TODO - preseed domains on installation with at least one domain
+    public function sellers_get_app(Request $request, Response $response, array $args = []): Response {
+        $uid = $args['uid'] ?? null;
         $domains = $this->db->get('t_core_domains');
-        $accounts = $this->db->where('c_json->>"$.type" = \'cash\'')->get('t_fin_accounts', null, ['c_uid as id', 'c_json->>"$.name" as name', 'c_json->>"$.currency" as currency']);
-        return $this->render($response, 'Fin/Views/trx.twig', [
+        if ($uid) {
+            return $this->render($response, 'Store/Views/seller.twig', [
+                'domains' => $domains,
+                'data' => $this->sellers_get_sql($args),
+            ]);          
+        }
+        return $this->render($response, 'Store/Views/sellers.twig', [
             'domains' => $domains,
-            'accounts' => $accounts,
+        ]);
+    }
+
+
+    public function sellers_post_api(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('store.sellers', 1);
+        $req = $request->getParsedBody();
+        $files = $request->getUploadedFiles();
+        
+        $data['_s'] = 'store.sellers';
+        $data['_v'] = '1';
+        $meta['user_id'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
+        $meta['domain'] = $req['domain'];
+
+        $data['business']['name'] = $req['business_name'];
+        $data['business']['regid'] = $req['business_regid'];
+        $data['business']['vatid'] = $req['business_vatid'];
+        $data['business']['vatpayer'] = $req['business_vatpayer'] ?? 0 ? 1 : 0;
+        $data['business']['addr'] = $req['business_addr'];
+
+        $data['contacts'] = $req['contacts'];
+        $data['template'] = $req['template'];
+        $data['uri'] = $req['uri'];
+
+
+        // TODO load the json schema and validate data against it
+        /*
+        $loader = new JSL("schema://store/", [ __ROOT__ . "/glued/Store/Controllers/Schemas/" ]);
+        $schema = $loader->loadSchema("schema://store/sellers.v1.schema");
+        $result = $this->jsonvalidator->schemaValidation($req, $schema);
+
+        if ($result->isValid()) {
+          */
+            $row = array (
+                'c_domain_id' => (int)$meta['domain'],
+                'c_user_id' => (int)$meta['user_id'],
+                'c_json' => json_encode($data),
+                'c_attr' => '{}',
+            );
+            try { $new_seller_id = $this->utils->sql_insert_with_json('t_store_sellers', $row); } catch (Exception $e) { 
+                throw new HttpInternalServerErrorException($request, $e->getMessage());  
+            }
+            
+            // pokud jsou files, nahrajeme je storem k $new_seller_id a tabulce t_store_sellers
+            foreach (['filetc', 'filepp', 'filecr'] as $ftype) {
+                if (!empty($files[$ftype]) and count($files[$ftype]) > 0) {
+                    foreach ($files[$ftype] as $newfile) {
+                        $r = $this->stor->internal_upload($newfile, 'store_sellers', $new_seller_id);
+                    }
+                }
+            }
+            $payload = $builder->withData((array)$req)->withCode(200)->build();
+            return $response->withJson($payload, 200);
+       /* } else {
+            $reseed = $request->getParsedBody();
+            $payload = $builder->withValidationReseed($reseed)
+                               ->withValidationError($result->getErrors())
+                               ->withCode(400)
+                               ->build();
+            return $response->withJson($payload, 400);
+        }*/
+    }
+
+
+    // ==========================================================
+    // ITEMS
+    // ==========================================================
+    // 
+    public function items_get_app(Request $request, Response $response, array $args = []): Response {
+        $uid = $args['uid'] ?? null;
+        $sellers = $this->db->get('t_store_sellers', null, ['c_uid as id', 'c_json->>"$.business.name" as name']);
+
+        if ($uid) {
+            return $this->render($response, 'Store/Views/item.twig', [
+                'sellers' => $sellers,
+                'data' => $this->sellers_get_sql($args),
+                'currencies' => $this->iso4217->getAll()
+            ]);          
+        }
+        return $this->render($response, 'Store/Views/items.twig', [
+            'sellers' => $sellers,
             'currencies' => $this->iso4217->getAll()
         ]);
     }
 
+    private function items_get_sql(array $args = []): array {
+      $uid = $args['uid'] ?? null;
+      $data = [];
 
-    // ==========================================================
-    // COSTS UI
-    // ==========================================================
+      // Merge the t_store_sellers.c_json with a json object computed
+      // out of files marked in t_stor_links as belonging to each of
+      // t_store_sellers rows.
+      $merge_files =  "JSON_MERGE( 
+                  t_store_items.c_json, 
+                  JSON_OBJECT( 
+                    'files', 
+                    JSON_ARRAYAGG(  
+                      JSON_OBJECT( 'name', t_stor_links.c_filename, 'uri', CONCAT('/stor/get/', t_stor_links.c_uid ) )
+                    )
+                  )
+                )";
 
-    public function costs_list_ui(Request $request, Response $response, array $args = []): Response {
-        // Since we don't have RBAC implemented yet, we're passing all domains
-        // to the view. The view uses them in the form which adds/modifies a view.
-        // 
-        // TODO - write a core function that will get only the domains for a given user
-        // so that we dont copy paste tons of code around and we don't present sources out of RBAC
-        // scope of a user.
-        // 
-        // TODO - preseed domains on installation with at least one domain
+      // If $args['uid'] is set, select only this one row. Furhter on,
+      // the single row branch of the code is prepended by if ($uid).
+      $cond = ($uid > 0) ? "AND t_store_items.c_uid = ?" : "";
+
+      // TODO add `WHERE t_store_items.c_uid IN (<domains-accessed-by-user>)
+      $query = "
+        SELECT $merge_files FROM t_store_items LEFT JOIN t_stor_links
+        ON (t_store_items.c_uid = t_stor_links.c_inherit_object)
+        WHERE (t_stor_links.c_inherit_object IS NOT NULL $cond)
+        GROUP BY t_store_items.c_uid
+        UNION
+        SELECT t_store_items.c_json FROM t_store_items LEFT JOIN t_stor_links
+        ON (t_store_items.c_uid = t_stor_links.c_inherit_object)
+        WHERE (t_stor_links.c_inherit_object IS NULL)";
         
-        // TODO - get this into a db to cross reference cost types to order/grant possibilities
-        $domains = $this->db->get('t_core_domains');
-        return $this->render($response, 'Fin/Views/costs.twig', [
-            'domains' => $domains,
-            'currencies' => $this->iso4217->getAll(),
-            'cost_types' => $cost_types,
-        ]);
+      if ($uid) $result = $this->db->rawQuery($query, [(int)$uid]);
+      else $result = $this->db->rawQuery($query);
+
+      // Rename $key to integers
+      $key = array_keys($result[0])[0];
+      foreach ($result as $obj) $data[] = json_decode($obj[$key]);
+      
+      // Unnest if returning only a single line
+      if ($uid) $data = (array)$data[0];
+      return $data;
     }
 
+    /**
+     * gets the whole collection or a single object defined by $args['uid']
+     * @param Request  $request
+     * @param Response $response
+     * @param array    $args
+     * @return Response
+     */
+
+    public function items_get_api(Request $request, Response $response, array $args = []): Response {
+      $data = $this->items_get_sql($args);
+      $builder = new JsonResponseBuilder('store.items', 1);
+      $payload = $builder->withData($data)->withCode(200)->build();
+      return $response->withJson($payload);
+    }
+
+    public function items_post_api(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('store.items', 1);
+        $req = $request->getParsedBody();
+        $files = $request->getUploadedFiles();
+        
+        $data['_s'] = 'store.items';
+        $data['_v'] = '1';
+        $meta['user_id'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
+        $meta['seller'] = $req['seller'];
+
+        $data['info'] = $req['info'];
+        $data['buy']  = $req['buy'];
+        $data['sell'] = $req['sell'];
+        $data['refs'] = $req['refs'];
+
+        print_r($req); die();
 
 
-    // ==========================================================
-    // ACCOUNTS UI
-    // ==========================================================
 
-    public function sellers_list_ui(Request $request, Response $response, array $args = []): Response {
-        // Since we don't have RBAC implemented yet, we're passing all domains
-        // to the view. The view uses them in the form which adds/modifies a view.
-        // 
-        // TODO - write a core function that will get only the domains for a given user
-        // so that we dont copy paste tons of code around and we don't present sources out of RBAC
-        // scope of a user.
-        // 
-        // TODO - preseed domains on installation with at least one domain
-        $domains = $this->db->get('t_core_domains');
-        return $this->render($response, 'Store/Views/sellers.twig', [
-            'domains' => $domains,
-        ]);
+        // TODO load the json schema and validate data against it
+        /*
+        $loader = new JSL("schema://store/", [ __ROOT__ . "/glued/Store/Controllers/Schemas/" ]);
+        $schema = $loader->loadSchema("schema://store/items.v1.schema");
+        $result = $this->jsonvalidator->schemaValidation($req, $schema);
+
+        if ($result->isValid()) {
+          */
+            $row = array (
+                'c_domain_id' => (int)$meta['domain'],
+                'c_user_id' => (int)$meta['user_id'],
+                'c_json' => json_encode($data),
+                'c_attr' => '{}',
+            );
+            try { $new_seller_id = $this->utils->sql_insert_with_json('t_store_items', $row); } catch (Exception $e) { 
+                throw new HttpInternalServerErrorException($request, $e->getMessage());  
+            }
+            
+            // pokud jsou files, nahrajeme je storem k $new_seller_id a tabulce t_store_items
+            foreach (['filetc', 'filepp', 'filecr'] as $ftype) {
+                if (!empty($files[$ftype]) and count($files[$ftype]) > 0) {
+                    foreach ($files[$ftype] as $newfile) {
+                        $r = $this->stor->internal_upload($newfile, 'store_items', $new_seller_id);
+                    }
+                }
+            }
+            $payload = $builder->withData((array)$req)->withCode(200)->build();
+            return $response->withJson($payload, 200);
+       /* } else {
+            $reseed = $request->getParsedBody();
+            $payload = $builder->withValidationReseed($reseed)
+                               ->withValidationError($result->getErrors())
+                               ->withCode(400)
+                               ->build();
+            return $response->withJson($payload, 400);
+        }*/
     }
 
 
@@ -156,43 +304,7 @@ SELECT c_uid2, JSON_OBJECT( 'uid', c_uid2, 'rel', JSON_ARRAYAGG(JSON_OBJECT('lab
     // ACCOUNTS API
     // ==========================================================
 
-    private function sql_accounts_list() {
-        $data = $this->db->rawQuery("
-            SELECT
-                c_domain_id as 'domain',
-                t_fin_accounts.c_user_id as 'user',
-                t_core_users.c_name as 'user_name',
-                t_core_domains.c_name as 'domain_name',
-                t_fin_accounts.c_uid as 'id',
-                t_fin_accounts.c_json->>'$._s' as '_s',
-                t_fin_accounts.c_json->>'$._v' as '_v',
-                t_fin_accounts.c_json->>'$.type' as 'type',
-                t_fin_accounts.c_json->>'$.currency' as 'currency',
-                t_fin_accounts.c_json->>'$.name' as 'name',
-                t_fin_accounts.c_json->>'$.color' as 'color',
-                t_fin_accounts.c_json->>'$.icon' as 'icon',
-                t_fin_accounts.c_json->>'$.description' as 'description',
-                t_fin_accounts.c_json->>'$.config' as 'config',
-                t_fin_accounts.c_ts_synced as 'ts_synced'
-            FROM `t_fin_accounts` 
-            LEFT JOIN t_core_users ON t_fin_accounts.c_user_id = t_core_users.c_uid
-            LEFT JOIN t_core_domains ON t_fin_accounts.c_domain_id = t_core_domains.c_uid
-        ");
-        return $data;
-    }
-
-
-    public function accounts_list(Request $request, Response $response, array $args = []): Response
-    {
-        $builder = new JsonResponseBuilder('fin.accounts', 1);
-        $payload = $builder->withData((array)$this->sql_accounts_list())->withCode(200)->build();
-        return $response->withJson($payload);
-        // TODO handle errors
-        // TODO the withData() somehow escapes quotes in t_fin_accounts.c_json->>'$.config' 
-        //      need to figure out where this happens and zap it.
-    }
-
-
+   
     public function accounts_patch(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('fin.accounts', 1);
 
@@ -310,90 +422,5 @@ SELECT c_uid2, JSON_OBJECT( 'uid', c_uid2, 'rel', JSON_ARRAYAGG(JSON_OBJECT('lab
         return $response->withJson($payload, 200);
     }
 
-
-
-    public function sellers_post(Request $request, Response $response, array $args = []): Response {
-        $builder = new JsonResponseBuilder('store.sellers', 1);
-        $req = $request->getParsedBody();
-        $files = $request->getUploadedFiles();
-        
-        $data['_s'] = 'store.sellers';
-        $data['_v'] = '1';
-        $data['user_id'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
-        $data['domain'] = $req['domain'];
-
-        $data['business']['name'] = $req['business_name'];
-        $data['business']['regid'] = $req['business_regid'];
-        $data['business']['vatid'] = $req['business_vatid'];
-        $data['business']['vatpayer'] = $req['business_vatpayer'] ?? 0 ? 1 : 0;
-        $data['business']['addr'] = $req['business_addr'];
-
-        $data['contacts'] = $req['contacts'];
-        $data['template'] = $req['template'];
-        $data['uri'] = $req['uri'];
-
-print_r($data);
-print_r($files);
-die();
-    
-        // TODO load the json schema and validate data against it
-        /*
-        $loader = new JSL("schema://fin/", [ __ROOT__ . "/glued/Fin/Controllers/Schemas/" ]);
-        $schema = $loader->loadSchema("schema://fin/accounts.v1.schema");
-        $result = $this->jsonvalidator->schemaValidation($req, $schema);
-
-        if ($result->isValid()) {
-          */
-            $row = array (
-                'c_domain_id' => (int)$data['domain'],
-                'c_user_id' => (int)$meta['user_id'],
-                'c_json' => json_encode($data),
-            );
-            try { $new_seller_id = $this->utils->sql_insert_with_json('t_store_sellers', $row); } catch (Exception $e) { 
-                throw new HttpInternalServerErrorException($request, $e->getMessage());  
-            }
-            
-            // pokud jsou files, nahrajeme je storem k $new_seller_id a tabulce t_store_sellers
-            if (!empty($files['file']) and count($files['file']) > 0) {
-                foreach ($files['file'] as $file_index => $newfile) {
-                    if ($newfile->getError() === UPLOAD_ERR_OK) {
-                        $filename = $newfile->getClientFilename();
-                        // ziskame tmp path ktere je privatni vlastnost $newfile, jeste zanorene v Stream, takze nejde normalne precist
-                        // vypichneme si stream a pouzijeme na to reflection
-                        $stream = $newfile->getStream();
-                        $reflectionProperty = new \ReflectionProperty(\Nyholm\Psr7\Stream::class, 'uri');
-                        $reflectionProperty->setAccessible(true);
-                        $tmp_path = $reflectionProperty->getValue($stream);
-                        // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
-                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $GLOBALS['_GLUED']['authn']['user_id'], $this->stor->app_tables['fin_trx'], $new_trx_id);
-                    }
-                }
-            }
-            
-            $payload = $builder->withData((array)$req)->withCode(200)->build();
-            return $response->withJson($payload, 200);
-       /* } else {
-            $reseed = $request->getParsedBody();
-            $payload = $builder->withValidationReseed($reseed)
-                               ->withValidationError($result->getErrors())
-                               ->withCode(400)
-                               ->build();
-            return $response->withJson($payload, 400);
-        }*/
-    }
-
-    public function trx_patch(Request $request, Response $response, array $args = []): Response {
-        throw new HttpBadRequestException( $request, __('Editing transactions is not yet implemented. Ask your admin for a manual edit.'));
-        $builder = new JsonResponseBuilder('fin.trx', 1);
-        $payload = $builder->withData((array)$data)->withCode(200)->build();
-        return $response->withJson($payload, 200);
-    }
-
-    public function trx_delete(Request $request, Response $response, array $args = []): Response {
-        throw new HttpBadRequestException( $request, __('Deleting transactions is not yet implemented. Ask your admin for a manual delete.'));
-        $builder = new JsonResponseBuilder('fin.trx', 1);
-        $payload = $builder->withData((array)$data)->withCode(200)->build();
-        return $response->withJson($payload, 200);
-    }
 }
 

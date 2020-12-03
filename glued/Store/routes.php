@@ -8,24 +8,20 @@ use Slim\Routing\RouteCollectorProxy;
 
 // Define the app routes.
 $app->group('/api/store/v1', function (RouteCollectorProxy $group) {
-    $group->get ('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_list')->setName('store.sellers.api01'); 
-    $group->post('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_post');
-    $group->patch('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_patch');
-    $group->delete('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_delete');
-    $group->get ('/trx[/{uid:[0-9]+}]', StoreController::class . ':trx_list')->setName('store.trx.api01'); 
-    $group->post ('/trx[/{uid:[0-9]+}]', StoreController::class . ':trx_post');
-    $group->patch('/trx[/{uid:[0-9]+}]', StoreController::class . ':trx_patch');
-    $group->delete('/trx[/{uid:[0-9]+}]', StoreController::class . ':trx_delete');
-    $group->get ('/costs[/{uid:[0-9]+}]', StoreController::class . ':costs_list')->setName('store.costs.api01'); 
-    $group->post ('/costs[/{uid:[0-9]+}]', StoreController::class . ':costs_post');
-    $group->patch('/costs[/{uid:[0-9]+}]', StoreController::class . ':costs_patch');
-    $group->delete('/costs[/{uid:[0-9]+}]', StoreController::class . ':costs_delete');
+    $group->get ('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_get_api')->setName('store.sellers.api01'); 
+    $group->post('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_post_api');
+    $group->patch('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_patch_api');
+    $group->delete('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_delete_api');
+    $group->get ('/items[/{uid:[0-9]+}]', StoreController::class . ':items_get_api')->setName('store.items.api01'); 
+    $group->post('/items[/{uid:[0-9]+}]', StoreController::class . ':items_post_api');
+    $group->patch('/items[/{uid:[0-9]+}]', StoreController::class . ':items_patch_api');
+    $group->delete('/items[/{uid:[0-9]+}]', StoreController::class . ':items_delete_api');
 })->add(RestrictGuests::class);
 
 $app->group('/store', function (RouteCollectorProxy $group) {
-    $group->get ('/sellers', StoreController::class . ':sellers_list_ui')->setName('store.sellers'); 
-    $group->get ('/items', StoreController::class . ':items_list_ui')->setName('store.items'); 
-    $group->get ('/subscritpions', StoreController::class . ':subscriptions_list_ui')->setName('store.subscriptions'); 
-    $group->get ('/tickets', StoreController::class . ':tickets_list_ui')->setName('store.tickets'); 
+    $group->get ('/sellers[/{uid:[0-9]+}]', StoreController::class . ':sellers_get_app')->setName('store.sellers'); 
+    $group->get ('/items', StoreController::class . ':items_get_app')->setName('store.items'); 
+    $group->get ('/subscritpions', StoreController::class . ':subscriptions_get_app')->setName('store.subscriptions'); 
+    $group->get ('/tickets', StoreController::class . ':tickets_get_app')->setName('store.tickets'); 
 })->add(RedirectGuests::class);
 

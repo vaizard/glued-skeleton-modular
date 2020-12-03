@@ -1,0 +1,31 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ data.business.name }}</h1><a href="{{ url_for('store.sellers') }}"><button type="button" class="btn btn-primary" style="margin-left: 1em;"><i class="fas fa-level-up-alt"></i></button></a>
+</div>
+
+<div class="section-body">
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-sm table-bordered">
+        <tr><td class="col-sm-2">{{ __('Seller ID') }}</td><td><b>{{ data.id }}</b></td></tr>
+        <tr><td class="col-sm-2">{{ __('Template') }}</td><td><b>{{ data.template }}</b></td></tr>
+        <tr><td class="col-sm-2">{{ __('Uri') }}</td><td><b>{{ data.uri }}</b></td></tr>
+        <tr><td class="col-sm-2">{{ __('Contacts') }}</td><td><b>{{ data.contacts }}</b></td></tr>
+        <tr><td class="col-sm-2">{{ __('Business name') }}</td><td><b>{{ data.business.name }}</b></td></tr>
+        <tr><td class="col-sm-2">{{ __('Business address') }}</td><td><b>{{ data.business.addr }}</b></td></tr>
+        <tr><td class="col-sm-2">{{ __('Business REGID') }}</td><td><b>{{ data.business.regid }}</b></td></tr>
+        <tr><td class="col-sm-2">{{ __('Business VATID') }}</td><td><b>{{ data.business.vatid }}</b></td></tr>
+        <tr><td class="col-sm-2">{{ __('Business is VAT payer') }}</td><td><b>{{ data.business.vatpayer }}</b></td></tr>
+        <tr><td class="col-sm-2">{{ __('Files') }}</td><td><b>
+        {% for row in data.files %}
+        <a href="{{ row.uri }}">{{ row.name }}</a><br>
+        {% endfor %}
+        </b></td></tr>
+      </table>
+    </div>    
+  </div>
+</div>           
+{% endblock %}
