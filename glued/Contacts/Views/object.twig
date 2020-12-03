@@ -1,0 +1,38 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Contacts') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-id="" data-uri="" data-name="" data-domain="" data-driver="" data-target="#contacts_items_create_modal">{{ __('New company') }}</button>
+</div>
+
+<div class="section-body">
+
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table" id="contacts_items_object">
+                <tr id="contacts_items_object_{{ row.id }}">
+                  <td class="col-sm-2" style="z-index: 1;">{{ row.fn }}{% if row.uri.0.value %}<a href="{{ row.uri.0.value }}" style="z-index: 2; position: relative;"><i class="fas fa-link"></i></a>{% endif %}{% if row.context.bday %}<i class="fas fa-birthday-cake" style="color: red;"></i>{% endif %}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
+                  <td class="col-sm-3">{{ row.addr.0.full }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
+                  <td class="col-sm-1">{{ row.nat.0.regid | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
+                  <td class="col-sm-1">{{ row.nat.0.vatid | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
+                  <td class="col-sm-2">{{ row.email.0.value | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
+                  <td class="col-sm-1">{{ row.phone.0.value | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
+                  <td class="col-sm-1">{{ row.tags | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
+                  <td class="col-sm-1">
+                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#contacts_items_update_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-driver="{{ row.driver }}"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#contacts_items_delete_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+{% endblock %}

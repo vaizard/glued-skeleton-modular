@@ -150,7 +150,7 @@ class ContactsController extends AbstractTwigController
       return implode(' ', array_filter(array_map('trim',$arrayOfStrings)));
     }
 
-    public function create(Request $request, Response $response, array $args = []): Response {
+    public function contacts_post_api(Request $request, Response $response, array $args = []): Response {
         // Init stuff
         $builder = new JsonResponseBuilder('contacts', 1);
         $req = (array)$request->getParsedBody();
@@ -161,7 +161,7 @@ class ContactsController extends AbstractTwigController
         $defs['_s'] = 'contacts';
         $type = 0;
         $row = array (
-            'c_domain_id' => 7, // TODO change to domain (int)$req['domain'], 
+            'c_domain_id' => 1, // TODO change to domain (int)$req['domain'], 
             'c_user_id' => (int)$GLOBALS['_GLUED']['authn']['user_id'],
             'c_attr' => '{}'
         );
@@ -173,8 +173,8 @@ class ContactsController extends AbstractTwigController
             $fn['n']['family'] = $req['contacts_items_create_n_family'];
             $fn['n']['suffix'] = $req['contacts_items_create_n_suffix'];
             $fn['fn'] = $this->concat([ $fn['n']['prefix'],$fn['n']['given'],$fn['n']['family'],$fn['n']['suffix'] ]);
-            $fn['email'] = $req['contacts_items_create_n_email'];
-            $fn['phone'] = $req['contacts_items_create_n_phone'];
+            $fn['email'][0]['value'] = $req['contacts_items_create_n_email'];
+            $fn['phone'][0]['value'] = $req['contacts_items_create_n_phone'];
             $fn['addr']['unstructured'] = $req['contacts_items_create_n_addr'];
             $fn['dob'] = $req['contacts_items_create_n_dob'];
             $fn['note'] = $req['contacts_items_create_n_note'];
@@ -191,10 +191,11 @@ class ContactsController extends AbstractTwigController
             $fl['nat'][0]['regid'] = $req['contacts_items_create_l_regid'];
             $fl['nat'][0]['vatid'] = $req['contacts_items_create_l_vatid'];
             $fl['nat'][0]['regby'] = $req['contacts_items_create_l_regby'];
+            $fl['uri'][0]['value'] = $req['contacts_items_create_l_web'];
+            $fl['uri'][0]['label'] = ($req['contacts_items_create_l_web']) ? 'website' : null;
             $fl['note'] = $req['contacts_items_create_l_note'];
             $do['fl'] = true;
         }
-
         // Get additional data about the legal person
         if ($do['fl']) {
 
@@ -228,40 +229,35 @@ class ContactsController extends AbstractTwigController
       try { 
           if (true) { // TODO replace true with validation check against schema ($result->isValid())
               if ($do['fl']) {
-                $row['c_json'] = json_encode($l);
+                $row['c_json'] = json_encode($l ?? $fl);
                 $l_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); 
               }
 
               if ($do['fn']) {
-                print("<pre>".print_r($n,true)."</pre>");
-                die();
                 foreach ($n as $person) {
                   $row['c_json'] = json_encode($person);
                   $n_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); 
-
                   if ($do['fn'] and $do['fl']) {
-//SELECT JSON_ARRAYAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from)) from t_contacts_rels where c_uid1 = 29;
-//SELECT c_uid2, JSON_arrayAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from)) from t_contacts_rels where c_uid1 = 29 GROUP BY c_uid2;
-//SELECT JSON_OBJECT( c_uid2, JSON_ARRAYAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from))) from t_contacts_rels where c_uid1 = 29 GROUP BY c_uid2;
-                      $rrow = [
-                          "c_uid1" => $l_req['id'],
-                          "c_uid2" => $n_req['id'],
-                          "c_type" => $type,
-                          "c_label" => $person['role']['name'] ?? null,
-                          "c_dt_from" => $person['role']['dt_from'] ?? null,
-                          "c_dt_till" => $person['role']['dt_till'] ?? null
-                      ];
-                      $this->db->insert('t_contacts_rels',$rrow);
-
-                      $rrow = [
-                          "c_uid1" => $n_req['id'],
-                          "c_uid2" => $l_req['id'],
-                          "c_type" => -$type,
-                          "c_label" => $person['role']['name'] ?? null,
-                          "c_dt_from" => $person['role']['dt_from'] ?? null,
-                          "c_dt_till" => $person['role']['dt_till'] ?? null
-                      ];
-                      $this->db->insert('t_contacts_rels',$rrow); 
+                      foreach ($person['role'] as $rel) {
+                          $rrow1 = [
+                              "c_uid1" => $l_req['id'],
+                              "c_uid2" => $n_req['id'],
+                              "c_type" => $type,
+                              "c_label" => $rel['name'] ?? null,
+                              "c_dt_from" => $rel['dt_from'] ?? null,
+                              "c_dt_till" => $rel['dt_till'] ?? null
+                          ];
+                          $rrow2 = [
+                              "c_uid1" => $n_req['id'],
+                              "c_uid2" => $l_req['id'],
+                              "c_type" => -$type,
+                              "c_label" => $rel['name'] ?? null,
+                              "c_dt_from" => $rel['dt_from'] ?? null,
+                              "c_dt_till" => $rel['dt_till'] ?? null
+                          ];
+                          $this->db->insert('t_contacts_rels',$rrow1);
+                          $this->db->insert('t_contacts_rels',$rrow2); 
+                      }
                   }
                 }
               }
@@ -284,8 +280,7 @@ class ContactsController extends AbstractTwigController
 
     public function list(Request $request, Response $response, array $args = []): Response {
       $builder = new JsonResponseBuilder('contacts', 1);
-      //$json = "JSON_MERGE(t_fin_trx.c_json, JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'), JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'), JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon'))";
-      $json = "JSON_MERGE(t_contacts_objects.c_json, JSON_OBJECT('justfun','1'))";
+      $json = "t_contacts_objects.c_json";
       $result = $this->db->get('t_contacts_objects', null, [ $json ]);
       $key = array_keys($result[0])[0];
       $data = [];
@@ -299,7 +294,9 @@ class ContactsController extends AbstractTwigController
       return $response->withJson($payload);
     }
 
-
+//SELECT JSON_ARRAYAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from)) from t_contacts_rels where c_uid1 = 29;
+//SELECT c_uid2, JSON_arrayAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from)) from t_contacts_rels where c_uid1 = 29 GROUP BY c_uid2;
+//SELECT JSON_OBJECT( c_uid2, JSON_ARRAYAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from))) from t_contacts_rels where c_uid1 = 29 GROUP BY c_uid2;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -322,13 +319,13 @@ class ContactsController extends AbstractTwigController
           $cnf = $cz->urikey($svc, $search_string); $raw_result = null;
           if ($this->fscache->has($cnf['key'])) {
               $new = $this->fscache->get($cnf['key']);
-              if (is_array($new)) foreach ($new as $item)  $indexed[ $item['nat'][0]['regid'] ] = $item; 
+              if (is_array($new)) foreach ($new as $item) $indexed[ $item['nat'][0]['regid'] ] = $item; 
               $result = array_replace_recursive($result, $indexed ?? []);
           } else {
               $new = $cz->$svc($search_string, $raw_result);
               if (is_array($new)) foreach ($new as $item)  $indexed[ $item['nat'][0]['regid'] ] = $item; 
               $result = array_replace_recursive($result, $indexed ?? []);
-              if (!is_null($new)) $this->fscache->set($cnf['key'], $indexed, 3600); // 60 minutes
+              if (!is_null($new) and ($new != false)) $this->fscache->set($cnf['key'], $indexed, 3600); // 60 minutes
           }
       }
 
@@ -393,6 +390,30 @@ class ContactsController extends AbstractTwigController
 
 
 
+
+
+    public function collection_ui(Request $request, Response $response, array $args = []): Response
+    {
+        $uid = $args['uid'] ?? null;
+        $domains = $this->db->get('t_core_domains');
+
+        if ($uid) {
+            $this->db->where('c_uid', $uid);
+            $data = $this->db->get('t_contacts_objects');
+            return $this->render($response, 'Contacts/Views/object.twig', [
+                'domains' => $domains,
+                'data' => $data//$this->sellers_get_sql($args),
+            ]);          
+        }
+        return $this->render($response, 'Contacts/Views/collection.twig', [
+            'domains' => $domains,
+        ]);
+
+
+    }
+
+
+/*
     public function collection_ui(Request $request, Response $response, array $args = []): Response
     {
       $uribase = strtolower(parse_url((string)$request->getUri(), PHP_URL_SCHEME)).'://'.strtolower(parse_url((string)$request->getUri(), PHP_URL_HOST));
@@ -414,6 +435,7 @@ class ContactsController extends AbstractTwigController
             ReactDOM.render((<div><h1>Thank you</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre></div>), 
                      document.getElementById("main"));
             */
+           /*
           },
           error: function(xhr, status, err) {
             ReactDOM.render((<div><h1>Something goes wrong ! not saving.</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre></div>), 
@@ -437,7 +459,7 @@ class ContactsController extends AbstractTwigController
         ]);
 
     }
-
+*/
 
     // show form for add new contact
     public function addContactForm($request, $response)

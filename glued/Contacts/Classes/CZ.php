@@ -92,7 +92,8 @@ class CZ
 
         $xml = new \SimpleXMLElement($data);
         $ns = $xml->getDocNamespaces();
-        $data = $xml->children($ns['are']);
+        $data = $xml->children($ns['are']) ?? null;
+        if (!$data) return [];
         $all = $data->children($ns['dtt'])->V;
         $all = json_decode(json_encode($all), true);
 
@@ -252,7 +253,8 @@ class CZ
         //print_r($result_raw);
         $xml = new \SimpleXMLElement($data);
         $ns = $xml->getDocNamespaces();
-        $data = $xml->children($ns['are']);
+        $data = $xml->children($ns['are']) ?? null;
+        if (!$data) return [];
         $zu = $data->children($ns['D'])->Vypis_RZP;
         $zu = json_decode(json_encode($zu), true);
         if (!is_null($zu)) {
@@ -299,7 +301,8 @@ class CZ
         $result_raw = $data;
         $xml = new \SimpleXMLElement($data);
         $ns = $xml->getNamespaces(true);
-        $are = $xml->children($ns['are']);
+        $are = $xml->children($ns['are']) ?? null;
+        if (!$are) return [];
         $zu = json_decode(json_encode($are->Odpoved->Vypis_VREO->Zakladni_udaje), true);
         if (!is_null($zu)) {
             // Get company data
@@ -512,7 +515,8 @@ class CZ
 
         $xml = new \SimpleXMLElement($data);
         $ns = $xml->getDocNamespaces();
-        $data = $xml->children($ns['are']);
+        $data = $xml->children($ns['are']) ?? null;
+        if (!$data) return [];
         $all = $data->children($ns['dtt'])->V;
         $all = json_decode(json_encode($all), true);
         if (is_array($all['S'])) $all = $all['S'];
