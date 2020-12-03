@@ -54,7 +54,7 @@ $app->group('/api/core/v1', function (RouteCollectorProxy $route) {
     // Everyone or Guests-only
     $route->group('', function (RouteCollectorProxy $route) {
         $route->get ('/auth/extend', AuthController::class . ':api_extend_get')->setName('core.auth.extend.api');
-        $route->get ('/auth/status', AuthController::class . ':api_status_get')->setName('core.auth.status.api');
+        $route->get ('/auth/whoami', AuthController::class . ':api_status_get')->setName('core.auth.whaomi.api');
         $route->post('/auth/signin', AuthController::class . ':api_signin_post')->setName('core.auth.signin.api');
         $route->get ('/auth/signout', AuthController::class . ':api_signout_get')->setName('core.auth.signout.api');
     });
