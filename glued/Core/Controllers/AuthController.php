@@ -165,6 +165,7 @@ class AuthController extends AbstractTwigController
             $payload = $builder->withMessage(__('Authentication failed.'))->withCode(403)->build();
             return $response->withJson($payload, 403);    
         }
+        $this->events->emit('core.install.migration.addrbac', [$auth_id]);
         return $response->withJson(['status' => 'OK', 'message' => 'Signed in.', 'token' => $auth]);
     }
 
@@ -176,6 +177,7 @@ class AuthController extends AbstractTwigController
         );
                     
         if (!$auth) {
+            $this->events->emit('core.install.migration.addrbac', [$auth_id]);
             $this->flash->addMessage('error', 'Could not sign you in with those details.');
             return $response->withRedirect($this->routerParser->urlFor('core.signin.web'));
         }

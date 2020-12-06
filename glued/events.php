@@ -3,7 +3,7 @@
 declare(strict_types=1);
 $ev = $container->get('events');
 
-$ev->on('core.auth.user.create2', function($auth_id) use ($container) {
+$ev->on('core.auth.user.create', function($auth_id) use ($container) {
     $a = $container->get('auth');
     $p = $container->get('settings')['policies']['default'];
     $e = $container->get('enforcer');
@@ -18,8 +18,7 @@ $ev->on('core.auth.user.create2', function($auth_id) use ($container) {
     }
 });
 
-$ev->on('core.auth.user.create', function($auth_id) use ($container) {
-//$ev->on('core.install.migration.addrbac', function($auth_id) use ($container) {
+$ev->on('core.install.migration.addrbac', function($auth_id) use ($container) {
     $a = $container->get('auth');
     $p = $container->get('settings')['policies']['default'];
     $e = $container->get('enforcer');
