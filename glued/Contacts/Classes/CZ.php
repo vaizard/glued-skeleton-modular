@@ -347,8 +347,8 @@ class CZ
                     foreach ($role['Clen'] as $person) {
                         $helper = null;
                         if (isset($person['fosoba'])) {
-                            $helper['n']['given'] = mb_convert_case($person['fosoba']['jmeno'], MB_CASE_TITLE);
-                            $helper['n']['family'] = mb_convert_case($person['fosoba']['prijmeni'], MB_CASE_TITLE);
+                            $helper['n']['given'] = mb_convert_case($person['fosoba']['jmeno'] ?? '', MB_CASE_TITLE) ?? null;
+                            $helper['n']['family'] = mb_convert_case($person['fosoba']['prijmeni'] ?? '', MB_CASE_TITLE) ?? null;
                             $helper['n']['prefix'] = $person['fosoba']['titulPred'] ?? null;
                             $helper['n']['suffix'] = $person['fosoba']['titulZa'] ?? null;
                             $helper['fn'] = trim($helper['n']['prefix'] .' '.$helper['n']['given'] .' '.$helper['n']['family'].' '.$helper['n']['suffix']);

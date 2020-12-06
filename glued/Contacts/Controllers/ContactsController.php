@@ -276,19 +276,64 @@ class ContactsController extends AbstractTwigController
       }        
     }
 
+    private function contacts_get_sql(array $args = []): array {
+      $uid = (int)$args['uid'] ?? null;
+      $data = [];
+
+      // Merge the t_contacts_objects.c_json with a json object computed
+      // out of files marked in t_stor_links as belonging to each of
+      // t_contacts_objects rows.
+      $merge_files = "t_contacts_objects.c_json";
+      /*
+      $merge_files =  "JSON_MERGE( 
+                  t_contacts_objects.c_json, 
+                  JSON_OBJECT( 
+                    'files', 
+                    JSON_ARRAYAGG(  
+                      JSON_OBJECT( 'name', t_stor_links.c_filename, 'uri', CONCAT('/stor/get/', t_stor_links.c_uid ) )
+                    )
+                  )
+                )";
+      */
+      // If $args['uid'] is set, select only this one row. Furhter on,
+      // the single row branch of the code is prepended by if ($uid).
+      $cond = ($uid > 0) ? "AND t_contacts_objects.c_uid = ?" : "";
+
+      // TODO add `WHERE t_contacts_objects.c_uid IN (<domains-accessed-by-user>)
+      $query = "
+        SELECT $merge_files FROM t_contacts_objects LEFT JOIN t_stor_links
+        ON (t_contacts_objects.c_uid = t_stor_links.c_inherit_object)
+        WHERE (t_stor_links.c_inherit_object IS NOT NULL $cond)
+        GROUP BY t_contacts_objects.c_uid
+        UNION
+        SELECT t_contacts_objects.c_json FROM t_contacts_objects LEFT JOIN t_stor_links
+        ON (t_contacts_objects.c_uid = t_stor_links.c_inherit_object)
+        WHERE (t_stor_links.c_inherit_object IS NULL)";
+        
+      if ($uid) $result = $this->db->rawQuery($query, [(int)$uid]);
+      else $result = $this->db->rawQuery($query);
+
+      // Rename $key to integers
+      $key = array_keys($result[0])[0];
+      foreach ($result as $obj) $data[] = json_decode($obj[$key]);
+      
+      // Unnest if returning only a single line
+      if ($uid) $data = (array)$data[0];
+      return $data;
+    }
+
 
 
     public function list(Request $request, Response $response, array $args = []): Response {
       $builder = new JsonResponseBuilder('contacts', 1);
       $json = "t_contacts_objects.c_json";
+
       $result = $this->db->get('t_contacts_objects', null, [ $json ]);
       $key = array_keys($result[0])[0];
       $data = [];
       foreach ($result as $obj) {
         $data[] = json_decode($obj[$key]);
       }
-      $payload = $builder->withData($data)->withCode(200)->build();
-      return $response->withJson($payload);
 
       $payload = $builder->withData((array)$data)->withCode(200)->build();
       return $response->withJson($payload);
@@ -402,7 +447,7 @@ class ContactsController extends AbstractTwigController
             $data = $this->db->get('t_contacts_objects');
             return $this->render($response, 'Contacts/Views/object.twig', [
                 'domains' => $domains,
-                'data' => $data//$this->sellers_get_sql($args),
+                'data' => $this->contacts_get_sql($args),
             ]);          
         }
         return $this->render($response, 'Contacts/Views/collection.twig', [

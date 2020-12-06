@@ -3,30 +3,25 @@
 {% block content %}
 
 <div class="section-header">
-  <h1>{{ __('Contacts') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-id="" data-uri="" data-name="" data-domain="" data-driver="" data-target="#contacts_items_create_modal">{{ __('New company') }}</button>
+  <h1>{{ fn }}</h1><a href="{{ url_for('contacts.collection') }}"><button type="button" class="btn btn-primary" style="margin-left: 1em;"><i class="fas fa-level-up-alt"></i></button></a>
 </div>
 
 <div class="section-body">
 
 
   <div class="row">
-    <div class="col-12">
+    <div class="col-6">
       <div class="card">
         <div class="card-body p-0">
           <div class="table-responsive">
-            <table class="table" id="contacts_items_object">
-                <tr id="contacts_items_object_{{ row.id }}">
-                  <td class="col-sm-2" style="z-index: 1;">{{ row.fn }}{% if row.uri.0.value %}<a href="{{ row.uri.0.value }}" style="z-index: 2; position: relative;"><i class="fas fa-link"></i></a>{% endif %}{% if row.context.bday %}<i class="fas fa-birthday-cake" style="color: red;"></i>{% endif %}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
-                  <td class="col-sm-3">{{ row.addr.0.full }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
-                  <td class="col-sm-1">{{ row.nat.0.regid | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
-                  <td class="col-sm-1">{{ row.nat.0.vatid | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
-                  <td class="col-sm-2">{{ row.email.0.value | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
-                  <td class="col-sm-1">{{ row.phone.0.value | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
-                  <td class="col-sm-1">{{ row.tags | default('') }}<a href="{{ url_for('contacts.collection') }}/{{ row.id }}" class="stretched-link"></a></td>
-                  <td class="col-sm-1">
-                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#contacts_items_update_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}" data-domain="{{ row.domain }}" data-driver="{{ row.driver }}"><i class="fas fa-edit"></i></button><button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#contacts_items_delete_modal" data-id="{{ row.id }}" data-uri="{{ row.uri }}" data-name="{{ row.name }}"><i class="fas fa-trash"></i></button>
-                  </td>
-                </tr>
+            <table class="table table-sm table-bordered">
+                <tr><td class="col-sm-2">{{ __('Full name') }}</td><td><b>{{ data.fn }}</b></td></tr>
+                <tr><td class="col-sm-2">{{ __('Contact ID') }}</td><td><b>{{ data.id }}</b></td></tr>
+                <tr><td class="col-sm-2">{{ __('Banking') }}</td><td><b>
+                {% for a in data.acc %}
+                <span title="iban: {{ a.account_iban }}">{{ a.account_number }} / {{ a.bank_code }}</span><br>
+                {% endfor %}
+                </b></td></tr>
             </table>
           </div>
         </div>

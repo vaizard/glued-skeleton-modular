@@ -23,6 +23,5 @@ $app->group('/api/contacts/search/v1', function (RouteCollectorProxy $group) {
 
 $app->group('/contacts', function (RouteCollectorProxy $group) {
     $group->get ('/items[/{uid:[0-9]+}]', ContactsController::class . ':collection_ui')->setName('contacts.collection'); 
-    //$group->get ('/items[/{uid:[0-9]+}]', ContactsController::class . ':object_ui');
 })->add(RedirectGuests::class);
 
