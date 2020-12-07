@@ -206,7 +206,11 @@ class ContactsController extends AbstractTwigController
                 // Get data from registers according to regid ()
                 $cz = new CZ($this->c);
                 $full = $cz->ids($fl['nat'][0]['regid']);
-                if ($full['fn'] == $fl['fn']) {
+                // get rid of unicode &nbsp; for comparison and excessive whitespace, translate unicode to chars
+                $p1 = '/\x{00A0}|\x{000D}|\x{000C}|\x{0085}/u';
+                $p2 = "/\s+/u";
+                $test_fl[] = utf8_decode(implode(json_decode('["' . preg_replace($p2, ' ', preg_replace($p1, ' ', $full['fn'])) . '"]')));
+                if ($test_full == $test_fl) {
                     // If {submitted company name} == {company name in registers}
                     // Override submitted form data with data from registers
                     $l = $full;
