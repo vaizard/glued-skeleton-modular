@@ -32,7 +32,7 @@
                 <script type="text/twig" id="contacts_items_obj_twig">
                 <tr id="contacts_items_object_{{ row.id }}">
                   <td class="col-sm-2" style="z-index: 1;">{{ row.fn }}{% if row.uri.0.value %}<a href="{{ row.uri.0.value }}" style="z-index: 2; position: relative;"><i class="fas fa-link"></i></a>{% endif %}{% if row.context.bday %}<i class="fas fa-birthday-cake" style="color: red;"></i>{% endif %}<a href="{% endverbatim %}{{ url_for('contacts.collection') }}{% verbatim %}/{{ row.id }}" class="stretched-link"></a></td>
-                  <td class="col-sm-3">{{ row.addr.0.full }}<a href="{% endverbatim %}{{ url_for('contacts.collection') }}{% verbatim %}/{{ row.id }}" class="stretched-link"></a></td>
+                  <td class="col-sm-3">{{ row.addr.0.full | default(row.addr.0.unstructured) }}<a href="{% endverbatim %}{{ url_for('contacts.collection') }}{% verbatim %}/{{ row.id }}" class="stretched-link"></a></td>
                   <td class="col-sm-1">{{ row.nat.0.regid | default('') }}<a href="{% endverbatim %}{{ url_for('contacts.collection') }}{% verbatim %}/{{ row.id }}" class="stretched-link"></a></td>
                   <td class="col-sm-1">{{ row.nat.0.vatid | default('') }}<a href="{% endverbatim %}{{ url_for('contacts.collection') }}{% verbatim %}/{{ row.id }}" class="stretched-link"></a></td>
                   <td class="col-sm-2">{{ row.email.0.value | default('') }}<a href="{% endverbatim %}{{ url_for('contacts.collection') }}{% verbatim %}/{{ row.id }}" class="stretched-link"></a></td>
