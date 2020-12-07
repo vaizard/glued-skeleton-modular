@@ -63,10 +63,8 @@ class StoreController extends AbstractTwigController
       else $result = $this->db->rawQuery($query);
 
       // Rename $key to integers
-      if ($result) {
-        $key = array_keys($result[0])[0];
-        foreach ($result as $obj) $data[] = json_decode($obj[$key]);
-      }
+      $key = array_keys($result[0])[0];
+      foreach ($result as $obj) $data[] = json_decode($obj[$key]);
       
       // Unnest if returning only a single line
       if ($uid) $data = (array)$data[0];
@@ -215,16 +213,14 @@ class StoreController extends AbstractTwigController
         UNION
         SELECT t_store_items.c_json FROM t_store_items LEFT JOIN t_stor_links
         ON (t_store_items.c_uid = t_stor_links.c_inherit_object)
-        WHERE (t_stor_links.c_inherit_object IS NULL $cond)";
+        WHERE (t_stor_links.c_inherit_object IS NULL)";
         
       if ($uid) $result = $this->db->rawQuery($query, [(int)$uid]);
       else $result = $this->db->rawQuery($query);
 
       // Rename $key to integers
-      if ($result) {
-        $key = array_keys($result[0])[0];
-        foreach ($result as $obj) $data[] = json_decode($obj[$key]);
-      }
+      $key = array_keys($result[0])[0];
+      foreach ($result as $obj) $data[] = json_decode($obj[$key]);
       
       // Unnest if returning only a single line
       if ($uid) $data = (array)$data[0];

@@ -175,7 +175,7 @@ class ContactsController extends AbstractTwigController
             $fn['fn'] = $this->concat([ $fn['n']['prefix'],$fn['n']['given'],$fn['n']['family'],$fn['n']['suffix'] ]);
             $fn['email'][0]['value'] = $req['contacts_items_create_n_email'];
             $fn['phone'][0]['value'] = $req['contacts_items_create_n_phone'];
-            $fn['addr'][0]['unstructured'] = $req['contacts_items_create_n_addr'];
+            $fn['addr']['unstructured'] = $req['contacts_items_create_n_addr'];
             $fn['dob'] = $req['contacts_items_create_n_dob'];
             $fn['note'] = $req['contacts_items_create_n_note'];
             $fn['role'][0]['name'] = $req['contacts_items_create_n_role'] ?? '';
@@ -186,7 +186,7 @@ class ContactsController extends AbstractTwigController
         // Get form data (legal person / company)
         if ($req['contacts_items_create_l_name'] ?? false) {
             $fl['fn'] = $req['contacts_items_create_l_name'];
-            $fl['addr'][0]['unstructured'] = $req['contacts_items_create_l_addr'];
+            $fl['addr']['unstructured'] = $req['contacts_items_create_l_addr'];
             $fl['nat'][0]['country'] = $req['contacts_items_create_l_nat'];
             $fl['nat'][0]['regid'] = $req['contacts_items_create_l_regid'];
             $fl['nat'][0]['vatid'] = $req['contacts_items_create_l_vatid'];
@@ -284,7 +284,7 @@ class ContactsController extends AbstractTwigController
       // out of files marked in t_stor_links as belonging to each of
       // t_contacts_objects rows.
       $merge_files = "t_contacts_objects.c_json";
-      
+      /*
       $merge_files =  "JSON_MERGE( 
                   t_contacts_objects.c_json, 
                   JSON_OBJECT( 
@@ -293,8 +293,8 @@ class ContactsController extends AbstractTwigController
                       JSON_OBJECT( 'name', t_stor_links.c_filename, 'uri', CONCAT('/stor/get/', t_stor_links.c_uid ) )
                     )
                   )
-                ) as jsondoc";
-      
+                )";
+      */
       // If $args['uid'] is set, select only this one row. Furhter on,
       // the single row branch of the code is prepended by if ($uid).
       $cond = ($uid > 0) ? "AND t_contacts_objects.c_uid = ?" : "";
@@ -308,77 +308,36 @@ class ContactsController extends AbstractTwigController
         UNION
         SELECT t_contacts_objects.c_json FROM t_contacts_objects LEFT JOIN t_stor_links
         ON (t_contacts_objects.c_uid = t_stor_links.c_inherit_object)
-        WHERE (t_stor_links.c_inherit_object IS NULL $cond)";
+        WHERE (t_stor_links.c_inherit_object IS NULL)";
         
-      if ($uid) {
-        $select = " JSON_ARRAYAGG(  
-                      JSON_OBJECT( 'uid', c_uid2, 'type', c_type, 'label', c_label, 'dt_from', c_dt_from, 'dt_till', c_dt_till, 'fn', c_json->>'$.fn', 'email', c_json->>'$.email[0].value', 'phone', c_json->>'$.phone[0].value' )
-                    ) as jsondoc";
-        $query_rels = "
-          SELECT $select FROM `t_contacts_rels` LEFT JOIN `t_contacts_objects`
-          ON (t_contacts_rels.c_uid2 = t_contacts_objects.c_uid)
-          WHERE t_contacts_rels.c_uid1 = ?";
-        // TODO add group by (same person can have multiplre relationships with)
-        $result = $this->db->rawQuery($query, [(int)$uid, (int)$uid]);
-        $result_rels = $this->db->rawQuery($query_rels, [(int)$uid]);
-        $jsondoc = json_decode($result[0]['jsondoc'] ?? "{}", true);
-        $jsondoc_rels = json_decode($result_rels[0]['jsondoc'] ?? "{}", true);
-        $jsondoc['rels'] = $jsondoc_rels;
-        $result[0]['jsondoc'] = json_encode($jsondoc);
-    } else $result = $this->db->rawQuery($query);
+      if ($uid) $result = $this->db->rawQuery($query, [(int)$uid]);
+      else $result = $this->db->rawQuery($query);
 
       // Rename $key to integers
-      if ($result) {
-        $key = array_keys($result[0])[0];
-        foreach ($result as $obj) $data[] = json_decode($obj[$key]);
-      }
+      $key = array_keys($result[0])[0];
+      foreach ($result as $obj) $data[] = json_decode($obj[$key]);
+      
       // Unnest if returning only a single line
       if ($uid) $data = (array)$data[0];
       return $data;
     }
 
 
-    public function contacts_get_api(Request $request, Response $response, array $args = []): Response {
-      $builder = new JsonResponseBuilder('contacts', 1);
-      $uid = $args['uid'] ?? null;
-      $data = null;
 
-        if ($uid) {
-            $result = json_encode($this->contacts_get_sql($args));    
-            $data = json_decode($result);
-        } else {
-            $json = "t_contacts_objects.c_json";
-            $result = $this->db->get('t_contacts_objects', null, [ $json ]) ?? null;
-            if ($result) {
-              $key = array_keys($result[0])[0];
-              foreach ($result as $obj) $data[] = json_decode($obj[$key]);
-            }
-        }     
+    public function list(Request $request, Response $response, array $args = []): Response {
+      $builder = new JsonResponseBuilder('contacts', 1);
+      $json = "t_contacts_objects.c_json";
+
+      $result = $this->db->get('t_contacts_objects', null, [ $json ]);
+      $key = array_keys($result[0])[0];
+      $data = [];
+      foreach ($result as $obj) {
+        $data[] = json_decode($obj[$key]);
+      }
+
       $payload = $builder->withData((array)$data)->withCode(200)->build();
       return $response->withJson($payload);
     }
-
-
-    public function contacts_get_app(Request $request, Response $response, array $args = []): Response
-    {
-        $uid = $args['uid'] ?? null;
-        $data = [];
-        $domains = $this->db->get('t_core_domains');
-
-        if ($uid) {
-            $this->db->where('c_uid', $uid);
-            $data = $this->db->get('t_contacts_objects');
-            return $this->render($response, 'Contacts/Views/object.twig', [
-                'domains' => $domains,
-                'data' => json_decode(json_encode($this->contacts_get_sql($args)),true),
-            ]);          
-        }
-        return $this->render($response, 'Contacts/Views/collection.twig', [
-            'domains' => $domains,
-        ]);
-    }
-
-
 
 //SELECT JSON_ARRAYAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from)) from t_contacts_rels where c_uid1 = 29;
 //SELECT c_uid2, JSON_arrayAGG(JSON_OBJECT('uid', c_uid2, 'label', c_label, 'dt_from', c_dt_from)) from t_contacts_rels where c_uid1 = 29 GROUP BY c_uid2;
@@ -477,6 +436,26 @@ class ContactsController extends AbstractTwigController
 
 
 
+
+    public function collection_ui(Request $request, Response $response, array $args = []): Response
+    {
+        $uid = $args['uid'] ?? null;
+        $domains = $this->db->get('t_core_domains');
+
+        if ($uid) {
+            $this->db->where('c_uid', $uid);
+            $data = $this->db->get('t_contacts_objects');
+            return $this->render($response, 'Contacts/Views/object.twig', [
+                'domains' => $domains,
+                'data' => $this->contacts_get_sql($args),
+            ]);          
+        }
+        return $this->render($response, 'Contacts/Views/collection.twig', [
+            'domains' => $domains,
+        ]);
+
+
+    }
 
 
 /*

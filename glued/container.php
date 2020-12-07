@@ -125,7 +125,6 @@ $container->set('view', function (Container $c) {
     // Add twig exensions here
     $twig->addExtension(new TwigAssetsExtension($environment, (array)$c->get('settings')['assets']));
     $twig->addExtension(new TwigTranslationExtension($c->get(Translator::class)));
-    $twig->addExtension(new \Twig\Extension\DebugExtension());
     $environment->addFilter(new TwigFilter('json_decode', function ($string) {
         return json_decode($string);
     }));

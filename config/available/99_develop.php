@@ -13,10 +13,6 @@ return [
     'assets' => [
         // Disable JavaScript and CSS compression
         'minify' => 0,
-    ],
-
-    'twig' => [
-        'default' => true,
     ]
 
 ];
