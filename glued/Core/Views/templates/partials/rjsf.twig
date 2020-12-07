@@ -123,6 +123,12 @@
             });
             
     });
+    {% elseif json_custom_structure is defined %}
+    ReactDOM.render((<Form onChange={onChange} onSubmit={onSubmit} uiSchema={uiSchema} schema={schema} formData={formData}></Form>), document.getElementById("rjsf"),
+        function() {
+            $("fieldset#root").addClass("row");
+            $("fieldset#root > .form-group").addClass("col-md-6");
+        });
     {% else %}
     ReactDOM.render((<Form onChange={onChange} onSubmit={onSubmit} uiSchema={uiSchema} schema={schema} formData={formData}></Form>), document.getElementById("rjsf"));
     {% endif %}

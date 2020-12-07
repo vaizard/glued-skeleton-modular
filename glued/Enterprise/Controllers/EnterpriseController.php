@@ -98,7 +98,8 @@ class EnterpriseController extends AbstractTwigController
             'json_schema_output' => $jsf_schema,
             'json_uischema_output' => $jsf_uischema,
             'json_formdata_output' => $jsf_formdata,
-            'json_onsubmit_output' => $jsf_onsubmit
+            'json_onsubmit_output' => $jsf_onsubmit,
+            'json_custom_structure' => true
         ]);
     }
 

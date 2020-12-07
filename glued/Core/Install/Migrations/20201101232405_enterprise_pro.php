@@ -50,29 +50,6 @@ class EnterprisePro extends Phinx\Migration\AbstractMigration
                 'after' => 'c_uid',
             ])
             ->create();
-        $this->table('t_enterprise_projects_rels', [
-                'id' => false,
-                'primary_key' => ['c_parent', 'c_child'],
-                'engine' => 'InnoDB',
-                'encoding' => 'utf8mb4',
-                'collation' => 'utf8mb4_unicode_ci',
-                'comment' => '',
-                'row_format' => 'DYNAMIC',
-            ])
-            ->addColumn('c_parent', 'integer', [
-                'null' => false,
-                'limit' => MysqlAdapter::INT_REGULAR,
-            ])
-            ->addColumn('c_child', 'integer', [
-                'null' => false,
-                'limit' => MysqlAdapter::INT_REGULAR,
-                'after' => 'c_parent',
-            ])
-            ->addIndex(['c_child'], [
-                'name' => 'c_child',
-                'unique' => false,
-            ])
-            ->create();
         $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
     }
 }
