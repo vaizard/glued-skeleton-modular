@@ -274,7 +274,7 @@ class CZ
             $rzp['addr'][0]['conscriptionnumber'] = $zu['Adresy']['A']['CD'];
             $vreo['addr'][0]['doornumber'] = null;
             $vreo['addr'][0]['floor'] = null;
-            $nr = implode('/', array_filter([ $rzp['addr'][0]['streetnumber'], $rzp['addr'][0]['conscriptionnumber'] ]));
+            $nr = implode('/', array_filter([ $rzp['addr'][0]['conscriptionnumber'], $rzp['addr'][0]['streetnumber'] ]));
             $ql = implode('-', array_filter([ $rzp['addr'][0]['locacity'], $rzp['addr'][0]['quarter'] ]));
             if (!is_null($rzp['addr'][0]['street'])) {
                 $st = implode(' ', [ $rzp['addr'][0]['street'], $nr ]);
@@ -320,7 +320,7 @@ class CZ
             $vreo['addr'][0]['conscriptionnumber'] = $zu['Sidlo']['cisloPop'];
             $vreo['addr'][0]['doornumber'] = null;
             $vreo['addr'][0]['floor'] = null;
-            $nr = implode('/', array_filter([ $vreo['addr'][0]['streetnumber'], $vreo['addr'][0]['conscriptionnumber'] ]));
+            $nr = implode('/', array_filter([ $vreo['addr'][0]['conscriptionnumber'], $vreo['addr'][0]['streetnumber'] ]));
             $ql = implode('-', array_filter([ $vreo['addr'][0]['locacity'], $vreo['addr'][0]['quarter'] ]));
             if (!is_null($vreo['addr'][0]['street'])) {
                 $st = implode(' ', [ $vreo['addr'][0]['street'], $nr ]);
@@ -364,7 +364,7 @@ class CZ
                                 'conscriptionnumber' => $person['fosoba']['adresa']['cisloOr'] ?? null,
                                 'kind' => ['permanent' => 1],
                             ];
-                            $nr = implode('/', array_filter([ $helper['addr'][0]['streetnumber'], $helper['addr'][0]['conscriptionnumber'] ]));
+                            $nr = implode('/', array_filter([ $helper['addr'][0]['conscriptionnumber'], $helper['addr'][0]['streetnumber'] ]));
                             $ql = implode('-', array_filter([ $helper['addr'][0]['locacity'], $helper['addr'][0]['quarter'] ]));
                             if (!is_null($helper['addr'][0]['street'])) {
                                 $st = implode(' ', [ $helper['addr'][0]['street'], $nr ]);
@@ -442,7 +442,7 @@ class CZ
                                 'conscriptionnumber' => $person['fosoba']['adresa']['cisloOr'] ?? null,
                                 'kind' => ['permanent' => 1],
                             ];
-                            $nr = implode('/', array_filter([ $helper['addr'][0]['streetnumber'], $helper['addr'][0]['conscriptionnumber'] ]));
+                            $nr = implode('/', array_filter([ $helper['addr'][0]['conscriptionnumber'], $helper['addr'][0]['streetnumber'] ]));
                             $ql = implode('-', array_filter([ $helper['addr'][0]['locacity'], $helper['addr'][0]['quarter'] ]));
                             if (!is_null($helper['addr'][0]['street'])) {
                                 $st = implode(' ', [ $helper['addr'][0]['street'], $nr ]);
