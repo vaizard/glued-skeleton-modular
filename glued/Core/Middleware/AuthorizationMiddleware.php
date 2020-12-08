@@ -30,15 +30,15 @@ final class AuthorizationMiddleware extends AbstractMiddleware implements Middle
         $user_id = null;
         $auth_id = null;
 
-        if (is_array($jwt)) {
+        if (is_array($jwt) and !empty($jwt)) {
             $user_id = $jwt['g_uid'] ?? null;
             $auth_id = $jwt['g_aid'] ?? null;
         }
-        if (is_array($ses)) {
+        if (is_array($ses) and !empty($ses)) {
             $user_id = $ses['core_user_id'] ?? null;
             $auth_id = $ses['core_auth_id'] ?? null;
         }
-        if (is_array($jwt) and is_array($ses)) {
+        if (is_array($jwt) and !empty($jwt) and is_array($ses) and !empty($ses)) {
             if (($ses['core_user_id'] ?? null) !== ($jwt['g_uid'] ?? null)) $user_id = null; 
             if (($ses['core_auth_id'] ?? null) !== ($jwt['g_uid'] ?? null)) $user_id = null;
         }
@@ -75,6 +75,7 @@ final class AuthorizationMiddleware extends AbstractMiddleware implements Middle
             }
         }
 
+        // TODO skip this for api paths $this->settings->auth->jwt->path
         $this->view->getEnvironment()->addFunction(new TwigFunction('enforce', function ($obj, $dom = "0", $sub = null, $act = "r") use ($e) {
             if (is_null($e)) return false;
             $sub = $GLOBALS['_GLUED']['authn']['user_id'] ?? null;

@@ -165,7 +165,7 @@ class AuthController extends AbstractTwigController
             $payload = $builder->withMessage(__('Authentication failed.'))->withCode(403)->build();
             return $response->withJson($payload, 403);    
         }
-        $this->events->emit('core.install.migration.addrbac', [$auth_id]);
+
         return $response->withJson(['status' => 'OK', 'message' => 'Signed in.', 'token' => $auth]);
     }
 
