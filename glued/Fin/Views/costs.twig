@@ -8,14 +8,9 @@
 
 <div class="section-body">
 
-  <div class="row">
-    <div class="col-12">
-      {% include '/Fin/Views/Partials/fin_costs_form.twig' with {'fin_costs_id': 'fin_costs_create'} %}
-    </div>
-  </div>
 
   <div class="row">
-    <div class="col-12">
+    <div class="col-8">
       <div class="card">
         <div class="card-body p-0">
           <div class="table-responsive">
@@ -32,8 +27,6 @@
                 </tr>
               </thead>
               <tbody id="fin_costs_placeholder">
-
-
 
                 {% verbatim %}
                 <script type="text/twig" id="fin_costs_obj_twig">
@@ -67,7 +60,11 @@
         </div>
       </div>
     </div>
+        <div class="col-4">
+      {% include '/Fin/Views/Partials/fin_costs_form.twig' with {'fin_costs_id': 'fin_costs_create'} %}
+    </div>
   </div>
+
 </div>
 {% include '/Fin/Views/Partials/fin_costs_modal.twig' with {'fin_costs_id': 'fin_costs_create'} %}
 {% include '/Fin/Views/Partials/fin_costs_modal.twig' with {'fin_costs_id': 'fin_costs_update'} %}
