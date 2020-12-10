@@ -280,6 +280,7 @@ class Utils
             $helper['ext']['order_id'] = $trx['column17']['value'] ?? ''; 
             $helper['ext']['order_by'] = $trx['column9']['value'] ?? ''; 
             $helper['ext']['type'] = $trx['column8']['value'] ?? '';     // type
+            $helper['ext']['comment'] = $trx['column25']['value'] ?? ''; //
             if (array_key_exists($helper['ext']['type'], $this->ext_types)) {
                 $helper['type'] = $this->ext_types[$helper['ext']['type']];  
             } else {

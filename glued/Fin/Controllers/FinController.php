@@ -140,7 +140,7 @@ class FinController extends AbstractTwigController
       $this->db->orderBy('t_fin_trx.c_trx_dt', 'Desc');
       $this->db->orderBy('t_fin_trx.c_ext_trx_id', 'Desc');
       $this->db->join('t_fin_accounts', 't_fin_trx.c_account_id = t_fin_accounts.c_uid', 'LEFT');
-      $json = "JSON_MERGE(t_fin_trx.c_json, JSON_OBJECT('account_name',t_fin_accounts.c_json->>'$.name'), JSON_OBJECT('account_color',t_fin_accounts.c_json->>'$.color'), JSON_OBJECT('account_icon',t_fin_accounts.c_json->>'$.icon'))";
+      $json = "JSON_MERGE(t_fin_trx.c_json, JSON_OBJECT('account_name', t_fin_accounts.c_json->>'$.name', 'account_color', t_fin_accounts.c_json->>'$.color', 'account_type', t_fin_accounts.c_json->>'$.type', 'account_icon',t_fin_accounts.c_json->>'$.icon'))";
       $result = $this->db->get('t_fin_trx', null, [ $json ]);
       $key = array_keys($result[0])[0];
       $data = [];
@@ -162,11 +162,93 @@ class FinController extends AbstractTwigController
         // 
         // TODO - preseed domains on installation with at least one domain
         $domains = $this->db->get('t_core_domains');
-        $accounts = $this->db->where('c_json->>"$.type" = \'cash\'')->get('t_fin_accounts', null, ['c_uid as id', 'c_json->>"$.name" as name', 'c_json->>"$.currency" as currency']);
+        $accounts = $this->db->get('t_fin_accounts', null, ['c_uid as id', 'c_json->>"$.type" as type', 'c_json->>"$.name" as name', 'c_json->>"$.currency" as currency']);
         return $this->render($response, 'Fin/Views/trx.twig', [
             'domains' => $domains,
             'accounts' => $accounts,
             'currencies' => $this->iso4217->getAll()
+        ]);
+    }
+
+ 
+    /**
+     * A version of in_array() that does a sub string match on $needle
+     *
+     * @param  mixed   $needle    The searched value
+     * @param  array   $haystack  The array to search in
+     * @return boolean
+     */
+    public function get_opt_param($needle, array $haystack)
+    {
+        $filtered = array_filter($haystack, function ($item) use ($needle) {
+            return false !== strpos($item, $needle);
+        });
+     
+        //return !empty($filtered);
+        return explode($needle, $filtered[1])[1];
+    }
+
+    public function trx_list_reduce_ui(Request $request, Response $response, array $args = []): Response {
+        $params = explode('/', $args['params']);
+        $where = null;
+        $where_param = null;
+        $where_query = '';
+        print_r($params);
+
+        if ($dt_from = $this->get_opt_param('dtfrom=', $params)) {
+           $cond['query'] = "STR_TO_DATE(SUBSTRING(c_json->>'$.dt', 1, LENGTH(c_json->>'$.dt')-15),'%Y-%m-%d') >= ?";
+           $cond['param'] = $dt_from; // TODO add regex match
+           $where['dt_from'] = $cond;
+
+        }
+
+        if (in_array('reduce-iban', $params)) {
+            if ($where) {
+              $where_query = "WHERE " . $where['dt_from']['query'];
+              $where_param[] = $where['dt_from']['param']; 
+              //-- t_fin_trx.c_json->>'$.offset.account_iban'='CZ0920100000002400089939' and 
+            }
+
+            $query = "SELECT 
+            JSON_ARRAYAGG( 
+              JSON_OBJECT(
+                'dt', STR_TO_DATE(SUBSTRING(c_json->>'$.dt', 1, LENGTH(c_json->>'$.dt')-15),'%Y-%m-%d'),
+                'offset', JSON_OBJECT(
+                  'account_number', c_json->>'$.offset.account_number',
+                  'bank_code', c_json->>'$.offset.bank_code',
+                  'account_iban', c_json->>'$.offset.account_iban',
+                  'name', c_json->>'$.offset.name',
+                  'id', c_json->>'$.offset.id'
+                ),
+                'ref', c_json->>'$.ref.freeform',
+                'volume', c_json->>'$.volume',
+                'comment', c_json->>'$.comment',
+                'message', c_json->>'$.message',
+                'account_id',c_json->>'$.account_id',
+                'currency',c_json->>'$.currency'
+              )
+            ) as 'transactions'
+            FROM `t_fin_trx`
+            $where_query
+            GROUP BY t_fin_trx.c_json->>'$.offset.account_iban'
+            ";
+        }
+
+        $result = $this->db->rawQuery($query, $where_param) ?? [];
+        $key = array_keys($result[0])[0];
+        $data = [];
+        foreach ($result as $obj) {
+          $data[] = json_decode($obj[$key], true);
+        }
+
+
+
+        $domains = $this->db->get('t_core_domains');
+        $accounts = $this->db->get('t_fin_accounts', null, ['c_uid as id', 'c_json->>"$.type" as type', 'c_json->>"$.name" as name', 'c_json->>"$.currency" as currency']);
+        return $this->render($response, 'Fin/Views/trx-reduce.twig', [
+            'domains' => $domains,
+            'accounts' => $accounts,
+            'data' => $data,
         ]);
     }
 

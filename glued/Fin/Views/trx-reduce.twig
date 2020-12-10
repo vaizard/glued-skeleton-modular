@@ -1,0 +1,48 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Transactions / Reduced') }}</h1>
+</div>
+
+<div class="section-body">
+
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover" id="fin_trx">
+              <thead>
+                <tr>
+                  <th class="col-2">{{ __('Offset') }}</th>
+                  <th class="col-10">{{ __('Transactions') }}</th>
+                </tr>
+              </thead>
+              <tbody id="fin_trx_placeholder">
+                {% for row in data %}
+                <tr id="fin_trx_object_{{ row.0.offset.account_iban }}">
+                  <td class="align-top"><b>{{ row.0.offset.account_iban }}</b><br>{{ row.0.offset.account_number }}{% if row.0.offset.bank_code %} / {% endif %}{{ row.0.offset.bank_code }}</td>
+                  <td class="align-top">
+                  {% for t in row %}
+                    <table style="width: 100%;"><tr style="width: 100%;">
+                    <td class="align-top col-2">{{ t.dt }}</td><td class="align-top col-2">{{ t.volume }} {{ t.currency }}</td><td class="align-top col-1">{{ t.account_id }}</td><td class="align-top col-7">{{ t.comment }}{% if t.comment %}<br>{% endif %}{{ t.message }}{% if t.message %}<br>{% endif %}{{ t.ref }}</td>
+                    </tr>
+                    </table>
+
+                  {% endfor %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

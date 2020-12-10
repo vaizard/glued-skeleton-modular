@@ -25,6 +25,7 @@ $app->group('/api/fin/v1', function (RouteCollectorProxy $group) {
 
 $app->group('/fin', function (RouteCollectorProxy $group) {
     $group->get ('/trx', FinController::class . ':trx_list_ui')->setName('fin.trx'); 
+    $group->get ('/trx/{params:.*}', FinController::class . ':trx_list_reduce_ui');
     $group->get ('/accounts', FinController::class . ':accounts_list_ui')->setName('fin.accounts'); 
     $group->get ('/costs', FinController::class . ':costs_list_ui')->setName('fin.costs'); 
 })->add(RedirectGuests::class);
