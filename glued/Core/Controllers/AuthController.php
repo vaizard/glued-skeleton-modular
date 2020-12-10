@@ -177,7 +177,7 @@ class AuthController extends AbstractTwigController
         );
                     
         if (!$auth) {
-            $this->events->emit('core.install.migration.addrbac', [$auth_id]);
+            //$this->events->emit('core.install.migration.addrbac', [$auth_id]);
             $this->flash->addMessage('error', 'Could not sign you in with those details.');
             return $response->withRedirect($this->routerParser->urlFor('core.signin.web'));
         }
