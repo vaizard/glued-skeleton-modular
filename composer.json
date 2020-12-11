@@ -114,11 +114,11 @@
       "mkdir -p public/assets/img",
       "mkdir -p public/assets/cache",
       "mkdir -p config/config.d",
-      "chmod 777 public/assets/cache",
-      "chmod 777 private/cache",
-      "chmod 777 private/data",
-      "chmod 777 private/locale",
-      "chmod 777 config/config.d",
+      "chmod -R 777 public/assets/cache",
+      "chmod -R 777 private/cache",
+      "chmod -R 777 private/data",
+      "chmod -R 777 private/locale",
+      "chmod -R 777 config/config.d",
       "test -n \"$GLUED_IN_DOCKER\" || composer configure < /dev/tty"
     ],
     "post-install-cmd": [
@@ -128,11 +128,11 @@
       "mkdir -p public/assets/img",
       "mkdir -p public/assets/cache",
       "mkdir -p config/config.d",
-      "chmod 777 public/assets/cache",
-      "chmod 777 private/cache",
-      "chmod 777 private/data",
-      "chmod 777 private/locale",
-      "chmod 777 config/config.d"
+      "chmod -R 777 public/assets/cache",
+      "chmod -R 777 private/cache",
+      "chmod -R 777 private/data",
+      "chmod -R 777 private/locale",
+      "chmod -R 777 config/config.d"
     ]
   },
   "extra": {
