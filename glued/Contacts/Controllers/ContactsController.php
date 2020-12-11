@@ -209,7 +209,8 @@ class ContactsController extends AbstractTwigController
                 // get rid of unicode &nbsp; for comparison and excessive whitespace, translate unicode to chars
                 $p1 = '/\x{00A0}|\x{000D}|\x{000C}|\x{0085}/u';
                 $p2 = "/\s+/u";
-                $test_fl[] = utf8_decode(implode(json_decode('["' . preg_replace($p2, ' ', preg_replace($p1, ' ', $full['fn'])) . '"]')));
+                $test_fl = utf8_decode(implode(json_decode('["' . preg_replace($p2, ' ', preg_replace($p1, ' ', $fl['fn'])) . '"]')));
+                $test_full = utf8_decode(implode(json_decode('["' . preg_replace($p2, ' ', preg_replace($p1, ' ', $full['fn'])) . '"]')));
                 if ($test_full == $test_fl) {
                     // If {submitted company name} == {company name in registers}
                     // Override submitted form data with data from registers
@@ -239,7 +240,9 @@ class ContactsController extends AbstractTwigController
 
               if ($do['fn']) {
                 foreach ($n as $person) {
-                  $row['c_json'] = json_encode($person);
+                  $ins = $person;
+                  unset($ins['role']);
+                  $row['c_json'] = json_encode($ins);
                   $n_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); 
                   if ($do['fn'] and $do['fl']) {
                       foreach ($person['role'] as $rel) {
