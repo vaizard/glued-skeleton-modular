@@ -52,6 +52,12 @@
                 </td></tr>
                 {% endfor %}
 
+                {% if data.dob %}
+                <tr><td class="col-sm-2">{{ __('Date of birth') }}</td><td>
+                {{ data.dob }}
+                </td></tr>
+                {% endif %}
+
                 {% if data.uri %}
                 <tr><td class="col-sm-2">{{ __('Uri') }}</td><td>
                 {% for a in data.uri %}

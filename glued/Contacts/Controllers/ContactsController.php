@@ -12,6 +12,7 @@ use DragonBe\Vies\ViesServiceException;
 use Glued\Contacts\Classes\CZ as CZ;
 use Glued\Contacts\Classes\EU;
 use Glued\Core\Classes\Json\JsonResponseBuilder;
+use Glued\Core\Classes\Utils\Utils;
 use Glued\Core\Controllers\AbstractTwigController;
 use Phpfastcache\CacheManager;
 use Phpfastcache\Config\Config;
@@ -146,9 +147,7 @@ class ContactsController extends AbstractTwigController
 
  
 
-    private function concat(array $arrayOfStrings): string {
-      return implode(' ', array_filter(array_map('trim',$arrayOfStrings)));
-    }
+
 
     public function contacts_post_api(Request $request, Response $response, array $args = []): Response {
         // Init stuff
@@ -172,7 +171,7 @@ class ContactsController extends AbstractTwigController
             $fn['n']['given'] = $req['contacts_items_create_n_given'];
             $fn['n']['family'] = $req['contacts_items_create_n_family'];
             $fn['n']['suffix'] = $req['contacts_items_create_n_suffix'];
-            $fn['fn'] = $this->concat([ $fn['n']['prefix'],$fn['n']['given'],$fn['n']['family'],$fn['n']['suffix'] ]);
+            $fn['fn'] = $this->utils->concat(' ', [ $fn['n']['prefix'],$fn['n']['given'],$fn['n']['family'],$fn['n']['suffix'] ]);
             $fn['email'][0]['value'] = $req['contacts_items_create_n_email'];
             $fn['phone'][0]['value'] = $req['contacts_items_create_n_phone'];
             $fn['addr'][0]['unstructured'] = $req['contacts_items_create_n_addr'];

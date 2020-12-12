@@ -274,15 +274,15 @@ class CZ
             $rzp['addr'][0]['conscriptionnumber'] = $zu['Adresy']['A']['CD'];
             $vreo['addr'][0]['doornumber'] = null;
             $vreo['addr'][0]['floor'] = null;
-            $nr = implode('/', array_filter([ $rzp['addr'][0]['conscriptionnumber'], $rzp['addr'][0]['streetnumber'] ]));
-            $ql = implode('-', array_filter([ $rzp['addr'][0]['locacity'], $rzp['addr'][0]['quarter'] ]));
+            $nr = $this->utils->concat('/', [ $rzp['addr'][0]['conscriptionnumber'], $rzp['addr'][0]['streetnumber'] ]);
+            $ql = $this->utils->concat('-', [ $rzp['addr'][0]['locacity'], $rzp['addr'][0]['quarter'] ]);
             if (!is_null($rzp['addr'][0]['street'])) {
-                $st = implode(' ', [ $rzp['addr'][0]['street'], $nr ]);
+                $st = $this->utils->concat(' ', [ $rzp['addr'][0]['street'], $nr ]);
             } else {
-                $st = implode(' ', [ $rzp['addr'][0]['quarter'], $nr ]);
+                $st = $this->utils->concat(' ', [ $rzp['addr'][0]['quarter'], $nr ]);
                 $ql = $rzp['addr'][0]['locacity'];
             }
-            $rzp['addr'][0]['full'] = implode(', ', [ $st , $ql , $rzp['addr'][0]['zip'] , $rzp['addr'][0]['country'] ]);
+            $rzp['addr'][0]['full'] = $this->utils->concat(', ',  [ $st , $ql , $rzp['addr'][0]['zip'] , $rzp['addr'][0]['country'] ]);
             $result = $rzp;
         }
         return $result;
@@ -320,15 +320,15 @@ class CZ
             $vreo['addr'][0]['conscriptionnumber'] = $zu['Sidlo']['cisloPop'];
             $vreo['addr'][0]['doornumber'] = null;
             $vreo['addr'][0]['floor'] = null;
-            $nr = implode('/', array_filter([ $vreo['addr'][0]['conscriptionnumber'], $vreo['addr'][0]['streetnumber'] ]));
-            $ql = implode('-', array_filter([ $vreo['addr'][0]['locacity'], $vreo['addr'][0]['quarter'] ]));
+            $nr = $this->utils->concat('/', [ $vreo['addr'][0]['conscriptionnumber'], $vreo['addr'][0]['streetnumber'] ]);
+            $ql = $this->utils->concat('-', [ $vreo['addr'][0]['locacity'], $vreo['addr'][0]['quarter'] ]);
             if (!is_null($vreo['addr'][0]['street'])) {
-                $st = implode(' ', [ $vreo['addr'][0]['street'], $nr ]);
+                $st = $this->utils->concat(' ', [ $vreo['addr'][0]['street'], $nr ]);
             } else {
-                $st = implode(' ', [ $vreo['addr'][0]['quarter'], $nr ]);
+                $st = $this->utils->concat(' ', [ $vreo['addr'][0]['quarter'], $nr ]);
                 $ql = $vreo['addr'][0]['locacity'];
             }
-            $vreo['addr'][0]['full'] = implode(', ', [ $st , $ql , $vreo['addr'][0]['zip'] , $vreo['addr'][0]['country'] ]);
+            $vreo['addr'][0]['full'] = $this->utils->concat(', ',  [ $st , $ql , $vreo['addr'][0]['zip'] , $vreo['addr'][0]['country'] ]);
             $vreo['addr'][0]['ext']['cz.ruian'] = $zu['Sidlo']['ruianKod'];
 
             // Get people
@@ -364,15 +364,15 @@ class CZ
                                 'conscriptionnumber' => $person['fosoba']['adresa']['cisloOr'] ?? null,
                                 'kind' => ['permanent' => 1],
                             ];
-                            $nr = implode('/', array_filter([ $helper['addr'][0]['conscriptionnumber'], $helper['addr'][0]['streetnumber'] ]));
-                            $ql = implode('-', array_filter([ $helper['addr'][0]['locacity'], $helper['addr'][0]['quarter'] ]));
+                            $nr = $this->utils->concat('/', [ $helper['addr'][0]['conscriptionnumber'], $helper['addr'][0]['streetnumber'] ]);
+                            $ql = $this->utils->concat('-', [ $helper['addr'][0]['locacity'], $helper['addr'][0]['quarter'] ]);
                             if (!is_null($helper['addr'][0]['street'])) {
-                                $st = implode(' ', [ $helper['addr'][0]['street'], $nr ]);
+                                $st = $this->utils->concat(' ', [ $helper['addr'][0]['street'], $nr ]);
                             } else {
-                                $st = implode(' ', [ $helper['addr'][0]['quarter'], $nr ]);
+                                $st = $this->utils->concat(' ', [ $helper['addr'][0]['quarter'], $nr ]);
                                 $ql = $helper['addr'][0]['locacity'];
                             }
-                            $helper['addr'][0]['full'] = implode(', ', [ $st , $ql , $helper['addr'][0]['zip'] , $helper['addr'][0]['country'] ]);
+                            $helper['addr'][0]['full'] = $this->utils->concat(', ', [ $st , $ql , $helper['addr'][0]['zip'] , $helper['addr'][0]['country'] ]);
                             // The XML api returns how people are assigned to roles (board members, CEO).
                             // Since we want to map out how roles are assigned to people in relation to
                             // an organization, we need to identify people with multiple roles attached
@@ -442,15 +442,15 @@ class CZ
                                 'conscriptionnumber' => $person['fosoba']['adresa']['cisloOr'] ?? null,
                                 'kind' => ['permanent' => 1],
                             ];
-                            $nr = implode('/', array_filter([ $helper['addr'][0]['conscriptionnumber'], $helper['addr'][0]['streetnumber'] ]));
-                            $ql = implode('-', array_filter([ $helper['addr'][0]['locacity'], $helper['addr'][0]['quarter'] ]));
+                            $nr = $this->utils->concat('/', [ $helper['addr'][0]['conscriptionnumber'], $helper['addr'][0]['streetnumber'] ]);
+                            $ql = $this->utils->concat('-', [ $helper['addr'][0]['locacity'], $helper['addr'][0]['quarter'] ]);
                             if (!is_null($helper['addr'][0]['street'])) {
-                                $st = implode(' ', [ $helper['addr'][0]['street'], $nr ]);
+                                $st = $this->utils->concat(' ', [ $helper['addr'][0]['street'], $nr ]);
                             } else {
-                                $st = implode(' ', [ $helper['addr'][0]['quarter'], $nr ]);
+                                $st = $this->utils->concat(' ', [ $helper['addr'][0]['quarter'], $nr ]);
                                 $ql = $helper['addr'][0]['locacity'];
                             }
-                            $helper['addr'][0]['full'] = implode(', ', [ $st , $ql , $helper['addr'][0]['zip'] , $helper['addr'][0]['country'] ]);
+                            $helper['addr'][0]['full'] = $this->utils->concat(', ', [ $st , $ql , $helper['addr'][0]['zip'] , $helper['addr'][0]['country'] ]);
                             // The XML api returns how people are assigned to roles (board members, CEO).
                             // Since we want to map out how roles are assigned to people in relation to
                             // an organization, we need to identify people with multiple roles attached
