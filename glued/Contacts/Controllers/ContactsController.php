@@ -215,6 +215,8 @@ class ContactsController extends AbstractTwigController
                     // If {submitted company name} == {company name in registers}
                     // Override submitted form data with data from registers
                     $l = $full;
+                    $l['uri'] = $fl['uri'];
+                    $l['note'] = $fl['note'];
                     $n = $full['people'];
                     if ($do['fn']) $n[] = $fn;
                     if (is_array($n)) $do['fn'] = true;

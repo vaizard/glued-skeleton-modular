@@ -52,6 +52,14 @@
                 </td></tr>
                 {% endfor %}
 
+                {% if data.uri %}
+                <tr><td class="col-sm-2">{{ __('Uri') }}</td><td>
+                {% for a in data.uri %}
+                <a href="{{ a.value }}"><b>{{ a.value }}</b></a><span style="float: right">{{ a.label }}</span><br>
+                {% endfor %}
+                </td></tr>
+                {% endif %}
+
                 <tr><td class="col-sm-2">{{ __('Note') }}</td><td>
                 {{ data.note }}
                 </td></tr>
