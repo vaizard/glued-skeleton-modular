@@ -355,6 +355,50 @@ class FinController extends AbstractTwigController
         ]);
     }
 
+    public function costs_post(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('fin.costs', 1);
+        $req = $request->getParsedBody();
+
+        $req['user'] = $GLOBALS['_GLUED']['authn']['user_id'];
+        $req['id'] = 0;
+        $req['_v'] = (int) 1;
+        $req['_s'] = 'fin.costs';
+
+        // convert body to object
+        $req = json_decode(json_encode((object)$req));
+  
+        // TODO replace manual coercion above with a function to recursively cast types of object values according to the json schema object (see below)       
+        
+        // load the json schema and validate data against it
+        /*
+        $loader = new JSL("schema://fin/", [ __ROOT__ . "/glued/Fin/Controllers/Schemas/" ]);
+        $schema = $loader->loadSchema("schema://fin/accounts.v1.schema");
+        $result = $this->jsonvalidator->schemaValidation($req, $schema);
+        */
+        
+        //if ($result->isValid()) {
+            $row = array (
+                'c_user_id' => (int)$req->user,
+                'c_json' => json_encode($req)
+            );
+            try { $req->id = $this->utils->sql_insert_with_json('t_fin_costs', $row); } catch (Exception $e) { 
+                throw new HttpInternalServerErrorException($request, $e->getMessage());  
+            }
+            $payload = $builder->withData((array)$req)->withCode(200)->build();
+            return $response->withJson($payload, 200);
+        /*
+        } else {
+            $reseed = $request->getParsedBody();
+            $payload = $builder->withValidationReseed($reseed)
+                               ->withValidationError($result->getErrors())
+                               ->withCode(400)
+                               ->build();
+            return $response->withJson($payload, 400);
+        }
+        */
+    }
+
+
 
 
     // ==========================================================

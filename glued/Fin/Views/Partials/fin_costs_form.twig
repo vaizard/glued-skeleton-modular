@@ -10,19 +10,19 @@
     <div class="form-group col-md-6">
       <label>{{ __('Offset') }}* <a href="#" data-toggle="modal" data-id="" data-uri="" data-name="" data-domain="" data-driver="" data-target="#contacts_items_create_modal"><i class="far fa-plus-square text-dark"></i></a></label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][offset]" required placeholder="{{ __('Person / Organization') }}" id="{{ fin_costs_id }}_form_offset_name">
+        <input type="text" class="form-control" name="offset" required placeholder="{{ __('Person / Organization') }}" id="{{ fin_costs_id }}_form_offset_name">
       </div>
     </div> 
     <div class="form-group col-md-3">
       <label>{{ __('Reference') }}*</label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][ref]" required placeholder="Invoice #" id="{{ fin_costs_id }}_form_issue_dt">
+        <input type="text" class="form-control" name="reference" required placeholder="Invoice #" id="{{ fin_costs_id }}_form_issue_dt">
       </div>
     </div>
     <div class="form-group col-md-3">
       <label>{{ __('Issue date') }}*</label>
       <div class="input-group">
-        <input type="text" class="form-control datepicker" name="data[0][dt]" required placeholder="RRRR-MM-DD"id="{{ fin_costs_id }}_form_issue_dt">
+        <input type="text" class="form-control datepicker" name="issue_dt" required placeholder="RRRR-MM-DD"id="{{ fin_costs_id }}_form_issue_dt">
       </div>
     </div>  
   </div>
@@ -31,18 +31,18 @@
     <div class="form-group col-md-3">
       <label>{{ __('Volume excl. VAT') }}</label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][volume_exvat]" required placeholder="{{ __('12345.67') }}" id="{{ fin_costs_id }}_form_volume_exvat">
+        <input type="text" class="form-control" name="volume_exvat" required placeholder="{{ __('12345.67') }}" id="{{ fin_costs_id }}_form_volume_exvat">
       </div>
     </div>
     <div class="form-group col-md-3">
       <label>{{ __('Volume incl. VAT') }}</label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][volume_invat]" required placeholder="{{ __('12345.67') }}" id="{{ fin_costs_id }}_form_volume_invat">
+        <input type="text" class="form-control" name="volume_invat" required placeholder="{{ __('12345.67') }}" id="{{ fin_costs_id }}_form_volume_invat">
       </div>
     </div>
     <div class="form-group col-md-3">
       <label>{{ __('Currency') }}</label>
-      <select class="form-control select2" name="data[0][currency]" required style="width: 100%" id="{{ fin_costs_id }}_form_currency">
+      <select class="form-control select2" name="currency" required style="width: 100%" id="{{ fin_costs_id }}_form_currency">
         {% for cur in currencies %}
         <option value="{{ cur.alpha3 }}" {% if cur.alpha3 == 'CZK' %}selected{% endif %}>{{ cur.alpha3 }}</option>
         {% endfor %}
@@ -51,7 +51,7 @@
     <div class="form-group col-md-3">
       <label>{{ __('Issue date') }}*</label>
       <div class="input-group">
-        <input type="text" class="form-control datepicker" name="data[0][dt]" required placeholder="RRRR-MM-DD"id="{{ fin_costs_id }}_form_issue_dt">
+        <input type="text" class="form-control datepicker" name="issue_dt2" required placeholder="RRRR-MM-DD"id="{{ fin_costs_id }}_form_issue_dt2">
       </div>
     </div>
   </div>
@@ -59,13 +59,13 @@
     <div class="form-group col-md-6">
       <label>{{ __('Project') }}* <a href="#"><i class="far fa-plus-square text-dark"></i></a></label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][offset]" required placeholder="{{ __('Name Surname, (Organization)') }}" id="{{ fin_costs_id }}_form_offset_name">
+        <input type="text" class="form-control" name="project" required placeholder="{{ __('Name Surname, (Organization)') }}" id="{{ fin_costs_id }}_form_project_name">
       </div>
     </div>
     <div class="form-group col-md-6">
       <label>{{ __('Internal comment') }}</label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][comment]" id="{{ fin_costs_id }}_form_comment">
+        <input type="text" class="form-control" name="comment" id="{{ fin_costs_id }}_form_comment">
       </div>
     </div>   
   </div>  
@@ -76,60 +76,62 @@
 <div class="card card-secondary">
 <div class="card-header">
 <h4>Cost types and analytics</h4>
-<button type="submit" class="btn btn-warning mt-1">-</button>
-<button type="submit" class="btn btn-success mt-1">+</button>
+<button type="button" class="btn btn-warning mt-1" id="costBlockDel">-</button>
+<button type="button" class="btn btn-success mt-1" id="costBlockAdd">+</button>
 <span style="padding-left: 2em">Unallocated: 3233.22</span>
 </div>
 <div class="card-body p-0">
 
-  <div class="form-row"> 
+  <div class="form-row costBlock" id="costBlockNr1">
     <div class="form-group col-md-3">
       <label>{{ __('Volume excl. VAT') }}</label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][volume_exvat]" required placeholder="{{ __('12345.67') }}" id="{{ fin_costs_id }}_form_volume_exvat">
+        <input type="text" class="form-control" name="cost_types[1][volume_exvat]" required placeholder="{{ __('12345.67') }}" id="polozka_volume_1">
       </div>
-    </div>  
+    </div>
     <div class="form-group col-md-9">
       <label>{{ __('Cost type') }}</label>
-      <select class="form-control select2" name="data[0][currency]" required style="width: 100%" id="{{ fin_costs_id }}_form_currency">
+      <select class="form-control select2 cost_type_select2" name="cost_types[1][currency]" required style="width: 100%" id="polozka_currency_1">
         {% for k, v in cost_types %}
         <option value="{{ k }}">{{ k }} {{ v }}</option>
         {% endfor %}
       </select>
     </div>
   </div>
+  
 </div>
 </div>
 
 <div class="card card-secondary">
 <div class="card-header">
 <h4>Order allocation</h4>
-<button type="submit" class="btn btn-warning mt-1">-</button>
-<button type="submit" class="btn btn-success mt-1">+</button>
+<button type="button" class="btn btn-warning mt-1" id="orderBlockDel">-</button>
+<button type="button" class="btn btn-success mt-1" id="orderBlockAdd">+</button>
 <span style="padding-left: 2em">Unallocated: 3233.22</span>
 </div>
 <div class="card-body p-0">
-  <div class="form-row"> 
+    
+  <div class="form-row orderBlock" id="orderBlockNr1">
     <div class="form-group col-md-3">
       <label>{{ __('Volume') }}</label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][volume_exvat]" required placeholder="{{ __('12345.67') }}" id="{{ fin_costs_id }}_form_volume_exvat">
+        <input type="text" class="form-control" name="allocations[1][volume_exvat]" required placeholder="{{ __('12345.67') }}" id="polozka_order_volume_1">
       </div>
     </div>  
     <div class="form-group col-md-3">
       <label>{{ __('Percentage') }}</label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][volume_exvat]" required placeholder="{{ __('12345.67') }}" id="{{ fin_costs_id }}_form_volume_exvat">
+        <input type="text" class="form-control" name="allocations[1][volume_exvat_percent]" required placeholder="{{ __('12345.67') }}" id="polozka_percentage_1">
       </div>
     </div>  
     <div class="form-group col-md-6">
       <label>{{ __('Order') }}* <a href="#"><i class="far fa-plus-square text-dark"></i></a></label>
       <div class="input-group">
-        <input type="text" class="form-control" name="data[0][offset]" required placeholder="{{ __('Name Surname, (Organization)') }}" id="{{ fin_costs_id }}_form_offset_name">
+        <input type="text" class="form-control" name="allocations[1][order]" required placeholder="{{ __('Name Surname, (Organization)') }}" id="polozka_order_1">
       </div>
     </div>
-
   </div>
+  
 </div>
 </div>
 
