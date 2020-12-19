@@ -7,6 +7,7 @@ use Glued\Core\Controllers\DomainsController as Domains;
 use Glued\Core\Controllers\Glued;
 use Glued\Core\Controllers\GluedApi;
 use Glued\Core\Controllers\Profiles;
+use Glued\Core\Controllers\Integrations;
 use Glued\Core\Controllers\ProfilesApi;
 use Glued\Core\Middleware\RedirectAuthenticated;
 use Glued\Core\Middleware\RedirectGuests;
@@ -42,6 +43,9 @@ $app->group('/core', function (RouteCollectorProxy $route) {
         $route->get('/domains', Domains::class . ':ui_manage')->setName('core.domains');
         $route->get ('/admin/phpinfo', function(Request $request, Response $response) { phpinfo(); return $response; }) -> setName('core.admin.phpinfo.web');
         $route->get ('/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); return $response; }) -> setName('core.admin.phpconst.web');
+        $route->get('/integrations/google', Integrations::class . ':google')->setName('core.integrations.google');
+        $route->get('/integrations/google_app', Integrations::class . ':google_app');
+        $route->get('/integrations/fio_cz', Integrations::class . ':fio_cz')->setName('core.integrations.fio_cz');
     })->add(RedirectGuests::class);
 });
 
