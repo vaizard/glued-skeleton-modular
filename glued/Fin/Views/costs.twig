@@ -132,6 +132,8 @@
 
   // add button for new Cost types
   $("#costBlockAdd").on('click', function(event) {
+        // destroujeme select2 s tridou cost_type_select2
+        $(".cost_type_select2").select2('destroy');
         // vezmeme posledni element
         var $zdroj = $(".costBlock").last();
         // zjistime jake cislo ma v idecku
@@ -140,15 +142,18 @@
         var nove_posledni_id = posledni_id + 1;
         // naklonujem si ten element nejdriv do promenne
         var $klon = $zdroj.clone().prop('id', 'costBlockNr'+nove_posledni_id);
-        // TODO provedeme dalsi zmeny uvnitr (vyprazdneni values a zmena indexace)
-        
+        // provedeme dalsi zmeny uvnitr (vyprazdneni values a zmena indexace)
+        $klon.find("#polozka_volume_" + posledni_id).prop('id', 'polozka_volume_' + nove_posledni_id).prop('name', 'cost_types[' + nove_posledni_id + '][volume_exvat]');
+        $klon.find("#polozka_currency_" + posledni_id).prop('id', 'polozka_currency_' + nove_posledni_id).prop('name', 'cost_types[' + nove_posledni_id + '][currency]');
         // a konecne to umistime za ten posledni element
         $zdroj.after($klon);
+        // znovu aktivujeme select2 na tride cost_type_select2
+        $(".cost_type_select2").select2();
   });
 
     // delete button pro new cost types
   $("#costBlockDel").on('click', function(event) {
-        // zjistie kolik tam je tech elementu, a pokud je jeden nedelame nic TODO
+        // zjistime kolik tam je tech elementu, a pokud je jeden nedelame nic TODO
         
         // zrusime posledni element
         $(".costBlock").last().remove();
@@ -164,15 +169,17 @@
         var nove_posledni_id = posledni_id + 1;
         // naklonujem si ten element nejdriv do promenne
         var $klon = $zdroj.clone().prop('id', 'orderBlockNr'+nove_posledni_id);
-        // TODO provedeme dalsi zmeny uvnitr (vyprazdneni values a zmena indexace)
-        
+        // provedeme dalsi zmeny uvnitr (vyprazdneni values a zmena indexace)
+        $klon.find("#polozka_order_volume_" + posledni_id).prop('id', 'polozka_order_volume_' + nove_posledni_id).prop('name', 'allocations[' + nove_posledni_id + '][volume_exvat]');
+        $klon.find("#polozka_percentage_" + posledni_id).prop('id', 'polozka_percentage_' + nove_posledni_id).prop('name', 'allocations[' + nove_posledni_id + '][volume_exvat_percent]');
+        $klon.find("#polozka_order_" + posledni_id).prop('id', 'polozka_order_' + nove_posledni_id).prop('name', 'allocations[' + nove_posledni_id + '][order]');
         // a konecne to umistime za ten posledni element
         $zdroj.after($klon);
   });
 
     // delete button pro new order types
   $("#orderBlockDel").on('click', function(event) {
-        // zjistie kolik tam je tech elementu, a pokud je jeden nedelame nic TODO
+        // zjistime kolik tam je tech elementu, a pokud je jeden nedelame nic TODO
         
         // zrusime posledni element
         $(".orderBlock").last().remove();
