@@ -355,6 +355,43 @@ class FinController extends AbstractTwigController
         ]);
     }
 
+    private function sql_costs_list() {
+        $data = $this->db->rawQuery("
+            SELECT
+                t_fin_costs.c_uid as 'id',
+                t_fin_costs.c_json->>'$.offset' as 'offset',
+                t_fin_costs.c_json->>'$.reference' as 'reference',
+                t_fin_costs.c_json->>'$.issue_dt' as 'issue_dt',
+                t_fin_costs.c_json->>'$.currency' as 'currency',
+                t_fin_costs.c_json->>'$.volume_exvat' as 'volume_exvat',
+                t_fin_costs.c_json->>'$.volume_invat' as 'volume_invat'
+            FROM `t_fin_costs`
+            ORDER BY c_uid DESC
+        ");
+        return $data;
+    }
+
+
+    public function costs_list(Request $request, Response $response, array $args = []): Response
+    {
+        $builder = new JsonResponseBuilder('fin.costs', 1);
+        // pokud je v adrese uid, chceme jen json data jednoho cost
+        if (!empty($args['uid'])) {
+            $cost_id = (int)$args['uid'];
+            $this->db->where('c_uid', $cost_id);
+            $doc = $this->db->getOne('t_fin_costs', ['c_json'])['c_json'];
+            $doc = json_decode($doc, true);
+            $payload = $builder->withData($doc)->withCode(200)->build();
+        }
+        else {
+            $payload = $builder->withData((array)$this->sql_costs_list())->withCode(200)->build();
+        }
+        return $response->withJson($payload);
+        // TODO handle errors
+        // TODO the withData() somehow escapes quotes in t_fin_accounts.c_json->>'$.config' 
+        //      need to figure out where this happens and zap it.
+    }
+
     public function costs_post(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('fin.costs', 1);
         $req = $request->getParsedBody();
@@ -398,6 +435,82 @@ class FinController extends AbstractTwigController
         */
     }
 
+    public function costs_patch(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('fin.costs', 1);
+        
+        // id z adresy
+        $cost_id = (int)$args['uid'];
+        
+        // Get patch data
+        $req = $request->getParsedBody();
+        
+        //$req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
+        //$req['id'] = (int)$args['uid'];
+        // user a id se nemeni pri updatu. ale pridame patched
+        //$req['patched'] = 1;
+        
+        // convert body to object
+        $req = json_decode(json_encode((object)$req));
+        
+        /*
+        // Get old data
+        $this->db->where('c_uid', $req['id']);
+        $doc = $this->db->getOne('t_enterprise_projects', ['c_json'])['c_json'];
+        if (!$doc) { throw new HttpBadRequestException( $request, __('Bad source ID.')); }
+        $doc = json_decode($doc);
+
+        // TODO replace this lame acl with something propper.
+        if($doc->user != $req['user']) { throw new HttpForbiddenException( $request, 'You can only edit your own calendar sources.'); }
+
+        // Patch old data
+        $doc->description = $req['description'];
+        $doc->name = $req['name'];
+        $doc->type = $req['type'];
+        $doc->color = $req['color'];
+        $doc->icon = $req['icon'];
+        $doc->domain = (int)$req['domain'];
+        if (array_key_exists('config', $req) and ($req['config'] != "")) {
+          $config = json_decode(trim($req['config']), true);
+          if (json_last_error() !== 0) throw new HttpBadRequestException( $request, __('Config contains invalid json.'));
+          $doc->config = (object)$config;
+        } else { $doc->config = new \stdClass(); }
+        if (!array_key_exists('currency', $req)) { $doc->currency = ''; } else {  $doc->currency = $req['currency']; }
+
+        // TODO if $doc->domain is patched here, you have to first test, if user has access to the domain
+        */
+        // load the json schema and validate data against it
+        //$loader = new JSL("schema://enterprise/", [ __ROOT__ . "/glued/Enterprise/Controllers/Schemas/" ]);
+        //$schema = $loader->loadSchema("schema://enterprise/projects.v1.schema");
+        //$result = $this->jsonvalidator->schemaValidation($doc, $schema);
+        //if ($result->isValid()) {
+            $row = [ 'c_json' => json_encode($req) ];
+            $this->db->where('c_uid', $cost_id);
+            $id = $this->db->update('t_fin_costs', $row);
+            if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating of the cost failed.')); }
+        //} else { throw new HttpBadRequestException( $request, __('Invalid account data.')); }
+        
+        // nejaka flash message
+        $this->flash->addMessage('info', 'tak sme to updatovali');
+        
+        // Success
+        $payload = $builder->withData((array)$req)->withCode(200)->build();
+        return $response->withJson($payload, 200);
+    }
+
+    public function costs_delete(Request $request, Response $response, array $args = []): Response {
+        try { 
+          $this->db->where('c_uid', (int)$args['uid']);
+          $this->db->delete('t_fin_costs');
+        } catch (Exception $e) { 
+          throw new HttpInternalServerErrorException($request, $e->getMessage());  
+        }
+        $builder = new JsonResponseBuilder('fin.costs', 1);
+        $req = $request->getParsedBody();
+        $req['user'] = (int)$GLOBALS['_GLUED']['authn']['user_id'];
+        $req['id'] = (int)$args['uid'];
+        $payload = $builder->withData((array)$req)->withCode(200)->build();
+        return $response->withJson($payload, 200);
+    }
 
 
 
