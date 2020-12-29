@@ -3,61 +3,64 @@
 use Phinx\Db\Adapter\MysqlAdapter;
 use Phinx\Util\Literal;
 
-class Integrations extends Phinx\Migration\AbstractMigration
+class FinStor extends Phinx\Migration\AbstractMigration
 {
     public function change()
     {
         $this->execute('SET unique_checks=0; SET foreign_key_checks=0;');
-        $this->table('t_core_int_objects', [
+        $this->table('t_fin_costs', [
                 'id' => false,
                 'primary_key' => ['c_uid'],
                 'engine' => 'InnoDB',
                 'encoding' => 'utf8mb4',
                 'collation' => 'utf8mb4_0900_ai_ci',
-                'comment' => 'Integration objects',
+                'comment' => 'Financial transactions',
                 'row_format' => 'DYNAMIC',
             ])
             ->addColumn('c_uid', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
                 'identity' => 'enable',
-                'comment' => 'Unique row id',
+                'comment' => 'Unique row/object id',
             ])
             ->addColumn('c_domain_id', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
+                'identity' => 'enable',
                 'comment' => 'Domain id',
                 'after' => 'c_uid',
             ])
             ->addColumn('c_user_id', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'comment' => 'Creator of the integration object',
-                'after' => 'c_domain_id',
-            ])
-            ->addColumn('c_attr', 'json', [
-                'null' => false,
-                'comment' => 'Integration object attributes (i.e. not authorized, etc.)',
-                'after' => 'c_user_id',
+                'comment' => 'Creator id',
             ])
             ->addColumn('c_json', 'json', [
                 'null' => false,
-                'comment' => 'Integrations object definition',
-                'after' => 'c_attr',
+                'comment' => 'Account data (json document)',
+                'after' => 'c_user_id',
             ])
             ->addColumn('c_ts_created', 'timestamp', [
                 'null' => true,
                 'default' => 'CURRENT_TIMESTAMP',
-                'comment' => 'Timestamp created',
+                'comment' => 'Timestamp: account created / seen first',
                 'after' => 'c_json',
             ])
-            ->addColumn('c_ts_updated', 'timestamp', [
+            ->addColumn('c_ts_modified', 'timestamp', [
                 'null' => true,
                 'default' => 'CURRENT_TIMESTAMP',
-                'comment' => 'Timestamp updated',
+                'update' => 'CURRENT_TIMESTAMP',
+                'comment' => 'Timestamp: account modified',
                 'after' => 'c_ts_created',
             ])
-            ->addColumn('c_stor_name', Literal::from("varchar(255) GENERATED ALWAYS AS (json_unquote(json_extract(`c_json`,_utf8mb4'$.name'))) VIRTUAL"), [
+            ->addColumn('c_ts_modified', 'timestamp', [
+                'null' => true,
+                'default' => 'CURRENT_TIMESTAMP',
+                'update' => 'CURRENT_TIMESTAMP',
+                'comment' => 'Timestamp: account modified',
+                'after' => 'c_ts_created',
+            ])
+            ->addColumn('c_stor_name', Literal::from("varchar(255) GENERATED ALWAYS AS (json_unquote(json_extract(`c_json`,_utf8mb4'$.offset'))) VIRTUAL"), [
                 'null' => false,
                 'comment' => 'Stor name',
             ])
