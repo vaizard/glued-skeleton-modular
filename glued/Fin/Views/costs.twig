@@ -212,7 +212,38 @@
     //
     function initialise_create_update_delete_handle() {
         
-        // Create handle
+        // Create handle, with file upload, post
+        $('#fin_costs_create_form #fin_costs_create_form_submit').on('click', function (event) {
+              event.preventDefault();
+              var formData = new FormData(document.getElementById("fin_costs_create_form"));         // insert complete form into FormData object
+              
+              $.ajax({
+                     url : '{{ url_for("fin.costs.api01") }}',
+                     type : 'POST',
+                     data : formData,
+                     processData: false,  // tell jQuery not to process the data
+                     contentType: false,  // tell jQuery not to set contentType
+                     success : function(res) {
+                          var idtwig = 'fin_costs_obj_twig';
+                          $('#toast-placeholder').empty();
+                          $(Twig.twig({ ref: 'fin_costs_obj_twig' }).render({ row: res.data })).prependTo("#fin_costs > tbody");
+                          $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+                          $('.toast').toast('show');
+                          // nacteme znova prazdny formular
+                          $("#fin_costs_form_placeholder").html(Twig.twig({ ref: "fin_costs_new_form_twig" }).render({ form_url: "{{ url_for('fin.costs.api01') }}", fin_costs_id: "fin_costs_create" }));
+                          initialise_cost_form();
+                     },
+                     error: function(res) {
+                          $('#toast-placeholder').empty();
+                          $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+                          $('.toast').toast('show');
+                     }
+                });
+                
+        });
+        
+        
+        /*
         $("#fin_costs_create_form").ajaxSubmit({
             data: function() {
               return $(this).serialize();
@@ -233,6 +264,7 @@
               $('.toast').toast('show');
             }
         });
+        */
         
         // Update handle
         $("#fin_costs_update_form").ajaxSubmit({

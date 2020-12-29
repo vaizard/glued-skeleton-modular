@@ -20,7 +20,8 @@ class Stor {
        "store_subscriptions"  => 'Store Subscriptions',
        "store_tickets"        => 'Store Tickets',
        "worklog"              => 'Worklog',
-       "fin_trx"              => 'Transactions'
+       "fin_trx"              => 'Transactions',
+       "fin_costs"              => 'Fin Costs'
     ];
     
     // prevod path na tabulku, kvuli predzjisteni prav
@@ -34,6 +35,7 @@ class Stor {
        "store_sellers"       => 't_store_sellers',
        "worklog"             => 't_worklog_items',
        "fin_trx"             => 't_fin_trx',
+       "fin_costs"             => 't_fin_costs'
     ];
     
     public $mime_icons = [
