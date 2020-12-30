@@ -1,7 +1,7 @@
 {% verbatim %}
 <script type="text/twig" id="fin_costs_new_form_twig">
 
-<form action="{{ form_url }}" method="post" autocomplete="off" id="{{ fin_costs_id }}_form">
+<form action="{{ form_url }}" method="post" autocomplete="off" id="{{ fin_costs_id }}_form" enctype="multipart/form-data">
 
 <div class="card card-primary">
 <div class="card-header">
@@ -60,7 +60,7 @@
       </div>
     </div>
   </div>
-  <div class="form-row"> 
+  <div class="form-row">
     <div class="form-group col-md-6">
       <label>Project* <a href="#"><i class="far fa-plus-square text-dark"></i></a></label>
       <div class="input-group">
@@ -73,8 +73,17 @@
         <input type="text" class="form-control" name="comment" id="{{ fin_costs_id }}_form_comment">
       </div>
     </div>   
-  </div>  
-
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-12">
+      <label>You can attach some files too</label>
+      <div class="input-group">
+        <input type="file" id="ajax-file" class="form-control" name="file[]" multiple>
+      </div>
+    </div>
+  </div>
+  
+  
 </div>
 </div>
 
@@ -145,7 +154,7 @@
 
 
   </div>
-    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="submit" id="fin_costs_create_form_submit" class="btn btn-primary">Save</button>
   </div>
 </form>
 

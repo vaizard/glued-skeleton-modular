@@ -379,8 +379,22 @@ class FinController extends AbstractTwigController
         if (!empty($args['uid'])) {
             $cost_id = (int)$args['uid'];
             $this->db->where('c_uid', $cost_id);
+            // nacteme pouze json data a dekodujeme
             $doc = $this->db->getOne('t_fin_costs', ['c_json'])['c_json'];
             $doc = json_decode($doc, true);
+            // prihodime tam data o attachnutych souborech ze storu
+            $doc['files'] = 'no files';
+            $sloupce = array("c_filename");
+            $this->db->where("c_inherit_table", 't_fin_costs');
+            $this->db->where("c_inherit_object", $cost_id);
+            $files = $this->db->get('t_stor_links', null, $sloupce);
+            if (count($files) > 0) {
+                $vystup_souboru = '';
+                foreach ($files as $filedata) {
+                    $vystup_souboru .= '<div>'.$filedata['c_filename'].'</div>';
+                }
+                $doc['files'] = $vystup_souboru;
+            }
             $payload = $builder->withData($doc)->withCode(200)->build();
         }
         else {
@@ -395,7 +409,8 @@ class FinController extends AbstractTwigController
     public function costs_post(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('fin.costs', 1);
         $req = $request->getParsedBody();
-
+        $files = $request->getUploadedFiles();
+        
         $req['user'] = $GLOBALS['_GLUED']['authn']['user_id'];
         $req['id'] = 0;
         $req['_v'] = (int) 1;
@@ -418,9 +433,29 @@ class FinController extends AbstractTwigController
                 'c_user_id' => (int)$req->user,
                 'c_json' => json_encode($req)
             );
-            try { $req->id = $this->utils->sql_insert_with_json('t_fin_costs', $row); } catch (Exception $e) { 
-                throw new HttpInternalServerErrorException($request, $e->getMessage());  
+            try { $new_costs_id = $this->utils->sql_insert_with_json('t_fin_costs', $row); } catch (Exception $e) { 
+                throw new HttpInternalServerErrorException($request, $e->getMessage());
             }
+            
+            $req->id = $new_costs_id;
+            
+            // pokud jsou files, nahrajeme je storem k $new_costs_id a tabulce t_fin_trx
+            if (!empty($files['file']) and count($files['file']) > 0) {
+                foreach ($files['file'] as $file_index => $newfile) {
+                    if ($newfile->getError() === UPLOAD_ERR_OK) {
+                        $filename = $newfile->getClientFilename();
+                        // ziskame tmp path ktere je privatni vlastnost $newfile, jeste zanorene v Stream, takze nejde normalne precist
+                        // vypichneme si stream a pouzijeme na to reflection
+                        $stream = $newfile->getStream();
+                        $reflectionProperty = new \ReflectionProperty(\Nyholm\Psr7\Stream::class, 'uri');
+                        $reflectionProperty->setAccessible(true);
+                        $tmp_path = $reflectionProperty->getValue($stream);
+                        // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
+                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $GLOBALS['_GLUED']['authn']['user_id'], $this->stor->app_tables['fin_costs'], $new_costs_id);
+                    }
+                }
+            }
+            
             $payload = $builder->withData((array)$req)->withCode(200)->build();
             return $response->withJson($payload, 200);
         /*
