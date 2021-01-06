@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="section-header">
-  <h1>{{ __('Costs') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-id="" data-currency="" data-name="" data-domain="" data-config="" data-description="" data-target="#fin_costs_create_modal">{{ __('New Cost') }}</button>
+  <h1>{{ __('Costs') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" id="new_form_button">{{ __('New Cost') }}</button>
 </div>
 
 <div class="section-body">
@@ -18,11 +18,11 @@
               <thead>
                 <tr>
                   <th class="col-auto">{{ __('ID') }}</th>
-                  <th class="col-auto">{{ __('Date') }}</th>
-                  <th class="col-1 text-right">{{ __('Volume') }}</th>
                   <th class="col-2">{{ __('Offset') }}</th>
                   <th class="col-1">{{ __('Reference') }}</th>
-                  <th class="col-4">{{ __('Description') }}</th>
+                  <th class="col-auto">{{ __('Date') }}</th>
+                  <th class="col-1 text-right">{{ __('Volume Ex.') }}</th>
+                  <th class="col-1 text-right">{{ __('Volume In.') }}</th>
                   <th class="">{{ __('Manage') }}</th>
                 </tr>
               </thead>
@@ -31,18 +31,17 @@
                 {% verbatim %}
                 <script type="text/twig" id="fin_costs_obj_twig">
                 <tr id="fin_costs_object_{{ row.id }}">
-                  <td class="align-top"  style="border-left: 4px solid {{ row.account_color }};"><i class="fas fa-{{ row.account_icon }}" style="color: {{ row.account_color }}; padding-right: 0.5em;" title="{{ row.account_name }}"></i><a href="#" class="text-dark" data-toggle="modal" data-target="#fin_costs_update_modal" data-id="{{ row.id }}" data-account_id="{{ row.account_id }}" data-dt="{{ row.dt }}" data-type_electronic="{{ row.type.electronic }}" data-volume="{{ row.volume }}" data-currency="{{ row.currency }}" data-offset_name="{{ row.offset.name }}" data-offset_aid="{{ row.offset.aid }}" data-offset_aid_type="{{ row.offset.aid_type }}" data-offset_addr_unstructured="{{ row.offset.addr.unstructured }}" data-ref_freeform="{{ row.ref.freeform }}" data-comment="{{ row.comment }}" data-message="{{ row.message }}" data_-tatus.aut="{{ row.status.aut }}" data-status.costs="{{ row.status.costs }}" data-status.aut="{{ row.status.aut }}" data-auth_note="{{ row.order.auth.note }}">{{ row.id }}</a>
-                  <td class="align-top" title="{{ row.dt }}"><i class="fas fa-{% if row.type.card %}credit-card{% else %}{%if row.type.fee %}university{% else %}{% if row.type.electronic %}laptop{% else %}wallet{% endif %}{% endif%}{% endif%}" style="padding-right: 0.5em;"></i>{{ row.dt | slice(2, 8) }}</td>
-                  <td class="align-top col-sm-1 text-right" style="color: {{ row.type.flow == 'i' ?  'green' : 'red'}}" title="Rate: {{ row.intl.rate }}">{{ row.volume  }}&nbsp;{{ row.currency }}{% if row.intl.volume %}<br>{{ row.intl.volume }}&nbsp;{{ row.intl.currency }} {% endif %}</td>
-                  <td class="align-top col-sm-2"><b>{{ row.offset.name | default(row.offset.account_name)}}</b>{% if row.offset.name or row.offset.account_name %}<br>{% endif %}{{ row.offset.account_number }}{% if row.offset.account_number and row.offset.bank_code %} / {% endif %}{{ row.offset.bank_code }} {{ row.offset.account_iban }} {{ row.offset.aid_type }} {{ row.offset.aid }}</td>
-                  <td class="align-top col-sm-1">{% if row.ref.variable %}VS {{ row.ref.variable }}<br>{% endif %}{% if row.ref.constant %}KS {{ row.ref.constant }}<br>{% endif %}{% if row.ref.specific %}SS {{ row.ref.specific }}<br>{% endif %}{{ row.ref.freeform }}</td>
-                  <td class="align-top col-sm-4">{% if row.comment %}<i class="far fa-folder" style="padding-right: 1em"></i>{{ row.comment }}<br>{%endif%}{% if row.message %}<i class="far fa-paper-plane" style="padding-right: 1em"></i><i>{{ row.message }}</i>{%endif%}</td>
+                  <td class="align-top" style="border-left: 4px solid {{ row.account_color }};">{{ row.id }}</td>
+                  <td class="align-top col-sm-2"><b class="fin_costs_update_activator" data-id="{{ row.id }}">{{ row.offset }}</b></td>
+                  <td class="align-top col-sm-1">{{ row.reference }}</td>
+                  <td class="align-top" title="{{ row.dt }}"><i class="fas fa-{% if row.type.card %}credit-card{% else %}{%if row.type.fee %}university{% else %}{% if row.type.electronic %}laptop{% else %}wallet{% endif %}{% endif%}{% endif%}" style="padding-right: 0.5em;"></i>{{ row.issue_dt | slice(2, 8) }}</td>
+                  <td class="align-top col-sm-1">{{ row.volume_exvat }}&nbsp;<sup>{{ row.currency }}</sup></td>
+                  <td class="align-top col-sm-1">{{ row.volume_invat }}&nbsp;<sup>{{ row.currency }}</sup></td>
                   <td class="align-text-top">
                     <div class="custom-control custom-checkbox">
                       <label class="custom-control-label" for="fin_costs_object_check_{{ row.id }}">
-                        <a href="#" data-toggle="modal" data-target="#fin_costs_delete_modal" data-id="{{ row.id }}" data-account_name="{{ row.account_name }}" data-volume="{{ row.volume }}" data-currency="{{ row.currency }}"><i class="far fa-trash-alt text-dark"></i></a>
+                        <a href="#" data-toggle="modal" data-target="#fin_costs_delete_modal" data-id="{{ row.id }}" data-offset="{{ row.offset }}"><i class="far fa-trash-alt text-dark"></i></a>
                       </label>
-                      <input type="checkbox" id="fin_costs_object_check_{{ row.id }}" value="{{ row.id }}" class="custom-control-input">
                     </div>
                       
                   </td>
@@ -60,14 +59,13 @@
         </div>
       </div>
     </div>
-        <div class="col-4">
-      {% include '/Fin/Views/Partials/fin_costs_form.twig' with {'fin_costs_id': 'fin_costs_create'} %}
+    <div class="col-4" id="fin_costs_form_placeholder">
+        {% include '/Fin/Views/Partials/fin_costs_form.twig' with {'fin_costs_id': 'fin_costs_create'} %}
+        {% include '/Fin/Views/Partials/fin_costs_update_form.twig' with {'fin_costs_id': 'fin_costs_update'} %}
     </div>
   </div>
 
 </div>
-{% include '/Fin/Views/Partials/fin_costs_modal.twig' with {'fin_costs_id': 'fin_costs_create'} %}
-{% include '/Fin/Views/Partials/fin_costs_modal.twig' with {'fin_costs_id': 'fin_costs_update'} %}
 {% include '/Fin/Views/Partials/fin_costs_delete_modal.twig' with {'fin_costs_id': 'fin_costs_delete'} %}
 {% endblock %}
 
@@ -75,7 +73,93 @@
 {% block additionaljs %}
 {# twig.js initialized in public/assets/js/glued.js #}
 <script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
-
+    
+    // initialisation of js elements in form
+    function initialise_cost_form() {
+        // aktivujeme tam select 2
+        $(".currency_select2").val(function( index, value ) {
+            return $(this).data('preset');
+        }).select2();
+        $(".cost_type_select2").val(function( index, value ) {
+            return $(this).data('preset');
+        }).select2();
+        // aktivujeme datepicker
+        $('.datepicker').daterangepicker( { locale:{format:'YYYY-MM-DD'}, singleDatePicker: true } );
+        
+        /* plus a minus buttony */
+          // add button for new Cost types
+          $("#costBlockAdd").on('click', function(event) {
+                // destroujeme select2 s tridou cost_type_select2
+                $(".cost_type_select2").select2('destroy');
+                // vezmeme posledni element
+                var $zdroj = $(".costBlock").last();
+                // zjistime jake cislo ma v idecku
+                var posledni_id = parseInt($zdroj.prop('id').match(/\d+/g), 10);
+                // zvedneme to o 1
+                var nove_posledni_id = posledni_id + 1;
+                // naklonujem si ten element nejdriv do promenne
+                var $klon = $zdroj.clone().prop('id', 'costBlockNr'+nove_posledni_id);
+                // provedeme dalsi zmeny uvnitr (vyprazdneni values a zmena indexace)
+                $klon.find("#polozka_volume_" + posledni_id).prop('id', 'polozka_volume_' + nove_posledni_id).prop('name', 'cost_types[' + nove_posledni_id + '][volume_exvat]').val('');
+                $klon.find("#polozka_type_" + posledni_id).prop('id', 'polozka_type_' + nove_posledni_id).prop('name', 'cost_types[' + nove_posledni_id + '][type]');
+                // a konecne to umistime za ten posledni element
+                $zdroj.after($klon);
+                // znovu aktivujeme select2 na tride cost_type_select2
+                $(".cost_type_select2").select2();
+          });
+            
+            // delete button pro new cost types
+          $("#costBlockDel").on('click', function(event) {
+                // zjistime kolik tam je tech elementu, a pokud je jeden nedelame nic
+                var $zdroj = $(".costBlock").last();
+                var posledni_id = parseInt($zdroj.prop('id').match(/\d+/g), 10);
+                if (posledni_id > 1) {
+                    // zrusime posledni element
+                    $(".costBlock").last().remove();
+                }
+          });
+            
+          // add button for new order types
+          $("#orderBlockAdd").on('click', function(event) {
+                // vezmeme posledni element
+                var $zdroj = $(".orderBlock").last();
+                // zjistime jake cislo ma v idecku
+                var posledni_id = parseInt($zdroj.prop('id').match(/\d+/g), 10);
+                // zvedneme to o 1
+                var nove_posledni_id = posledni_id + 1;
+                // naklonujem si ten element nejdriv do promenne
+                var $klon = $zdroj.clone().prop('id', 'orderBlockNr'+nove_posledni_id);
+                // provedeme dalsi zmeny uvnitr (vyprazdneni values a zmena indexace)
+                $klon.find("#polozka_order_volume_" + posledni_id).prop('id', 'polozka_order_volume_' + nove_posledni_id).prop('name', 'allocations[' + nove_posledni_id + '][volume_exvat]').val('');
+                $klon.find("#polozka_percentage_" + posledni_id).prop('id', 'polozka_percentage_' + nove_posledni_id).prop('name', 'allocations[' + nove_posledni_id + '][volume_exvat_percent]').val('');
+                $klon.find("#polozka_order_" + posledni_id).prop('id', 'polozka_order_' + nove_posledni_id).prop('name', 'allocations[' + nove_posledni_id + '][order]').val('');
+                // a konecne to umistime za ten posledni element
+                $zdroj.after($klon);
+          });
+            
+            // delete button pro new order types
+          $("#orderBlockDel").on('click', function(event) {
+                // zjistime kolik tam je tech elementu, a pokud je jeden nedelame nic
+                var $zdroj = $(".orderBlock").last();
+                var posledni_id = parseInt($zdroj.prop('id').match(/\d+/g), 10);
+                if (posledni_id > 1) {
+                    // zrusime posledni element
+                    $(".orderBlock").last().remove();
+                }
+          });
+        
+        // aktivujeme reakci na submit formu, bud create nebo update (a delete v modalu)
+        // podle toho ktery form tam bude
+        initialise_create_update_delete_handle();
+        
+    }
+    
+    
+    // insert empty form to page and initialise it
+    $("#fin_costs_form_placeholder").html(Twig.twig({ ref: "fin_costs_new_form_twig" }).render({ form_url: "{{ url_for('fin.costs.api01') }}", fin_costs_id: "fin_costs_create" }));
+    initialise_cost_form();
+    
+    
   //
   // Onload ajax to fetch Cost data
   // 
@@ -84,187 +168,204 @@
     contentType: "application/json",
     dataType: 'json',
     success: function(res) {
-      $( document ).ready(function() {
-        $("#fin_costs_placeholder").append(Twig.twig({ ref: "fin_costs_col_twig" }).render({ data: res.data }))
-      })
+        $( document ).ready(function() {
+            $("#fin_costs_placeholder").append(Twig.twig({ ref: "fin_costs_col_twig" }).render({ data: res.data }));
+            
+            // iniciace tlacitek pro nacteni update formu, pri kliku na offset v tabulce
+            $(".fin_costs_update_activator").on('click', function(event) {
+                // zavolame ajaxem nacteni dat
+                $.ajax({
+                    url: "{{ url_for('fin.costs.api01') }}/" + $(this).data('id'),
+                    contentType: "application/json",
+                    dataType: 'json',
+                    success: function(res) {
+                        // data dosadime do update formulare
+                        $("#fin_costs_form_placeholder").html(Twig.twig({ ref: "fin_costs_update_form_twig" }).render({ row: res.data, form_url: "{{ url_for('fin.costs.api01') }}", fin_costs_id: "fin_costs_update" }));
+                        initialise_cost_form();
+                        
+                    },
+                    error: function(res) {
+                      $('#toast-placeholder').empty();
+                      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin costs") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+                      $('.toast').toast('show');
+                    }
+                })
+            });
+            
+        })
     }
   });
   
-  //
-  // Create + Update + Delete modals
-  // 
-  $('#fin_costs_update_modal').on('show.bs.modal', function (event) {
-    var modal = $(this)
-    var e = $(event.relatedTarget) // event which triggered the modal
-    modal.find('.modal-title').text('{{ __("Edit Cost") }} ' + e.data('id'));
-    modal.find('.modal-dialog form').attr('action', '{{ url_for("fin.costs.api01") }}/' + e.data('id') );
-    modal.find('.modal-body #fin_costs_update_form_account_id').val(e.data('account_id')).trigger('change');
-    modal.find('.modal-body #fin_costs_update_form_volume').val(e.data('volume'));
-    modal.find('.modal-body #fin_costs_update_form_currency').val(e.data('currency')).trigger('change');
-    modal.find('.modal-body #fin_costs_update_form_dt').val(e.data('dt'));
-    modal.find('.modal-body #fin_costs_update_form_offset_name').val(e.data('offset_name'));
-    modal.find('.modal-body #fin_costs_update_form_offset_aid').val(e.data('offset_aid'));
-    modal.find('.modal-body #fin_costs_update_form_form_offset_aid_type').val(e.data('offset_aid_type')).trigger('change');
-    modal.find('.modal-body #fin_costs_update_form_ref_freeform').val(e.data('ref_freeform'));
-    modal.find('.modal-body #fin_costs_update_form_message').val(e.data('message'));
-    modal.find('.modal-body #fin_costs_update_form_comment').val(e.data('comment'));
-    modal.find('.modal-body #fin_costs_update_form_offset_addr_unstructured').text(e.data('offset_addr_unstructured'));
-    modal.find('.modal-body #fin_costs_update_form_auth_note').val(e.data('auth_note'));
-    // TODO we miss the payed out and authorized radio setup
+  
+  // nastaveni noveho formulare
+  $('#new_form_button').on('click', function (){
+    $("#fin_costs_form_placeholder").html(Twig.twig({ ref: "fin_costs_new_form_twig" }).render({ form_url: "{{ url_for('fin.costs.api01') }}", fin_costs_id: "fin_costs_create" }));
+    initialise_cost_form();
   });
-
-  $('#fin_costs_create_modal').on('show.bs.modal', function (event) {
-    var modal = $(this)
-    var e = $(event.relatedTarget) // event which triggered the modal
-    modal.find('.modal-title').text('{{ __("New Cost") }}');
-  });
-
-  $('#fin_costs_delete_modal').on('show.bs.modal', function (event) {
-    var modal = $(this)
-    var e = $(event.relatedTarget) // event which triggered the modal
-    modal.find('.modal-title').text('{{ __("Delete Cost") }} ' + e.data('id'));
-    modal.find('.modal-dialog form').attr('action', '{{ url_for("fin.costs.api01") }}/' + e.data('id') );
-    modal.find('.modal-body').text('{{ __("Do you really want to delete the Cost:") }} ' + e.data('volume') + ' ' + e.data('currency') + ' {{ __("from account") }} ' + e.data('account_name') + '?');
-  });
-
-
-/* plus a minus buttony */
-
-  // add button for new Cost types
-  $("#costBlockAdd").on('click', function(event) {
-        // destroujeme select2 s tridou cost_type_select2
-        $(".cost_type_select2").select2('destroy');
-        // vezmeme posledni element
-        var $zdroj = $(".costBlock").last();
-        // zjistime jake cislo ma v idecku
-        var posledni_id = parseInt($zdroj.prop('id').match(/\d+/g), 10);
-        // zvedneme to o 1
-        var nove_posledni_id = posledni_id + 1;
-        // naklonujem si ten element nejdriv do promenne
-        var $klon = $zdroj.clone().prop('id', 'costBlockNr'+nove_posledni_id);
-        // provedeme dalsi zmeny uvnitr (vyprazdneni values a zmena indexace)
-        $klon.find("#polozka_volume_" + posledni_id).prop('id', 'polozka_volume_' + nove_posledni_id).prop('name', 'cost_types[' + nove_posledni_id + '][volume_exvat]');
-        $klon.find("#polozka_currency_" + posledni_id).prop('id', 'polozka_currency_' + nove_posledni_id).prop('name', 'cost_types[' + nove_posledni_id + '][currency]');
-        // a konecne to umistime za ten posledni element
-        $zdroj.after($klon);
-        // znovu aktivujeme select2 na tride cost_type_select2
-        $(".cost_type_select2").select2();
-  });
-
-    // delete button pro new cost types
-  $("#costBlockDel").on('click', function(event) {
-        // zjistime kolik tam je tech elementu, a pokud je jeden nedelame nic TODO
+  
+  
+    
+    //
+    // reseni odesilani formularu
+    // musime to dat do funkce, protoze formulare se budou znova nacitat
+    // a tu funkci pote vzdy znovu zavolame
+    //
+    function initialise_create_update_delete_handle() {
         
-        // zrusime posledni element
-        $(".costBlock").last().remove();
-  });
-
-  // add button for new order types
-  $("#orderBlockAdd").on('click', function(event) {
-        // vezmeme posledni element
-        var $zdroj = $(".orderBlock").last();
-        // zjistime jake cislo ma v idecku
-        var posledni_id = parseInt($zdroj.prop('id').match(/\d+/g), 10);
-        // zvedneme to o 1
-        var nove_posledni_id = posledni_id + 1;
-        // naklonujem si ten element nejdriv do promenne
-        var $klon = $zdroj.clone().prop('id', 'orderBlockNr'+nove_posledni_id);
-        // provedeme dalsi zmeny uvnitr (vyprazdneni values a zmena indexace)
-        $klon.find("#polozka_order_volume_" + posledni_id).prop('id', 'polozka_order_volume_' + nove_posledni_id).prop('name', 'allocations[' + nove_posledni_id + '][volume_exvat]');
-        $klon.find("#polozka_percentage_" + posledni_id).prop('id', 'polozka_percentage_' + nove_posledni_id).prop('name', 'allocations[' + nove_posledni_id + '][volume_exvat_percent]');
-        $klon.find("#polozka_order_" + posledni_id).prop('id', 'polozka_order_' + nove_posledni_id).prop('name', 'allocations[' + nove_posledni_id + '][order]');
-        // a konecne to umistime za ten posledni element
-        $zdroj.after($klon);
-  });
-
-    // delete button pro new order types
-  $("#orderBlockDel").on('click', function(event) {
-        // zjistime kolik tam je tech elementu, a pokud je jeden nedelame nic TODO
+        // Create handle, with file upload, post
+        $('#fin_costs_create_form #fin_costs_create_form_submit').on('click', function (event) {
+              event.preventDefault();
+              var formData = new FormData(document.getElementById("fin_costs_create_form"));         // insert complete form into FormData object
+              
+              $.ajax({
+                     url : '{{ url_for("fin.costs.api01") }}',
+                     type : 'POST',
+                     data : formData,
+                     processData: false,  // tell jQuery not to process the data
+                     contentType: false,  // tell jQuery not to set contentType
+                     success : function(res) {
+                          var idtwig = 'fin_costs_obj_twig';
+                          $('#toast-placeholder').empty();
+                          $(Twig.twig({ ref: 'fin_costs_obj_twig' }).render({ row: res.data })).prependTo("#fin_costs > tbody");
+                          $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+                          $('.toast').toast('show');
+                          // nacteme znova prazdny formular
+                          $("#fin_costs_form_placeholder").html(Twig.twig({ ref: "fin_costs_new_form_twig" }).render({ form_url: "{{ url_for('fin.costs.api01') }}", fin_costs_id: "fin_costs_create" }));
+                          initialise_cost_form();
+                     },
+                     error: function(res) {
+                          $('#toast-placeholder').empty();
+                          $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+                          $('.toast').toast('show');
+                     }
+                });
+                
+        });
         
-        // zrusime posledni element
-        $(".orderBlock").last().remove();
-  });
-
-
-  //
-  // Create handle
-  // 
-  $("#fin_costs_create_form").ajaxSubmit({
-    data: function() {
-      return $(this).serialize();
-    },
-    success: function(res) {
-      var idtwig = 'fin_costs_obj_twig';
-      $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'fin_costs_obj_twig' }).render({ row: res.data })).prependTo("#fin_costs > tbody");
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
-      $('.toast').toast('show');
-      //$('#fin_costs_create_modal').modal('toggle');
-    },
-    error: function(res) {
-      $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
-      $('.toast').toast('show');
+        
+        /*
+        $("#fin_costs_create_form").ajaxSubmit({
+            data: function() {
+              return $(this).serialize();
+            },
+            success: function(res) {
+              var idtwig = 'fin_costs_obj_twig';
+              $('#toast-placeholder').empty();
+              $(Twig.twig({ ref: 'fin_costs_obj_twig' }).render({ row: res.data })).prependTo("#fin_costs > tbody");
+              $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("New entry saved.") }}' })).appendTo("#toast-placeholder");
+              $('.toast').toast('show');
+              // nacteme znova prazdny formular
+              $("#fin_costs_form_placeholder").html(Twig.twig({ ref: "fin_costs_new_form_twig" }).render({ form_url: "{{ url_for('fin.costs.api01') }}", fin_costs_id: "fin_costs_create" }));
+              initialise_cost_form();
+            },
+            error: function(res) {
+              $('#toast-placeholder').empty();
+              $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+              $('.toast').toast('show');
+            }
+        });
+        */
+        
+        // Update handle
+        $("#fin_costs_update_form").ajaxSubmit({
+            data: function() {
+              return $(this).serialize();
+            },
+            headers: {
+              "X-Http-Method-Override": "PATCH"
+            },
+            success: function(res) {
+              $('#toast-placeholder').empty();
+              $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Entry updated.") }}' })).appendTo("#toast-placeholder");
+              $('.toast').toast('show');
+              
+              // nacteme znova prazdny formular
+              $("#fin_costs_form_placeholder").html(Twig.twig({ ref: "fin_costs_new_form_twig" }).render({ form_url: "{{ url_for('fin.costs.api01') }}", fin_costs_id: "fin_costs_create" }));
+              initialise_cost_form();
+              
+              // vyprazdnime a znova naplnime tabulku
+              $.ajax({
+                url: "{{ url_for('fin.costs.api01') }}",
+                contentType: "application/json",
+                dataType: 'json',
+                success: function(res) {
+                    // vyprazdnime tabulku
+                    $('#fin_costs_placeholder').empty();
+                    
+                    // naplnime znova komplet celou tabulku
+                    $("#fin_costs_placeholder").append(Twig.twig({ ref: "fin_costs_col_twig" }).render({ data: res.data }));
+                    
+                    // iniciace tlacitek pro nacteni update formu, pri kliku na offset v tabulce
+                    $(".fin_costs_update_activator").on('click', function(event) {
+                        // zavolame ajaxem nacteni dat
+                        $.ajax({
+                            url: "{{ url_for('fin.costs.api01') }}/" + $(this).data('id'),
+                            contentType: "application/json",
+                            dataType: 'json',
+                            success: function(res) {
+                                // data dosadime do update formulare
+                                $("#fin_costs_form_placeholder").html(Twig.twig({ ref: "fin_costs_update_form_twig" }).render({ row: res.data, form_url: "{{ url_for('fin.costs.api01') }}", fin_costs_id: "fin_costs_update" }));
+                                initialise_cost_form();
+                            },
+                            error: function(res) {
+                              $('#toast-placeholder').empty();
+                              $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin costs") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+                              $('.toast').toast('show');
+                            }
+                        })
+                    });
+                    
+                }
+              })
+            },
+            error: function(res) {
+              $('#toast-placeholder').empty();
+              $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+              $('.toast').toast('show');
+            }
+        });
+        
     }
-  });
 
 
-  //
-  // Update handle
-  // 
-  $("#fin_costs_update_form").ajaxSubmit({
-    data: function() {
-      return $(this).serialize();
-    },
-    headers: {
-      "X-Http-Method-Override": "PATCH"
-    },
-    success: function(res) {
-      $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Entry updated.") }}' })).appendTo("#toast-placeholder");
-      $('.toast').toast('show');
-      $('#fin_costs_update_modal').modal('toggle');
-      $('#fin_costs_placeholder').empty();
-      $.ajax({
-        url: "{{ url_for('fin.costs.api01') }}",
-        contentType: "application/json",
-        dataType: 'json',
+    //
+    // Delete modal, otevreni modalu
+    //
+
+    $('#fin_costs_delete_modal').on('show.bs.modal', function (event) {
+        var modal = $(this)
+        var e = $(event.relatedTarget) // event which triggered the modal
+        modal.find('.modal-title').text('{{ __("Delete Cost") }} ' + e.data('id'));
+        modal.find('.modal-dialog form').attr('action', '{{ url_for("fin.costs.api01") }}/' + e.data('id') );
+        modal.find('.modal-body').text('{{ __("Do you really want to delete the Cost:") }} ' + e.data('offset') + '?');
+    });
+
+    //
+    // Delete handle (odeslani formu z delete modalu)
+    // neni treba reinicializace, protoze delete modal tam furt je
+    //
+    $("#fin_costs_delete_form").ajaxSubmit({
+        data: function() {
+          return $(this).serialize();
+        },
+        headers: {
+          "X-Http-Method-Override": "DELETE"
+        },
         success: function(res) {
-          $("#fin_costs_placeholder").append(Twig.twig({ ref: "fin_costs_col_twig" }).render({ data: res.data }))
+          $('#toast-placeholder').empty();
+          // jen smazem z tabulky ten radek. neni treba nic reinicializovat
+          $('#fin_costs > tbody > #fin_costs_object_' + res.data.id).remove();
+          $('#fin_costs_delete_modal').modal('toggle'); 
+          $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin costs") }}' , msg: '{{ __("Removed source ") }}' + res.data.id + '.' })).appendTo("#toast-placeholder");
+          $('.toast').toast('show');
+        },
+        error: function(res) {
+          $('#toast-placeholder').empty();
+          $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin costs") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+          $('.toast').toast('show');
         }
-      })
-    },
-    error: function(res) {
-      $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
-      $('.toast').toast('show');
-    }
-  });
+    });
 
-  //
-  // Delete handle
-  // 
-  $("#fin_costs_delete_form").ajaxSubmit({
-    data: function() {
-      return $(this).serialize();
-    },
-    headers: {
-      "X-Http-Method-Override": "DELETE"
-    },
-    success: function(res) {
-      var idtwig = 'fin_costs_obj_twig';
-      $('#toast-placeholder').empty();
-      $('#fin_costs > tbody > #fin_costs_object_' + res.data.id).remove();
-      $('#fin_costs_delete_modal').modal('toggle'); 
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Removed source ") }}' + res.data.id + '.' })).appendTo("#toast-placeholder");
-      $('.toast').toast('show');
-    },
-    error: function(res) {
-      $('#toast-placeholder').empty();
-      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
-      $('.toast').toast('show');
-    }
-  });
 
   // NOTE: Make sure, that json data uses double quotes, not single quotes
   $('#fin_costs_form_type').change(function() {
@@ -285,6 +386,5 @@
     }
   }).trigger('change');
 
-  $('.datepicker').daterangepicker( { singleDatePicker: true, startDate: today, } );
   </script>
   {% endblock %}

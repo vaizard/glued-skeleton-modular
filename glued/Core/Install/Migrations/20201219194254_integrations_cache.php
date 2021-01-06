@@ -1,6 +1,7 @@
 <?php
 
 use Phinx\Db\Adapter\MysqlAdapter;
+use Phinx\Util\Literal;
 
 class IntegrationsCache extends Phinx\Migration\AbstractMigration
 {
