@@ -40,8 +40,9 @@ class Utils
         return $data;
     }
 
+    // will concatenate array items with delimeter, then trim the result
     public function concat($delimeter, array $arrayOfStrings): string {
-      return implode($delimeter, array_filter(array_map('trim',$arrayOfStrings)));
+      return trim(implode($delimeter, array_filter(array_map('trim',$arrayOfStrings))));
     }
 
 }
