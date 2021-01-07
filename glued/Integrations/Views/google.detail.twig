@@ -1,0 +1,47 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Detail of google object') }} {{ data.name }} #{{row.id}}</h1>
+</div>
+
+<div class="section-body">
+  <div class="row">
+    <div class="col-6">
+      <div class="card">
+        <div class="card-body">
+            <h4>{{ __('Basic data') }}</h4>
+            <div>{{ __('ID') }}: {{ row.id }}</div>
+            <div>{{ __('URI') }}: {{ row.uri }}</div>
+            <div>{{ __('Spreadsheet ID') }}: {{ row.spreadsheetId }}</div>
+            <div>{{ __('Sheet ID') }}: {{ row.sheetId }}</div>
+            <div>{{ __('Progress') }}: {{ row.progress }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-body">
+            <h4>{{ __('Next step') }}</h4>
+            <form action="{{ url_for('integrations.google.next.api01', { 'uid': row.id }) }}" method="post">
+                <p>{{ next.description | raw }}</p>
+                <div>{{ next.inputs | raw }}</div>
+                <div><button type="submit" class="btn btn-success">{{ next.submit }}</button></div>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-12">
+        {% include '/Core/Views/templates/partials/flash.twig' %}
+      <div id="rjsf"></div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+

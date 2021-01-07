@@ -1,0 +1,110 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Google docs') }}</h1><button type="button" class="btn btn-primary" style="margin-left: 1em;" data-toggle="modal" data-id="" data-currency="" data-name="" data-domain="" data-config="" data-description="" data-target="#google_docs_create_modal">{{ __('New spreadsheet') }}</button>
+</div>
+
+<div class="section-body">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped" id="google_docs">
+              <thead>
+                <tr>
+                  <th class="col-sm-1">{{ __('ID') }}</th>
+                  <th class="col-sm-2">{{ __('Doc ID') }}</th>
+                  <th class="col-sm-2">{{ __('Sheet ID') }}</th>
+                  <th class="col-sm-2">{{ __('Sheet Title') }}</th>
+                  <th class="col-sm-1">{{ __('Area') }}</th>
+                  <th class="col-sm-1">{{ __('Progress') }}</th>
+                  <th class="col-sm-1">{{ __('Manage') }}</th>
+                </tr>
+              </thead>
+              <tbody id="google_docs_placeholder">
+                {% for row in spreadsheets %}
+                <tr id="google_docs_object_{{ row.id }}">
+                  <td class="col-sm-1">{{ row.id }} <a href="#{{ row.id }}"><i class="fas fa-sync"></i></a></td>
+                  {% if row.progress < 5 %}
+                  <td class="col-sm-7" colspan="3">URI: <a href="{{ url_for('integrations.google.detail', { 'uid': row.id }) }}">{{ row.uri }}</a></td>
+                  {% else %}
+                  <td class="col-sm-2"><a href="{{ url_for('integrations.google.detail', { 'uid': row.id }) }}">{{ row.spreadsheetId }}</a></td>
+                  <td class="col-sm-2">{{ row.sheetId }}</td>
+                  <td class="col-sm-2">{{ row.title }}</td>
+                  <td class="col-sm-1">{{ row.area }}</td>
+                  {% endif %}
+                  <td class="col-sm-1">{{ row.progress }}</td>
+                  <td class="col-sm-1">
+                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#fin_accounts_update_modal" data-id="{{ row.id }}"><i class="fas fa-edit"></i></button>
+                    <button type="button" class="btn btn-icon btn-sm" data-toggle="modal" data-target="#google_docs_delete_modal" data-id="{{ row.id }}"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include '/Integrations/Views/Partials/google_docs_modal.twig' %}
+{% include '/Integrations/Views/Partials/google_docs_delete_modal.twig' %}
+{% endblock %}
+
+
+{% block additionaljs %}
+{# twig.js initialized in public/assets/js/glued.js #}
+<script nonce="{{ csp_nonce.script_src }}" type="text/javascript">
+
+  //
+  // Onload ajax to fetch account data
+  // 
+  $( document ).ready(function() {
+    
+  });
+  
+  //
+  // Create + Update + Delete modals
+  // 
+
+
+  $('#google_docs_delete_modal').on('show.bs.modal', function (event) {
+    var modal = $(this);
+    var e = $(event.relatedTarget); // event which triggered the modal
+    modal.find('.modal-title').text('{{ __("Delete spreadsheet") }} ' + e.data('id'));
+    modal.find('.modal-dialog form').attr('action', '{{ url_for("integrations.google.api01") }}/' + e.data('id') );
+    modal.find('.modal-body').text('{{ __("Do you really want to delete this google spreadsheet") }} ?');
+  });
+
+
+  //
+  // Delete handle
+  // 
+  $("#google_docs_delete_form").ajaxSubmit({
+    data: function() {
+      return $(this).serialize();
+    },
+    headers: {
+      "X-Http-Method-Override": "DELETE"
+    },
+    success: function(res) {
+      $('#toast-placeholder').empty();
+      $('#google_docs > tbody > #google_docs_object_' + res.data.id).remove();
+      $('#google_docs_delete_modal').modal('toggle');
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Google spreadsheet") }}' , msg: '{{ __("Removed source ") }}' + res.data.id + '.' })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    },
+    error: function(res) {
+      $('#toast-placeholder').empty();
+      $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Google spreadsheet") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+      $('.toast').toast('show');
+    }
+  });
+
+
+  </script>
+  {% endblock %}
