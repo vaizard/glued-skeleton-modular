@@ -26,7 +26,6 @@ class FinStor extends Phinx\Migration\AbstractMigration
             ->addColumn('c_domain_id', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
                 'comment' => 'Domain id',
                 'after' => 'c_uid',
             ])
@@ -45,13 +44,6 @@ class FinStor extends Phinx\Migration\AbstractMigration
                 'default' => 'CURRENT_TIMESTAMP',
                 'comment' => 'Timestamp: account created / seen first',
                 'after' => 'c_json',
-            ])
-            ->addColumn('c_ts_modified', 'timestamp', [
-                'null' => true,
-                'default' => 'CURRENT_TIMESTAMP',
-                'update' => 'CURRENT_TIMESTAMP',
-                'comment' => 'Timestamp: account modified',
-                'after' => 'c_ts_created',
             ])
             ->addColumn('c_ts_modified', 'timestamp', [
                 'null' => true,
