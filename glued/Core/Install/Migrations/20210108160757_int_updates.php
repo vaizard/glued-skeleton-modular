@@ -81,7 +81,7 @@ class IntUpdates extends Phinx\Migration\AbstractMigration
                 'identity' => 'enable',
                 'comment' => 'Unique row id',
             ])
-            ->change();
+            ->update();
         $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
     }
 }
