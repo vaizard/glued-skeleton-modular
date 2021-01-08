@@ -41,7 +41,7 @@ class IntegrationsController extends AbstractTwigController
         // nacteme moje sheety
         $this->db->where('c_provider', 'google');
         $this->db->where('c_service', 'spreadsheets');
-        $this->db->where('c_owner_id', $GLOBALS['_GLUED']['authn']['user_id']);
+        $this->db->where('c_user_id', $GLOBALS['_GLUED']['authn']['user_id']);
         $spreadsheets = $this->db->get('t_int_objects', null, ['c_uid as id', 'c_progress as progress', 'c_json->>"$.uri" as uri', 'c_json->>"$.attributes.spreadsheetId" as spreadsheetId', 'c_json->>"$.attributes.sheetId" as sheetId']);
         return $this->render($response, 'Integrations/Views/google_docs.twig', [
             'spreadsheets' => $spreadsheets
@@ -141,6 +141,7 @@ class IntegrationsController extends AbstractTwigController
         $req['provider'] = 'google';
         $req['service'] = 'spreadsheets';
         $req['uri'] = $post_data['uri'];
+        $req['name'] = $post_data['uri']; // Temp. name for c_stor_name
         
         // convert body to object
         $req = json_decode(json_encode((object)$req));
@@ -154,11 +155,13 @@ class IntegrationsController extends AbstractTwigController
 
         //if ($result->isValid()) {
             $row = array (
-                'c_provider' => 'google',
-                'c_service' => 'spreadsheets',
-                'c_owner_id' => $user_id,
+                //'c_provider' => 'google',
+                //'c_service' => 'spreadsheets',
+                'c_domain_id' => 1, // TODO put scope into _GLUED
+                'c_user_id' => $user_id,
                 'c_progress' => '0',
-                'c_json' => json_encode($req)
+                'c_json' => json_encode($req),
+                'c_attr' => '{}'
             );
             try { $nove_id = $this->utils->sql_insert_with_json('t_int_objects', $row); } catch (Exception $e) { 
                 throw new HttpInternalServerErrorException($request, $e->getMessage());  

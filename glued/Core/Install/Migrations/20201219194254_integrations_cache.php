@@ -8,7 +8,7 @@ class IntegrationsCache extends Phinx\Migration\AbstractMigration
     public function change()
     {
         $this->execute('SET unique_checks=0; SET foreign_key_checks=0;');
-        $this->table('t_core_int_cache', [
+        $this->table('t_int_cache', [
                 'id' => false,
                 'primary_key' => ['c_uid'],
                 'engine' => 'InnoDB',
