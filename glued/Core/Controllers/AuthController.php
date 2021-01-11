@@ -37,6 +37,7 @@ class AuthController extends AbstractTwigController
     {
         $builder = new JsonResponseBuilder('auth-reset', 1);
 
+
         // TODO verify that a posted json will yield same results as XHR posting a form
         // TODO add throttling for too many reset requests for diff accounts from one source and/or overall
         $validation = $this->validator->validate($request, [
@@ -44,20 +45,87 @@ class AuthController extends AbstractTwigController
         ]);
 
         if ($this->auth->check()) {
-            $payload = $builder->withMessage(__('You are signed in.'))->build();
+            $payload = $builder->withMessage(__('You are signed in, please sign out first.'))->build();
             return $response->withJson($payload, 403); 
-            // TODO mozna by tudy mohl resetovat hesla root? nebo mu dame tlacitko           
         }
+
         if ($validation->failed()) {
             $reseed = $this->validator->reseed($request, [ 'email' ]);
             $payload = $builder->withValidationError($validation->messages())
                                ->withValidationReseed($reseed)
                                ->build();
+            return $response->withJson($payload, 400);
+        } else {
+
+            // Fetch user
+            $email = $request->getParam('email');
+            $this->db->join("t_core_authn a", "a.c_user_uid=u.c_uid", "LEFT");
+            $this->db->where("u.c_email", $email);
+            $this->db->where("a.c_type", 0);
+            $user = $this->db->get("t_core_users u", null);
+
+            // Lame throttling + token insert
+            $seconds_test = 60;
+            $seconds_step = 5;
+            $seconds_max_throttle = 30;
+            $seconds_token_valid = 3600;
+            
+            if (!$user) {
+                $seconds_throttle = $seconds_max_throttle;
+            } else {
+                $this->db->where("c_user_id", $user[0]['c_user_uid']);
+                $this->db->where("c_auth_id", $user[0]['c_uid']);
+                $this->db->where("c_ts_created", ['timestamp(DATE_SUB(NOW(), INTERVAL '.$seconds_test.' SECOND))', 'timestamp(NOW())'], 'BETWEEN');
+                $reset = $this->db->get("t_core_authn_reset", null);
+
+                $seconds_throttle = count($reset) * $seconds_step;
+                if ($seconds_throttle > $seconds_max_throttle) $seconds_throttle = $seconds_max_throttle;
+
+                $data = [
+                    "c_user_id" => $user[0]['c_user_uid'],
+                    "c_auth_id" => $user[0]['c_uid'],
+                    "c_token"   => $this->crypto->genkey_base64(),
+                    "c_ts_timeout" => "(DATE_ADD( NOW(), INTERVAL $seconds_token_valid SECOND))"
+                ];
+                $this->db->insert("t_core_authn_reset", $data);
+                echo $this->db->getLastQuery();
+            
+            try {
+                echo "la";
+                $message = (new \Swift_Message())
+                  ->setSubject('Password reset')
+                  ->setFrom(['support@example.com'])
+                  ->setTo([$email => $email])
+                  ->setBody(
+                    '<html>' .
+                    ' <body>' .
+                    '  <p>A password reset was requested on your behalf.</p>'.
+                    '  <p>If this was you, <a href="'.$this->routerParser->urlFor('core.reset.web').'/'.$data['c_token'].'">click this link</a> to proceed with the password reset.</p>' .
+                    ' </body>' .
+                    '</html>',
+                      'text/html'
+                    );
+                $this->mailer->send($message);
+                echo "lau";
+            } catch (\Exception $e) {
+                echo 'Caught exception: ',  $e->getMessage(), "\n";
+            }
+            }
+
+            sleep($seconds_throttle);
+
+
+
+
+//echo $this->db->getLastQuery();
+            print_r($user);
+            echo "<br>";
+            print_r($reset);
+            die();
+
             // TODO test if email exists
             // TODO test if throttling should apply on this particular email addr
             // TODO log attempt
-            return $response->withJson($payload, 400);
-        } else {
             $this->auth->reset($request->getParam('email')); // auto sign-in after account creation
             $flash = [
                 "info" => 'A password reset token has been sent to you. Please follow the instructions received by e-mail.',
@@ -284,6 +352,8 @@ class AuthController extends AbstractTwigController
     {
         $user_id = $GLOBALS['_GLUED']['authn']['user_id'] ?? false;
         $auth_id = $GLOBALS['_GLUED']['authn']['auth_id'] ?? false;
+
+        // TODO - this fires on password reset
         
         if ($user_id and $auth_id) {
             
