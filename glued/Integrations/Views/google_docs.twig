@@ -16,10 +16,9 @@
               <thead>
                 <tr>
                   <th class="col-sm-1">{{ __('ID') }}</th>
-                  <th class="col-sm-2">{{ __('Doc ID') }}</th>
+                  <th class="col-sm-3">{{ __('Doc ID') }}</th>
                   <th class="col-sm-2">{{ __('Sheet ID') }}</th>
                   <th class="col-sm-2">{{ __('Sheet Title') }}</th>
-                  <th class="col-sm-1">{{ __('Area') }}</th>
                   <th class="col-sm-1">{{ __('Progress') }}</th>
                   <th class="col-sm-1">{{ __('Manage') }}</th>
                 </tr>
@@ -31,10 +30,9 @@
                   {% if row.progress < 5 %}
                   <td class="col-sm-7" colspan="3">URI: <a href="{{ url_for('integrations.google.detail', { 'uid': row.id }) }}">{{ row.uri }}</a></td>
                   {% else %}
-                  <td class="col-sm-2"><a href="{{ url_for('integrations.google.detail', { 'uid': row.id }) }}">{{ row.spreadsheetId }}</a></td>
+                  <td class="col-sm-3"><a href="{{ url_for('integrations.google.detail', { 'uid': row.id }) }}">{{ row.spreadsheetId }}</a></td>
                   <td class="col-sm-2">{{ row.sheetId }}</td>
                   <td class="col-sm-2">{{ row.title }}</td>
-                  <td class="col-sm-1">{{ row.area }}</td>
                   {% endif %}
                   <td class="col-sm-1">{{ row.progress }}</td>
                   <td class="col-sm-1">
