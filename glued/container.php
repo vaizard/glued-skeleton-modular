@@ -155,6 +155,15 @@ $container->set('iso4217', function() {
     return new Alcohol\ISO4217();
 });
 
+$container->set('mailer', function (Container $c) {
+    $smtp = $c->get('settings')['smtp'];
+    $transport = (new \Swift_SmtpTransport($smtp['addr'], $smtp['port'], $smtp['encr']))
+      ->setUsername($smtp['user']) 
+      ->setPassword($smtp['pass']);
+    $mailer = new \Swift_Mailer($transport);
+    return $mailer;
+});
+
 
 // *************************************************
 // GLUED CLASSES ***********************************
@@ -174,9 +183,13 @@ $container->set('utils', function (Container $c) {
     return new Utils($c->get('db'), $c->get('settings'));
 });
 
-// stor trida
 $container->set('stor', function (Container $c) {
     return new Stor($c->get('db'));
+});
+
+$container->set('crypto', function () {
+    // TODO cleanup codebase from Crypto initialization
+    return new Glued\Core\Classes\Crypto\Crypto();
 });
 
 
