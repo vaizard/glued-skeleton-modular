@@ -176,7 +176,7 @@ class IntegrationsController extends AbstractTwigController
         
         return $this->render($response, 'Integrations/Views/google.detail.twig', [
             'row' => $data_sheet,
-            'actions' => $json_data['attributes']['actions'],
+            'actions' => $json_data['attributes']['actions'] ?? [],
             'next' => $next
         ]);
     }
