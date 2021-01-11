@@ -97,6 +97,7 @@ return [
         'encr' => 'ssl',
         'user' => 'you@example.com',
         'pass' => 'very-secret',
+        'from' => 'you@example.com',
         'reconnect.after' => '100',  // reconnect after x emails
         'reconnect.delay' => '15',   // wait for x seconds between connections
         'throttle.count' => '50',    // number of emails per minute

@@ -10,6 +10,7 @@ return [
         'encr' => 'tls',
         'user' => 'test@example.com',
         'pass' => 'AVeryStrongPassword',
+        'from' => 'test@example.com'
     ],
 
 ];

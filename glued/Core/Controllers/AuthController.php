@@ -88,48 +88,39 @@ class AuthController extends AbstractTwigController
                     "c_ts_timeout" => "(DATE_ADD( NOW(), INTERVAL $seconds_token_valid SECOND))"
                 ];
                 $this->db->insert("t_core_authn_reset", $data);
-                echo $this->db->getLastQuery();
             
-            try {
-                echo "la";
-                $message = (new \Swift_Message())
-                  ->setSubject('Password reset')
-                  ->setFrom(['support@example.com'])
-                  ->setTo([$email => $email])
-                  ->setBody(
-                    '<html>' .
-                    ' <body>' .
-                    '  <p>A password reset was requested on your behalf.</p>'.
-                    '  <p>If this was you, <a href="'.$this->routerParser->urlFor('core.reset.web').'/'.$data['c_token'].'">click this link</a> to proceed with the password reset.</p>' .
-                    ' </body>' .
-                    '</html>',
-                      'text/html'
-                    );
-                $this->mailer->send($message);
-                echo "lau";
-            } catch (\Exception $e) {
-                echo 'Caught exception: ',  $e->getMessage(), "\n";
+                try {
+                    $uri = $_SERVER['SERVER_NAME'] ?? '';
+                    if ($uri == '') {
+                        $payload = $builder->withMessage(__('Password resets currently impossible.'))->withCode(500)->build();
+                        return $response->withJson($payload, 500);
+                    }
+                    $uri = 'https://' . $uri . $this->routerParser->urlFor('core.reset.web') . '/' . $data['c_token'];
+                    $message = (new \Swift_Message())
+                      ->setSubject('Password reset')
+                      ->setFrom([ $this->settings['smtp']['from'] ])
+                      ->setTo([ $email ])
+                      ->setBody(
+                            '<html><body>' .
+                            '<p>A password reset was requested on your behalf.</p>' .
+                            '<p>If this was you, <a href="'.$uri.'">click this link</a> to proceed with the password reset.</p>' .
+                            '</body></html>',
+                            'text/html'
+                        );
+                    $this->mailer->send($message);
+                    
+                } catch (\Exception $e) {
+                    $payload = $builder->withMessage(__('Sending the password reset e-mail failed.'))->withCode(500)->build();
+                    return $response->withJson($payload, 500);
+                }
             }
-            }
-
             sleep($seconds_throttle);
 
-
-
-
-//echo $this->db->getLastQuery();
-            print_r($user);
-            echo "<br>";
-            print_r($reset);
-            die();
-
-            // TODO test if email exists
-            // TODO test if throttling should apply on this particular email addr
+/*
             // TODO log attempt
             $this->auth->reset($request->getParam('email')); // auto sign-in after account creation
-            $flash = [
-                "info" => 'A password reset token has been sent to you. Please follow the instructions received by e-mail.',
-            ];
+            */
+            $flash = [ "info" => 'A password reset token has been sent to you. Please follow the instructions received by e-mail.' ];
             $payload = $builder->withFlashMessage($flash)->withCode(200)->build();
             return $response->withJson($payload, 200);
         }

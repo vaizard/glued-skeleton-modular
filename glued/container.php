@@ -159,8 +159,11 @@ $container->set('mailer', function (Container $c) {
     $smtp = $c->get('settings')['smtp'];
     $transport = (new \Swift_SmtpTransport($smtp['addr'], $smtp['port'], $smtp['encr']))
       ->setUsername($smtp['user']) 
-      ->setPassword($smtp['pass']);
+      ->setPassword($smtp['pass'])
+      ->setStreamOptions(array('ssl' => array('allow_self_signed' => true, 'verify_peer' => false)));
     $mailer = new \Swift_Mailer($transport);
+    $mailLogger = new \Swift_Plugins_Loggers_ArrayLogger();
+    $mailer->registerPlugin(new \Swift_Plugins_LoggerPlugin($mailLogger));
     return $mailer;
 });
 
