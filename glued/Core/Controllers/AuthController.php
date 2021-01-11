@@ -36,6 +36,7 @@ class AuthController extends AbstractTwigController
     public function reset_post($request, $response)
     {
         $builder = new JsonResponseBuilder('auth-reset', 1);
+                //print_r($request->getParsedBody()); die();
 
 
         // TODO verify that a posted json will yield same results as XHR posting a form

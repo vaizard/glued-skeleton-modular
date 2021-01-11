@@ -28,7 +28,7 @@ $app->group('/core', function (RouteCollectorProxy $route) {
     $route->group('', function ($route) {
         $route->get ('/signin', AuthController::class . ':signin_get')->setName('core.signin.web')->add(RedirectAuthenticated::class);
         $route->post('/signin', AuthController::class . ':signin_post');
-        $route->get ('/reset', AuthController::class . ':reset_get')->setName('core.reset.web')->add(RedirectAuthenticated::class);
+        $route->get ('/reset[/{token}]', AuthController::class . ':reset_get')->setName('core.reset.web')->add(RedirectAuthenticated::class);
         $route->post('/reset', AuthController::class . ':reset_post');
         $route->get ('/signup', AuthController::class . ':signup_get')->setName('core.signup.web')->add(RedirectAuthenticated::class);
         // TODO consider killing the RedirectAuthenticated middleware. Just warn user instead?
