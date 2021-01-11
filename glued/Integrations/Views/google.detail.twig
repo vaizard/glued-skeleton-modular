@@ -18,18 +18,38 @@
             <div>{{ __('Spreadsheet ID') }}: {{ row.spreadsheetId }}</div>
             <div>{{ __('Sheet ID') }}: {{ row.sheetId }}</div>
             <div>{{ __('Progress') }}: {{ row.progress }}</div>
+            
+            <h4>{{ __('Functions') }}</h4>
+            {% for fce in actions %}
+            <div>function: {{ fce.function }}, meta: {{ fce.meta }}</div>
+            {% endfor %}
         </div>
       </div>
     </div>
     <div class="col-6">
       <div class="card">
         <div class="card-body">
+            {% if row.progress < 15 %}
             <h4>{{ __('Next step') }}</h4>
             <form action="{{ url_for('integrations.google.next.api01', { 'uid': row.id }) }}" method="post">
                 <p>{{ next.description | raw }}</p>
                 <div>{{ next.inputs | raw }}</div>
                 <div><button type="submit" class="btn btn-success">{{ next.submit }}</button></div>
             </form>
+            {% endif %}
+            {% if row.progress == 11 %}
+            <form action="{{ url_for('integrations.google.next.api01', { 'uid': row.id }) }}" method="post">
+                <p>{{ __('or you can finalise process') }}</p>
+                <div><button type="submit" name="finalise" class="btn btn-success">{{ __('Finalise') }}</button></div>
+            </form>
+            {% endif %}
+            {% if row.progress == 15 %}
+            <h4>{{ __('All steps completed') }}</h4>
+            <form action="{{ url_for('integrations.google.next.api01', { 'uid': row.id }) }}" method="post">
+                <p>{{ __('now you can do big action') }}</p>
+                <div><button type="submit" class="btn btn-success">{{ __('do action') }}</button></div>
+            </form>
+            {% endif %}
         </div>
       </div>
     </div>

@@ -73,8 +73,8 @@ class IntegrationsController extends AbstractTwigController
         
         // nacteme moje sheety
         $this->db->where('c_uid', $object_id);
-        $data_sheet = $this->db->getOne('t_int_objects', ['c_uid as id', 'c_progress as progress', 'c_json->>"$.uri" as uri', 'c_json->>"$.attributes.spreadsheetId" as spreadsheetId', 'c_json->>"$.attributes.sheetId" as sheetId']);
-        
+        $data_sheet = $this->db->getOne('t_int_objects', ['c_uid as id', 'c_progress as progress', 'c_json as json', 'c_json->>"$.uri" as uri', 'c_json->>"$.attributes.spreadsheetId" as spreadsheetId', 'c_json->>"$.attributes.sheetId" as sheetId']);
+        $json_data = json_decode($data_sheet['json'], true);
         $progress = $data_sheet['progress'];
         
         $next = array();
@@ -133,12 +133,41 @@ class IntegrationsController extends AbstractTwigController
         //   ]
         // }
             
-            $next['inputs'] = '';
-            $next['submit'] = 'vybrat oblast';
+            $sheet_functions = array();
+            $sheet_functions[] = 'checkmeta';
+            $sheet_functions[] = 'rowcache';
+            $sheet_functions[] = 'costimport';
+            
+            $sheet_optiony = '';
+            foreach ($sheet_functions as $sf) {
+                $sheet_optiony .= '<option>'.$sf.'</option>';
+            }
+            
+            $next['inputs'] = '
+                <div><select name="funkce">'.$sheet_optiony.'</select></div>
+                <div><input type="text" name="meta" value="" placeholder="meta data" /></div>
+            ';
+            
+            $next['submit'] = 'nastavit funkci';
         }
         else if ($progress == 11) {
             $next['description'] = 'mate spreadsheet i sheet. vyberte dalsi funkce, nebo ukoncete vyber';
-            $next['submit'] = 'ukoncit vyber';
+            $sheet_functions = array();
+            $sheet_functions[] = 'checkmeta';
+            $sheet_functions[] = 'rowcache';
+            $sheet_functions[] = 'costimport';
+            
+            $sheet_optiony = '';
+            foreach ($sheet_functions as $sf) {
+                $sheet_optiony .= '<option>'.$sf.'</option>';
+            }
+            
+            $next['inputs'] = '
+                <div><select name="funkce">'.$sheet_optiony.'</select></div>
+                <div><input type="text" name="meta" value="" placeholder="meta data" /></div>
+            ';
+            
+            $next['submit'] = 'nastavit funkci';
         }
         else if ($progress == 15) {
             $next['description'] = 'vse mate vybrane';
@@ -147,6 +176,7 @@ class IntegrationsController extends AbstractTwigController
         
         return $this->render($response, 'Integrations/Views/google.detail.twig', [
             'row' => $data_sheet,
+            'actions' => $json_data['attributes']['actions'],
             'next' => $next
         ]);
     }
@@ -305,7 +335,47 @@ class IntegrationsController extends AbstractTwigController
             $id = $this->db->update('t_int_objects', $row);
             if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating failed.')); }
         }
-        
+        else if ($progress == 10 or $progress == 11) {
+            // pokud je to 11 a byl stisknuty finalise, ukoncime to
+            if (isset($post_data['finalise']) and $progress == 11) {
+                $row = [ 'c_progress' => '15' ];
+                $this->db->where('c_uid', $object_id);
+                $id = $this->db->update('t_int_objects', $row);
+                if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating failed.')); }
+            }
+            else {
+                // pridavame zadanou funkci a meta data
+                // zalozime urcite ten prvek
+                if (!isset($json_data['attributes']['actions'])) { $json_data['attributes']['actions'] = array(); }
+                //      "sheets.checkmeta": {       // php funkce, ktera kontroluje, zda existuji predepsane zahlavi sloupcu (v radku definovanem pomoci "meta")
+                //         "meta": "Orig!A1:G1",
+                //         "reqs": [ "DÚZP", "VS", "VS2" ]
+                //      }
+                /*
+                    aby to bylo serazene, musi se to zadat jako pole
+                    
+                    [] {
+                        function: 
+                        meta: 
+                    }
+                */
+                
+                // priprava objektu funkce (jako asociativni pole
+                $objekt_funkce = array(
+                    "function" => "sheets.".$post_data['funkce'],
+                    "meta" => $post_data['meta']
+                );
+                
+                $json_data['attributes']['actions'][] = $objekt_funkce;
+                
+                // pripravime update data objektu
+                $row = [ 'c_progress' => '11', 'c_json' => json_encode($json_data) ];
+                $this->db->where('c_uid', $object_id);
+                $id = $this->db->update('t_int_objects', $row);
+                if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating failed.')); }
+                
+            }
+        }
         
         // presmerujeme na adresu integrations.google.detail kde budeme pokracovat
         $redirect_url = $this->routerParser->urlFor('integrations.google.detail').'/'.$object_id;
