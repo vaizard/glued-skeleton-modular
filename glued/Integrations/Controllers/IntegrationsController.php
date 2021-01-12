@@ -42,7 +42,7 @@ class IntegrationsController extends AbstractTwigController
         $this->db->where('c_provider', 'google');
         $this->db->where('c_service', 'spreadsheets');
         $this->db->where('c_user_id', $GLOBALS['_GLUED']['authn']['user_id']);
-        $spreadsheets = $this->db->get('t_int_objects', null, ['c_uid as id', 'c_progress as progress', 'c_json->>"$.uri" as uri', 'c_json->>"$.attributes.spreadsheetId" as spreadsheetId', 'c_json->>"$.attributes.sheetId" as sheetId']);
+        $spreadsheets = $this->db->get('t_int_objects', null, ['c_uid as id', 'c_progress as progress', 'c_json->>"$.uri" as uri', 'c_json->>"$.attributes.spreadsheetId" as spreadsheetId', 'c_json->>"$.attributes.sheetId" as sheetId', 'c_json->>"$.attributes.sheetTitle" as sheetTitle']);
         return $this->render($response, 'Integrations/Views/google_docs.twig', [
             'spreadsheets' => $spreadsheets
         ]);
@@ -73,7 +73,7 @@ class IntegrationsController extends AbstractTwigController
         
         // nacteme moje sheety
         $this->db->where('c_uid', $object_id);
-        $data_sheet = $this->db->getOne('t_int_objects', ['c_uid as id', 'c_progress as progress', 'c_json as json', 'c_json->>"$.uri" as uri', 'c_json->>"$.attributes.spreadsheetId" as spreadsheetId', 'c_json->>"$.attributes.sheetId" as sheetId']);
+        $data_sheet = $this->db->getOne('t_int_objects', ['c_uid as id', 'c_progress as progress', 'c_json as json', 'c_json->>"$.uri" as uri', 'c_json->>"$.attributes.spreadsheetId" as spreadsheetId', 'c_json->>"$.attributes.sheetId" as sheetId', 'c_json->>"$.attributes.sheetTitle" as sheetTitle']);
         $json_data = json_decode($data_sheet['json'], true);
         $progress = $data_sheet['progress'];
         
@@ -253,6 +253,19 @@ class IntegrationsController extends AbstractTwigController
         $client->setAuthConfig(__ROOT__ . '/private/api/glued-dev-91338368ae7d.json');
         $service = new \Google_Service_Sheets($client);
         
+        // funkce co zjisti title pro zadane gid
+        function getSheetTitle($service, $spreadsheetID, $gid) {
+            $spreadSheet = $service->spreadsheets->get($spreadsheetID);
+            $sheets = $spreadSheet->getSheets();
+            $title = '';
+            foreach($sheets as $sheet) {
+                if ($sheet->properties->sheetId == $gid) {
+                    $title = $sheet->properties->title;
+                }
+            }
+            return $title;
+        }
+        
         // nacteme si jaky mame progress a podle toho provedeme akci
         $this->db->where('c_uid', $object_id);
         $data_sheet = $this->db->getOne('t_int_objects', ['c_progress', 'c_json']);
@@ -298,6 +311,7 @@ class IntegrationsController extends AbstractTwigController
                 if (isset($matches[1]) and $matches[1] != '') {
                     // neco tam je, dame 10 a ulozime ten sheet
                     $json_data['attributes']['sheetId'] = $matches[1];
+                    $json_data['attributes']['sheetTitle'] = getSheetTitle($service, $spreadsheetID, $matches[1]);
                     // pripravime update data objektu
                     $row = [ 'c_progress' => '10', 'c_json' => json_encode($json_data) ];
                     $this->db->where('c_uid', $object_id);
@@ -328,7 +342,9 @@ class IntegrationsController extends AbstractTwigController
             */
         }
         else if ($progress == 7) {
+            $spreadsheetID = $json_data['attributes']['spreadsheetId'];
             $json_data['attributes']['sheetId'] = $post_data['gid'];
+            $json_data['attributes']['sheetTitle'] = getSheetTitle($service, $spreadsheetID, $post_data['gid']);
             // pripravime update data objektu
             $row = [ 'c_progress' => '10', 'c_json' => json_encode($json_data) ];
             $this->db->where('c_uid', $object_id);
@@ -376,6 +392,47 @@ class IntegrationsController extends AbstractTwigController
                 
             }
         }
+        
+        // presmerujeme na adresu integrations.google.detail kde budeme pokracovat
+        $redirect_url = $this->routerParser->urlFor('integrations.google.detail').'/'.$object_id;
+        return $response->withRedirect($redirect_url);
+        
+    }
+    
+    
+    // zpracovani akci prirazenych k sheetu
+    public function google_sheet_action(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('integrations.google', 1);
+        $object_id = (int) $args['uid'];
+        $post_data = $request->getParsedBody();
+        
+        // pripravime si taky spojeni s goglem
+        $client = new \Google_Client();
+        $client->setApplicationName('Google Sheets and PHP');
+        $client->setScopes([\Google_Service_Sheets::SPREADSHEETS]);
+        $client->setAccessType('offline');
+        $client->setAuthConfig(__ROOT__ . '/private/api/glued-dev-91338368ae7d.json');
+        $service = new \Google_Service_Sheets($client);
+        
+        $this->db->where('c_uid', $object_id);
+        $data_sheet = $this->db->getOne('t_int_objects', ['c_json']);
+        $json_data = json_decode($data_sheet['c_json'], true);
+        
+        $flash_vystup = '';
+        
+        foreach ($json_data['attributes']['actions'] as $action) {
+            if ($action['function'] == 'sheets.checkmeta') {
+                $flash_vystup .= 'zpracovavam funkci checkmeta *';
+            }
+            else if ($action['function'] == 'sheets.rowcache') {
+                $flash_vystup .= 'zpracovavam funkci rowcache *';
+            }
+            else if ($action['function'] == 'sheets.costimport') {
+                $flash_vystup .= 'zpracovavam funkci costimport *';
+            }
+        }
+        
+        $this->flash->addMessage('info', $flash_vystup);
         
         // presmerujeme na adresu integrations.google.detail kde budeme pokracovat
         $redirect_url = $this->routerParser->urlFor('integrations.google.detail').'/'.$object_id;
