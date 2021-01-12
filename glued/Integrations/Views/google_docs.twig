@@ -32,7 +32,7 @@
                   {% else %}
                   <td class="col-sm-3"><a href="{{ url_for('integrations.google.detail', { 'uid': row.id }) }}">{{ row.spreadsheetId }}</a></td>
                   <td class="col-sm-2">{{ row.sheetId }}</td>
-                  <td class="col-sm-2">{{ row.title }}</td>
+                  <td class="col-sm-2">{{ row.sheetTitle }}</td>
                   {% endif %}
                   <td class="col-sm-1">{{ row.progress }}</td>
                   <td class="col-sm-1">

@@ -17,6 +17,7 @@
             <div>{{ __('URI') }}: {{ row.uri }}</div>
             <div>{{ __('Spreadsheet ID') }}: {{ row.spreadsheetId }}</div>
             <div>{{ __('Sheet ID') }}: {{ row.sheetId }}</div>
+            <div>{{ __('Sheet Title') }}: {{ row.sheetTitle }}</div>
             <div>{{ __('Progress') }}: {{ row.progress }}</div>
             
             <h4>{{ __('Functions') }}</h4>
@@ -45,7 +46,7 @@
             {% endif %}
             {% if row.progress == 15 %}
             <h4>{{ __('All steps completed') }}</h4>
-            <form action="{{ url_for('integrations.google.next.api01', { 'uid': row.id }) }}" method="post">
+            <form action="{{ url_for('integrations.google.action.api01', { 'uid': row.id }) }}" method="post">
                 <p>{{ __('now you can do big action') }}</p>
                 <div><button type="submit" class="btn btn-success">{{ __('do action') }}</button></div>
             </form>
