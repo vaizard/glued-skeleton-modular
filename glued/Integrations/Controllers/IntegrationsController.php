@@ -18,6 +18,7 @@ use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Symfony\Component\DomCrawler\Crawler;
+use Glued\Integrations\Classes\Google;
 
 
 class IntegrationsController extends AbstractTwigController
@@ -56,9 +57,8 @@ class IntegrationsController extends AbstractTwigController
         5 - mame k dispozici spreadsheet
         6 - nejde se k nemu pripojit
         7 - muzeme se pripojit ale neni vybrany sheet
-        10 - mame spreadsheet, i sheet a jde se pripojit
-        11 - zadana 1 nebo vice funkci ale neukonceno
-        15 - ukonceno zadavani funkci. je to ready ke spusteni
+        10 - mame spreadsheet, i sheet a jde se pripojit, muzou se pridavat skupiny funkci
+        15 - ukonceno zadavani skupin funkci. je to ready ke spusteni
     */
     public function google_detail_ui(Request $request, Response $response, array $args = []): Response {
         $object_id = (int) $args['uid'];
@@ -111,12 +111,15 @@ class IntegrationsController extends AbstractTwigController
             $next['submit'] = 'vyber sheet';
         }
         else if ($progress == 10) {
-            $next['description'] = 'mate spreadsheet i sheet. vyberte funkce a jejich rozsahy dat';
+            $next['description'] = 'mate spreadsheet i sheet. vyberte funkce a jejich rozsahy dat a vytvorte tak pojmenovanou skupinu funkci. nebo vice skupin funkci. pokud vse mate, ukoncete tuto fazi';
             
         // "attributes": {
         //   "spreadsheetId": "14y4sJZ1cCUlIvTmq021hGwSl4em6Iv-6Cr-DHOrY5fs", // povinne
         //   "sheetId": "607165653", // nepovinne, jen pokud je v url
         //   "actions": [
+        //        "nazev skupiny": [
+        //            
+        //        ],
         //      "sheets.checkmeta": {       // php funkce, ktera kontroluje, zda existuji predepsane zahlavi sloupcu (v radku definovanem pomoci "meta")
         //         "meta": "Orig!A1:G1",
         //         "reqs": [ "DÚZP", "VS", "VS2" ]
@@ -144,40 +147,45 @@ class IntegrationsController extends AbstractTwigController
             }
             
             $next['inputs'] = '
-                <div><select name="funkce">'.$sheet_optiony.'</select></div>
-                <div><input type="text" name="meta" value="" placeholder="meta data" /></div>
+                <div><input type="text" name="group_key" value="" placeholder="key of group" /> - key of the group</div>
+                <div class="" style="margin: 20px 0; padding: 10px; border: 1px solid black;">
+                    <div><select name="funkce1"><option value="0" selected> - not selected - </option>'.$sheet_optiony.'</select> - function 1</div>
+                    <div><input type="text" name="meta1" value="" placeholder="meta data" /> - meta 1</div>
+                    <div><input type="text" name="data1" value="" placeholder="basic data" /> - data 1</div>
+                    <div><input type="text" name="fuid1" value="" placeholder="fuid" /> - fuid 1</div>
+                </div>
+                <div class="" style="margin: 20px 0; padding: 10px; border: 1px solid black;">
+                    <div><select name="funkce2"><option value="0" selected> - not selected - </option>'.$sheet_optiony.'</select> - function 2</div>
+                    <div><input type="text" name="meta2" value="" placeholder="meta data" /> - meta 2</div>
+                    <div><input type="text" name="data2" value="" placeholder="basic data" /> - data 2</div>
+                    <div><input type="text" name="fuid2" value="" placeholder="fuid" /> - fuid 2</div>
+                </div>
+                <div class="" style="margin: 20px 0; padding: 10px; border: 1px solid black;">
+                    <div><select name="funkce3"><option value="0" selected> - not selected - </option>'.$sheet_optiony.'</select> - function 3</div>
+                    <div><input type="text" name="meta3" value="" placeholder="meta data" /> - meta 3</div>
+                    <div><input type="text" name="data3" value="" placeholder="basic data" /> - data 3</div>
+                    <div><input type="text" name="fuid3" value="" placeholder="fuid" /> - fuid 3</div>
+                </div>
             ';
             
-            $next['submit'] = 'nastavit funkci';
-        }
-        else if ($progress == 11) {
-            $next['description'] = 'mate spreadsheet i sheet. vyberte dalsi funkce, nebo ukoncete vyber';
-            $sheet_functions = array();
-            $sheet_functions[] = 'checkmeta';
-            $sheet_functions[] = 'rowcache';
-            $sheet_functions[] = 'costimport';
-            
-            $sheet_optiony = '';
-            foreach ($sheet_functions as $sf) {
-                $sheet_optiony .= '<option>'.$sf.'</option>';
-            }
-            
-            $next['inputs'] = '
-                <div><select name="funkce">'.$sheet_optiony.'</select></div>
-                <div><input type="text" name="meta" value="" placeholder="meta data" /></div>
-            ';
-            
-            $next['submit'] = 'nastavit funkci';
+            $next['submit'] = 'nastavit skupinu funkci';
         }
         else if ($progress == 15) {
-            $next['description'] = 'vse mate vybrane';
-            $next['submit'] = 'ok, uz to nemackej';
+            $next['description'] = 'vse mate vybrane. nyni muzete spustit jednotlive skupiny funkci';
+            $groups = array();
+            
+            // dekodujem mozne submity
+            foreach ($json_data['attributes']['actions'] as $kk => $vv) {
+                $groups[] = $kk;
+            }
+            
         }
         
         return $this->render($response, 'Integrations/Views/google.detail.twig', [
             'row' => $data_sheet,
             'actions' => $json_data['attributes']['actions'] ?? [],
-            'next' => $next
+            'next' => $next,
+            'groups' => $groups ?? []
         ]);
     }
     
@@ -351,9 +359,9 @@ class IntegrationsController extends AbstractTwigController
             $id = $this->db->update('t_int_objects', $row);
             if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating failed.')); }
         }
-        else if ($progress == 10 or $progress == 11) {
-            // pokud je to 11 a byl stisknuty finalise, ukoncime to
-            if (isset($post_data['finalise']) and $progress == 11) {
+        else if ($progress == 10) {
+            // pokud byl stisknuty finalise, ukoncime to
+            if (isset($post_data['finalise'])) {
                 $row = [ 'c_progress' => '15' ];
                 $this->db->where('c_uid', $object_id);
                 $id = $this->db->update('t_int_objects', $row);
@@ -361,31 +369,29 @@ class IntegrationsController extends AbstractTwigController
             }
             else {
                 // pridavame zadanou funkci a meta data
-                // zalozime urcite ten prvek
+                // pokud tam jeste nic neni, zalozime urcite ten prvek actions
                 if (!isset($json_data['attributes']['actions'])) { $json_data['attributes']['actions'] = array(); }
-                //      "sheets.checkmeta": {       // php funkce, ktera kontroluje, zda existuji predepsane zahlavi sloupcu (v radku definovanem pomoci "meta")
-                //         "meta": "Orig!A1:G1",
-                //         "reqs": [ "DÚZP", "VS", "VS2" ]
-                //      }
-                /*
-                    aby to bylo serazene, musi se to zadat jako pole
-                    
-                    [] {
-                        function: 
-                        meta: 
+                
+                $group_key = $post_data['group_key'];
+                $json_data['attributes']['actions'][$group_key] = array();
+                
+                // muzou prijit naraz i 3 funkce
+                for ($i = 1; $i <= 3; $i++) {
+                    if ($post_data['funkce'.$i] == '0') { continue; }
+                    else {
+                        // priprava objektu funkce (jako asociativni pole
+                        $objekt_funkce = array(
+                            "function" => "sheets.".$post_data['funkce'.$i],
+                            "meta" => $post_data['meta'.$i],
+                            "data" => $post_data['data'.$i],
+                            "fuid" => $post_data['fuid'.$i]
+                        );
+                        $json_data['attributes']['actions'][$group_key][] = $objekt_funkce;
                     }
-                */
-                
-                // priprava objektu funkce (jako asociativni pole
-                $objekt_funkce = array(
-                    "function" => "sheets.".$post_data['funkce'],
-                    "meta" => $post_data['meta']
-                );
-                
-                $json_data['attributes']['actions'][] = $objekt_funkce;
+                }
                 
                 // pripravime update data objektu
-                $row = [ 'c_progress' => '11', 'c_json' => json_encode($json_data) ];
+                $row = [ 'c_json' => json_encode($json_data) ];
                 $this->db->where('c_uid', $object_id);
                 $id = $this->db->update('t_int_objects', $row);
                 if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating failed.')); }
@@ -400,11 +406,13 @@ class IntegrationsController extends AbstractTwigController
     }
     
     
-    // zpracovani akci prirazenych k sheetu
+    // zpracovani akci prirazenych k sheetu, klic ke skupine funkci je v hidden post poli group_key
     public function google_sheet_action(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('integrations.google', 1);
         $object_id = (int) $args['uid'];
         $post_data = $request->getParsedBody();
+        
+        $group_key = $post_data['group_key'];
         
         // pripravime si taky spojeni s goglem
         $client = new \Google_Client();
@@ -415,29 +423,56 @@ class IntegrationsController extends AbstractTwigController
         $service = new \Google_Service_Sheets($client);
         
         $this->db->where('c_uid', $object_id);
-        $data_sheet = $this->db->getOne('t_int_objects', ['c_json']);
-        $json_data = json_decode($data_sheet['c_json'], true);
+        $data_sheet = $this->db->getOne('t_int_objects', ['c_uid as id', 'c_progress as progress', 'c_json as json', 'c_json->>"$.uri" as uri', 'c_json->>"$.attributes.spreadsheetId" as spreadsheetId', 'c_json->>"$.attributes.sheetId" as sheetId', 'c_json->>"$.attributes.sheetTitle" as sheetTitle']);
+        $json_data = json_decode($data_sheet['json'], true);
         
-        $flash_vystup = '';
+        $g = new Google();
         
-        foreach ($json_data['attributes']['actions'] as $action) {
+        //$vystup = 'poslana post data: '.print_r($post_data, true);
+        $vystup = '';
+        
+        
+        
+        foreach ($json_data['attributes']['actions'][$group_key] as $action) {
             if ($action['function'] == 'sheets.checkmeta') {
-                $flash_vystup .= 'zpracovavam funkci checkmeta *';
+                $vystup .= '<div>zpracovavam funkci checkmeta</div>';
+                $ret = array();
+                $vraceno = $g->checkmeta($service, $data_sheet['spreadsheetId'], $action['meta'], $action['data'], $ret);
+                if ($vraceno == false) {
+                    $vystup .= '<div>nepovedlo se</div>';
+                    $vystup .= '<div>vraceno: '.print_r($ret, true).'</div>';
+                }
+                else {
+                    $vystup .= '<div>povedlo se</div>';
+                    $vystup .= '<div>vraceno: '.print_r($ret, true).'</div>';
+                }
+                
             }
             else if ($action['function'] == 'sheets.rowcache') {
-                $flash_vystup .= 'zpracovavam funkci rowcache *';
+                $vystup .= 'zpracovavam funkci rowcache *';
             }
             else if ($action['function'] == 'sheets.costimport') {
-                $flash_vystup .= 'zpracovavam funkci costimport *';
+                $vystup .= 'zpracovavam funkci costimport *';
             }
         }
         
-        $this->flash->addMessage('info', $flash_vystup);
+        
+        
+        //$flash_vystup = '';
+        //$flash_vystup .= print_r($post_data, true);
+        //$this->flash->addMessage('info', $flash_vystup);
         
         // presmerujeme na adresu integrations.google.detail kde budeme pokracovat
-        $redirect_url = $this->routerParser->urlFor('integrations.google.detail').'/'.$object_id;
-        return $response->withRedirect($redirect_url);
+        //$redirect_url = $this->routerParser->urlFor('integrations.google.detail').'/'.$object_id;
+        //return $response->withRedirect($redirect_url);
         
+        
+        
+        return $this->render($response, 'Integrations/Views/google.action.twig', [
+            'row' => $data_sheet,
+            'group' => $group_key,
+            'vystup' => $vystup
+        ]);
     }
     
     

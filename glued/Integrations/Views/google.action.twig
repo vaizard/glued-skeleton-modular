@@ -1,0 +1,45 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ __('Detail of google action group') }} {{ group }}</h1>
+  <a class="btn btn-primary" style="margin-left: 10em;" href="{{ url_for('integrations.google.detail', { 'uid': row.id }) }}">back</a>
+</div>
+
+<div class="section-body">
+  <div class="row">
+    <div class="col-6">
+      <div class="card">
+        <div class="card-body">
+            <h4>{{ __('Basic data') }}</h4>
+            <div>{{ __('ID') }}: {{ row.id }}</div>
+            <div>{{ __('URI') }}: {{ row.uri }}</div>
+            <div>{{ __('Spreadsheet ID') }}: {{ row.spreadsheetId }}</div>
+            <div>{{ __('Sheet ID') }}: {{ row.sheetId }}</div>
+            <div>{{ __('Sheet Title') }}: {{ row.sheetTitle }}</div>
+            <div>{{ __('Progress') }}: {{ row.progress }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-body">
+            <h4>{{ __('Action output') }}</h4>
+            {{ vystup | raw }}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-12">
+        {% include '/Core/Views/templates/partials/flash.twig' %}
+      <div id="rjsf"></div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+

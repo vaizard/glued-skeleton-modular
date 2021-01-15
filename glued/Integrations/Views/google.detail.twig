@@ -21,8 +21,11 @@
             <div>{{ __('Progress') }}: {{ row.progress }}</div>
             
             <h4>{{ __('Functions') }}</h4>
-            {% for fce in actions %}
-            <div>function: {{ fce.function }}, meta: {{ fce.meta }}</div>
+            {% for key, groups in actions %}
+            <div><strong>group: {{ key }}</strong></div>
+                {% for fce in groups %}
+                <div>function: {{ fce.function }}, meta: {{ fce.meta }}, data: {{ fce.data }}, fuid: {{ fce.fuid }}</div>
+                {% endfor %}
             {% endfor %}
         </div>
       </div>
@@ -38,18 +41,23 @@
                 <div><button type="submit" class="btn btn-success">{{ next.submit }}</button></div>
             </form>
             {% endif %}
-            {% if row.progress == 11 %}
+            {% if row.progress == 10 %}
             <form action="{{ url_for('integrations.google.next.api01', { 'uid': row.id }) }}" method="post">
                 <p>{{ __('or you can finalise process') }}</p>
                 <div><button type="submit" name="finalise" class="btn btn-success">{{ __('Finalise') }}</button></div>
             </form>
             {% endif %}
             {% if row.progress == 15 %}
-            <h4>{{ __('All steps completed') }}</h4>
-            <form action="{{ url_for('integrations.google.action.api01', { 'uid': row.id }) }}" method="post">
-                <p>{{ __('now you can do big action') }}</p>
-                <div><button type="submit" class="btn btn-success">{{ __('do action') }}</button></div>
-            </form>
+                <h4>{{ __('All steps completed') }}</h4>
+                <p>{{ __('now you can do big group actions') }}</p>
+                {% for key in groups %}
+                <div style="margin: 20px 0;">
+                <form action="{{ url_for('integrations.google.action.api01', { 'uid': row.id }) }}" method="post">
+                <input type="hidden" name="group_key" value="{{ key }}" />
+                <button type="submit" class="btn btn-success">{{ __('run group of functions') }}: {{ key }}</button>
+                </form>
+                </div>
+                {% endfor %}
             {% endif %}
         </div>
       </div>
