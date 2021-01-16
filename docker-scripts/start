@@ -13,6 +13,7 @@ mkdir -p private/log
 chmod 777 private/cache
 chmod 777 private/data
 chmod 777 private/locale
+chmod 777 private/log
 
 chmod -R 777 public/assets/cache
 

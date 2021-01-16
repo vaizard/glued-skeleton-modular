@@ -7,7 +7,7 @@ RUN apt-get update && \
     npm install --global yarn && \
     php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer
 
-ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/install-php-extensions /usr/local/bin/
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 ADD https://raw.githubusercontent.com/eficode/wait-for/master/wait-for /usr/local/bin/
 
 RUN chmod uga+x /usr/local/bin/install-php-extensions && \
