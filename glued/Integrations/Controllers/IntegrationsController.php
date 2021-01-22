@@ -236,7 +236,7 @@ class IntegrationsController extends AbstractTwigController
                 'c_attr' => '{}'
             );
             try { $nove_id = $this->utils->sql_insert_with_json('t_int_objects', $row); } catch (Exception $e) { 
-                throw new HttpInternalServerErrorException($request, $e->getMessage());  
+                throw new HttpInternalServerErrorException($request, $e->getMessage());
             }
             
             // presmerujeme na adresu integrations.google.detail kde budeme pokracovat
@@ -426,17 +426,22 @@ class IntegrationsController extends AbstractTwigController
         $data_sheet = $this->db->getOne('t_int_objects', ['c_uid as id', 'c_progress as progress', 'c_json as json', 'c_json->>"$.uri" as uri', 'c_json->>"$.attributes.spreadsheetId" as spreadsheetId', 'c_json->>"$.attributes.sheetId" as sheetId', 'c_json->>"$.attributes.sheetTitle" as sheetTitle']);
         $json_data = json_decode($data_sheet['json'], true);
         
-        $g = new Google();
+        $g = new Google($this->db);
         
         //$vystup = 'poslana post data: '.print_r($post_data, true);
         $vystup = '';
         
+        // pro zdarne ukonceni skupiny finkci je dulezite, aby prvni funkce byla checkmeta
+        // dalsi funkce by se mely vykonavat jen tehdy, kdyz z checkmeta prijde true, a kdyz bude k dispozici vysledek z ni, ktery se pouzije jako argument
         
+        $mame_vysledek_checkmeta = false;
+        $vysledek_checkmeta = array();
         
         foreach ($json_data['attributes']['actions'][$group_key] as $action) {
             if ($action['function'] == 'sheets.checkmeta') {
                 $vystup .= '<div>zpracovavam funkci checkmeta</div>';
                 $ret = array();
+                // TODO tohle bych mel volat s try, protoze je mozne ze se to nespoji a pak to vrati exception
                 $vraceno = $g->checkmeta($service, $data_sheet['spreadsheetId'], $action['meta'], $action['data'], $ret);
                 if ($vraceno == false) {
                     $vystup .= '<div>nepovedlo se</div>';
@@ -445,14 +450,34 @@ class IntegrationsController extends AbstractTwigController
                 else {
                     $vystup .= '<div>povedlo se</div>';
                     $vystup .= '<div>vraceno: '.print_r($ret, true).'</div>';
+                    $mame_vysledek_checkmeta = true;
+                    $vysledek_checkmeta = $ret;
                 }
-                
             }
             else if ($action['function'] == 'sheets.rowcache') {
-                $vystup .= 'zpracovavam funkci rowcache *';
+                $vystup .= '<div>zpracovavam funkci rowcache</div>';
+                // jen pokud mam vysledek z checkmeta
+                if ($mame_vysledek_checkmeta) {
+                    // TODO taky by to melo byt v try, protoze to muze vratit exception
+                    $ret2 = array();
+                    $vraceno = $g->rowcache($service, $data_sheet['spreadsheetId'], $object_id, $vysledek_checkmeta, $action['data'], $action['fuid'], $ret2);
+                    if ($vraceno == true) {
+                        $vystup .= '<div>povedlo se, ale nevim co se presne delo</div>';
+                    }
+                    else {
+                        $vystup .= '<div>nepovedlo se, sory jako</div>';
+                        $vystup .= '<div>vraceno: '.print_r($ret2, true).'</div>';
+                    }
+                }
+                else {
+                    $vystup .= '<div>nepovedlo se, protoze nemam predchozi vysledek z checkmeta</div>';
+                }
             }
             else if ($action['function'] == 'sheets.costimport') {
                 $vystup .= 'zpracovavam funkci costimport *';
+                
+                
+                
             }
         }
         
