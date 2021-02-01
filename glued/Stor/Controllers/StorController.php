@@ -29,6 +29,10 @@ class StorController extends AbstractTwigController
     
     
     // funkce co zpracuje poslany nahravany soubor
+    // slouzi k ulozeni soubori do storu poslaneho POST
+    // postupne to odbourame. zatim zruseno ze stor popupu ve stor browseru
+    // je to pry jeste ve worklogu, TODO zrusit form z worklogu a pak tuto funkci
+    // pripadne pokud tuto funkci zachovame, predelat na pouziti internal_upload nebo internal_create
     public function uploaderSave($request, $response)
     {
         $files = $request->getUploadedFiles();
