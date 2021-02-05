@@ -235,7 +235,7 @@ class CZ
                 }
             }
             $result = $r;
-            $result['acc'] = $acc;
+            $result['acc'] = $acc ?? null;
         }
         return $result;
     }
@@ -339,13 +339,17 @@ class CZ
                 $person = null;
                 $helper = null;
                 // atrributes: dza (datum zapisu / date of registration), dvy (datum vymazu / date of removal)
-                $dates = json_decode(json_encode($item->attributes()), true)['@attributes']; 
+                
                 // simplifying things here by ignoring people deleted from the orgization structure
                 // (we'll work only with people who have role 'dvy' unset)
-                if (!isset($dates['dvy'])) {
+                //if (!isset($dates['dvy'])) {
                     $role = json_decode(json_encode($item), true);
-                    foreach ($role['Clen'] as $person) {
+                    foreach ($item->Clen as $obj_person) {
+                    //foreach ($role['Clen'] as $person) {
+                        $person = json_decode(json_encode($obj_person), true);
                         $helper = null;
+                        $dates = null;
+                        $dates = json_decode(json_encode($obj_person->attributes()), true)['@attributes']; 
                         if (isset($person['fosoba'])) {
                             $helper['n']['given'] = mb_convert_case($person['fosoba']['jmeno'] ?? '', MB_CASE_TITLE) ?? null;
                             $helper['n']['family'] = mb_convert_case($person['fosoba']['prijmeni'] ?? '', MB_CASE_TITLE) ?? null;
@@ -397,6 +401,7 @@ class CZ
                                     $people[$hash]['role'][] = [
                                         'name' => $role['Nazev'],
                                         'dt_from' => $dates['dza'],
+                                        'dt_till' => $dates['dvy'] ?? null,
                                     ];
                                 }
                             } else {
@@ -404,11 +409,12 @@ class CZ
                                 $people[$hash]['role'][] = [
                                     'name' => $role['Nazev'],
                                     'dt_from' => $dates['dza'],
+                                    'dt_till' => $dates['dvy'] ?? null,
                                 ];
                             }
                         }
                     }
-                }
+                //}
             }
 
             foreach ($are->Odpoved->Vypis_VREO->Jiny_organ as $key => $item) {
@@ -420,10 +426,12 @@ class CZ
                 $dates = json_decode(json_encode($item->attributes()), true)['@attributes']; 
                 // simplifying things here by ignoring people deleted from the orgization structure
                 // (we'll work only with people who have role 'dvy' unset)
-                if (!isset($dates['dvy'])) {
+                //if (!isset($dates['dvy'])) {
                     $role = json_decode(json_encode($item), true);
-                    foreach ($role['Clen'] as $person) {
+                    foreach ($item->Clen as $obj_person) {
+                        $person = json_decode(json_encode($obj_person), true);
                         $helper = null;
+                        $dates = json_decode(json_encode($obj_person->attributes()), true)['@attributes']; 
                         if (isset($person['fosoba'])) {
                             $helper['n']['given'] = mb_convert_case($person['fosoba']['jmeno'], MB_CASE_TITLE);
                             $helper['n']['family'] = mb_convert_case($person['fosoba']['prijmeni'], MB_CASE_TITLE);
@@ -486,7 +494,7 @@ class CZ
                             }
                         }
                     }
-                }
+                //}
             }
  
             // Get rid of the hashes

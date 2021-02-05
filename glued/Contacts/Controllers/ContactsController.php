@@ -179,6 +179,7 @@ class ContactsController extends AbstractTwigController
             $fn['note'] = $req['contacts_items_create_n_note'];
             $fn['role'][0]['name'] = $req['contacts_items_create_n_role'] ?? '';
             $fn['role'][0]['dt_from'] = '';
+            $fn['role'][0]['dt_till'] = '';
             $do['fn'] = true;
         }
 
@@ -224,6 +225,7 @@ class ContactsController extends AbstractTwigController
                     $l = $fl;
                     if ($do['fn']) $n[0] = $fn;
                 }
+                $l['kind']['l'] = 1;
             }
 
         // No company data, only natural person
@@ -242,6 +244,7 @@ class ContactsController extends AbstractTwigController
               if ($do['fn']) {
                 foreach ($n as $person) {
                   $ins = $person;
+                  $ins['kind']['n'] = 1;
                   unset($ins['role']);
                   $row['c_json'] = json_encode($ins);
                   $n_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); 
