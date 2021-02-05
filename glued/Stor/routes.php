@@ -20,10 +20,6 @@ $app->group('/stor', function (RouteCollectorProxy $group) {
     // copy nebo move z modalu pro copy move
     $group->post('/item/copymove', StorController::class . ':itemCopyMove')->setName('stor.item.copy.move');
     
-    // funkce na upload post formularem, klasicky reload stranky nebo presmerovani
-    // je jako test pouzito napriklad ve worklog popupu pro upload souboru k zaznamu
-    // je mozne toto casem odbourat a dat vsude ajax. nebo nechat pro specialni pripady.
-    $group->post('/uploader', StorController::class . ':uploaderSave')->setName('stor.uploader');
  });
 
 $app->group('/api/stor/v1', function (RouteCollectorProxy $group) {
