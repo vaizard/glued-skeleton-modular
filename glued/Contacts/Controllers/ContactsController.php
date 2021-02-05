@@ -237,11 +237,26 @@ class ContactsController extends AbstractTwigController
       try { 
           if (true) { // TODO replace true with validation check against schema ($result->isValid())
               if ($do['fl']) {
-                $row['c_json'] = json_encode($l ?? $fl);
-                $l_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); 
+
+                $ins = $l ?? $fl;
+                $row['c_json'] = json_encode($ins);
+
+                // check if legal person already in database
+                if (isset($ins['nat'][0]['vatid'])) $this->db->orwhere('c_vatid', $ins['nat'][0]['vatid'] ?? null);
+                if (isset($ins['nat'][0]['regid'])) $this->db->orwhere('c_regid', $ins['nat'][0]['regid'] ?? null);
+                if (isset($ins['nat'][0]['natid'])) $this->db->orwhere('c_natid', $ins['nat'][0]['natid'] ?? null);
+                $present = $this->db->get('t_contacts_objects', null, 'c_uid');
+
+                // if present, only add natural person from form, 
+                // drop data about people sourced from the registers
+                if ($present) { $n = null; $n[0] = $fn ?? null; $l_req['id'] = $present[0]['c_uid']; }
+
+                // if absent, insert
+                else $l_req['id'] = $this->utils->sql_insert_with_json('t_contacts_objects', $row); 
               }
 
-              if ($do['fn']) {
+              // if there's anything to insert
+              if ($do['fn'] and isset($n[0])) {
                 foreach ($n as $person) {
                   $ins = $person;
                   $ins['kind']['n'] = 1;
