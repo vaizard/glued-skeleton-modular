@@ -17,9 +17,9 @@ class Asset extends Phinx\Migration\AbstractMigration
                 'comment' => 'Assets items',
                 'row_format' => 'DYNAMIC',
             ])
-            ->addColumn('c_ref1', Literal::from("varchar(255) COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (`c_json`->>'$.uid') VIRTUAL"), [
-                'null' => false,
-                'comment' => 'Unique row id',
+            ->addColumn('c_vatid', Literal::from("varchar(255) COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (`c_json`->>'$.nat[0].vatid') VIRTUAL"), [
+                'null' => true,
+                'comment' => 'Generated, contains VATID if available.',
             ])
             ->update();
         $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
