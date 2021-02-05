@@ -21,9 +21,6 @@
     }
     else {
         modal.find('.modal-footer').show();
-        // tady musime dat aktualni adresu aby se to tam vratilo
-        modal.find('#cil_return_url').val('{{ url_for("stor.browser") }}');
-        modal.find('.modal-dialog form').attr('action', '{{ url_for("stor.uploader") }}');
         // fill reload values at ajax upload button
         modal.find('#ajax-upload').attr("data-freload", button.data('freload'));
     }
