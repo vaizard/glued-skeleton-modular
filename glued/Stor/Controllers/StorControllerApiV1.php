@@ -108,20 +108,20 @@ class StorControllerApiV1 extends AbstractTwigController
                     $return_code = 200;
                 }
                 else {
-                    $this->flash->addMessage('error', 'your file failed to upload.');
-                    $return_message = 'your file failed to upload.';
+                    //$this->flash->addMessage('error', 'your file failed to upload.');
+                    $return_message = 'Error: your file failed to upload.';
                     $return_code = 500;
                 }
             }
             else {
-                $this->flash->addMessage('error', 'your cannot upload into this dir.');
-                $return_message = 'your cannot upload into this dir.';
+                //$this->flash->addMessage('error', 'your cannot upload into this dir.');
+                $return_message = 'Error: your cannot upload into this dir.';
                 $return_code = 500;
             }
         }
         else {
-            $this->flash->addMessage('error', 'Expected uploaded file, got none.');
-            $return_message = 'Expected uploaded file, got none.';
+            //$this->flash->addMessage('error', 'Expected uploaded file, got none.');
+            $return_message = 'Error: expected uploaded file, got none.';
             $return_code = 500;
         }
         
