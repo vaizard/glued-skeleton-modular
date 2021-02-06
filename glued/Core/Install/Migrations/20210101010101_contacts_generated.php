@@ -19,7 +19,7 @@ class ContactsGenerated extends Phinx\Migration\AbstractMigration
             ])
             ->changeColumn('c_vatid', Literal::from("varchar(255) COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (`c_json`->>'$.nat[0].vatid') STORED"), [
                 'null' => true,
-                'comment' => ' (Generated) Contains VATID if available.',
+                'comment' => '(Generated) Contains VATID if available.',
             ])
             ->changeColumn('c_fn', Literal::from("varchar(255) COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (`c_json`->>'$.fn') STORED"), [
                 'null' => true,
@@ -32,6 +32,16 @@ class ContactsGenerated extends Phinx\Migration\AbstractMigration
             ->changeColumn('c_kind_natural', Literal::from("tinyint GENERATED ALWAYS AS (`c_json`->>'$.kind.n') STORED"), [
                 'null' => true,
                 'comment' => '(Generated) Flag, true if contact is a natural person.',
+            ])
+            ->addColumn('c_regid', Literal::from("varchar(255) COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (`c_json`->>'$.nat[0].regid') STORED"), [
+                'null' => true,
+                'comment' => '(Generated) Contains REGID if available.',
+                'after' => 'c_vatid',
+            ])
+            ->addColumn('c_natid', Literal::from("varchar(255) COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (`c_json`->>'$.nat[0].natid') STORED"), [
+                'null' => true,
+                'comment' => '(Generated) Contains NATID if available.',
+                'after' => 'c_vatid',
             ])
             ->update();
         $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
