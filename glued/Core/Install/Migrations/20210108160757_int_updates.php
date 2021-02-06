@@ -17,7 +17,6 @@ class IntUpdates extends Phinx\Migration\AbstractMigration
             ])
             ->addColumn('c_uid', 'biginteger', [
                 'null' => false,
-                'limit' => MysqlAdapter::INT_BIG,
                 'signed' => false,
                 'identity' => 'enable',
                 'comment' => 'Unique row id',
