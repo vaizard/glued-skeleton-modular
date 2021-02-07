@@ -95,21 +95,6 @@ class JsonResponseBuilder {
         ]);
     }
 
-    /**
-     * Sends a flash message. 
-     * @param  array  $arr 
-     * 'success' => , 
-     * 'dagner' =>
-     * 'warning' =>
-     * 'info' =>
-     */
-    public function withFlashMessage(array $arr) {
-        return $this->setProperty('messages', [
-            'flash' => $arr
-        ]);
-    }
-
-    // TODO drop flash messages, styling should be done on client side
     // TODO rename messages to details to discern from withMessage
 
     public function withMessage(string $msg) {

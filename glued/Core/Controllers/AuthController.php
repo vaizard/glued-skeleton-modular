@@ -25,10 +25,21 @@ class AuthController extends AbstractTwigController
     }
 
 
-    public function reset_get($request, $response)
+    public function reset_get($request, $response, array $args = [])
     {
-        return $this->view->render($response, 'Core/Views/reset.twig', [
-            'redirect' => $request->getParams()['redirect'] ?? null 
+        $twig = 'Core/Views/reset.twig';
+
+
+        if (isset($args['token'])) {
+            $twig = 'Core/Views/reset-token-fail.twig'; 
+            $this->db->where("c_token", $args['token']);
+            $this->db->where("c_ts_timeout >= timestamp(NOW())");
+            $reset = $this->db->get("t_core_authn_reset", null);
+            if ($reset) $twig = 'Core/Views/reset-token-pass.twig'; 
+        }
+        return $this->view->render($response, $twig, [
+            'redirect' => $request->getParams()['redirect'] ?? null,
+            'token' => $args['token'] ?? null,
         ]);
     }
 
@@ -74,10 +85,7 @@ class AuthController extends AbstractTwigController
             if (!$user) {
                 $seconds_throttle = $seconds_max_throttle;
             } else {
-                $this->db->where("c_user_id", $user[0]['c_user_uid']);
-                $this->db->where("c_auth_id", $user[0]['c_uid']);
-                $this->db->where("c_ts_created", ['timestamp(DATE_SUB(NOW(), INTERVAL '.$seconds_test.' SECOND))', 'timestamp(NOW())'], 'BETWEEN');
-                $reset = $this->db->get("t_core_authn_reset", null);
+                $reset = $this->db->rawQuery("SELECT * FROM t_core_authn_reset WHERE c_user_id = ? AND c_auth_id = ? AND c_ts_created BETWEEN timestamp(DATE_SUB(NOW(), INTERVAL ? SECOND)) AND timestamp(NOW())", [ $user[0]['c_user_uid'], $user[0]['c_uid'], $seconds_test ]);
 
                 $seconds_throttle = count($reset) * $seconds_step;
                 if ($seconds_throttle > $seconds_max_throttle) $seconds_throttle = $seconds_max_throttle;
@@ -86,7 +94,7 @@ class AuthController extends AbstractTwigController
                     "c_user_id" => $user[0]['c_user_uid'],
                     "c_auth_id" => $user[0]['c_uid'],
                     "c_token"   => $this->crypto->genkey_base64(),
-                    "c_ts_timeout" => "(DATE_ADD( NOW(), INTERVAL $seconds_token_valid SECOND))"
+                    "c_ts_timeout" => $this->db->func("(DATE_ADD( NOW(), INTERVAL $seconds_token_valid SECOND))")
                 ];
                 $this->db->insert("t_core_authn_reset", $data);
             
@@ -121,8 +129,8 @@ class AuthController extends AbstractTwigController
             // TODO log attempt
             $this->auth->reset($request->getParam('email')); // auto sign-in after account creation
             */
-            $flash = [ "info" => 'A password reset token has been sent to you. Please follow the instructions received by e-mail.' ];
-            $payload = $builder->withFlashMessage($flash)->withCode(200)->build();
+            $msg = 'A password reset token has been sent to you. Please follow the instructions received by e-mail.';
+            $payload = $builder->withMessage($msg)->withCode(200)->build();
             return $response->withJson($payload, 200);
         }
     }
@@ -301,12 +309,9 @@ class AuthController extends AbstractTwigController
             if ($auth_id) $this->events->emit('core.auth.user.create', [$auth_id]);
             $this->auth->attempt($request->getParam('email'), $request->getParam('password')); // auto sign-in after account creation
 
-            $flash = [
-                "info" => 'You have been signed up',
-                "info" => 'You have been signed in too'
-            ];
-            $payload = $builder->withFlashMessage($flash)->withCode(200)->build();
-            $this->flash->addMessage('info', __('You were signed up successfully. We signed you in too!'));
+            $msg = __('You were signed up successfully. We signed you in too!');
+            $payload = $builder->withMessage($msg)->withCode(200)->build();
+            $this->flash->addMessage('info', $msg);
             return $response->withJson($payload, 200);
         }
     }
