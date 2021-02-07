@@ -28,103 +28,100 @@ class StorControllerApiV1 extends AbstractTwigController
     public function uploaderApiSave($request, $response)
     {
         // Initialize helper variables
-        $return_code = 0;
-        $return_data = array();
-        $return_message = '';
+        $errors = [];
+        $files_uploaded = 0;
         $files_stored = 0;
+        $return_code = 500;
+        $return_data = array();
+        $return_message = 'Error: some or all files could not be stored.';
         $who = $GLOBALS['_GLUED']['authn']['user_id'];
 
-        // Get data
-        $files = $request->getUploadedFiles();
-        if (!is_array($files['file'])) { throw new HttpBadRequestException($request,'POST request with files must contain an array. Forgotten brackets in file[]?'); }
-        $raw_path = $request->getParam('actual_dir');
-        
-        // vyjimka na my_files
-        if ($raw_path == 'my_files') {
-            $actual_dir = 'users';
-            $actual_object = $who;
-            // TODO my_files path still valid in stor?
-            // I think that if the upload button returns with #95,
-            // this code branch will just break.
-        } else {
-            $parts = explode('/', $raw_path);
-            if (count($parts) > 1) {
-                $actual_dir = $parts[0];
-                $actual_object = $parts[1];
-            }
-            else {
-                $actual_dir = '';   // pokud to neni objekt v diru, tak delame jako ze dir neexistuje.
-            }
-        }
-        
-        if (!empty($files['file']) and count($files['file']) > 0) {
-            
-            // pokud dir existuje v seznamu povolenych diru, uploadujem (ovsem je zadany timpadem i objekt)
-            if (isset($this->stor->app_dirs[$actual_dir])) {
-                
-                // $files['file'] je pole, s idexy 0 1 2 ... 
-                // musime to projit vsechno
-                $pocet_souboru = count($files['file']);
-                
-                foreach ($files['file'] as $file_index => $newfile) {
-                    
-                    //$newfile = $files['file'][0];
-                    
-                    if ($newfile->getError() === UPLOAD_ERR_OK) {
-                        $filename = $newfile->getClientFilename();
-                        
-                        // ziskame tmp path ktere je privatni vlastnost $newfile, jeste zanorene v Stream, takze nejde normalne precist
-                        // vypichneme si stream a pouzijeme na to reflection
-                        $stream = $newfile->getStream();
-                        $reflectionProperty = new \ReflectionProperty(\Nyholm\Psr7\Stream::class, 'uri');
-                        $reflectionProperty->setAccessible(true);
-                        $tmp_path = $reflectionProperty->getValue($stream);
-                        
-                        // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
-                        $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $who, $this->stor->app_tables[$actual_dir], $actual_object);
-                        
-                        // priprava navratovych dat
-                        $return_data[$file_index]['link-id'] = $file_object_data['new_id'];
-                        $return_data[$file_index]['name'] = $filename;
-                        $return_data[$file_index]['module-name'] = $actual_dir;
-                        $return_data[$file_index]['object-id'] = $file_object_data['sha512'];
-                        $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $file_object_data['new_id'], 'filename' => $filename]);
-                        $return_data[$file_index]['size'] = $file_object_data['size'];
-                        $return_data[$file_index]['mime-type'] = $file_object_data['mime'];
-                        
-                        if ($file_object_data['insert'] == 1) {
-                            $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully.');
-                        }
-                        else {
-                            $this->flash->addMessage('info', 'Your file ('.$filename.') was uploaded successfully as link. Its hash already exists in objects table.');
-                        }
-                        
-                        $files_stored++;
-                    }
-                }   // konec cyklu pres nahrane soubory
-                
-                if ($files_stored > 0) {
-                    $return_message = 'Upload successful ('.$files_stored.')files stored.';
-                    $return_code = 200;
+        try {
+            $raw_path = $request->getParam('actual_dir');
+            if (is_null($raw_path)) throw new \Exception('Expected a target, got none.');
+            // vyjimka na my_files
+            if ($raw_path == 'my_files') {
+                $actual_dir = 'users';
+                $actual_object = $who;
+                // TODO my_files path still valid in stor?
+                // I think that if the upload button returns with #95,
+                // this code branch will just break.
+            } else {
+                $parts = explode('/', $raw_path);
+                if (count($parts) > 1) {
+                    $actual_dir = $parts[0];
+                    $actual_object = $parts[1];
                 }
                 else {
-                    //$this->flash->addMessage('error', 'your file failed to upload.');
-                    $return_message = 'Error: your file failed to upload.';
-                    $return_code = 500;
+                    $actual_dir = '';   // pokud to neni objekt v diru, tak delame jako ze dir neexistuje.
                 }
             }
-            else {
-                //$this->flash->addMessage('error', 'your cannot upload into this dir.');
-                $return_message = 'Error: your cannot upload into this dir.';
-                $return_code = 500;
+
+            // Get data
+            $files = $request->getUploadedFiles();
+
+            // Make sure we have work to do
+            if (!empty($files['file'])) $files_uploaded = count($files['file']);
+            if ($files_uploaded == 0) throw new \Exception('Expected file(s), got none.');
+            // pokud dir existuje v seznamu povolenych diru, uploadujem (ovsem je zadany timpadem i objekt)
+            if (!(isset($this->stor->app_dirs[$actual_dir]))) throw new \Exception('Your cannot upload your files here.');
+                  
+            foreach ($files['file'] as $file_index => $newfile) {
+
+                $filename = $newfile->getClientFilename();         
+                if ($newfile->getError() === UPLOAD_ERR_OK) {
+                    // ziskame tmp path ktere je privatni vlastnost $newfile, jeste zanorene v Stream, takze nejde normalne precist
+                    // vypichneme si stream a pouzijeme na to reflection
+                    $stream = $newfile->getStream();
+                    $reflectionProperty = new \ReflectionProperty(\Nyholm\Psr7\Stream::class, 'uri');
+                    $reflectionProperty->setAccessible(true);
+                    $tmp_path = $reflectionProperty->getValue($stream);
+                    
+                    // zavolame funkci, ktera to vlozi. vysledek je pole dulezitych dat. nove id v tabulce links je $file_object_data['new_id']
+                    $file_object_data = $this->stor->internal_create($tmp_path, $newfile, $who, $this->stor->app_tables[$actual_dir], $actual_object);
+                    
+                    // priprava navratovych dat
+                    $return_data[$file_index]['link-id'] = $file_object_data['new_id'];
+                    $return_data[$file_index]['name'] = $filename;
+                    $return_data[$file_index]['module-name'] = $actual_dir;
+                    $return_data[$file_index]['object-id'] = $file_object_data['sha512'];
+                    $return_data[$file_index]['link'] = $this->routerParser->urlFor('stor.serve.file', ['id' => $file_object_data['new_id'], 'filename' => $filename]);
+                    $return_data[$file_index]['size'] = $file_object_data['size'];
+                    $return_data[$file_index]['mime-type'] = $file_object_data['mime'];
+                    
+                    if ($file_object_data['insert'] == 1) $return_data[$file_index]['result'] = 'Stored.';
+                    else $return_data[$file_index]['result'] = 'Linked.';
+                    $files_stored++;
+                } else {
+                    $return_data[$file_index]['name'] = $filename;
+                    $return_data[$file_index]['result'] = 'Failed.';
+                    $errors[$newfile->getError()] = 1;
+                }
+            }   // konec cyklu pres nahrane soubory
+          
+            if (($files_stored == $files_uploaded) and ($files_stored > 0)) {
+                $return_message = 'Success: '.$files_stored.' files stored.';
+                $return_code = 200;
+            } else {
+                $phpFileUploadErrors = [
+                    1 => 'Max supported filesize exceeded (' . ini_get('upload_max_filesize') . 'B). ',
+                    2 => 'Max filesize required by client exceeded. ',
+                    3 => 'Incomplete transfer. ',
+                    4 => 'No file(s) transfered. ',
+                    6 => 'Missing temp folder. ',
+                    7 => 'Failed to write file(s). ',
+                    8 => 'Extension stopped file(s) from transferring.',
+                ];
+                $return_message = 'Stored '.$files_stored.' out of '.$files_uploaded.'. Problems encountered: ';
+                foreach ($errors as $key => $item) {
+                    if ($item === 1) $return_message .= $phpFileUploadErrors[$key];
+                }
             }
+        } catch (\Exception $e) {
+            $return_message = $e->getMessage();
         }
-        else {
-            //$this->flash->addMessage('error', 'Expected uploaded file, got none.');
-            $return_message = 'Error: expected uploaded file, got none.';
-            $return_code = 500;
-        }
-        
+
+       
         // vybuildime json response
         $builder = new JsonResponseBuilder('stor/upload', 1);
         $payload = $builder->withData($return_data)->withMessage($return_message)->withCode($return_code)->build();
