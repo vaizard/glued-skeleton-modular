@@ -562,7 +562,7 @@ class ContactsController extends AbstractTwigController
         $jsf_formdata = '{"data":{}}';
         $jsf_onsubmit = '
             $.ajax({
-                url: "https://'.$this->settings['glued']['hostname'].$this->routerParser->pathFor('contacts.api.new').'",
+                url: "https://'.$this->settings['glued']['hostname'].$this->routerParser->urlFor('contacts.api.new').'",
                 dataType: "text",
                 type: "POST",
                 data: "billdata=" + JSON.stringify(formData.formData),

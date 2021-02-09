@@ -674,7 +674,7 @@ class StorControllerApiV1 extends AbstractTwigController
             $files = $this->container->db->get('t_stor_links lin', null, $sloupce);
             if (count($files) > 0) {
                 foreach ($files as $filedata) {
-                    $adresa = $this->container->router->pathFor('stor.serve.file', ['id' => $filedata['c_uid'], 'filename' => $filedata['c_filename']]);
+                    $adresa = $this->container->router->urlFor('stor.serve.file', ['id' => $filedata['c_uid'], 'filename' => $filedata['c_filename']]);
                     $vystup_souboru .= '
                     <div>
                         <a href="'.$adresa.'" class="">

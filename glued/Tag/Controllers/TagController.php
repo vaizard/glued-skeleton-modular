@@ -45,7 +45,8 @@ class TagController extends AbstractTwigController
       $tagid = $args['tagid'] ?? null;
       $tagpw = $args['tagpw'] ?? null;
       $data = [];
-      return $response->withStatus(302)->withHeader('Location', 'https://'.$this->settings['glued']['hostname'].$this->routerParser->pathFor('stor.serve.file'));
+      $data['id'] = "51";
+      return $response->withStatus(302)->withHeader('Location', 'https://'.$this->settings['glued']['hostname'].$this->routerParser->urlFor('stor.serve.file', $data));
     }
 
 }

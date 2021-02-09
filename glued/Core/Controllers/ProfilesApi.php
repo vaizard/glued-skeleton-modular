@@ -54,18 +54,3 @@ class ProfilesApi extends AbstractJsonController
 }
 
 
-
-
-
-// Prefill data:
-// 
-
-
-
-//      url: "https://'.$this->container['settings']['glued']['hostname'].$this->container->router->pathFor('assets.api.new').'",
-
-
-        //$this->container['settings']['glued']['hostname']
-        //$this->container->settings->glued->hostname
-        // vnitrek onsubmit funkce
-        //         alert('xhr status: ' + xhr.status + ', status: ' + status + ', err: ' + err)
