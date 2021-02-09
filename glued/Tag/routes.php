@@ -9,7 +9,7 @@ use Slim\Routing\RouteCollectorProxy;
 // Define the app routes.
 $app->group('/api/tag/v1', function (RouteCollectorProxy $group) {
     $group->get ('/doc/{tagid}[/{tagpw}]', TagController::class . ':tag_doc_get_api')->setName('tag.doc.api01'); 
-    $group->get ('/create/{count}]', TagController::class . ':tag_create_get_api')->setName('tag.create.api01'); 
+    $group->get ('/create[/{count}]', TagController::class . ':tag_create_get_api')->setName('tag.create.api01'); 
 })->add(RestrictGuests::class);
 
 $app->group('/tag', function (RouteCollectorProxy $group) {
