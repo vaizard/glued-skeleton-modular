@@ -145,8 +145,30 @@ class ContactsController extends AbstractTwigController
      * @return Response
      */
 
- 
+     public function contacts_get_api(Request $request, Response $response, array $args = []): Response {
+      $q = $request->getQueryParams();
+      $builder = new JsonResponseBuilder('contacts', 1);
+      $uid = $args['uid'] ?? null;
+      $filter = $q['filter'] ?? null;
+      $data = null;
 
+        if ($uid) {
+            $result = json_encode($this->contacts_get_sql($args));    
+            $data = json_decode($result);
+        } else {
+            $json = "t_contacts_objects.c_json";
+            if ($filter) {
+                $this->db->where('c_fn', "%$filter%", 'LIKE');
+            }
+            $result = $this->db->get('t_contacts_objects', null, [ $json ]) ?? null;
+            if ($result) {
+              $key = array_keys($result[0])[0];
+              foreach ($result as $obj) $data[] = json_decode($obj[$key]);
+            }
+        }     
+      $payload = $builder->withData((array)$data)->withCode(200)->build();
+      return $response->withJson($payload);
+    }
 
 
     public function contacts_post_api(Request $request, Response $response, array $args = []): Response {
@@ -362,28 +384,6 @@ class ContactsController extends AbstractTwigController
       if ($uid) $data = (array)$data[0];
       return $data;
     }
-
-
-    public function contacts_get_api(Request $request, Response $response, array $args = []): Response {
-      $builder = new JsonResponseBuilder('contacts', 1);
-      $uid = $args['uid'] ?? null;
-      $data = null;
-
-        if ($uid) {
-            $result = json_encode($this->contacts_get_sql($args));    
-            $data = json_decode($result);
-        } else {
-            $json = "t_contacts_objects.c_json";
-            $result = $this->db->get('t_contacts_objects', null, [ $json ]) ?? null;
-            if ($result) {
-              $key = array_keys($result[0])[0];
-              foreach ($result as $obj) $data[] = json_decode($obj[$key]);
-            }
-        }     
-      $payload = $builder->withData((array)$data)->withCode(200)->build();
-      return $response->withJson($payload);
-    }
-
 
     public function contacts_get_app(Request $request, Response $response, array $args = []): Response
     {
