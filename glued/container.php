@@ -83,8 +83,6 @@ $container->set('antixss', function () {
     return new AntiXSS();
 });
 
-
-
 $container->set('goutte', function () {
     return new Goutte\Client();
 });
