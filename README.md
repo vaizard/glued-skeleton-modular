@@ -240,6 +240,13 @@ curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/a
 curl -H 'Accept: application/json' -H "Authorization: Bearer ${TOKEN}" ${HOST}/api/core/v1/profiles -k --output -
 ```
 
+Specific tasks:
+
+```
+# UPLOAD A FILE
+curl -k -H "Authorization: Bearer ${TOKEN}" -F 'actual_dir=worklog/1' -F 'file[]=@./file1.txt' -F 'file[]=@./file2.txt' ... ${HOST}/api/stor/v1/upload
+```
+
 ### Global variables and passing around data
 
 To pass around data between middlewares and the app, or the app and the twig views, uses:

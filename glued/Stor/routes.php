@@ -24,7 +24,7 @@ $app->group('/stor', function (RouteCollectorProxy $group) {
 
 $app->group('/api/stor/v1', function (RouteCollectorProxy $group) {
     // upload pres ajax api, taky z post formulare ale bez reloadu stranky, jen vraci nejaky json
-    $group->post('/uploader', StorControllerApiV1::class . ':uploaderApiSave')->setName('stor.api.uploader');
+    $group->post('/upload', StorControllerApiV1::class . ':uploaderApiSave')->setName('stor.api.uploader');
     // ajax co vraci optiony v jsonu pro select 2 filtr
     $group->get('/filteroptions', StorControllerApiV1::class . ':showFilterOptions')->setName('stor.api.filter.options');
     // ajax, ktery po odeslani filtru vraci soubory odpovidajici vyberu
@@ -35,7 +35,8 @@ $app->group('/api/stor/v1', function (RouteCollectorProxy $group) {
     $group->post('/update', StorControllerApiV1::class . ':ajaxUpdate')->setName('stor.ajax.update');
     // ajax co vypise vhodne idecka k vybranemu diru, pro copy move
     $group->get('/modalobjects', StorControllerApiV1::class . ':showModalObjects')->setName('stor.api.modal.objects');
-    
 });
+
+
 
 
