@@ -235,7 +235,7 @@
                      },
                      error: function(res) {
                           $('#toast-placeholder').empty();
-                          $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.error.message })).appendTo("#toast-placeholder");
+                          $(Twig.twig({ ref: 'toasts' }).render({ title: '{{ __("Fin accounts") }}' , msg: '{{ __("Error: ") }}' + res.responseJSON.error.message })).appendTo("#toast-placeholder");
                           $('.toast').toast('show');
                      }
                 });
