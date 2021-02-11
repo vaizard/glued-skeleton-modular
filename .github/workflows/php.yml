@@ -12,7 +12,7 @@ jobs:
     - uses: nanasess/setup-php@v3.0.6
       with:
         php-version: '7.4'
-    - uses: haltuf/mysql-action 
+    - uses: haltuf/mysql-action@master
       with:
         mysql user: 'glued' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
         mysql password: 'glued' # Required if "mysql user" exists. The password for the "mysql user"
