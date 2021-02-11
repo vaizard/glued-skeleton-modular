@@ -50,10 +50,16 @@ class StorControllerApiV1 extends AbstractTwigController
                 $parts = explode('/', $raw_path);
                 if (count($parts) > 1) {
                     $actual_dir = $parts[0];
-                    $actual_object = $parts[1];
+                    if (!empty($parts[1])) {
+                        $actual_object = $parts[1];
+                    }
+                    else {
+                        $actual_object = 0; // pro pripady z api kdy za lomitkem nic neni, null objekt reprezentovany 0
+                    }
                 }
                 else {
-                    $actual_dir = '';   // pokud to neni objekt v diru, tak delame jako ze dir neexistuje.
+                    $actual_dir = $parts[0];   // pokud to neni objekt v diru, tak nastavime jen ten dir a bude se ukladat do NULL objektu
+                    $actual_object = 0; // zde null objekt reprezentovany 0
                 }
             }
 
@@ -65,10 +71,10 @@ class StorControllerApiV1 extends AbstractTwigController
             if ($files_uploaded == 0) throw new \Exception('Expected file(s), got none.');
             // pokud dir existuje v seznamu povolenych diru, uploadujem (ovsem je zadany timpadem i objekt)
             if (!(isset($this->stor->app_dirs[$actual_dir]))) throw new \Exception('Your cannot upload your files here.');
-                  
+            
             foreach ($files['file'] as $file_index => $newfile) {
 
-                $filename = $newfile->getClientFilename();         
+                $filename = $newfile->getClientFilename();
                 if ($newfile->getError() === UPLOAD_ERR_OK) {
                     // ziskame tmp path ktere je privatni vlastnost $newfile, jeste zanorene v Stream, takze nejde normalne precist
                     // vypichneme si stream a pouzijeme na to reflection
@@ -402,7 +408,7 @@ class StorControllerApiV1 extends AbstractTwigController
                     );
                 }
             }
-            else if ($jsou_tam_objekty) {   // to znamena ze jsme v jedne app a vypisujeme jeji objekty. jen tady by mel byt aktivni upload button
+            else if ($jsou_tam_objekty) {   // to znamena ze jsme v jedne app a vypisujeme jeji objekty. tady nakonec bude taky aktivni upload souboru do null objektu
                 // nejdriv zpet do app
                 $stor_rows[] = $this->firstRowUplinkBrowser('//', '//apps');
                 // nacteme idecka
@@ -421,8 +427,93 @@ class StorControllerApiV1 extends AbstractTwigController
                         
                     }
                 }
+                // muzou tam byt taky soubory nahrane v NULL objektu
+                $sloupce = array("lin.c_uid", "lin.c_user_id", "lin.c_filename", "lin.c_inherit_table", "lin.c_inherit_object", "lin.c_ts_created", "obj.c_sha512", "obj.c_json ->>'$.data.size' as size", "obj.c_json ->>'$.data.mime' as mime");
+                $this->db->join("t_stor_objects obj", "obj.c_sha512=lin.c_sha512", "LEFT");
+                $this->db->where("c_inherit_table", $app_tables[$objektovy_dir]);
+                $this->db->where("c_inherit_object", NULL, 'IS');
+                $files = $this->db->get('t_stor_links lin', null, $sloupce);
+                if (count($files) > 0) {
+                    foreach ($files as $data) {
+                        $dir_path = array_search($data['c_inherit_table'], $app_tables);
+                        $full_path = $dir_path.'/';
+                        
+                        // urcime jake mame globalni prava na inherit objekt (ne na soubor ale na objekt ve kterem soubor je)
+                        // TODO, pole s nactenymi pravy by melo byt globalni, aby se necetly stejna prava u kazdeho dalsiho souboru se stejnou dvojici table objekt
+                        $allowed_global_actions = array();
+                        // zatim nastavujeme, ze ma vsechny prava. pozdeji toto nebude vzdy vyplneno. az budou fungovat nove prava
+                        $allowed_global_actions[] = 'list';
+                        $allowed_global_actions[] = 'read';
+                        $allowed_global_actions[] = 'write';
+                        
+                        // jestli soubor vubec vylistovat, TODO tohle je ale spis read pravo na objekt. ne list.
+                        if (in_array('list', $allowed_global_actions)) {
+                            
+                            $action_dropdown = '';
+                            // jestli bude ozubene kolo
+                            if (in_array('write', $allowed_global_actions)) {
+                                $action_dropdown = '
+                                    <div class="dropdown">
+                                        <div class="btn-group dropleft">
+                                          <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Actions
+                                          </button>
+                                          <div class="dropdown-menu dropleft" x-placement="left-start" style="background-color: #cdd3d8; font-size: 12px;">
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-delete-stor" data-uid="'.$data['c_uid'].'"><i class="fa fa-trash-o "></i> Delete</button>
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-edit-stor" data-uid="'.$data['c_uid'].'" data-filename="'.htmlspecialchars($data['c_filename']).'"><i class="fa fa-pencil"></i> Edit</button>
+                                                <button class="dropdown-item" type="button" data-toggle="modal" data-target="#modal-copy-move-stor" data-uid="'.$data['c_uid'].'"><i class="fa fa-files-o"></i> Copy/Move</button>
+                                          </div>
+                                        </div>
+                                    </div>
+                                ';
+                            }
+                            
+                            // ulozene do budoucna, jak bylo drive mime souboru a creator name
+                            // <i class="fa '.$this->container->stor->get_mime_icon($data['mime']).' fa-2x"></i>
+                            // '.$this->container->auth->user_screenname($data['c_owner']).'
+                            
+                            if (in_array('read', $allowed_global_actions)) {
+                                $shortcut = '
+                                        <a href="'.$this->routerParser->urlFor('stor.serve.file', ['id' => $data['c_uid'], 'filename' => $data['c_filename']]).'" class="">
+                                            <b id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</b>
+                                        </a>
+                                ';
+                            }
+                            else {
+                                $shortcut = '
+                                <b id="fname_'.$data['c_uid'].'" class="item-title">'.$data['c_filename'].'</b>
+                                ';
+                            }
+                            
+                            $path = '
+                                        <a href="" class="stor-shortcuts" data-id="/'.$full_path.'" data-text="/'.$full_path.'">
+                                            /'.$full_path.'
+                                        </a>
+                            ';
+                            
+                            $stor_rows[] = array(
+                                'type' => 'file',
+                                'uid' => $data['c_uid'],
+                                'sha512' => $data['c_sha512'],
+                                'filename' => $data['c_filename'],
+                                'inherit_object' => NULL,
+                                'inherit_table' => $data['c_inherit_table'],
+                                'shortcut' => $shortcut,
+                                'size' => $this->stor->human_readable_size($data['size']),
+                                'path' => $path,
+                                'created' => $data['c_ts_created'],
+                                'action_buttons' => $action_dropdown
+                            );
+                            
+                        }
+                    }
+                }
+                
+                
+                // timto urcime, ze bude uploadovaci tlacitko ve formu
+                $upload_module = $objektovy_dir;
             }
-            else {  // vypis souboru v objektu nebo obecny vypis souboru
+            else {  // vypis souboru v objektu nebo obecny vypis souboru. jen tady by mel byt aktivni upload button
                 
                 // krome tagovych muzeme udelat vyber jednim sql dotazem nad links tabulkou
                 $sloupce = array("lin.c_uid", "lin.c_user_id", "lin.c_filename", "lin.c_inherit_table", "lin.c_inherit_object", "lin.c_ts_created", "obj.c_sha512", "obj.c_json ->>'$.data.size' as size", "obj.c_json ->>'$.data.mime' as mime");

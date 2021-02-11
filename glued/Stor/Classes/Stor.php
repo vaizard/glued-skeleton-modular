@@ -299,13 +299,24 @@ class Stor {
             $this->db->insert ('t_stor_objects', $data);
             
             // vlozime do links
-            $data = Array (
-            "c_sha512" => $sha512,
-            "c_user_id" => $user_id,
-            "c_filename" => $atributes['filename'],
-            "c_inherit_table" => $inherit_table,
-            "c_inherit_object" => $inherit_object
-            );
+            if ($inherit_object == 0) {
+                $data = Array (
+                "c_sha512" => $sha512,
+                "c_user_id" => $user_id,
+                "c_filename" => $atributes['filename'],
+                "c_inherit_table" => $inherit_table,
+                "c_inherit_object" => NULL
+                );
+            }
+            else {
+                $data = Array (
+                "c_sha512" => $sha512,
+                "c_user_id" => $user_id,
+                "c_filename" => $atributes['filename'],
+                "c_inherit_table" => $inherit_table,
+                "c_inherit_object" => $inherit_object
+                );
+            }
             $new_id = $this->db->insert ('t_stor_links', $data);
             
             // navratova data
