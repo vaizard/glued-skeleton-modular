@@ -430,6 +430,7 @@ class FinController extends AbstractTwigController
         
         //if ($result->isValid()) {
             $row = array (
+                'c_domain_id' => 0,
                 'c_user_id' => (int)$req->user,
                 'c_json' => json_encode($req)
             );
