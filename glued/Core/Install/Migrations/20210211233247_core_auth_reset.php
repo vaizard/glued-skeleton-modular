@@ -16,30 +16,8 @@ class CoreAuthReset extends Phinx\Migration\AbstractMigration
                 'comment' => 'Reset access credentials',
                 'row_format' => 'DYNAMIC',
             ])
-            ->addColumn('c_user_id', 'integer', [
-                'null' => false,
-                'limit' => MysqlAdapter::INT_REGULAR,
-                'comment' => 'Corresponds to t_core_users.c_uid',
-                'after' => 'c_uid',
-            ])
-            ->addColumn('c_auth_id', 'integer', [
-                'null' => false,
-                'limit' => MysqlAdapter::INT_REGULAR,
-                'comment' => 'Corresponds to t_core_authn.c_uid',
-                'after' => 'c_user_id',
-            ])
-            ->removeColumn('c_user_uid')
-            ->removeColumn('c_authn_uid')
-            ->removeIndexByName("c_authn_uid")
-            ->addIndex(['c_auth_id'], [
-                'name' => 'c_authn_uid',
-                'unique' => false,
-            ])
-            ->removeIndexByName("c_user_id")
-            ->addIndex(['c_user_id'], [
-                'name' => 'c_user_id',
-                'unique' => false,
-            ])
+            ->renameColumn('c_user_uid', 'c_user_id')
+            ->renameColumn('c_authn_uid', 'c_auth_id')
             ->save();
         $this->execute('SET unique_checks=1; SET foreign_key_checks=1;');
     }
