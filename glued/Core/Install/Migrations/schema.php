@@ -833,42 +833,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_calendar_objects',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
-        'c_source_id' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_calendar_objects',
-            'Non_unique' => '1',
-            'Key_name' => 'c_source_id',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_source_id',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_object_hash' => 
         array (
           1 => 
@@ -900,6 +864,42 @@ return array (
             'Sub_part' => '5',
             'Packed' => NULL,
             'Null' => 'YES',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'c_source_id' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_calendar_objects',
+            'Non_unique' => '1',
+            'Key_name' => 'c_source_id',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_source_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_calendar_objects',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
             'Index_type' => 'BTREE',
             'Comment' => '',
             'Index_comment' => '',
@@ -1116,15 +1116,15 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
+        'c_domain_id' => 
         array (
           1 => 
           array (
             'Table' => 't_calendar_sources',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
+            'Non_unique' => '1',
+            'Key_name' => 'c_domain_id',
             'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
+            'Column_name' => 'c_domain_id',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -1152,15 +1152,15 @@ return array (
             'Index_comment' => '',
           ),
         ),
-        'c_domain_id' => 
+        'PRIMARY' => 
         array (
           1 => 
           array (
             'Table' => 't_calendar_sources',
-            'Non_unique' => '1',
-            'Key_name' => 'c_domain_id',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
             'Seq_in_index' => '1',
-            'Column_name' => 'c_domain_id',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -1418,10 +1418,10 @@ return array (
           'COLLATION_NAME' => NULL,
           'COLUMN_TYPE' => 'tinyint',
           'COLUMN_KEY' => '',
-          'EXTRA' => '',
+          'EXTRA' => 'STORED GENERATED',
           'PRIVILEGES' => 'select,insert,update,references',
-          'COLUMN_COMMENT' => '',
-          'GENERATION_EXPRESSION' => '',
+          'COLUMN_COMMENT' => '(Generated) Flag, true if contact is a legal person.',
+          'GENERATION_EXPRESSION' => 'json_unquote(json_extract(`c_json`,_utf8mb3\\\'$.kind.l\\\'))',
           'SRS_ID' => NULL,
         ),
         'c_kind_natural' => 
@@ -1442,34 +1442,10 @@ return array (
           'COLLATION_NAME' => NULL,
           'COLUMN_TYPE' => 'tinyint',
           'COLUMN_KEY' => '',
-          'EXTRA' => '',
+          'EXTRA' => 'STORED GENERATED',
           'PRIVILEGES' => 'select,insert,update,references',
-          'COLUMN_COMMENT' => '',
-          'GENERATION_EXPRESSION' => '',
-          'SRS_ID' => NULL,
-        ),
-        'c_fn' => 
-        array (
-          'TABLE_CATALOG' => 'def',
-          'TABLE_NAME' => 't_contacts_objects',
-          'COLUMN_NAME' => 'c_fn',
-          'ORDINAL_POSITION' => '11',
-          'COLUMN_DEFAULT' => NULL,
-          'IS_NULLABLE' => 'YES',
-          'DATA_TYPE' => 'tinyint',
-          'CHARACTER_MAXIMUM_LENGTH' => NULL,
-          'CHARACTER_OCTET_LENGTH' => NULL,
-          'NUMERIC_PRECISION' => '3',
-          'NUMERIC_SCALE' => '0',
-          'DATETIME_PRECISION' => NULL,
-          'CHARACTER_SET_NAME' => NULL,
-          'COLLATION_NAME' => NULL,
-          'COLUMN_TYPE' => 'tinyint',
-          'COLUMN_KEY' => '',
-          'EXTRA' => '',
-          'PRIVILEGES' => 'select,insert,update,references',
-          'COLUMN_COMMENT' => '',
-          'GENERATION_EXPRESSION' => '',
+          'COLUMN_COMMENT' => '(Generated) Flag, true if contact is a natural person.',
+          'GENERATION_EXPRESSION' => 'json_unquote(json_extract(`c_json`,_utf8mb3\\\'$.kind.n\\\'))',
           'SRS_ID' => NULL,
         ),
         'c_vatid' => 
@@ -1477,46 +1453,100 @@ return array (
           'TABLE_CATALOG' => 'def',
           'TABLE_NAME' => 't_contacts_objects',
           'COLUMN_NAME' => 'c_vatid',
+          'ORDINAL_POSITION' => '11',
+          'COLUMN_DEFAULT' => NULL,
+          'IS_NULLABLE' => 'YES',
+          'DATA_TYPE' => 'varchar',
+          'CHARACTER_MAXIMUM_LENGTH' => '255',
+          'CHARACTER_OCTET_LENGTH' => '1020',
+          'NUMERIC_PRECISION' => NULL,
+          'NUMERIC_SCALE' => NULL,
+          'DATETIME_PRECISION' => NULL,
+          'CHARACTER_SET_NAME' => 'utf8mb4',
+          'COLLATION_NAME' => 'utf8mb4_unicode_ci',
+          'COLUMN_TYPE' => 'varchar(255)',
+          'COLUMN_KEY' => '',
+          'EXTRA' => 'STORED GENERATED',
+          'PRIVILEGES' => 'select,insert,update,references',
+          'COLUMN_COMMENT' => ' (Generated) Contains VATID if available.',
+          'GENERATION_EXPRESSION' => 'json_unquote(json_extract(`c_json`,_utf8mb3\\\'$.nat[0].vatid\\\'))',
+          'SRS_ID' => NULL,
+        ),
+        'c_fn' => 
+        array (
+          'TABLE_CATALOG' => 'def',
+          'TABLE_NAME' => 't_contacts_objects',
+          'COLUMN_NAME' => 'c_fn',
           'ORDINAL_POSITION' => '12',
           'COLUMN_DEFAULT' => NULL,
           'IS_NULLABLE' => 'YES',
-          'DATA_TYPE' => 'tinyint',
-          'CHARACTER_MAXIMUM_LENGTH' => NULL,
-          'CHARACTER_OCTET_LENGTH' => NULL,
-          'NUMERIC_PRECISION' => '3',
-          'NUMERIC_SCALE' => '0',
+          'DATA_TYPE' => 'varchar',
+          'CHARACTER_MAXIMUM_LENGTH' => '255',
+          'CHARACTER_OCTET_LENGTH' => '1020',
+          'NUMERIC_PRECISION' => NULL,
+          'NUMERIC_SCALE' => NULL,
           'DATETIME_PRECISION' => NULL,
-          'CHARACTER_SET_NAME' => NULL,
-          'COLLATION_NAME' => NULL,
-          'COLUMN_TYPE' => 'tinyint',
+          'CHARACTER_SET_NAME' => 'utf8mb4',
+          'COLLATION_NAME' => 'utf8mb4_unicode_ci',
+          'COLUMN_TYPE' => 'varchar(255)',
           'COLUMN_KEY' => '',
-          'EXTRA' => '',
+          'EXTRA' => 'STORED GENERATED',
           'PRIVILEGES' => 'select,insert,update,references',
-          'COLUMN_COMMENT' => '',
-          'GENERATION_EXPRESSION' => '',
+          'COLUMN_COMMENT' => '(Generated) Full name.',
+          'GENERATION_EXPRESSION' => 'json_unquote(json_extract(`c_json`,_utf8mb3\\\'$.fn\\\'))',
+          'SRS_ID' => NULL,
+        ),
+        'c_regid' => 
+        array (
+          'TABLE_CATALOG' => 'def',
+          'TABLE_NAME' => 't_contacts_objects',
+          'COLUMN_NAME' => 'c_regid',
+          'ORDINAL_POSITION' => '13',
+          'COLUMN_DEFAULT' => NULL,
+          'IS_NULLABLE' => 'YES',
+          'DATA_TYPE' => 'varchar',
+          'CHARACTER_MAXIMUM_LENGTH' => '255',
+          'CHARACTER_OCTET_LENGTH' => '1020',
+          'NUMERIC_PRECISION' => NULL,
+          'NUMERIC_SCALE' => NULL,
+          'DATETIME_PRECISION' => NULL,
+          'CHARACTER_SET_NAME' => 'utf8mb4',
+          'COLLATION_NAME' => 'utf8mb4_unicode_ci',
+          'COLUMN_TYPE' => 'varchar(255)',
+          'COLUMN_KEY' => '',
+          'EXTRA' => 'STORED GENERATED',
+          'PRIVILEGES' => 'select,insert,update,references',
+          'COLUMN_COMMENT' => ' (Generated) Contains REGID if available.',
+          'GENERATION_EXPRESSION' => 'json_unquote(json_extract(`c_json`,_utf8mb3\\\'$.nat[0].regid\\\'))',
+          'SRS_ID' => NULL,
+        ),
+        'c_natid' => 
+        array (
+          'TABLE_CATALOG' => 'def',
+          'TABLE_NAME' => 't_contacts_objects',
+          'COLUMN_NAME' => 'c_natid',
+          'ORDINAL_POSITION' => '14',
+          'COLUMN_DEFAULT' => NULL,
+          'IS_NULLABLE' => 'YES',
+          'DATA_TYPE' => 'varchar',
+          'CHARACTER_MAXIMUM_LENGTH' => '255',
+          'CHARACTER_OCTET_LENGTH' => '1020',
+          'NUMERIC_PRECISION' => NULL,
+          'NUMERIC_SCALE' => NULL,
+          'DATETIME_PRECISION' => NULL,
+          'CHARACTER_SET_NAME' => 'utf8mb4',
+          'COLLATION_NAME' => 'utf8mb4_unicode_ci',
+          'COLUMN_TYPE' => 'varchar(255)',
+          'COLUMN_KEY' => '',
+          'EXTRA' => 'STORED GENERATED',
+          'PRIVILEGES' => 'select,insert,update,references',
+          'COLUMN_COMMENT' => ' (Generated) Contains REGID if available.',
+          'GENERATION_EXPRESSION' => 'json_unquote(json_extract(`c_json`,_utf8mb3\\\'$.nat[0].natid\\\'))',
           'SRS_ID' => NULL,
         ),
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_contacts_objects',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_domain_id' => 
         array (
           1 => 
@@ -1526,6 +1556,24 @@ return array (
             'Key_name' => 'c_domain_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_domain_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_contacts_objects',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -1955,24 +2003,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_core_authn',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_uid' => 
         array (
           1 => 
@@ -2004,6 +2034,24 @@ return array (
             'Sub_part' => NULL,
             'Packed' => NULL,
             'Null' => 'YES',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_core_authn',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
             'Index_type' => 'BTREE',
             'Comment' => '',
             'Index_comment' => '',
@@ -2061,11 +2109,11 @@ return array (
           'GENERATION_EXPRESSION' => '',
           'SRS_ID' => NULL,
         ),
-        'c_user_uid' => 
+        'c_user_id' => 
         array (
           'TABLE_CATALOG' => 'def',
           'TABLE_NAME' => 't_core_authn_reset',
-          'COLUMN_NAME' => 'c_user_uid',
+          'COLUMN_NAME' => 'c_user_id',
           'ORDINAL_POSITION' => '2',
           'COLUMN_DEFAULT' => NULL,
           'IS_NULLABLE' => 'NO',
@@ -2085,11 +2133,11 @@ return array (
           'GENERATION_EXPRESSION' => '',
           'SRS_ID' => NULL,
         ),
-        'c_authn_uid' => 
+        'c_auth_id' => 
         array (
           'TABLE_CATALOG' => 'def',
           'TABLE_NAME' => 't_core_authn_reset',
-          'COLUMN_NAME' => 'c_authn_uid',
+          'COLUMN_NAME' => 'c_auth_id',
           'ORDINAL_POSITION' => '3',
           'COLUMN_DEFAULT' => NULL,
           'IS_NULLABLE' => 'NO',
@@ -2208,42 +2256,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_core_authn_reset',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
-        'c_uid' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_core_authn_reset',
-            'Non_unique' => '0',
-            'Key_name' => 'c_uid',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_authn_uid' => 
         array (
           1 => 
@@ -2252,7 +2264,7 @@ return array (
             'Non_unique' => '1',
             'Key_name' => 'c_authn_uid',
             'Seq_in_index' => '1',
-            'Column_name' => 'c_authn_uid',
+            'Column_name' => 'c_auth_id',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -2280,6 +2292,24 @@ return array (
             'Index_comment' => '',
           ),
         ),
+        'c_uid' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_core_authn_reset',
+            'Non_unique' => '0',
+            'Key_name' => 'c_uid',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
         'c_user_id' => 
         array (
           1 => 
@@ -2288,7 +2318,25 @@ return array (
             'Non_unique' => '1',
             'Key_name' => 'c_user_id',
             'Seq_in_index' => '1',
-            'Column_name' => 'c_user_uid',
+            'Column_name' => 'c_user_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_core_authn_reset',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -2304,7 +2352,7 @@ return array (
         't_core_authn_reset_ibfk_2' => 
         array (
           'TABLE_NAME' => 't_core_authn_reset',
-          'COLUMN_NAME' => 'c_user_uid',
+          'COLUMN_NAME' => 'c_user_id',
           'CONSTRAINT_NAME' => 't_core_authn_reset_ibfk_2',
           'REFERENCED_TABLE_NAME' => 't_core_users',
           'REFERENCED_COLUMN_NAME' => 'c_uid',
@@ -2314,7 +2362,7 @@ return array (
         't_core_authn_reset_ibfk_4' => 
         array (
           'TABLE_NAME' => 't_core_authn_reset',
-          'COLUMN_NAME' => 'c_authn_uid',
+          'COLUMN_NAME' => 'c_auth_id',
           'CONSTRAINT_NAME' => 't_core_authn_reset_ibfk_4',
           'REFERENCED_TABLE_NAME' => 't_core_authn',
           'REFERENCED_COLUMN_NAME' => 'c_uid',
@@ -2507,24 +2555,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_core_domains',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_user_id' => 
         array (
           1 => 
@@ -2534,6 +2564,24 @@ return array (
             'Key_name' => 'c_user_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_user_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_core_domains',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -2886,24 +2934,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_core_log',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_authn_uid' => 
         array (
           1 => 
@@ -3021,6 +3051,24 @@ return array (
             'Key_name' => 'c_user_uid',
             'Seq_in_index' => '1',
             'Column_name' => 'c_user_uid',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_core_log',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -3431,24 +3479,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_core_processlog',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_domain_id' => 
         array (
           1 => 
@@ -3476,6 +3506,24 @@ return array (
             'Key_name' => 'c_user_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_user_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_core_processlog',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -3805,24 +3853,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_core_users',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_email' => 
         array (
           1 => 
@@ -3832,6 +3862,24 @@ return array (
             'Key_name' => 'c_email',
             'Seq_in_index' => '1',
             'Column_name' => 'c_email',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'c_screenname' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_core_users',
+            'Non_unique' => '1',
+            'Key_name' => 'c_screenname',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_name',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -3859,15 +3907,15 @@ return array (
             'Index_comment' => '',
           ),
         ),
-        'c_screenname' => 
+        'PRIMARY' => 
         array (
           1 => 
           array (
             'Table' => 't_core_users',
-            'Non_unique' => '1',
-            'Key_name' => 'c_screenname',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
             'Seq_in_index' => '1',
-            'Column_name' => 'c_name',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -4666,6 +4714,24 @@ return array (
       ),
       'indexes' => 
       array (
+        'c_child' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_enterprise_projects_rels',
+            'Non_unique' => '1',
+            'Key_name' => 'c_child',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_child',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
         'PRIMARY' => 
         array (
           1 => 
@@ -4689,24 +4755,6 @@ return array (
             'Non_unique' => '0',
             'Key_name' => 'PRIMARY',
             'Seq_in_index' => '2',
-            'Column_name' => 'c_child',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
-        'c_child' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_enterprise_projects_rels',
-            'Non_unique' => '1',
-            'Key_name' => 'c_child',
-            'Seq_in_index' => '1',
             'Column_name' => 'c_child',
             'Collation' => 'A',
             'Sub_part' => NULL,
@@ -4928,15 +4976,15 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
+        'c_domain_id' => 
         array (
           1 => 
           array (
             'Table' => 't_fin_accounts',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
+            'Non_unique' => '1',
+            'Key_name' => 'c_domain_id',
             'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
+            'Column_name' => 'c_domain_id',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -4964,15 +5012,15 @@ return array (
             'Index_comment' => '',
           ),
         ),
-        'c_domain_id' => 
+        'PRIMARY' => 
         array (
           1 => 
           array (
             'Table' => 't_fin_accounts',
-            'Non_unique' => '1',
-            'Key_name' => 'c_domain_id',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
             'Seq_in_index' => '1',
-            'Column_name' => 'c_domain_id',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -5191,24 +5239,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_fin_costs',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_user_id' => 
         array (
           1 => 
@@ -5218,6 +5248,24 @@ return array (
             'Key_name' => 'c_user_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_user_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_fin_costs',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -6086,15 +6134,15 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
+        'c_account_id' => 
         array (
           1 => 
           array (
             'Table' => 't_fin_trx',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
+            'Non_unique' => '1',
+            'Key_name' => 'c_account_id',
             'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
+            'Column_name' => 'c_account_id',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -6122,15 +6170,15 @@ return array (
             'Index_comment' => '',
           ),
         ),
-        'c_account_id' => 
+        'PRIMARY' => 
         array (
           1 => 
           array (
             'Table' => 't_fin_trx',
-            'Non_unique' => '1',
-            'Key_name' => 'c_account_id',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
             'Seq_in_index' => '1',
-            'Column_name' => 'c_account_id',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -6640,24 +6688,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_int_objects',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_user_id' => 
         array (
           1 => 
@@ -6667,6 +6697,24 @@ return array (
             'Key_name' => 'c_user_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_user_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_int_objects',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -6887,24 +6935,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_mail_accounts',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_domain_id' => 
         array (
           1 => 
@@ -6932,6 +6962,24 @@ return array (
             'Key_name' => 'c_user_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_user_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_mail_accounts',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -6987,8 +7035,8 @@ return array (
           'TABLE_NAME' => 't_stor_links',
           'COLUMN_NAME' => 'c_inherit_object',
           'ORDINAL_POSITION' => '2',
-          'COLUMN_DEFAULT' => '0',
-          'IS_NULLABLE' => 'NO',
+          'COLUMN_DEFAULT' => NULL,
+          'IS_NULLABLE' => 'YES',
           'DATA_TYPE' => 'int',
           'CHARACTER_MAXIMUM_LENGTH' => NULL,
           'CHARACTER_OCTET_LENGTH' => NULL,
@@ -6997,7 +7045,7 @@ return array (
           'DATETIME_PRECISION' => NULL,
           'CHARACTER_SET_NAME' => NULL,
           'COLLATION_NAME' => NULL,
-          'COLUMN_TYPE' => 'int',
+          'COLUMN_TYPE' => 'int unsigned',
           'COLUMN_KEY' => '',
           'EXTRA' => '',
           'PRIVILEGES' => 'select,insert,update,references',
@@ -7012,7 +7060,7 @@ return array (
           'COLUMN_NAME' => 'c_inherit_table',
           'ORDINAL_POSITION' => '3',
           'COLUMN_DEFAULT' => NULL,
-          'IS_NULLABLE' => 'YES',
+          'IS_NULLABLE' => 'NO',
           'DATA_TYPE' => 'varchar',
           'CHARACTER_MAXIMUM_LENGTH' => '50',
           'CHARACTER_OCTET_LENGTH' => '200',
@@ -7418,24 +7466,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_store_items',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_seller_id' => 
         array (
           1 => 
@@ -7445,6 +7475,24 @@ return array (
             'Key_name' => 'c_seller_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_seller_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_store_items',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -7677,24 +7725,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_store_sellers',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_user_id' => 
         array (
           1 => 
@@ -7704,6 +7734,24 @@ return array (
             'Key_name' => 'c_user_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_user_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_store_sellers',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -7900,24 +7948,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_store_subscriptions',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_seller_id' => 
         array (
           1 => 
@@ -7927,6 +7957,24 @@ return array (
             'Key_name' => 'c_seller_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_seller_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_store_subscriptions',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -8135,24 +8183,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_store_tickets',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_seller_id' => 
         array (
           1 => 
@@ -8162,6 +8192,24 @@ return array (
             'Key_name' => 'c_seller_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_seller_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_store_tickets',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
@@ -8370,24 +8418,6 @@ return array (
       ),
       'indexes' => 
       array (
-        'PRIMARY' => 
-        array (
-          1 => 
-          array (
-            'Table' => 't_worklog_items',
-            'Non_unique' => '0',
-            'Key_name' => 'PRIMARY',
-            'Seq_in_index' => '1',
-            'Column_name' => 'c_uid',
-            'Collation' => 'A',
-            'Sub_part' => NULL,
-            'Packed' => NULL,
-            'Null' => '',
-            'Index_type' => 'BTREE',
-            'Comment' => '',
-            'Index_comment' => '',
-          ),
-        ),
         'c_domain_id' => 
         array (
           1 => 
@@ -8415,6 +8445,24 @@ return array (
             'Key_name' => 'c_user_id',
             'Seq_in_index' => '1',
             'Column_name' => 'c_user_id',
+            'Collation' => 'A',
+            'Sub_part' => NULL,
+            'Packed' => NULL,
+            'Null' => '',
+            'Index_type' => 'BTREE',
+            'Comment' => '',
+            'Index_comment' => '',
+          ),
+        ),
+        'PRIMARY' => 
+        array (
+          1 => 
+          array (
+            'Table' => 't_worklog_items',
+            'Non_unique' => '0',
+            'Key_name' => 'PRIMARY',
+            'Seq_in_index' => '1',
+            'Column_name' => 'c_uid',
             'Collation' => 'A',
             'Sub_part' => NULL,
             'Packed' => NULL,
