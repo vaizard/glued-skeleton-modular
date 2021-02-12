@@ -52,7 +52,7 @@ return [
         ],
         'jwt' => [
             // token params
-            'expiry'    => '30 minute',
+            'expiry'    => '60 minute',
             'secret'    => $_ENV['SECRET_JWT'] ?? 'some-secret', // a config.d fragment file will be generated with a correct key
             'algorithm' => 'HS512',
             // middleware params
@@ -64,13 +64,18 @@ return [
             "cookie"    => 'g_tok', // jwt cookie name
             "before" => function ($response, $params) use (&$decoded, &$token) {},
             "after" => function ($response, $params) use (&$decoded, &$token) {},
-            "error" => function ($response, $arguments) {
+            "error" => function ($response, $arguments) use (&$decoded) {
+
+                $payload_exp = $decoded['exp'] ?? 0;
+                $expired_ago = $payload_exp - (new \DateTime())->getTimeStamp();
+
                 $data['api'] =  'core/auth/jwt';
                 $data['version'] = '1';
                 $data['response_ts'] = time();
                 $data['response_id'] = uniqid();
                 $data['status'] = 'Forbidden.';
                 $data['message'] = 'You must be signed in to do this, please provide a valid token.';
+                if ($expired_ago < 0) $data['message'] .= ' (expired)';
                 $data['code'] = 403;
                 $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
                 return $response->withHeader("Content-Type", "application/json");
