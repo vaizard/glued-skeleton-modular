@@ -50,19 +50,13 @@ class StorControllerApiV1 extends AbstractTwigController
                 $parts = explode('/', $raw_path);
                 if (count($parts) > 1) {
                     $actual_dir = $parts[0];
-                    if (!empty($parts[1])) {
-                        $actual_object = $parts[1];
-                    }
-                    else {
-                        $actual_object = 0; // pro pripady z api kdy za lomitkem nic neni, null objekt reprezentovany 0
-                    }
-                }
-                else {
-                    $actual_dir = $parts[0];   // pokud to neni objekt v diru, tak nastavime jen ten dir a bude se ukladat do NULL objektu
-                    $actual_object = 0; // zde null objekt reprezentovany 0
+                    if (!empty($parts[1])) $actual_object = $parts[1];  // case "work_dir": "app/123"
+                    else $actual_object = null;                         // case "work_dir": "app/"
+                } else {
+                    $actual_dir = $parts[0];                            // case "work_dir": "app"
+                    $actual_object = null;
                 }
             }
-
             // Get data
             $files = $request->getUploadedFiles();
 
