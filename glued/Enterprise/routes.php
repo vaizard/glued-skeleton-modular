@@ -8,7 +8,7 @@ use Slim\Routing\RouteCollectorProxy;
 
 // Define the app routes.
 $app->group('/api/enterprise/v1', function (RouteCollectorProxy $group) {
-    $group->get ('/projects[/{uid:[0-9]+}]', EnterpriseController::class . ':projects_list')->setName('enterprise.projects.api01'); 
+    $group->get ('/projects[/{uid:[0-9]+}]', EnterpriseController::class . ':projects_get_api')->setName('enterprise.projects.api01'); 
     $group->post('/projects[/{uid:[0-9]+}]', EnterpriseController::class . ':projects_post');
     $group->patch('/projects[/{uid:[0-9]+}]', EnterpriseController::class . ':projects_patch');
     $group->delete('/projects[/{uid:[0-9]+}]', EnterpriseController::class . ':projects_delete');

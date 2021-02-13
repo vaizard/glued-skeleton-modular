@@ -109,47 +109,50 @@ class EnterpriseController extends AbstractTwigController
     // PROJECTS API
     // ==========================================================
 
-    private function sql_projects_list() {
-        $data = $this->db->rawQuery("
-            SELECT
-                t_enterprise_projects.c_uid as 'id',
-                t_enterprise_projects.c_json->>'$._s' as '_s',
-                t_enterprise_projects.c_json->>'$._v' as '_v',
-                t_enterprise_projects.c_json->>'$.name' as 'name',
-                t_enterprise_projects.c_json->>'$.description' as 'description'
-            FROM `t_enterprise_projects` 
-        ");
-        if (count($data) > 0) {
-            foreach ($data as $ind => $pro) {
-                // doplnime url na detail, protoze v te sablone nefunguje url_for
-                //$data[$ind]['detail_url'] = $this->routerParser->urlFor('enterprise.project.detail', array('uid' => $pro['id']));
-                // podivame se, jestli ma nejakeho parenta v tabulce t_enterprise_projects_rels
-                $this->db->where('c_child', $pro['id']);
-                $parent_data = $this->db->getOne('t_enterprise_projects_rels');
-                if ($this->db->count == 0) { $data[$ind]['parent'] = ''; }
-                else {
-                    // nacteme nazev parentu
-                    $this->db->where('c_uid', $parent_data['c_parent']);
-                    $parent_project_data = $this->db->getOne('t_enterprise_projects', ['c_uid as id', 'c_json->>"$.name" as name']);
-                    $data[$ind]['parent'] = $parent_project_data['name'];
-                }
-            }
-        }
-        
-        return $data;
-    }
 
-
-    public function projects_list(Request $request, Response $response, array $args = []): Response
-    {
+     public function projects_get_api(Request $request, Response $response, array $args = []): Response {
+      
+        $q = $request->getQueryParams();
         $builder = new JsonResponseBuilder('enterprise.projects', 1);
-        $payload = $builder->withData((array)$this->sql_projects_list())->withCode(200)->build();
-        return $response->withJson($payload);
-        // TODO handle errors
-        // TODO the withData() somehow escapes quotes in t_enterprise_projects.c_json->>'$.config' 
-        //      need to figure out where this happens and zap it.
-    }
+        $uid = $args['uid'] ?? null;
+        $filter = $q['filter'] ?? '';
+        $data = null;
 
+        $query = "
+          SELECT 
+          JSON_ARRAYAGG(
+            JSON_MERGE(
+              p1.c_json,
+              JSON_OBJECT(
+                'dt_created', p1.c_ts_created,
+                'dt_updated', p1.c_ts_updated,
+                'parent', JSON_OBJECT(
+                  'id', r.c_parent,
+                  'name', p2.c_name
+                )
+              )
+            )
+          ) as c_json
+          FROM (`t_enterprise_projects` p1
+          LEFT JOIN `t_enterprise_projects_rels` r
+          ON (r.c_child = p1.c_uid))
+          LEFT JOIN `t_enterprise_projects` p2
+          ON (r.c_parent = p2.c_uid)
+          ";
+       
+        if ($uid) {
+            $query .= ' WHERE p1.c_uid = ?';
+            $params = [ $uid ];
+        } else {
+            $query .= ' WHERE p1.c_name LIKE ?';
+            $params = [ '%'.$filter.'%' ];
+        }
+
+      $data = json_decode($this->db->rawQuery($query, $params)[0]['c_json'] ?? '', true);
+      if (($uid) and (!$data)) $payload = $builder->withCode(404)->build();
+      else $payload = $builder->withData((array)$data)->withCode(200)->build();
+      return $response->withJson($payload);
+    }
 
     public function projects_patch(Request $request, Response $response, array $args = []): Response {
         $builder = new JsonResponseBuilder('enterprise.projects', 1);
