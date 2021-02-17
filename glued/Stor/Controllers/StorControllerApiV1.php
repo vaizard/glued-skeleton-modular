@@ -31,6 +31,7 @@ class StorControllerApiV1 extends AbstractTwigController
         $errors = [];
         $files_uploaded = 0;
         $files_stored = 0;
+        $files_skipped = 0;
         $return_code = 500;
         $return_data = array();
         $return_message = 'Error: some or all files could not be stored.';
@@ -89,18 +90,27 @@ class StorControllerApiV1 extends AbstractTwigController
                     $return_data[$file_index]['size'] = $file_object_data['size'];
                     $return_data[$file_index]['mime-type'] = $file_object_data['mime'];
                     
-                    if ($file_object_data['insert'] == 1) $return_data[$file_index]['result'] = 'Stored.';
-                    else $return_data[$file_index]['result'] = 'Linked.';
-                    $files_stored++;
+                    if ($file_object_data['insert'] == 0 and $file_object_data['linked'] == 0) {
+                        $return_data[$file_index]['result'] = 'Skipped.';
+                        $files_skipped++;
+                    }
+                    else {
+                        if ($file_object_data['insert'] == 1) $return_data[$file_index]['result'] = 'Stored.';
+                        else $return_data[$file_index]['result'] = 'Linked.';
+                        $files_stored++;
+                    }
                 } else {
                     $return_data[$file_index]['name'] = $filename;
                     $return_data[$file_index]['result'] = 'Failed.';
                     $errors[$newfile->getError()] = 1;
                 }
             }   // konec cyklu pres nahrane soubory
-          
-            if (($files_stored == $files_uploaded) and ($files_stored > 0)) {
+            
+            $successful_files_count = $files_stored + $files_skipped;
+            
+            if (($successful_files_count == $files_uploaded) and ($successful_files_count > 0)) {
                 $return_message = 'Success: '.$files_stored.' files stored.';
+                if ($files_skipped > 0) { $return_message .= ' '.$files_skipped.' files skipped.'; }
                 $return_code = 200;
             } else {
                 $phpFileUploadErrors = [
@@ -112,7 +122,7 @@ class StorControllerApiV1 extends AbstractTwigController
                     7 => 'Failed to write file(s). ',
                     8 => 'Extension stopped file(s) from transferring.',
                 ];
-                $return_message = 'Stored '.$files_stored.' out of '.$files_uploaded.'. Problems encountered: ';
+                $return_message = 'Stored '.$files_stored.' out of '.$files_uploaded.'. '.$files_skipped.' skipped. Problems encountered: ';
                 foreach ($errors as $key => $item) {
                     if ($item === 1) $return_message .= $phpFileUploadErrors[$key];
                 }
@@ -120,7 +130,6 @@ class StorControllerApiV1 extends AbstractTwigController
         } catch (\Exception $e) {
             $return_message = $e->getMessage();
         }
-
        
         // vybuildime json response
         $builder = new JsonResponseBuilder('stor/upload', 1);
