@@ -80,7 +80,8 @@
     "dragonbe/vies": "^2.1",
     "itsgoingd/clockwork": "v5.*@beta",
     "sabre/event": "^5.1",
-    "ccxt/ccxt": "^1.40"
+    "ccxt/ccxt": "^1.40",
+    "ondrakoupil/csob-eapi-paygate": "^1.8"
   },
   "repositories": [
     {
