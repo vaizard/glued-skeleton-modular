@@ -57,7 +57,7 @@ return [
             'algorithm' => 'HS512',
             // middleware params
             'path'      => [ '/api' ],
-            'ignore'    => [ '/api/core/v1/auth/whoami', '/api/core/v1/auth/signin' ],
+            'ignore'    => [ '/api/core/v1/auth/whoami', '/api/core/v1/auth/signin', '/api/core/v1/auth/update', '/api/integrations/v1/qrpay' ],
             'attribute' => 'auth_jwt',
             'secure'    => 'true', // require jwt over https (NOTE You can really screw up your security with this)
             'relaxed'   => ["localhost", "127.0.0.1" ], // https not enforced for requests from relaxed whitelist (NOTE You can really screw up your security with this)

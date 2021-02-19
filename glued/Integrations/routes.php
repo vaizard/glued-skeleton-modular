@@ -14,6 +14,7 @@ $app->group('/api/integrations/v1', function (RouteCollectorProxy $group) {
     $group->delete('/google[/{uid:[0-9]+}]', IntegrationsController::class . ':google_delete');
     $group->post ('/google/next[/{uid:[0-9]+}]', IntegrationsController::class . ':google_progress_next')->setName('integrations.google.next.api01');
     $group->post ('/google/action[/{uid:[0-9]+}]', IntegrationsController::class . ':google_sheet_action')->setName('integrations.google.action.api01');
+    $group->get ('/qrpay', IntegrationsController::class . ':qrpay_get_api')->setName('intagrations.qrpay.api01'); 
 })->add(RestrictGuests::class);
 
 $app->group('/integrations', function (RouteCollectorProxy $group) {

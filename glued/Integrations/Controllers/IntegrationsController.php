@@ -22,6 +22,7 @@ use Glued\Integrations\Classes\Google;
 use OndraKoupil\Csob\Config as CsobConfig;
 use OndraKoupil\Csob\GatewayUrl;
 use OndraKoupil\Csob\Client;
+use Defr\QRPlatba\QRPlatba;
 
 class IntegrationsController extends AbstractTwigController
 {
@@ -46,11 +47,51 @@ class IntegrationsController extends AbstractTwigController
         } catch (Exception $e) {
             echo "Something went wrong: " . $e->getMessage();
         }
-
-  
         return $response;
     }
 
+    public function qrpay_get_api(Request $request, Response $response, array $args = []): Response {
+
+
+    // https://10.146.149.150/integrations/qrplatba?amount=133.3&name=pavel stratil&street=kainarova 26&locacity=brno&bday=22.11.1980&regid=34323423&zip=61600&email=a@b.c
+
+    $volume_def = 1000.0;
+    $volume = (float) ($request->getQueryParam('volume') ?? $volume_def);
+    $email  = (string) ($request->getQueryParam('email') ?? '');
+    $eid    = $this->crypto->genkey_base64();
+
+    $json['eid'] = $eid;
+    $json['volume'] = $volume;
+    $json['email'] = $email ?? '';
+    $json['name'] = $request->getQueryParam('name') ?? '';
+    $json['addr']['street'] = $request->getQueryParam('street') ?? '';
+    $json['addr']['locacity'] = $request->getQueryParam('locacity') ?? '';
+    $json['addr']['zip'] = $request->getQueryParam('zip') ?? '';
+    $json['bday'] = $request->getQueryParam('bday') ?? '';
+    $json['regid'] = $request->getQueryParam('regid') ?? '';
+
+    $row = array (
+        'c_eid' => $eid,
+        'c_json' => json_encode($json),
+    );
+            try { $new = $this->utils->sql_insert_with_json('t_store_payments', $row); } catch (Exception $e) { 
+                //throw new HttpInternalServerErrorException($request, $e->getMessage());  
+            }
+
+    $qrPlatba = new QRPlatba();
+
+    
+
+    $qrPlatba->setAccount('2500781658/2010')
+        ->setAmount($volume)
+        ->setMessage($eid. ' ' . $email)
+        //->setCurrency('CZK') // Výchozí je CZK, lze zadat jakýkoli ISO kód měny
+        //->setDueDate(new \DateTime());
+        ;
+
+        echo $qrPlatba->getQRCodeImage(); // Zobrazí <img> tag s kódem, viz níže         
+        return $response; 
+    }
 
     /**
      * @param Request  $request

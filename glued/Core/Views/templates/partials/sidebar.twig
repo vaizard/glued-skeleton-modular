@@ -16,6 +16,7 @@
   <li class="dropdown">
     <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-terminal"></i> <span>{{ __('Admin') }}</span></a>
     <ul class="dropdown-menu">
+      <li><a class="nav-link" href="{{ url_for('core.admin.enforcer.app') }}">Casbin Enforcer</a></li>
       <li><a class="nav-link" href="{{ url_for('core.admin.phpinfo.web') }}">phpinfo()</a></li>
       <li><a class="nav-link" href="{{ url_for('core.admin.phpconst.web') }}">get_defined_constants()</a></li>
       <li><a class="nav-link" href="{{ url_for('core.admin.playground.web') }}">Playground closure</a></li>
@@ -27,15 +28,7 @@
     <a href="{{ url_for('core.api') }}" class="nav-link"><i class="fas fa-code"></i><span>Api</span></a>
   </li>
   {% endif %}
-  {% if enforce('/ui/core/integrations') %}
-  <li class="dropdown">
-    <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-plug"></i> <span>{{ __('Integrations') }}</span></a>
-    <ul class="dropdown-menu">
-      <li><a class="nav-link" href="{{ url_for('core.integrations.google') }}">Google</a></li>
-      <li><a class="nav-link" href="{{ url_for('core.integrations.fio_cz') }}">Fio.cz</a></li>
-    </ul>
-  </li>
-  {% endif %}
+
 
   <li class="menu-header">{{ __('Apps') }}</li>
   {% if enforce('/ui/stor') %}
@@ -128,9 +121,13 @@
   {% endif %}
   {% if enforce('/ui/integrations') %}
   <li class="dropdown">
-    <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-credit-card"></i> <span>{{ __('Integrations') }}</span></a>
+    <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-plug"></i> <span>{{ __('Integrations') }}</span></a>
     <ul class="dropdown-menu">
       <li><a class="nav-link" href="{{ url_for('integrations.google.list') }}">{{ __('Google sheets') }}</a></li>
+      <li><a class="nav-link" href="{{ url_for('intagrations.csob.app') }}">CSOB</a></li>
+      <li><a class="nav-link" href="{{ url_for('intagrations.qrpay.api01') }}">QR platba</a></li>
+      <li><a class="nav-link" href="{{ url_for('core.integrations.google') }}">Google</a></li>
+      <li><a class="nav-link" href="{{ url_for('core.integrations.fio_cz') }}">Fio.cz</a></li>
     </ul>
   </li>
   {% endif %}
