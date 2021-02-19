@@ -19,5 +19,6 @@ $app->group('/api/integrations/v1', function (RouteCollectorProxy $group) {
 $app->group('/integrations', function (RouteCollectorProxy $group) {
     $group->get ('/google/list', IntegrationsController::class . ':google_list_ui')->setName('integrations.google.list');
     $group->get ('/google/detail[/{uid:[0-9]+}]', IntegrationsController::class . ':google_detail_ui')->setName('integrations.google.detail');
+    $group->get ('/csob', IntegrationsController::class . ':csob_get_app')->setName('intagrations.csob.app'); 
 })->add(RedirectGuests::class);
 

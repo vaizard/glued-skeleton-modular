@@ -19,10 +19,39 @@ use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Symfony\Component\DomCrawler\Crawler;
 use Glued\Integrations\Classes\Google;
-
+use OndraKoupil\Csob\Config as CsobConfig;
+use OndraKoupil\Csob\GatewayUrl;
+use OndraKoupil\Csob\Client;
 
 class IntegrationsController extends AbstractTwigController
 {
+
+    public function csob_get_app(Request $request, Response $response, array $args = []): Response {
+        echo 'https://iplatebnibrana.csob.cz/keygen/';
+        $config = new CsobConfig(
+                $this->settings['csob']['merchant_id'],
+                __ROOT__ . "/private/api/csob.key",
+                __ROOT__ . "/private/api/csob.brana.pub",
+                $this->settings['csob']['shop_name'],
+                $this->settings['csob']['return_uri'],
+                GatewayUrl::TEST_LATEST
+            );
+
+        $client = new Client($config);    
+        try {
+            $client->testGetConnection();
+            $client->testPostConnection();
+            echo 'ok';
+
+        } catch (Exception $e) {
+            echo "Something went wrong: " . $e->getMessage();
+        }
+
+  
+        return $response;
+    }
+
+
     /**
      * @param Request  $request
      * @param Response $response
@@ -122,7 +151,7 @@ class IntegrationsController extends AbstractTwigController
         //        ],
         //      "sheets.checkmeta": {       // php funkce, ktera kontroluje, zda existuji predepsane zahlavi sloupcu (v radku definovanem pomoci "meta")
         //         "meta": "Orig!A1:G1",
-        //         "reqs": [ "DÚZP", "VS", "VS2" ]
+        //         "reqs": [ "DÃšZP", "VS", "VS2" ]
         //      }
         //      "sheets.rowcache": {       // php funkce, ktera cachene data do nasi tabulky - nejdriv udela ze vseho ve sloupecku A md5 a testne, ze jsou hashe fakt unikatni
         //         "meta": "Orig!A1:G1",
@@ -130,7 +159,7 @@ class IntegrationsController extends AbstractTwigController
         //         "fuid": "A",
         //       },
         //       "sheets.costimport": {    // php funkce, ktera importne zatim nenaimportovane radky do jsonu v t_fin_costs tabulce
-        //         "DÚZP": "dt-supply",
+        //         "DÃšZP": "dt-supply",
         //         "Vystaveno": "dt-issued",
         //       }
         //   ]
