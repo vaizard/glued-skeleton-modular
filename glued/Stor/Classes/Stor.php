@@ -241,7 +241,8 @@ class Stor {
     vystup
     $file_object_data['sha512'] - hash, klic v objects tabulce
     $file_object_data['new_id'] - klic v links tabulce
-    $file_object_data['insert'] - 0 uz byl v objects, 1 bylo vlozeno i do objects
+    $file_object_data['insert'] - 0 uz byl v objects, 1 bylo vlozeno i do objects (tyka se tabulky objects)
+    $file_object_data['linked'] - 0 nebylo pridano do links (uz tam je soubor se stejnym nazvem a hashem) 1 bylo pridano do links (tyka se tabulky links)
     $file_object_data['size'] - aktualni hodnota size v objects tabulce
     $file_object_data['mime'] - aktualni hodnota mime v objects tabulce
     */
@@ -297,7 +298,8 @@ class Stor {
             // vlozime do objects
             $data = Array ("c_json" => $json_string);
             $this->db->insert ('t_stor_objects', $data);
-
+            
+            // protoze je novy v objects, nemuze byt se stejnym hashem v links, takze vzdy vkladame i do links
             $data = Array (
             "c_sha512" => $sha512,
             "c_user_id" => $user_id,
@@ -305,32 +307,49 @@ class Stor {
             "c_inherit_table" => $inherit_table,
             "c_inherit_object" => $inherit_object
             );
-
             $new_id = $this->db->insert ('t_stor_links', $data);
             
             // navratova data
             $file_object_data['new_id'] = $new_id;
             $file_object_data['insert'] = 1;
+            $file_object_data['linked'] = 1;
             $file_object_data['size'] = $atributes['size'];
             $file_object_data['mime'] = $atributes['mime'];
         }
         else {
-            // soubor uz existuje v objects ale vlozime ho aspon do links
-            $data = Array (
-            "c_sha512" => $sha512,
-            "c_user_id" => $user_id,
-            "c_filename" => $atributes['filename'],
-            "c_inherit_table" => $inherit_table,
-            "c_inherit_object" => $inherit_object
-            );
-            $new_id = $this->db->insert ('t_stor_links', $data);
+            // soubor uz existuje v objects
             
-            // navratova data pouzijeme z nactenych dat
+            // nejdriv vytvorime cast dat z existujiciho souboru
             $file_data = json_decode($file_object['c_json'], true);
-            $file_object_data['new_id'] = $new_id;
             $file_object_data['insert'] = 0;
             $file_object_data['size'] = $file_data['data']['size'];
             $file_object_data['mime'] = $file_data['data']['mime'];
+            
+            // pokud v links nahodou uz je soubor se stejnym nazvem a hashem, tak preskocime i vlozeni do links
+            $this->db->where("c_sha512", $sha512);
+            $this->db->where("c_inherit_table", $inherit_table);
+            $this->db->where("c_inherit_object", $inherit_object);
+            $this->db->where("c_filename", $atributes['filename']);
+            $file_link = $this->db->getOne('t_stor_links');
+            if ($this->db->count == 0) {
+                $data = Array (
+                "c_sha512" => $sha512,
+                "c_user_id" => $user_id,
+                "c_filename" => $atributes['filename'],
+                "c_inherit_table" => $inherit_table,
+                "c_inherit_object" => $inherit_object
+                );
+                $new_id = $this->db->insert ('t_stor_links', $data);
+                
+                // doplnime dalsi navratova data
+                $file_object_data['new_id'] = $new_id;
+                $file_object_data['linked'] = 1;
+            }
+            else {
+                // doplnime dalsi navratova data
+                $file_object_data['new_id'] = $file_link['c_uid'];
+                $file_object_data['linked'] = 0;
+            }
         }
         
         return $file_object_data;
