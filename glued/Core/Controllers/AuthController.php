@@ -11,11 +11,81 @@ use Glued\Core\Classes\Json\JsonResponseBuilder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
+use Facile\OpenIDClient\Service\Builder\RevocationServiceBuilder;
+use Facile\OpenIDClient\Service\Builder\UserInfoServiceBuilder;
+use Keycloak\Admin\KeycloakClient;
 use \Exception;
 
 class AuthController extends AbstractTwigController
 
 {
+
+    public function keycloak_adm($request, $response) {
+        echo "<b>"."https://github.com/MohammadWaleed/keycloak-admin-client"."</b>";
+        $client = $this->oidc_adm;
+        echo "<br><b>".'$client->getUsers()'."</b>";
+        print("<pre>".print_r($client->getUsers(),true)."</pre>");
+        return $response;
+    }
+
+    public function keycloak_login($request, $response) {
+        $settings = [];
+        //$settings['response_mode'] = 'query';
+        //$settings['login_hint'] = 'user_username';
+        //$settings['response_type'] = 'code id_token token';
+        $settings['response_type'] = 'code';
+        //$settings['nonce'] = 'somenonce';
+
+        $authorizationService = $this->oidc_svc;
+        $redirectAuthorizationUri = $authorizationService->getAuthorizationUri(
+            $this->oidc_cli, $settings);
+
+        // print("<pre>".print_r($authorizationService,true)."</pre>");
+        // print("<pre>".print_r($redirectAuthorizationUri,true)."</pre>");
+        header('Location: '.$redirectAuthorizationUri);
+        exit();
+    }
+
+    public function keycloak_logout($request, $response) {
+        $client = $this->oidc_cli;
+        $authorizationService = $this->oidc_svc;
+        $revocationService = (new RevocationServiceBuilder())->build();
+        $callbackParams = $authorizationService->getCallbackParams($request, $client);
+         $tokenSet = $authorizationService->callback($client, $callbackParams);
+        $params = $revocationService->revoke($client, $tokenSet->getRefreshToken());
+        return $response;
+    }
+
+
+    public function keycloak_priv($request, $response) {
+        $settings['response_type'] = 'code id_token token';
+        $settings['nonce'] = 'somenonce';
+        $client = $this->oidc_cli;
+        $authorizationService = $this->oidc_svc;
+        $callbackParams = $authorizationService->getCallbackParams($request, $client, $settings);
+        $tokenSet = $authorizationService->callback($client, $callbackParams);
+
+        $idToken = $tokenSet->getIdToken(); // Unencrypted id_token
+        $accessToken = $tokenSet->getAccessToken(); // Access token
+        $claims = $tokenSet->claims(); // IdToken claims (if id_token is available)
+
+        // print_r($callbackParams);
+        // print_r($tokenSet);
+        // print_r($claims);
+        // print_r($idToken);
+        // print_r($accessToken);
+        // die('<br>lala');
+
+        // Refresh token
+        $refreshToken = $tokenSet->getRefreshToken(); // Refresh token
+        print_r($refreshToken);
+        $tokenSet = $authorizationService->refresh($client, $refreshToken);
+        die('lala');
+
+        // Get user info
+        $userInfoService = (new UserInfoServiceBuilder())->build();
+        $userInfo = $userInfoService->getUserInfo($client, $tokenSet);
+    }
 
     public function signout_get($request, $response)
     {
@@ -28,7 +98,6 @@ class AuthController extends AbstractTwigController
     public function reset_get($request, $response, array $args = [])
     {
         $twig = 'Core/Views/reset.twig';
-
 
         if (isset($args['token'])) {
             $twig = 'Core/Views/reset-token-fail.twig'; 
@@ -85,6 +154,7 @@ class AuthController extends AbstractTwigController
             if (!$user) {
                 $seconds_throttle = $seconds_max_throttle;
             } else {
+                $delete = $this->db->rawQuery('DELETE FROM `t_core_authn_reset` WHERE c_ts_timeout < timestamp(now())');
                 $reset = $this->db->rawQuery("SELECT * FROM t_core_authn_reset WHERE c_user_id = ? AND c_auth_id = ? AND c_ts_created BETWEEN timestamp(DATE_SUB(NOW(), INTERVAL ? SECOND)) AND timestamp(NOW())", [ $user[0]['c_user_uid'], $user[0]['c_uid'], $seconds_test ]);
 
                 $seconds_throttle = count($reset) * $seconds_step;
@@ -143,15 +213,54 @@ class AuthController extends AbstractTwigController
     }
 
 
+    public function api_update_post($request, $response)
+    {
+        $builder = new JsonResponseBuilder('authentication', 1);
 
+
+            //$request->getParam('email'),
+            //$request->getParam('password')
+
+            $validation = $this->validator->validate($request, [
+                'password1' => v::noWhitespace()->notEmpty(),
+                'password2' => v::noWhitespace()->notEmpty(),
+            ]);
+            
+// -----------------------------------------------------------------------------------------------------tady to je rozdelane
+
+            // on validation failure redirect back to the form. the rest of this
+            // function won't get exectuted
+            if ($validation->failed()) {
+                $this->logger->warn("Password change failed. Validation error.");
+                return $response->withRedirect($this->routerParser->urlFor('core.accounts.read.web',['uid' => $user_id]));
+            }
+            
+            // change the password, emit flash message and redirect
+            $update = $this->auth->cred_update($user_id, $auth_id, $request->getParam('password'));
+            
+            if (!$update) {
+                $this->logger->warn("Password change failed. DB error.");
+                return $response->withRedirect($this->routerParser->urlFor('core.accounts.read.web',['uid' => $user_id]));
+            }
+            else {
+                $this->logger->info("One password changed.");
+                $this->flash->addMessage('info', 'Your password was changed');
+                return $response->withRedirect($this->routerParser->urlFor('core.accounts.read.web',['uid' => $user_id]));
+            }
+
+
+        $this->auth->cred_update($user_id, $auth_id, $password);
+        $payload = $builder->withMessage(__('Password updated.'))->withCode(200)->build();
+        return $response->withJson($payload, 200);
+    }
 
 
     public function api_signout_get($request, $response)
     {
         $builder = new JsonResponseBuilder('authentication', 1);
         $this->auth->signout();
-        return $response->withJson(['status' => 'OK', 'message' => 'Signed out.']);
-
+        $payload = $builder->withMessage(__('Signed out.'))->withCode(200)->build();
+        return $response->withJson($payload, 200);
     }
 
     public function api_extend_get($request, $response) {
@@ -385,7 +494,87 @@ class AuthController extends AbstractTwigController
                 return $response->withRedirect($this->routerParser->urlFor('core.accounts.read.web',['uid' => $user_id]));
             }
         }
+    }
+
+
+    public function enforcer(Request $request, Response $response, array $args = []): Response {
+        function pprint($data) {
+            if (is_array($data) or is_object($data)) print("<pre>".print_r($data,true)."</pre>");
+            else print($data.'<br>');
+        }
+
+        // AUTHORIZATION
+        // TODO Uncommenting the stuff below is viable once problems with casbin are resolved
+
+        $sub = $GLOBALS['_GLUED']['authn']['user_id'] ?? null;
+        $dom = 1;
+        $obj = '';
+        $act = '';
+        $e = $this->enforcer;
+        $m = $e->getModel();
         
+        pprint('<b>getPolicy($policy_type, $policy_name)</b>');
+        pprint('<i>$policy_type assumes values: "p" (get a policy), "g" (get a group/role)</i>.');
+        pprint("group/role policy 'g' assigns {subject:user}, {role}, {domain}. Domain 0 is used for domain unspecific stuff (UI elements).");
+        pprint("group/role policy 'g2' assign domain relationships {domain_parent}, {domain_child}.");
+        pprint("getPolicy('g','g2') lists all group/role policies labeled as 'g2'");
+        pprint($m->getPolicy('g','g2'));
+        pprint("getPolicy('g','g') lists all group/role policies labeled as 'g'");
+        pprint("<b>List {subject:user}, {role}, {domain} definitions. Domain 0 is used for domain unspecific stuff (UI elements).</b>");
+        pprint($m->getPolicy('g','g'));
+
+        // $e->getFilteredGroupingPolicy(1, "admin") = getFilteredPolicy('g','g',1,'admin')
+        pprint("<b>getFilteredPolicy('g','g',0,'1') - get policies for user 1</b>");
+        pprint($m->getFilteredPolicy('g','g',0,'1'));
+        pprint("<b>getFilteredPolicy('g','g',1,'admin') - get policies for role admin</b>");
+        pprint($m->getFilteredPolicy('g','g',1,'admin'));
+        pprint("<b>getFilteredPolicy('g','g',1,'admin') - get policies for role usage</b>");
+        pprint($m->getFilteredPolicy('g','g',1,'usage'));
+        pprint("<b>getFilteredPolicy('g','g',2,'0') - get policies for domain 0</b>");
+        pprint($m->getFilteredPolicy('g','g',2,'0'));
+        pprint("<b>getFilteredPolicy('g','g',2,'3') - get policies for domain 3</b>");
+        pprint($m->getFilteredPolicy('g','g',2,'3'));
+        pprint("<b>getFilteredPolicy('g','g',0,'1')->getFilteredPolicy('g','g',1,'usage')</b>");
+        pprint( 'doesnt work' );
+        pprint("<b>getFilteredPolicy('g','g',2,'1') - get policies for domain 1 (this doesnt give the expected result, because we'd first need to look for g2 relationships)</b>");
+        pprint($m->getFilteredPolicy('g','g',2,'1'));
+        pprint('---------------------------------');            
+        
+        pprint('$e->getPolicy() = $e->getPolicy("p","p"), gives permission polcies');
+        pprint($e->getPolicy('p','p'));
+
+        pprint('$e->getFilteredPolicy(0, "admin"), gives permission polcies for role admin');
+        pprint($e->getFilteredPolicy(0, "admin"));
+        pprint('$e->getFilteredPolicy(1, "0"), gives permission polcies for domain 0');
+        pprint($e->getFilteredPolicy(1, "0"));
+        pprint('$e->getFilteredPolicy(1, "1"), gives permission polcies for domain 1');
+        pprint($e->getFilteredPolicy(1, "1"));
+        pprint('$e->getFilteredPolicy(2, "/ui/stor"), gives permission polcies for resource');
+        pprint($e->getFilteredPolicy(2, "/ui/stor"));
+        pprint('$e->getRolesForUserInDomain("2", "0") (user 2 in domain 0)');
+        pprint($e->getRolesForUserInDomain("2", "0"));
+
+        pprint('$e->getFilteredGroupingPolicy(0, "alice"); all role inheritance rules');
+        pprint($e->getFilteredGroupingPolicy(0, "1"));
+        //You can gets all the role inheritance rules in the policy, field filters can be specified. Then use array_filter() to filter.
+        //Getting all domains that user is in
+       
+
+        //doesnt work, probably because of domain
+        //pprint('$e->getRolesForUser("2")');
+        //pprint($e->getRolesForUser("1"));
+            //$m = $e->getModel();
+            //$r = $e->enforce((string)$sub, (string)$dom, (string)$obj, (string)$act); 
+
+        //$e->enforce($u, '0', 'add-correct-route-here', 'r');  
+
+        // $e->name, or $m->name?
+        //print_r( $m->getPolicy(1,1,'all','read') ) ;
+        //$e->addRoleForUser('alice', 'admin'); 
+        //$e->addPermissionForUser('member', '/foo', 'GET');
+        //$e->addPolicy('eve', 'data3', 'read');
+        //$e->getRolesForUser('alice');
+        return $response;
     }
 
 }

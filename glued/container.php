@@ -33,6 +33,12 @@ use Twig\Loader\FilesystemLoader;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 use voku\helper\AntiXSS;
+use Keycloak\Admin\KeycloakClient;
+use Facile\OpenIDClient\Client\ClientBuilder;
+use Facile\OpenIDClient\Issuer\IssuerBuilder;
+use Facile\OpenIDClient\Client\Metadata\ClientMetadata;
+use Facile\OpenIDClient\Service\Builder\AuthorizationServiceBuilder;
+use Facile\OpenIDClient\Service\Builder\UserInfoServiceBuilder;
 
 $container->set('events', function () {
     return new Emitter();
@@ -79,6 +85,15 @@ $container->set('fscache', function () {
       return new Psr16Adapter('files');
 });
 
+$container->set('fscache', function () {
+        CacheManager::setDefaultConfig(new Config([
+        "path" => '/var/www/html/glued-skeleton/private/cache/psr16',
+        "itemDetailedDate" => false
+      ]));
+      return new Psr16Adapter('files');
+});
+
+
 $container->set('antixss', function () {
     return new AntiXSS();
 });
@@ -114,6 +129,41 @@ $container->set('enforcer', function (Container $c) {
         ]);
     return new Enforcer($s['casbin']['modelconf'], $adapter);
 });
+
+$container->set('oidc_adm', function (Container $c) {
+    $s = $c->get('settings')['oidc'];
+    $client = \Keycloak\Admin\KeycloakClient::factory([
+        'baseUri'   => $s['server'],
+        'realm'     => $s['realm'],
+        'client_id' => $s['admin']['client'],
+        'username'  => $s['admin']['user'],
+        'password'  => $s['admin']['pass']
+    ]);
+    return $client;
+});
+
+$container->set('oidc_cli', function (Container $c) {
+    $s = $c->get('settings')['oidc'];
+    $issuer = (new IssuerBuilder())->build($s['uri']['discovery']);
+    $clientMetadata = ClientMetadata::fromArray([
+        'client_id'     => $s['auth']['client'],
+        'client_secret' => $s['auth']['secret'],
+        'token_endpoint_auth_method' => 'client_secret_basic', // the auth method to the token endpoint
+        'redirect_uris' => $s['uri']['redirect']
+    ]);
+    $client = (new ClientBuilder())
+        ->setIssuer($issuer)
+        ->setClientMetadata($clientMetadata)
+        ->build();
+    return $client;
+});
+
+$container->set('oidc_svc', function (Container $c) {
+    $s = $c->get('settings')['oidc'];
+    $service = (new AuthorizationServiceBuilder())->build();
+    return $service;
+});
+
 
 $container->set('view', function (Container $c) {
     $twig = Twig::create(__ROOT__ . '/glued/', $c->get('settings')['twig']);

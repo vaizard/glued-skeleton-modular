@@ -82,7 +82,10 @@
     "sabre/event": "^5.1",
     "ccxt/ccxt": "^1.40",
     "ondrakoupil/csob-eapi-paygate": "^1.8",
-    "zoldia/qr-platba": "^1.0"
+    "zoldia/qr-platba": "^1.0",
+    "facile-it/php-openid-client": "dev-master",
+    "mohammad-waleed/keycloak-admin-client": "^0.22.0",
+    "dflydev/fig-cookies": "^2.0"
   },
   "repositories": [
     {
@@ -148,6 +151,6 @@
       "manager-options": "--modules-folder=./public/assets/node_modules"
     }
   },
-  "minimum-stability": "stable",
+  "minimum-stability": "beta",
   "prefer-stable": true
 }

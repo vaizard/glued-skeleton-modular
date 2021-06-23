@@ -41,6 +41,7 @@ $app->group('/core', function (RouteCollectorProxy $route) {
         $route->get('/accounts/{uid:[0-9]+}', Accounts::class . ':read')->setName('core.accounts.read.web');
         $route->patch('core/accounts/{uid:[0-9]+}/password', AuthController::class . ':change_password')-> setName('core.settings.password.web');
         $route->get('/domains', Domains::class . ':ui_manage')->setName('core.domains');
+        $route->get ('/admin/enforcer', AuthController::class . ':enforcer')-> setName('core.admin.enforcer.app');
         $route->get ('/admin/phpinfo', function(Request $request, Response $response) { phpinfo(); return $response; }) -> setName('core.admin.phpinfo.web');
         $route->get ('/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); return $response; }) -> setName('core.admin.phpconst.web');
         $route->get('/integrations/google', Integrations::class . ':google')->setName('core.integrations.google');
@@ -61,6 +62,7 @@ $app->group('/api/core/v1', function (RouteCollectorProxy $route) {
         $route->get ('/auth/whoami', AuthController::class . ':api_status_get')->setName('core.auth.whaomi.api');
         $route->post('/auth/signin', AuthController::class . ':api_signin_post')->setName('core.auth.signin.api');
         $route->get ('/auth/signout', AuthController::class . ':api_signout_get')->setName('core.auth.signout.api');
+        $route->post('/auth/update', AuthController::class . ':api_update_post')->setName('core.auth.update.api');
     });
     // Authenticated-only
     $route->group('', function (RouteCollectorProxy $route) {
@@ -75,6 +77,11 @@ $app->group('/api/core/v1', function (RouteCollectorProxy $route) {
 
 
 });
+
+$app->get ('/keycloak-login', AuthController::class . ':keycloak_login');
+$app->get ('/keycloak-logout', AuthController::class . ':keycloak_logout');
+$app->get ('/keycloak-priv', AuthController::class . ':keycloak_priv');
+$app->get ('/keycloak-admin', AuthController::class . ':keycloak_adm');
 
 $app->get ('/core/admin/playground', function(Request $request, Response $response) { 
     $reader = new \GeoIp2\Database\Reader(__ROOT__ . '/private/data/core/maxmind-geolite2-city.mmdb');
