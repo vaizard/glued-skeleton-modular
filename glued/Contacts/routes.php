@@ -22,6 +22,8 @@ $app->group('/api/contacts/search/v1', function (RouteCollectorProxy $group) {
 })->add(RestrictGuests::class);
 
 $app->group('/contacts', function (RouteCollectorProxy $group) {
-    $group->get ('/items[/{uid:[0-9]+}]', ContactsController::class . ':contacts_get_app')->setName('contacts.collection'); 
+    $group->get ('/items[/{uid:[0-9]+}]', ContactsController::class . ':contacts_get_app')->setName('contacts.collection');
+    $group->get ('/items/edit[/{uid:[0-9]+}]', ContactsController::class . ':contacts_edit_app')->setName('contacts.collection.edit');
+    $group->patch ('/items/edit[/{uid:[0-9]+}]', ContactsController::class . ':contacts_patch_app')->setName('contacts.collection.patch');
 })->add(RedirectGuests::class);
 

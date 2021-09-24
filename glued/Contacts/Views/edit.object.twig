@@ -1,0 +1,19 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+
+<div class="section-header">
+  <h1>{{ data.fn }}</h1><a href="{{ url_for('contacts.collection') }}"><button type="button" class="btn btn-primary" style="margin-left: 1em;"><i class="fas fa-level-up-alt"></i></button></a>
+</div>
+
+<div class="section-body">
+
+  <div class="row">
+    <div class="col-12">
+        {% include '/Core/Views/templates/partials/flash.twig' %}
+      <div id="rjsf"></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

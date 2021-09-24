@@ -1,0 +1,640 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "Contact editing",
+    "properties": {
+        "n": {
+            "$id": "#/properties/n",
+            "type": "object",
+            "title": "The n schema",
+            "properties": {
+                "given": {
+                    "$id": "#/properties/n/properties/given",
+                    "type": "string",
+                    "title": "The given schema"
+                },
+                "family": {
+                    "$id": "#/properties/n/properties/family",
+                    "type": "string",
+                    "title": "The family schema"
+                },
+                "prefix": {
+                    "$id": "#/properties/n/properties/prefix",
+                    "type": ["string", "null"],
+                    "title": "The prefix schema"
+                },
+                "suffix": {
+                    "$id": "#/properties/n/properties/suffix",
+                    "type": ["string", "null"],
+                    "title": "The suffix schema"
+                },
+                "maiden": {
+                    "$id": "#/properties/n/properties/maiden",
+                    "type": "string",
+                    "title": "The maiden schema"
+                },
+                "trade": {
+                    "$id": "#/properties/n/properties/trade",
+                    "type": "string",
+                    "title": "The trade schema"
+                },
+                "intl": {
+                    "$id": "#/properties/n/properties/intl",
+                    "type": "array",
+                    "title": "The intl schema",
+                    "items": {
+                        "$id": "#/properties/n/properties/intl/items",
+                        "type": "object",
+                        "anyOf": [
+                          {
+                            "$id": "#/properties/n/properties/intl/items/anyOf/0",
+                            "title": "de",
+                            "properties": {
+                              "de": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          {
+                            "$id": "#/properties/n/properties/intl/items/anyOf/1",
+                            "title": "en",
+                            "properties": {
+                              "en": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          {
+                            "$id": "#/properties/n/properties/intl/items/anyOf/2",
+                            "title": "fr",
+                            "properties": {
+                              "fr": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        ]
+                    }
+                }
+            }
+        },
+        "gender": {
+            "$id": "#/properties/gender",
+            "type": "string",
+            "title": "The gender schema"
+        },
+        "nickname": {
+            "$id": "#/properties/nickname",
+            "type": "array",
+            "title": "The nickname schema",
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/nickname/items",
+                "type": "string"
+            }
+        },
+        "fn": {
+            "$id": "#/properties/fn",
+            "type": "string",
+            "title": "The fn schema"
+        },
+        "nat": {
+            "$id": "#/properties/nat",
+            "type": "array",
+            "title": "The nat schema",
+            "items": {
+                "$id": "#/properties/nat/items",
+                "type": "object",
+                "properties": {
+                    "regby": {
+                        "$id": "#/properties/nat/items/properties/regby",
+                        "type": "string",
+                        "title": "The regby schema"
+                    },
+                    "regdt": {
+                        "$id": "#/properties/nat/items/properties/regdt",
+                        "type": "string",
+                        "title": "The regdt schema"
+                    },
+                    "regid": {
+                        "$id": "#/properties/nat/items/properties/regid",
+                        "type": "string",
+                        "title": "The regid schema"
+                    },
+                    "vatid": {
+                        "$id": "#/properties/nat/items/properties/vatid",
+                        "type": "string",
+                        "title": "The vatid schema"
+                    },
+                    "nadid": {
+                        "$id": "#/properties/nat/items/properties/nadid",
+                        "type": "string",
+                        "title": "The nadid schema"
+                    },
+                    "doc": {
+                        "$id": "#/properties/nat/items/properties/doc",
+                        "type": "array",
+                        "title": "The doc schema",
+                        "items": {
+                            "$id": "#/properties/nat/items/properties/doc/items",
+                            "type": "object",
+                            "properties": {
+                                "kind": {
+                                    "$id": "#/properties/nat/items/properties/doc/items/properties/kind",
+                                    "type": "string",
+                                    "title": "The kind schema"
+                                },
+                                "docid": {
+                                    "$id": "#/properties/nat/items/properties/doc/items/properties/docid",
+                                    "type": "string",
+                                    "title": "The docid schema"
+                                },
+                                "issby": {
+                                    "$id": "#/properties/nat/items/properties/doc/items/properties/issby",
+                                    "type": "string",
+                                    "title": "The issby schema"
+                                },
+                                "issdt": {
+                                    "$id": "#/properties/nat/items/properties/doc/items/properties/issdt",
+                                    "type": "string",
+                                    "title": "The issdt schema"
+                                },
+                                "expdt": {
+                                    "$id": "#/properties/nat/items/properties/doc/items/properties/expdt",
+                                    "type": "string",
+                                    "title": "The expdt schema"
+                                },
+                                "files": {
+                                    "$id": "#/properties/nat/items/properties/doc/items/properties/files",
+                                    "type": "array",
+                                    "title": "The files schema",
+                                    "items": {
+                                        "$id": "#/properties/nat/items/properties/doc/items/properties/files/items",
+                                        "type": "object",
+                                        "properties": {
+                                            "uid": {
+                                                "$id": "#/properties/nat/items/properties/doc/items/properties/files/items/properties/uid",
+                                                "type": "string",
+                                                "title": "The uid schema"
+                                            },
+                                            "src": {
+                                                "$id": "#/properties/nat/items/properties/doc/items/properties/files/items/properties/src",
+                                                "type": "string",
+                                                "title": "The src schema"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "country": {
+                        "$id": "#/properties/nat/items/properties/country",
+                        "type": "string",
+                        "title": "The country schema"
+                    }
+                }
+            }
+        },
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "The id schema"
+        },
+        "dob": {
+            "$id": "#/properties/dob",
+            "type": "string",
+            "title": "The dob schema"
+        },
+        "dod": {
+            "$id": "#/properties/dod",
+            "type": "string",
+            "title": "The dod schema"
+        },
+        "anniversary": {
+            "$id": "#/properties/anniversary",
+            "type": "array",
+            "title": "The anniversary schema",
+            "items": {
+                "$id": "#/properties/anniversary/items",
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "$id": "#/properties/anniversary/items/properties/label",
+                        "type": "string",
+                        "title": "The label schema"
+                    },
+                    "date": {
+                        "$id": "#/properties/anniversary/items/properties/date",
+                        "type": "string",
+                        "title": "The date schema"
+                    }
+                }
+            }
+        },
+        "profile": {
+            "$id": "#/properties/profile",
+            "type": "object",
+            "title": "The profile schema",
+            "properties": {
+                "files": {
+                    "$id": "#/properties/profile/properties/files",
+                    "type": "array",
+                    "items": {
+                        "$id": "#/properties/profile/properties/files/items",
+                        "type": "object",
+                        "properties": {
+                            "uid": {
+                                "$id": "#/properties/profile/properties/files/items/properties/uid",
+                                "type": "string",
+                                "title": "The uid schema"
+                            },
+                            "src": {
+                                "$id": "#/properties/profile/properties/files/items/properties/src",
+                                "type": "string",
+                                "title": "The src schema"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "acc": {
+            "$id": "#/properties/acc",
+            "type": "array",
+            "title": "The acc schema",
+            "items": {
+                "$id": "#/properties/acc/items",
+                "type": "object",
+                "properties": {
+                    "src": {
+                        "$id": "#/properties/acc/items/properties/src",
+                        "type": "object",
+                        "title": "The src schema",
+                        "properties": {
+                            "adisrws.mfcr.cz": {
+                                "$id": "#/properties/acc/items/properties/src/properties/adisrws.mfcr.cz",
+                                "type": "object",
+                                "properties": {
+                                    "seen": {
+                                        "$id": "#/properties/acc/items/properties/src/properties/adisrws.mfcr.cz/properties/seen",
+                                        "type": "string",
+                                        "title": "The seen schema"
+                                    },
+                                    "published": {
+                                        "$id": "#/properties/acc/items/properties/src/properties/adisrws.mfcr.cz/properties/published",
+                                        "type": "string",
+                                        "title": "The published schema"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "bank_code": {
+                        "$id": "#/properties/acc/items/properties/bank_code",
+                        "type": "string",
+                        "title": "The bank_code schema"
+                    },
+                    "bank_bic": {
+                        "$id": "#/properties/acc/items/properties/bank_bic",
+                        "type": "string",
+                        "title": "The bank_bic schema"
+                    },
+                    "bank_name": {
+                        "$id": "#/properties/acc/items/properties/bank_name",
+                        "type": "string",
+                        "title": "The bank_name schema"
+                    },
+                    "bank_addr": {
+                        "$id": "#/properties/acc/items/properties/bank_addr",
+                        "type": "string",
+                        "title": "The bank_addr schema"
+                    },
+                    "account_iban": {
+                        "$id": "#/properties/acc/items/properties/account_iban",
+                        "type": "string",
+                        "title": "The account_iban schema"
+                    },
+                    "account_number": {
+                        "$id": "#/properties/acc/items/properties/account_number",
+                        "type": "string",
+                        "title": "The account_number schema"
+                    },
+                    "account_holder": {
+                        "$id": "#/properties/acc/items/properties/account_holder",
+                        "type": "string",
+                        "title": "The account_holder schema"
+                    },
+                    "account_currency": {
+                        "$id": "#/properties/acc/items/properties/account_currency",
+                        "type": "array",
+                        "title": "The account_currency schema",
+                        "items": {
+                            "$id": "#/properties/acc/items/properties/account_currency/items",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "addr": {
+            "$id": "#/properties/addr",
+            "type": "array",
+            "title": "The addr schema",
+            "items": {
+                "$id": "#/properties/addr/items",
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "$id": "#/properties/addr/items/properties/label",
+                        "type": "string",
+                        "title": "The label schema"
+                    },
+                    "ext": {
+                        "$id": "#/properties/addr/items/properties/ext",
+                        "type": "object",
+                        "title": "The ext schema",
+                        "properties": {
+                            "cz.ruian": {
+                                "$id": "#/properties/addr/items/properties/ext/properties/cz.ruian",
+                                "type": "string",
+                                "title": "The cz.ruian schema"
+                            }
+                        }
+                    },
+                    "zip": {
+                        "$id": "#/properties/addr/items/properties/zip",
+                        "type": "string",
+                        "title": "The zip schema"
+                    },
+                    "full": {
+                        "$id": "#/properties/addr/items/properties/full",
+                        "type": "string",
+                        "title": "The full schema"
+                    },
+                    "unstructured": {
+                        "$id": "#/properties/addr/items/properties/unstructured",
+                        "type": "string",
+                        "title": "The unstructured schema"
+                    },
+                    "kind": {
+                        "$id": "#/properties/addr/items/properties/kind",
+                        "type": "object",
+                        "title": "The kind schema",
+                        "properties": {
+                            "permanent": {
+                                "$id": "#/properties/addr/items/properties/kind/properties/permanent",
+                                "type": "integer",
+                                "title": "The permanent schema"
+                            },
+                            "main": {
+                                "$id": "#/properties/addr/items/properties/kind/properties/main",
+                                "type": "integer",
+                                "title": "The main schema"
+                            },
+                            "billing": {
+                                "$id": "#/properties/addr/items/properties/kind/properties/billing",
+                                "type": "integer",
+                                "title": "The billing schema"
+                            },
+                            "temporary": {
+                                "$id": "#/properties/addr/items/properties/kind/properties/temporary",
+                                "type": "integer",
+                                "title": "The temporary schema"
+                            },
+                            "shipping": {
+                                "$id": "#/properties/addr/items/properties/kind/properties/shipping",
+                                "type": "integer",
+                                "title": "The shipping schema"
+                            }
+                        }
+                    },
+                    "street": {
+                        "$id": "#/properties/addr/items/properties/street",
+                        "type": "string",
+                        "title": "The street schema"
+                    },
+                    "country": {
+                        "$id": "#/properties/addr/items/properties/country",
+                        "type": "string",
+                        "title": "The country schema"
+                    },
+                    "district": {
+                        "$id": "#/properties/addr/items/properties/district",
+                        "type": ["string", "null"],
+                        "title": "The district schema"
+                    },
+                    "quarter": {
+                        "$id": "#/properties/addr/items/properties/quarter",
+                        "type": "string",
+                        "title": "The quarter schema"
+                    },
+                    "locacity": {
+                        "$id": "#/properties/addr/items/properties/locacity",
+                        "type": "string",
+                        "title": "The locacity schema"
+                    },
+                    "streetnumber": {
+                        "$id": "#/properties/addr/items/properties/streetnumber",
+                        "type": ["string", "null"],
+                        "title": "The streetnumber schema"
+                    },
+                    "conscriptionnumber": {
+                        "$id": "#/properties/addr/items/properties/conscriptionnumber",
+                        "type": ["string", "null"],
+                        "title": "The conscriptionnumber schema"
+                    },
+                    "door": {
+                        "$id": "#/properties/addr/items/properties/door",
+                        "type": "string",
+                        "title": "The door schema"
+                    },
+                    "floor": {
+                        "$id": "#/properties/addr/items/properties/floor",
+                        "type": ["string", "null"],
+                        "title": "The floor schema"
+                    },
+                    "pobox": {
+                        "$id": "#/properties/addr/items/properties/pobox",
+                        "type": "string",
+                        "title": "The pobox schema"
+                    }
+                }
+            }
+        },
+        "kind": {
+            "$id": "#/properties/kind",
+            "type": "object",
+            "title": "The kind schema",
+            "properties": {
+                "n": {
+                    "$id": "#/properties/kind/properties/n",
+                    "type": "integer",
+                    "title": "The n schema"
+                },
+                "l": {
+                    "$id": "#/properties/kind/properties/l",
+                    "type": "integer",
+                    "title": "The l schema"
+                }
+            }
+        },
+        "uri": {
+            "$id": "#/properties/uri",
+            "type": "array",
+            "title": "The uri schema",
+            "items": {
+                "$id": "#/properties/uri/items",
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "$id": "#/properties/uri/items/properties/label",
+                        "type": ["string", "null"],
+                        "title": "The label schema"
+                    },
+                    "value": {
+                        "$id": "#/properties/uri/items/properties/value",
+                        "type": "string",
+                        "title": "The value schema"
+                    }
+                }
+            }
+        },
+        "note": {
+            "$id": "#/properties/note",
+            "type": "string",
+            "title": "The note schema"
+        },
+        "email": {
+            "$id": "#/properties/email",
+            "type": "array",
+            "title": "The email schema",
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/email/items",
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "$id": "#/properties/email/items/properties/label",
+                        "type": "string",
+                        "title": "The label schema"
+                    },
+                    "value": {
+                        "$id": "#/properties/email/items/properties/value",
+                        "type": "string",
+                        "title": "The value schema"
+                    },
+                    "valid": {
+                        "$id": "#/properties/email/items/properties/valid",
+                        "type": "integer",
+                        "title": "The valid schema"
+                    }
+                }
+            }
+        },
+        "phone": {
+            "$id": "#/properties/phone",
+            "type": "array",
+            "title": "The phone schema",
+            "items": {
+                "$id": "#/properties/phone/items",
+                "type": "object",
+                "properties": {
+                    "value": {
+                        "$id": "#/properties/phone/items/properties/value",
+                        "type": "string",
+                        "title": "The value schema"
+                    },
+                    "label": {
+                        "$id": "#/properties/phone/items/properties/label",
+                        "type": "string",
+                        "title": "The label schema"
+                    },
+                    "valid": {
+                        "$id": "#/properties/phone/items/properties/valid",
+                        "type": "integer",
+                        "title": "The valid schema"
+                    }
+                }
+            }
+        },
+        "lang": {
+            "$id": "#/properties/lang",
+            "type": "array",
+            "title": "The lang schema",
+            "items": {
+                "$id": "#/properties/lang/items",
+                "type": "string"
+            }
+        },
+        "focus": {
+            "$id": "#/properties/focus",
+            "type": "array",
+            "title": "The focus schema",
+            "items": {
+                "$id": "#/properties/focus/items",
+                "type": "object",
+                "title": "The first anyOf schema",
+                "properties": {
+                    "sub": {
+                        "$id": "#/properties/focus/items/properties/sub",
+                        "type": "string",
+                        "title": "The sub schema"
+                    },
+                    "pro": {
+                        "$id": "#/properties/focus/items/properties/pro",
+                        "type": "string",
+                        "title": "The pro schema"
+                    },
+                    "int": {
+                        "$id": "#/properties/focus/items/properties/int",
+                        "type": "string",
+                        "title": "The int schema"
+                    },
+                    "exp": {
+                        "$id": "#/properties/focus/items/properties/exp",
+                        "type": "string",
+                        "title": "The exp schema"
+                    }
+                }
+            }
+        },
+        "occupation": {
+            "$id": "#/properties/occupation",
+            "type": "array",
+            "title": "The occupation schema",
+            "items": {
+                "$id": "#/properties/occupation/items",
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$id": "#/properties/occupation/items/properties/kind",
+                        "type": "string",
+                        "title": "The kind schema"
+                    },
+                    "org": {
+                        "$id": "#/properties/occupation/items/properties/org",
+                        "type": "string",
+                        "title": "The org schema"
+                    },
+                    "dtfrom": {
+                        "$id": "#/properties/occupation/items/properties/dtfrom",
+                        "type": "string",
+                        "title": "The dtfrom schema"
+                    },
+                    "dttill": {
+                        "$id": "#/properties/occupation/items/properties/dttill",
+                        "type": "string",
+                        "title": "The dttill schema"
+                    }
+                }
+            }
+        },
+        "marital-status": {
+            "$id": "#/properties/marital-status",
+            "type": "string",
+            "title": "The marital-status schema"
+        }
+    }
+}

@@ -24,6 +24,7 @@ use Sabre\VObject;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Symfony\Component\DomCrawler\Crawler;
+use \Opis\JsonSchema\Loaders\File as JSL;
 
 class ContactsController extends AbstractTwigController
 {
@@ -172,6 +173,7 @@ class ContactsController extends AbstractTwigController
 
 
     public function contacts_post_api(Request $request, Response $response, array $args = []): Response {
+        
         // Init stuff
         $builder = new JsonResponseBuilder('contacts', 1);
         $req = (array)$request->getParsedBody();
@@ -237,6 +239,13 @@ class ContactsController extends AbstractTwigController
                     // If {submitted company name} == {company name in registers}
                     // Override submitted form data with data from registers
                     $l = $full;
+                    // musime opravit "addr": ktere je u nas pole objektu, ale v tomto rejstriku je to objekt s podobjekty
+                    $l['addr'] = array();
+                    $l['addr'][] = $full['addr']['0'];
+                    // odstranime $l['acc'], TODO protoze nekdy byval null a to nebere nase json schema
+                    // proto to taky nemuzeme checkovat pomoci isset
+                    if (array_key_exists('acc', $l)) { unset($l['acc']); }
+                    // dalsi veci prepiseme nasima
                     $l['uri'] = $fl['uri'];
                     $l['note'] = $fl['note'];
                     $n = $full['people'];
@@ -403,6 +412,95 @@ class ContactsController extends AbstractTwigController
             'domains' => $domains,
         ]);
     }
+
+    public function contacts_edit_app(Request $request, Response $response, array $args = []): Response
+    {
+        $contact_id = $args['uid'] ?? null;
+        $data = [];
+        
+        if ($contact_id) {
+            
+            $this->db->where('c_uid', $contact_id);
+            $data = $this->db->getOne('t_contacts_objects', ['c_uid as id', 'c_json as json']);
+            
+            $jsf_schema   = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.edit.v1.schema');
+            $jsf_uischema = file_get_contents(__ROOT__.'/glued/Contacts/Controllers/Schemas/contacts.edit.v1.formui');
+            $jsf_formdata = $data['json'];
+            $cilova_adresa = $this->routerParser->urlFor('contacts.collection.patch', ['uid' => $contact_id]);
+            $navratova_adresa = $this->routerParser->urlFor('contacts.collection', ['uid' => $contact_id]);
+            $jsf_onsubmit = '
+            $.ajax({
+              url: "'.$cilova_adresa.'",
+              dataType: "text",
+              type: "PATCH",
+              data: "stockdata=" + JSON.stringify(formData.formData),
+              success: function(data) {
+                // diky replacu nezustava puvodni adresa v historii, takze se to vice blizi redirectu
+                // presmerovani na editacni stranku se vraci z toho ajaxu
+                window.location.replace("'.$navratova_adresa.'");
+                /*
+                ReactDOM.render((<div><h1>Thank you</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre></div>), 
+                         document.getElementById("main"));
+                */
+              },
+              error: function(xhr, status, err) {
+                ReactDOM.render((<div><h1>Something goes wrong ! not saving.</h1><pre>{JSON.stringify(formData.formData, null, 2) }</pre></div>), 
+                         document.getElementById("main"));
+              }
+            });
+            ';
+            
+            return $this->render($response, 'Contacts/Views/edit.object.twig', [
+                'data' => json_decode(json_encode($data['json']),true),
+                'json_schema_output' => $jsf_schema,
+                'json_uischema_output' => $jsf_uischema,
+                'json_formdata_output' => $jsf_formdata,
+                'json_onsubmit_output' => $jsf_onsubmit,
+                'json_custom_structure' => true
+            ]);
+        }
+        else {
+            $domains = $this->db->get('t_core_domains');
+            return $this->render($response, 'Contacts/Views/collection.twig', [
+                'domains' => $domains
+            ]);
+        }
+    }
+
+    public function contacts_patch_app(Request $request, Response $response, array $args = []): Response {
+        $builder = new JsonResponseBuilder('contacts.object', 1);
+        
+        // id z adresy
+        $contact_id = (int)$args['uid'];
+        
+        // Get patch data
+        $patch_data = $request->getParsedBody();
+        $req = $patch_data['stockdata'];
+        
+        // convert body to object
+        //$doc = json_decode(json_encode((object)$req));
+        $doc = json_decode($req);
+        
+        // load the json schema and validate data against it
+        $loader = new JSL("schema://contacts/", [ __ROOT__ . "/glued/Contacts/Controllers/Schemas/" ]);
+        $schema = $loader->loadSchema("schema://contacts/contacts.edit.v1.schema");
+        $result = $this->jsonvalidator->schemaValidation($doc, $schema);
+        if ($result->isValid()) {
+            $row = [ 'c_json' => json_encode($doc) ];
+            $this->db->where('c_uid', $contact_id);
+            $id = $this->db->update('t_contacts_objects', $row);
+            if (!$id) { throw new HttpInternalServerErrorException( $request, __('Updating of the contact failed.')); }
+        } else { throw new HttpBadRequestException( $request, __('Invalid contact data.')); }
+        
+        // nejaka flash message
+        $this->flash->addMessage('info', 'tak sme to updatovali');
+        
+        // Success
+        $payload = $builder->withData((array)$doc)->withCode(200)->build();
+        return $response->withJson($payload, 200);
+    }
+
+
 
 
 

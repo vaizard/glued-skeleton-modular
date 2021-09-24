@@ -42,6 +42,7 @@ $app->group('/core', function (RouteCollectorProxy $route) {
         $route->patch('core/accounts/{uid:[0-9]+}/password', AuthController::class . ':change_password')-> setName('core.settings.password.web');
         $route->get('/domains', Domains::class . ':ui_manage')->setName('core.domains');
         $route->get ('/admin/phpinfo', function(Request $request, Response $response) { phpinfo(); return $response; }) -> setName('core.admin.phpinfo.web');
+        $route->get ('/admin/enforcer', function(Request $request, Response $response) { phpinfo(); return $response; }) -> setName('core.admin.enforcer.app'); // TODO do it real
         $route->get ('/admin/phpconst', function(Request $request, Response $response) { highlight_string("<?php\nget_defined_constants() =\n" . var_export(get_defined_constants(true), true) . ";\n?>"); return $response; }) -> setName('core.admin.phpconst.web');
         $route->get('/integrations/google', Integrations::class . ':google')->setName('core.integrations.google');
         $route->get('/integrations/google_app', Integrations::class . ':google_app');
