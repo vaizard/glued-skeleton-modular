@@ -36,7 +36,7 @@ class SocialController extends AbstractTwigController
         $this->db->where("c_type", 'user');
         $token_data = $this->db->getOne('t_social_tokens');
         if (!empty($token_data['c_token'])) {
-            $token = 'has token: '.substr($token_data['c_token'], 0, 10).'...';
+            $token = 'has token: '.substr($token_data['c_token'], 0, 20).'...';
         }
         
         return $this->render($response, 'Social/Views/fb-profile.twig', [
@@ -198,10 +198,10 @@ ale realne tam je error_code a error_message, takze zase zrada
             $this->db->where("c_user_id", $user_id);
             $this->db->where("c_service", 'fb');
             $this->db->where("c_type", 'user');
-            $tokens = $this->db->get('t_social_tokens');
-            if (count($tokens) == 1) {
+            $data = $this->db->getOne('t_social_tokens');
+            if (!empty($data['c_token'])) {
                 $row = [ 'c_token' => $token_data['access_token'] ];
-                $this->db->where('c_uid', $user_id);
+                $this->db->where('c_uid', $data['c_uid']);  // updatujeme radek podle unikatniho klice
                 $this->db->update('t_social_tokens', $row);
             }
             else {
@@ -291,7 +291,7 @@ ale realne tam je error_code a error_message, takze zase zrada
             // nebo takto to bude lepsi
             $json_data = $fbresponse->getDecodedBody();
             
-            $vystup = 'fb vratil: '.print_r($json_data, true);
+            $vystup = 'glued user id: '.$user_id.', token: '.substr($token_data['c_token'], 0 , 20).'..., fb vratil: '.print_r($json_data, true);
         }
         else {
             $vystup = 'nemas ulozeny user token';
