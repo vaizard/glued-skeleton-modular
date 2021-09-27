@@ -1,0 +1,41 @@
+{% extends '/Core/Views/templates/default.twig' %}
+
+{% block content %}
+<div class="section-header">
+  <h1>{{ __('Social module - FB') }}</h1>
+</div>
+
+<div class="section-body">
+    <form action="{{ url_for('social.fb.token.get') }}" method="post" id="social_fb_token_get">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>FB login and get token for application</label><br>
+                <button type="submit" class="btn btn-primary btn-lg">{{ __('Get Token') }}</button>
+            </div>
+            <div class="form-group col-md-6">
+                <p>Token info</p>
+                <p>{{ token }}</p>
+            </div>
+        </div>
+    </form>
+    
+    <form action="{{ url_for('social.fb.me.get') }}" method="post" id="worklog_work_form">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>download your FB info</label><br>
+                <button type="submit" class="btn btn-primary btn-lg">{{ __('Download') }}</button>
+            </div>
+            <div class="form-group col-md-6">
+                <label>delete aplication data</label><br>
+                <button type="submit" class="btn btn-primary btn-lg">{{ __('Delete') }}</button>
+            </div>
+        </div>
+    </form>
+    
+    <div>
+        <h3>output data</h3>
+        <p>{{ argdata }}</p>
+    </div>
+    
+</div>
+{% endblock %}

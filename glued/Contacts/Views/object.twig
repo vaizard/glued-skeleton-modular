@@ -4,6 +4,7 @@
 
 <div class="section-header">
   <h1>{{ data.fn }}</h1><a href="{{ url_for('contacts.collection') }}"><button type="button" class="btn btn-primary" style="margin-left: 1em;"><i class="fas fa-level-up-alt"></i></button></a>
+  <a href="{{ url_for('contacts.collection.edit', {'uid': data.id}) }}"><button type="button" class="btn btn-primary" style="margin-left: 1em;">edit</button></a>
 </div>
 
 <div class="section-body">
